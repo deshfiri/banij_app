@@ -1,0 +1,180 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../../../constants/color.dart';
+
+class StatusCardWidget extends StatelessWidget {
+  final String statusTitle;
+  final String statusHighlight;
+  final String progressLabel;
+  final IconData progressIcon;
+  final List<StatusItemModel> items;
+
+  const StatusCardWidget({
+    super.key,
+    this.statusTitle = 'Current status: ',
+    this.statusHighlight = 'KYC pending',
+    this.progressLabel = 'Documents Pending',
+    this.progressIcon = Icons.donut_large_rounded,
+    this.items = const [
+      StatusItemModel(
+        title: 'Government ID',
+        iconData: Icons.badge_outlined,
+      ),
+      StatusItemModel(
+        title: 'Proof of Address',
+        iconData: Icons.location_on_outlined,
+      ),
+      StatusItemModel(
+        title: 'Self-Declaration Form',
+        statusTag: '(Pending)',
+        iconData: Icons.circle_outlined,
+      ),
+    ],
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(18.w),
+      decoration: BoxDecoration(
+        color: inputFillColor,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(
+          color: primaryOrange.withValues(alpha: 0.4),
+          width: 1.5.w,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: primaryOrange.withValues(alpha: 0.06),
+            blurRadius: 16.r,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header: Current status: KYC pending
+          RichText(
+            text: TextSpan(
+              style: TextStyle(
+                fontSize: 18.sp,
+                fontFamily: Theme.of(context).textTheme.bodyMedium?.fontFamily,
+              ),
+              children: [
+                TextSpan(
+                  text: statusTitle,
+                  style: const TextStyle(
+                    color: textMain,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                TextSpan(
+                  text: statusHighlight,
+                  style: const TextStyle(
+                    color: primaryOrange,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 16.h),
+
+          // Inner Status Box: Documents Pending
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFFFFF9F5),
+              borderRadius: BorderRadius.circular(10.r),
+              border: Border.all(color: cardBorderColor),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  progressIcon,
+                  size: 22.sp,
+                  color: primaryOrange,
+                ),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Text(
+                    progressLabel,
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w600,
+                      color: textMain,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 20.h),
+
+          // Document List
+          Column(
+            children: items.map((item) {
+              return Padding(
+                padding: EdgeInsets.only(bottom: 12.h),
+                child: Row(
+                  children: [
+                    Icon(
+                      item.iconData,
+                      size: 20.sp,
+                      color: textMain,
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: RichText(
+                        text: TextSpan(
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontFamily:
+                                Theme.of(context).textTheme.bodyMedium?.fontFamily,
+                          ),
+                          children: [
+                            TextSpan(
+                              text: item.title,
+                              style: const TextStyle(
+                                color: textMain,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            if (item.statusTag != null) ...[
+                              const TextSpan(text: ' '),
+                              TextSpan(
+                                text: item.statusTag!,
+                                style: const TextStyle(
+                                  color: primaryOrange,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class StatusItemModel {
+  final String title;
+  final String? statusTag;
+  final IconData iconData;
+
+  const StatusItemModel({
+    required this.title,
+    this.statusTag,
+    required this.iconData,
+  });
+}

@@ -1,0 +1,154 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../../../../constants/color.dart';
+
+class CustomBottomNavBar extends StatelessWidget {
+  final int currentIndex;
+  final Function(int) onTap;
+
+  const CustomBottomNavBar({
+    super.key,
+    required this.currentIndex,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: inputFillColor,
+        border: Border(
+          top: BorderSide(color: cardBorderColor, width: 1.w),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: 68.h,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              // 1. Dashboard Tab
+              Expanded(
+                child: _buildNavItem(
+                  index: 0,
+                  icon: Icons.home_filled,
+                  label: 'Dashboard',
+                  isActive: currentIndex == 0,
+                ),
+              ),
+
+              // 2. Finance Tab
+              Expanded(
+                child: _buildNavItem(
+                  index: 1,
+                  icon: Icons.euro_symbol_rounded,
+                  label: 'Finance',
+                  isActive: currentIndex == 1,
+                ),
+              ),
+
+              // 3. Center Action (+) Button
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => onTap(2),
+                  behavior: HitTestBehavior.opaque,
+                  child: Center(
+                    child: Container(
+                      width: 54.w,
+                      height: 40.h,
+                      decoration: BoxDecoration(
+                        color: primaryOrange,
+                        borderRadius: BorderRadius.circular(12.r),
+                        boxShadow: [
+                          BoxShadow(
+                            color: primaryOrange.withValues(alpha: 0.3),
+                            blurRadius: 8.r,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Icon(
+                        Icons.add,
+                        color: Colors.white,
+                        size: 24.sp,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // 4. Business Tab
+              Expanded(
+                child: _buildNavItem(
+                  index: 3,
+                  icon: Icons.business_center_outlined,
+                  label: 'Business',
+                  isActive: currentIndex == 3,
+                ),
+              ),
+
+              // 5. Account Tab
+              Expanded(
+                child: _buildNavItem(
+                  index: 4,
+                  icon: Icons.person_outline_rounded,
+                  label: 'Account',
+                  isActive: currentIndex == 4,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem({
+    required int index,
+    required IconData icon,
+    required String label,
+    required bool isActive,
+  }) {
+    return GestureDetector(
+      onTap: () => onTap(index),
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          // Top Active Indicator Line
+          Container(
+            height: 3.h,
+            width: 30.w,
+            decoration: BoxDecoration(
+              color: isActive ? primaryOrange : Colors.transparent,
+              borderRadius: BorderRadius.only(
+                bottomLeft: Radius.circular(2.r),
+                bottomRight: Radius.circular(2.r),
+              ),
+            ),
+          ),
+          const Spacer(),
+          Icon(
+            icon,
+            size: 22.sp,
+            color: isActive ? primaryOrange : textMuted,
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 11.sp,
+              fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
+              color: isActive ? primaryOrange : textMuted,
+            ),
+          ),
+          SizedBox(height: 6.h),
+        ],
+      ),
+    );
+  }
+}
