@@ -22,6 +22,8 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _passwordController = TextEditingController();
   bool _rememberMe = false;
   bool _obscurePassword = true;
+  bool _isSupplierMode = false; // false = New Account, true = Active Supplier
+  bool _isSupplierRegister = false; // false = Create account, true = Become a supplier
 
   @override
   void dispose() {
@@ -33,11 +35,12 @@ class _LoginScreenState extends State<LoginScreen> {
   void _handleSignIn() {
     FocusScope.of(context).unfocus();
     if (_formKey.currentState!.validate()) {
+
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Processing Sign In...'),
+        SnackBar(
+          content: Text('Processing Sign In as ...'),
           backgroundColor: primaryOrange,
-          duration: Duration(milliseconds: 800),
+          duration: const Duration(milliseconds: 800),
         ),
       );
       Navigator.pushReplacement(
@@ -93,7 +96,12 @@ class _LoginScreenState extends State<LoginScreen> {
                       height: 1.4,
                     ),
                   ),
-                  UIHelper.verticalSpace(32.h),
+                  UIHelper.verticalSpace(28.h),
+
+                  // Supplier vs New Account Switcher
+
+
+                  UIHelper.verticalSpace(24.h),
 
                   // 2. Passkey Button
                   OutlinedButton.icon(
@@ -272,12 +280,14 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   UIHelper.verticalSpace(24.h),
 
-                  // 8. Sign Up Link
+                  // 8. Dynamic Sign Up & Supplier Switcher Link at Bottom
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'New to the platform? ',
+                        _isSupplierRegister
+                            ? 'Want to become a supplier? '
+                            : 'New to the platform? ',
                         style: TextStyle(
                           color: textMuted,
                           fontSize: 13.sp,
@@ -294,7 +304,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           );
                         },
                         child: Text(
-                          'Create an account',
+                          _isSupplierRegister
+                              ? 'Become a Supplier'
+                              : 'Create an account',
                           style: TextStyle(
                             color: primaryOrange,
                             fontSize: 13.sp,
@@ -304,41 +316,33 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ],
                   ),
-                  UIHelper.verticalSpace(24.h),
-                  const Divider(color: cardBorderColor, thickness: 1),
-                  UIHelper.verticalSpace(16.h),
-
-                  // 9. Supplier Link
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Want to become a supplier? ',
+                        'Supplier Registration Mode',
                         style: TextStyle(
-                          color: textMuted,
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w500,
+                          color: textMain,
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                      GestureDetector(
-                        onTap: () {},
-                        child: Text(
-                          'Become a Supplier',
-                          style: TextStyle(
-                            color: primaryOrange,
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
+                      SizedBox(width: 8.w),
+                      Switch.adaptive(
+                        value: _isSupplierRegister,
+                        activeThumbColor: primaryOrange,
+                        onChanged: (val) {
+                          setState(() {
+                            _isSupplierRegister = val;
+                          });
+                        },
                       ),
                     ],
                   ),
                   UIHelper.verticalSpace(24.h),
 
                   // Language Switcher Icon
-                  Center(
-                    child: Icon(Icons.g_translate, color: textMuted, size: 20.sp),
-                  ),
+
                 ],
               ),
             ),
