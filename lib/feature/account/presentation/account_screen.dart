@@ -128,7 +128,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Profile',
+              'profile_heading'.tr,
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
@@ -137,7 +137,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
             ),
             UIHelper.verticalSpace(4.h),
             Text(
-              'Update your name and email address',
+              'profile_desc'.tr,
               style: TextStyle(
                 fontSize: 13.sp,
                 color: AppColorsTheme.textMutedColor(context),
@@ -145,7 +145,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
             ),
             UIHelper.verticalSpace(20.h),
             Text(
-              'Name',
+              'name'.tr,
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
@@ -158,7 +158,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
             ),
             UIHelper.verticalSpace(16.h),
             Text(
-              'Email address',
+              'email_address'.tr,
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: FontWeight.w600,
@@ -181,12 +181,12 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                     ),
                   );
                 },
-                btnName: 'Save',
+                btnName: 'save'.tr,
               ),
             ),
             UIHelper.verticalSpace(32.h),
             Text(
-              'Delete your account',
+              'delete_account_title'.tr,
               style: TextStyle(
                 fontSize: 16.sp,
                 fontWeight: FontWeight.bold,
@@ -195,7 +195,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
             ),
             UIHelper.verticalSpace(6.h),
             Text(
-              'You cannot delete your account yourself. Ask us, and an authorised member of our team will review the request.',
+              'delete_account_desc'.tr,
               style: TextStyle(
                 fontSize: 12.sp,
                 height: 1.4,
@@ -210,7 +210,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Security',
+              'security_heading'.tr,
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
@@ -219,7 +219,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
             ),
             UIHelper.verticalSpace(4.h),
             Text(
-              'Manage your password, 2FA, and active sessions.',
+              'security_desc'.tr,
               style: TextStyle(
                 fontSize: 13.sp,
                 color: AppColorsTheme.textMutedColor(context),
@@ -227,8 +227,8 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
             ),
             UIHelper.verticalSpace(20.h),
             FinanceCardWidget(
-              title: 'Change Password',
-              subtitle: 'Update your account password',
+              title: 'change_password'.tr,
+              subtitle: 'change_password_sub'.tr,
               iconData: Icons.lock_outline_rounded,
               onTap: () {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -247,7 +247,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Your package',
+              'your_package'.tr,
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
@@ -256,7 +256,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
             ),
             UIHelper.verticalSpace(4.h),
             Text(
-              'What you are on, what it grants, and when it renews.',
+              'package_desc'.tr,
               style: TextStyle(
                 fontSize: 13.sp,
                 color: AppColorsTheme.textMutedColor(context),
@@ -277,7 +277,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Standard',
+                        'standard_package'.tr,
                         style: TextStyle(
                           fontSize: 18.sp,
                           fontWeight: FontWeight.bold,
@@ -303,7 +303,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                             ),
                             SizedBox(width: 4.w),
                             Text(
-                              'Awaiting payment',
+                              'awaiting_payment'.tr,
                               style: TextStyle(
                                 fontSize: 11.sp,
                                 fontWeight: FontWeight.bold,
@@ -317,7 +317,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                   ),
                   UIHelper.verticalSpace(8.h),
                   Text(
-                    'You do not have a package to renew yet.',
+                    'no_package_renew'.tr,
                     style: TextStyle(
                       fontSize: 13.sp,
                       color: AppColorsTheme.textMutedColor(context),
@@ -325,7 +325,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                   ),
                   UIHelper.verticalSpace(16.h),
                   Text(
-                    'Paid',
+                    'paid'.tr,
                     style: TextStyle(
                       fontSize: 11.sp,
                       color: AppColorsTheme.textMutedColor(context),
@@ -341,7 +341,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                   ),
                   UIHelper.verticalSpace(12.h),
                   Text(
-                    'Renews at',
+                    'renews_at'.tr,
                     style: TextStyle(
                       fontSize: 11.sp,
                       color: AppColorsTheme.textMutedColor(context),
@@ -357,14 +357,14 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                   ),
                   UIHelper.verticalSpace(12.h),
                   Text(
-                    'How you got it',
+                    'how_you_got_it'.tr,
                     style: TextStyle(
                       fontSize: 11.sp,
                       color: AppColorsTheme.textMutedColor(context),
                     ),
                   ),
                   Text(
-                    'Purchased',
+                    'purchased'.tr,
                     style: TextStyle(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w600,
@@ -375,7 +375,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                   Divider(color: AppColorsTheme.borderColor(context)),
                   UIHelper.verticalSpace(12.h),
                   Text(
-                    'What this includes',
+                    'what_this_includes'.tr,
                     style: TextStyle(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.bold,
@@ -394,14 +394,14 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Dedicated website',
+                          'dedicated_website'.tr,
                           style: TextStyle(
                             fontSize: 14.sp,
                             color: AppColorsTheme.textMainColor(context),
                           ),
                         ),
                         Text(
-                          'Included',
+                          'included'.tr,
                           style: TextStyle(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.w600,
@@ -422,7 +422,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Invoices',
+              'invoices_heading'.tr,
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
@@ -431,7 +431,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
             ),
             UIHelper.verticalSpace(4.h),
             Text(
-              'View and download your billing invoices.',
+              'invoices_desc'.tr,
               style: TextStyle(
                 fontSize: 13.sp,
                 color: AppColorsTheme.textMutedColor(context),
@@ -452,7 +452,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Receipts',
+              'receipts_heading'.tr,
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
@@ -461,7 +461,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
             ),
             UIHelper.verticalSpace(4.h),
             Text(
-              'Track your payment receipts and transaction records.',
+              'receipts_desc'.tr,
               style: TextStyle(
                 fontSize: 13.sp,
                 color: AppColorsTheme.textMutedColor(context),
@@ -482,7 +482,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Appearance & Settings',
+              'appearance_heading'.tr,
               style: TextStyle(
                 fontSize: 18.sp,
                 fontWeight: FontWeight.bold,
@@ -491,7 +491,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
             ),
             UIHelper.verticalSpace(4.h),
             Text(
-              'Manage your dark mode preference, language, and session.',
+              'appearance_desc'.tr,
               style: TextStyle(
                 fontSize: 13.sp,
                 color: AppColorsTheme.textMutedColor(context),
@@ -586,7 +586,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Settings',
+                    'settings'.tr,
                     style: TextStyle(
                       fontSize: 22.sp,
                       fontWeight: FontWeight.bold,
@@ -595,7 +595,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                   ),
                   UIHelper.verticalSpace(4.h),
                   Text(
-                    'Manage your profile and account settings',
+                    'settings_subtitle'.tr,
                     style: TextStyle(
                       fontSize: 13.sp,
                       color: AppColorsTheme.textMutedColor(context),
@@ -616,6 +616,15 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                   // Vertical Tabs List matching screenshot
                   ..._tabs.map((tab) {
                     final isSelected = _selectedTab == tab;
+
+                    // Translate tab display name if needed or map key
+                    String tabLabel = tab;
+                    if (tab == 'Profile') tabLabel = 'profile'.tr;
+                    if (tab == 'Security') tabLabel = 'security'.tr;
+                    if (tab == 'Package') tabLabel = 'package_tab'.tr;
+                    if (tab == 'Invoices') tabLabel = 'invoices_tab'.tr;
+                    if (tab == 'Receipts') tabLabel = 'receipts_tab'.tr;
+                    if (tab == 'Appearance') tabLabel = 'appearance_tab'.tr;
 
                     return GestureDetector(
                       onTap: () {
@@ -642,7 +651,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                           ),
                         ),
                         child: Text(
-                          tab,
+                          tabLabel,
                           style: TextStyle(
                             fontSize: 15.sp,
                             fontWeight:

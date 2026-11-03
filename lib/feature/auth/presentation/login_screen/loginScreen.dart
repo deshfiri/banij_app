@@ -100,52 +100,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   UIHelper.verticalSpace(28.h),
 
                   // Supplier vs New Account Switcher
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
-                    decoration: BoxDecoration(
-                      color: AppColorsTheme.cardBg(context),
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(color: AppColorsTheme.borderColor(context)),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _isSupplierMode ? 'Active Supplier' : 'New Account',
-                              style: TextStyle(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.bold,
-                                color: AppColorsTheme.textMainColor(context),
-                              ),
-                            ),
-                            SizedBox(height: 2.h),
-                            Text(
-                              _isSupplierMode
-                                  ? 'Signing in with supplier privileges'
-                                  : 'Signing in with new account mode',
-                              style: TextStyle(
-                                fontSize: 11.sp,
-                                color: AppColorsTheme.textMutedColor(context),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Switch(
-                          value: _isSupplierMode,
-                          activeThumbColor: primaryOrange,
-                          onChanged: (value) {
-                            setState(() {
-                              _isSupplierMode = value;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-                  UIHelper.verticalSpace(24.h),
+
+
 
                   // 2. Passkey Button
                   OutlinedButton.icon(
@@ -386,10 +342,8 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   UIHelper.verticalSpace(24.h),
 
-                  // Language Switcher Icon
-                  Center(
-                    child: Icon(Icons.g_translate, color: AppColorsTheme.textMutedColor(context), size: 20.sp),
-                  ),
+
+
                 ],
               ),
             ),
