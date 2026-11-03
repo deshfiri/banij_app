@@ -305,7 +305,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          Navigator.pushNamed(context, Routes.signupScreen);
+                          if (_isSupplierRegister) {
+                            Navigator.pushNamed(context, Routes.supplierRegisterScreen);
+                          } else {
+                            Navigator.pushNamed(context, Routes.signupScreen);
+                          }
                         },
                         child: Text(
                           _isSupplierRegister
@@ -325,7 +329,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Supplier Registration Mode',
+                        'supplier_registration_mode'.tr,
                         style: TextStyle(
                           color: AppColorsTheme.textMainColor(context),
                           fontSize: 12.sp,

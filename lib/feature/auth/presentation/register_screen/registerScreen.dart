@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../../common_widget/custom_button.dart';
 import '../../../../common_widget/custom_form_field.dart';
@@ -175,7 +176,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   UIHelper.verticalSpace(5.h),
                   Text(
-                    'Enter your details below to create your account',
+                    'enter_details_account'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 13.sp,
@@ -186,10 +187,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   UIHelper.verticalSpace(24.h),
 
                   // 1. Name
-                  _buildFieldLabel(context, 'Name'),
+                  _buildFieldLabel(context, 'name'.tr),
                   CustomFormField(
                     controller: _nameController,
-                    hintText: 'Full name',
+                    hintText: 'full_name'.tr,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return 'Please enter your full name';
@@ -200,7 +201,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   UIHelper.verticalSpace(16.h),
 
                   // 2. Email address
-                  _buildFieldLabel(context, 'Email address'),
+                  _buildFieldLabel(context, 'email_address'.tr),
                   CustomFormField(
                     controller: _emailController,
                     inputType: TextInputType.emailAddress,
@@ -221,7 +222,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   UIHelper.verticalSpace(16.h),
 
                   // 3. Mobile number
-                  _buildFieldLabel(context, 'Mobile number'),
+                  _buildFieldLabel(context, 'mobile_number'.tr),
                   CustomFormField(
                     controller: _phoneController,
                     inputType: TextInputType.phone,
@@ -235,7 +236,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   UIHelper.verticalSpace(4.h),
                   Text(
-                    'We send a verification code to this number.',
+                    'verification_code_sent_hint'.tr,
                     style: TextStyle(
                       fontSize: 12.sp,
                       color: AppColorsTheme.textMutedColor(context),
@@ -245,12 +246,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   UIHelper.verticalSpace(16.h),
 
                   // 4. Password
-                  _buildFieldLabel(context, 'Password'),
+                  _buildFieldLabel(context, 'password'.tr),
                   CustomFormField(
                     controller: _passwordController,
                     isPass: true,
                     isObsecure: _obscurePassword,
-                    hintText: 'Password',
+                    hintText: 'password'.tr,
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword
@@ -278,12 +279,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   UIHelper.verticalSpace(16.h),
 
                   // 5. Confirm password
-                  _buildFieldLabel(context, 'Confirm password'),
+                  _buildFieldLabel(context, 'confirm_password'.tr),
                   CustomFormField(
                     controller: _confirmPasswordController,
                     isPass: true,
                     isObsecure: _obscureConfirmPassword,
-                    hintText: 'Confirm password',
+                    hintText: 'confirm_password'.tr,
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscureConfirmPassword
@@ -312,7 +313,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                   // Section Header: Optional Fields
                   Text(
-                    'Optional — you can add these later',
+                    'optional_later'.tr,
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w500,
@@ -322,7 +323,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   UIHelper.verticalSpace(16.h),
 
                   // 6. Date of birth
-                  _buildFieldLabel(context, 'Date of birth'),
+                  _buildFieldLabel(context, 'date_of_birth'.tr),
                   CustomFormField(
                     controller: _dobController,
                     isRead: true,
@@ -340,7 +341,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   UIHelper.verticalSpace(16.h),
 
                   // 7. Gender Dropdown
-                  _buildFieldLabel(context, 'Gender'),
+                  _buildFieldLabel(context, 'gender'.tr),
                   Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 16.w,
@@ -388,7 +389,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   UIHelper.verticalSpace(16.h),
 
                   // 8. Country Dropdown
-                  _buildFieldLabel(context, 'Country'),
+                  _buildFieldLabel(context, 'country'.tr),
                   Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 16.w,
@@ -436,7 +437,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   UIHelper.verticalSpace(16.h),
 
                   // 9. Nationality
-                  _buildFieldLabel(context, 'Nationality'),
+                  _buildFieldLabel(context, 'nationality'.tr),
                   CustomFormField(
                     controller: _nationalityController,
                     hintText: 'Bangladeshi',
@@ -444,7 +445,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   UIHelper.verticalSpace(16.h),
 
                   // 10. Partner code
-                  _buildFieldLabel(context, 'Partner code'),
+                  _buildFieldLabel(context, 'partner_code'.tr),
                   CustomFormField(
                     controller: _partnerCodeController,
                     hintText: 'Optional',
@@ -474,7 +475,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       UIHelper.horizontalSpace(8.w),
                       Expanded(
                         child: Text(
-                          'I accept the terms and conditions',
+                          'accept_terms'.tr,
                           style: TextStyle(
                             color: AppColorsTheme.textMainColor(context),
                             fontSize: 13.sp,
@@ -509,7 +510,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       UIHelper.horizontalSpace(8.w),
                       Expanded(
                         child: Text(
-                          'I accept the privacy policy',
+                          'accept_privacy'.tr,
                           style: TextStyle(
                             color: AppColorsTheme.textMainColor(context),
                             fontSize: 13.sp,
@@ -524,7 +525,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   // Create Account Button
                   CustomButton(
                     onTap: _handleCreateAccount,
-                    btnName: 'Create account',
+                    btnName: 'create_account'.tr,
                     isLoading: _isLoading,
                   ),
                   UIHelper.verticalSpace(24.h),
@@ -534,7 +535,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'Already have an account? ',
+                        'new_platform'.tr, // or 'Already have an account? '
                         style: TextStyle(
                           color: AppColorsTheme.textMutedColor(context),
                           fontSize: 13.sp,
@@ -546,7 +547,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           Navigator.pop(context);
                         },
                         child: Text(
-                          'Sign in',
+                          'sign_in'.tr,
                           style: TextStyle(
                             color: primaryOrange,
                             fontSize: 13.sp,
