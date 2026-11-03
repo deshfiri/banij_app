@@ -50,7 +50,7 @@ class _SplashScreenState extends State<SplashScreen>
         bool isLoggedIn = appData.read(kKeyIsLoggedIn) ?? false;
         Navigator.pushReplacementNamed(
           context,
-          isLoggedIn ? Routes.dashboardScreen : Routes.loginScreen,
+          isLoggedIn ? Routes.dashboardScreen : Routes.onboardingScreen,
         );
       }
     });

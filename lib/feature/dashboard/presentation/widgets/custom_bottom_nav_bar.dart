@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../constants/color.dart';
+import '../../../../providers/theme_provider.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
@@ -16,6 +18,9 @@ class CustomBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = context.watch<ThemeProvider>();
+    final isDark = themeProvider.isDarkMode;
+
     return Container(
       decoration: BoxDecoration(
         color: AppColorsTheme.cardBg(context),
@@ -52,30 +57,45 @@ class CustomBottomNavBar extends StatelessWidget {
                 ),
               ),
 
-              // 3. Center Action (+) Button
+              // 3. Center App Theme Toggle (Dark / Light Switch)
               Expanded(
                 child: GestureDetector(
-                  onTap: () => onTap(2),
+                  onTap: () {
+                    final newMode = !isDark;
+                    context.read<ThemeProvider>().toggleDarkMode(newMode);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(newMode ? 'Dark Mode Enabled' : 'Light Mode Enabled'),
+                        backgroundColor: primaryOrange,
+                        duration: const Duration(milliseconds: 600),
+                      ),
+                    );
+                  },
                   behavior: HitTestBehavior.opaque,
                   child: Center(
-                    child: Container(
-                      width: 54.w,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 300),
+                      width: 52.w,
                       height: 40.h,
                       decoration: BoxDecoration(
-                        color: primaryOrange,
-                        borderRadius: BorderRadius.circular(12.r),
+                        color: isDark ? const Color(0xFF221A15) : primaryOrange,
+                        borderRadius: BorderRadius.circular(14.r),
+                        border: Border.all(
+                          color: isDark ? primaryOrange : Colors.transparent,
+                          width: 1.5.w,
+                        ),
                         boxShadow: [
                           BoxShadow(
-                            color: primaryOrange.withValues(alpha: 0.3),
+                            color: primaryOrange.withValues(alpha: isDark ? 0.2 : 0.35),
                             blurRadius: 8.r,
                             offset: const Offset(0, 3),
                           ),
                         ],
                       ),
                       child: Icon(
-                        Icons.add,
+                        isDark ? Icons.wb_sunny_rounded : Icons.dark_mode_outlined,
                         color: Colors.white,
-                        size: 24.sp,
+                        size: 22.sp,
                       ),
                     ),
                   ),

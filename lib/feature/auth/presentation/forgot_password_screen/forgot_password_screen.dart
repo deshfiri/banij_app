@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../common_widget/custom_button.dart';
 import '../../../../common_widget/custom_form_field.dart';
 import '../../../../constants/color.dart';
 import '../../../../constants/image_const.dart';
 import '../../../../helpers/ui_helpers.dart';
+import '../../../../providers/forgot_password_provider.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -21,6 +23,17 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   bool _isLoading = false;
 
   @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final provider = context.read<ForgotPasswordProvider>();
+      if (provider.email.isNotEmpty) {
+        _emailController.text = provider.email;
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _emailController.dispose();
     super.dispose();
@@ -29,6 +42,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   Future<void> _handleResetPassword() async {
     FocusScope.of(context).unfocus();
     if (_formKey.currentState!.validate()) {
+      context.read<ForgotPasswordProvider>().updateEmail(_emailController.text.trim());
+
       setState(() {
         _isLoading = true;
       });
@@ -117,6 +132,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     controller: _emailController,
                     inputType: TextInputType.emailAddress,
                     hintText: 'enter_email'.tr,
+                    onChanged: (val) {
+                      context.read<ForgotPasswordProvider>().updateEmail(val);
+                    },
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return 'please_enter_email'.tr;

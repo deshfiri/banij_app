@@ -532,7 +532,7 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
                         ),
                       ),
                       UIHelper.horizontalSpace(16.w),
-                      // Continue / Create Account Button
+
                       Expanded(
                         flex: 2,
                         child: CustomButton(

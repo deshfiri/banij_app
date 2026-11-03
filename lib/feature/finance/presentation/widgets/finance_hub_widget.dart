@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../../common_widget/hub_card_tile_widget.dart';
 import '../../../../constants/color.dart';
 import '../../../../constants/image_const.dart';
 import '../../../../helpers/all_routes.dart';
@@ -223,7 +224,7 @@ class _FinanceHubWidgetState extends State<FinanceHubWidget> {
         ),
         UIHelper.verticalSpace(16.h),
 
-        // 3. 2-Column Grid of Cards
+        // 3. 2-Column Grid of Cards using HubCardTileWidget
         Expanded(
           child: GridView.builder(
             padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
@@ -236,74 +237,11 @@ class _FinanceHubWidgetState extends State<FinanceHubWidget> {
             itemCount: filteredItems.length,
             itemBuilder: (context, index) {
               final item = filteredItems[index];
-              return GestureDetector(
+              return HubCardTileWidget(
+                title: item.titleKey.tr,
+                subtitle: item.tagKey.tr,
+                iconData: item.iconData,
                 onTap: () => _handleItemTap(context, item),
-                child: Container(
-                  padding: EdgeInsets.all(14.w),
-                  decoration: BoxDecoration(
-                    color: AppColorsTheme.cardBg(context),
-                    borderRadius: BorderRadius.circular(16.r),
-                    border: Border.all(
-                      color: AppColorsTheme.borderColor(context),
-                      width: 1.w,
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Top row: Icon Box & Chevron Right
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Container(
-                            padding: EdgeInsets.all(10.w),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFFECE0),
-                              borderRadius: BorderRadius.circular(12.r),
-                            ),
-                            child: Icon(
-                              item.iconData,
-                              color: primaryOrange,
-                              size: 22.sp,
-                            ),
-                          ),
-                          Icon(
-                            Icons.chevron_right,
-                            color: AppColorsTheme.textMutedColor(context),
-                            size: 20.sp,
-                          ),
-                        ],
-                      ),
-                      // Bottom texts: Title & Tag
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item.titleKey.tr,
-                            style: TextStyle(
-                              fontSize: 15.sp,
-                              fontWeight: FontWeight.bold,
-                              color: AppColorsTheme.textMainColor(context),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          UIHelper.verticalSpace(2.h),
-                          Text(
-                            item.tagKey.tr,
-                            style: TextStyle(
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.w600,
-                              color: AppColorsTheme.textMutedColor(context),
-                              letterSpacing: 0.5,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
               );
             },
           ),
