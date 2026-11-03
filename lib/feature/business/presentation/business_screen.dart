@@ -3,9 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../constants/color.dart';
+import '../../../common_widget/finance_card_widget.dart';
 import '../../../helpers/all_routes.dart';
 import '../../../helpers/ui_helpers.dart';
-import '../../finance/presentation/finance_screen.dart';
 
 class BusinessScreenBody extends StatelessWidget {
   const BusinessScreenBody({super.key});

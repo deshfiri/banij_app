@@ -1,0 +1,97 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+
+import '../constants/color.dart';
+
+class FinanceCardWidget extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData iconData;
+  final VoidCallback onTap;
+
+  const FinanceCardWidget({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.iconData,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(18.w),
+        decoration: BoxDecoration(
+          color: AppColorsTheme.cardBg(context),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(color: AppColorsTheme.borderColor(context), width: 1.w),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.0 : 0.03),
+              blurRadius: 10.r,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            // Icon in soft orange container
+            Container(
+              padding: EdgeInsets.all(12.w),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF221A15) : const Color(0xFFFFF7F2),
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(
+                  color: primaryOrange.withValues(alpha: 0.2),
+                ),
+              ),
+              child: Icon(
+                iconData,
+                size: 26.sp,
+                color: primaryOrange,
+              ),
+            ),
+            SizedBox(width: 16.w),
+
+            // Title & Subtitle
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColorsTheme.textMainColor(context),
+                    ),
+                  ),
+                  SizedBox(height: 4.h),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w400,
+                      color: AppColorsTheme.textMutedColor(context),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Trailing arrow icon
+            Icon(
+              Icons.arrow_forward_ios_rounded,
+              size: 16.sp,
+              color: AppColorsTheme.textMutedColor(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

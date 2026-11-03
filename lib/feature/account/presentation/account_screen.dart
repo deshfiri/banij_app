@@ -5,12 +5,12 @@ import 'package:provider/provider.dart';
 
 import '../../../common_widget/custom_button.dart';
 import '../../../common_widget/custom_form_field.dart';
+import '../../../common_widget/finance_card_widget.dart';
 import '../../../constants/color.dart';
 import '../../../helpers/di.dart';
 import '../../../helpers/all_routes.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../../providers/theme_provider.dart';
-import '../../finance/presentation/finance_screen.dart';
 
 class AccountScreenBody extends StatefulWidget {
   final String? initialTab;

@@ -10,6 +10,7 @@ import '../../account/presentation/account_screen.dart';
 import '../../business/presentation/business_screen.dart';
 import '../../finance/presentation/finance_screen.dart';
 import 'widgets/custom_bottom_nav_bar.dart';
+import 'widgets/dashboard_hub_widget.dart';
 import 'widgets/dynamic_step_indicator.dart';
 import 'widgets/status_card_widget.dart';
 
@@ -23,11 +24,15 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentIndex = 0;
   final int _currentStep = 3; // KYC step is step 3
+  bool _isKycSubmitted = false;
 
   void _handleSubmitKYC() {
+    setState(() {
+      _isKycSubmitted = true;
+    });
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Opening KYC Document Submission...'),
+        content: Text('KYC documents submitted successfully!'),
         backgroundColor: primaryOrange,
       ),
     );
@@ -36,6 +41,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget _buildBodyContent(bool isDark) {
     switch (_currentIndex) {
       case 0:
+        if (_isKycSubmitted) {
+          return const DashboardHubWidget();
+        }
         return SingleChildScrollView(
           padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
           child: Column(
