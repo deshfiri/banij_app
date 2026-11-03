@@ -6,6 +6,8 @@ import '../feature/auth/presentation/forgot_password_screen/forgot_password_scre
 import '../feature/auth/presentation/login_screen/loginScreen.dart';
 import '../feature/auth/presentation/register_screen/registerScreen.dart';
 import '../feature/auth/presentation/supplier_register_screen/supplier_register_screen.dart';
+import '../feature/account/presentation/account_screen_wrapper.dart';
+import '../feature/business/presentation/verification_history_screen.dart';
 import '../feature/dashboard/presentation/dashboard_screen.dart';
 
 final class Routes {
@@ -17,6 +19,8 @@ final class Routes {
   static const String signupScreen = '/signupScreen';
   static const String forgotPasswordScreen = '/forgotPasswordScreen';
   static const String supplierRegisterScreen = '/supplierRegisterScreen';
+  static const String verificationHistoryScreen = '/verificationHistoryScreen';
+  static const String accountScreen = '/accountScreen';
   static const String dashboardScreen = '/dashboardScreen';
 }
 
@@ -43,6 +47,15 @@ final class RouteGenerator {
         return Platform.isAndroid
             ? _AdvancedTransitionRoute(widget: const SupplierRegisterScreen(), settings: settings)
             : CupertinoPageRoute(builder: (context) => const SupplierRegisterScreen(), settings: settings);
+      case Routes.verificationHistoryScreen:
+        return Platform.isAndroid
+            ? _AdvancedTransitionRoute(widget: const VerificationHistoryScreen(), settings: settings)
+            : CupertinoPageRoute(builder: (context) => const VerificationHistoryScreen(), settings: settings);
+      case Routes.accountScreen:
+        final initialTab = settings.arguments as String?;
+        return Platform.isAndroid
+            ? _AdvancedTransitionRoute(widget: AccountScreen(initialTab: initialTab), settings: settings)
+            : CupertinoPageRoute(builder: (context) => AccountScreen(initialTab: initialTab), settings: settings);
       case Routes.dashboardScreen:
         return Platform.isAndroid
             ? _AdvancedTransitionRoute(widget: const DashboardScreen(), settings: settings)

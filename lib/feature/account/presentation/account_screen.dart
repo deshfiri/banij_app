@@ -13,14 +13,15 @@ import '../../../providers/theme_provider.dart';
 import '../../finance/presentation/finance_screen.dart';
 
 class AccountScreenBody extends StatefulWidget {
-  const AccountScreenBody({super.key});
+  final String? initialTab;
+  const AccountScreenBody({super.key, this.initialTab});
 
   @override
   State<AccountScreenBody> createState() => _AccountScreenBodyState();
 }
 
 class _AccountScreenBodyState extends State<AccountScreenBody> {
-  String _selectedTab = 'Profile';
+  late String _selectedTab;
   final List<String> _tabs = [
     'Profile',
     'Security',
@@ -40,6 +41,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
   @override
   void initState() {
     super.initState();
+    _selectedTab = widget.initialTab ?? 'Profile';
     _isBengali = appData.read('isBengali') ?? false;
   }
 

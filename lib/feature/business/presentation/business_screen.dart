@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../constants/color.dart';
+import '../../../helpers/all_routes.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../finance/presentation/finance_screen.dart';
 
@@ -10,21 +11,11 @@ class BusinessScreenBody extends StatelessWidget {
   const BusinessScreenBody({super.key});
 
   void _handleVerificationTap(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Opening Verification...'),
-        backgroundColor: primaryOrange,
-      ),
-    );
+    Navigator.pushNamed(context, Routes.verificationHistoryScreen);
   }
 
   void _handleSubscriptionTap(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Opening Subscription...'),
-        backgroundColor: primaryOrange,
-      ),
-    );
+    Navigator.pushNamed(context, Routes.accountScreen, arguments: 'Package');
   }
 
   @override
