@@ -8,10 +8,10 @@ import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import 'constants/app_translations.dart';
-import 'constants/custome_theme.dart';
 import 'gen/colors.gen.dart';
 import 'helpers/all_routes.dart';
 import 'helpers/di.dart';
@@ -112,6 +112,12 @@ class UtillScreenMobile extends StatelessWidget {
           theme: ThemeData(
             useMaterial3: true,
             brightness: Brightness.light,
+            fontFamilyFallback: [
+              'LiAdor',
+              GoogleFonts.hindSiliguri().fontFamily!,
+              GoogleFonts.anekBangla().fontFamily!,
+              GoogleFonts.notoSansBengali().fontFamily!,
+            ],
             primaryColor: const Color(0xFFFD6B04),
             scaffoldBackgroundColor: const Color(0xFFFAFAFA),
             colorScheme: ColorScheme.fromSeed(
@@ -127,6 +133,12 @@ class UtillScreenMobile extends StatelessWidget {
           darkTheme: ThemeData(
             useMaterial3: true,
             brightness: Brightness.dark,
+            fontFamilyFallback: [
+              'LiAdor',
+              GoogleFonts.hindSiliguri().fontFamily!,
+              GoogleFonts.anekBangla().fontFamily!,
+              GoogleFonts.notoSansBengali().fontFamily!,
+            ],
             primaryColor: const Color(0xFFFD6B04),
             scaffoldBackgroundColor: const Color(0xFF121212),
             colorScheme: ColorScheme.fromSeed(
