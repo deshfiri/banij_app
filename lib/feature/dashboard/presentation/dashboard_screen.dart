@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../common_widget/custom_button.dart';
 import '../../../constants/color.dart';
@@ -52,7 +53,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               // 2. Title
               Text(
-                'Setting up your account',
+                'setting_up_account'.tr,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 22.sp,
@@ -67,13 +68,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
               UIHelper.verticalSpace(24.h),
 
               // 4. KYC Status Card
-              const StatusCardWidget(),
+              StatusCardWidget(),
               UIHelper.verticalSpace(28.h),
 
               // 5. Submit KYC Action Button
               CustomButton(
                 onTap: _handleSubmitKYC,
-                btnName: 'Submit your KYC documents',
+                btnName: 'submit_kyc'.tr,
               ),
               UIHelper.verticalSpace(20.h),
             ],

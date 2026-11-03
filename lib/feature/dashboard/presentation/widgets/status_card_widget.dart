@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../../constants/color.dart';
 
@@ -10,28 +11,32 @@ class StatusCardWidget extends StatelessWidget {
   final IconData progressIcon;
   final List<StatusItemModel> items;
 
-  const StatusCardWidget({
+  StatusCardWidget({
     super.key,
-    this.statusTitle = 'Current status: ',
-    this.statusHighlight = 'KYC pending',
-    this.progressLabel = 'Documents Pending',
+    String? statusTitle,
+    String? statusHighlight,
+    String? progressLabel,
     this.progressIcon = Icons.donut_large_rounded,
-    this.items = const [
-      StatusItemModel(
-        title: 'Government ID',
-        iconData: Icons.badge_outlined,
-      ),
-      StatusItemModel(
-        title: 'Proof of Address',
-        iconData: Icons.location_on_outlined,
-      ),
-      StatusItemModel(
-        title: 'Self-Declaration Form',
-        statusTag: '(Pending)',
-        iconData: Icons.circle_outlined,
-      ),
-    ],
-  });
+    List<StatusItemModel>? items,
+  })  : statusTitle = statusTitle ?? 'current_status'.tr,
+        statusHighlight = statusHighlight ?? 'kyc_pending'.tr,
+        progressLabel = progressLabel ?? 'documents_pending'.tr,
+        items = items ??
+            [
+              StatusItemModel(
+                title: 'government_id'.tr,
+                iconData: Icons.badge_outlined,
+              ),
+              StatusItemModel(
+                title: 'proof_of_address'.tr,
+                iconData: Icons.location_on_outlined,
+              ),
+              StatusItemModel(
+                title: 'self_declaration'.tr,
+                statusTag: 'pending_tag'.tr,
+                iconData: Icons.circle_outlined,
+              ),
+            ];
 
   @override
   Widget build(BuildContext context) {

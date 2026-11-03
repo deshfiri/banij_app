@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../constants/color.dart';
+import '../../../helpers/di.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../auth/presentation/login_screen/loginScreen.dart';
 import '../../finance/presentation/finance_screen.dart';
@@ -15,7 +17,13 @@ class AccountScreenBody extends StatefulWidget {
 
 class _AccountScreenBodyState extends State<AccountScreenBody> {
   bool _isDarkMode = false;
-  bool _isBengali = false;
+  late bool _isBengali;
+
+  @override
+  void initState() {
+    super.initState();
+    _isBengali = appData.read('isBengali') ?? false;
+  }
 
   void _handleProfileTap(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -45,7 +53,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
           ),
           backgroundColor: inputFillColor,
           title: Text(
-            'Are you sure you want to logout?',
+            'Are you sure you want to logout?'.tr,
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.bold,
@@ -53,7 +61,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
             ),
           ),
           content: Text(
-            'You will need to sign in again to access your account and workspace.',
+            'You will need to sign in again to access your account and workspace.'.tr,
             style: TextStyle(
               fontSize: 13.sp,
               color: textMuted,
@@ -62,10 +70,10 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.pop(dialogContext); // Close dialog
+                Navigator.pop(dialogContext);
               },
               child: Text(
-                'No',
+                'No'.tr,
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
@@ -75,7 +83,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
             ),
             ElevatedButton(
               onPressed: () {
-                Navigator.pop(dialogContext); // Close dialog
+                Navigator.pop(dialogContext);
                 Navigator.pushAndRemoveUntil(
                   context,
                   MaterialPageRoute(
@@ -93,7 +101,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                 elevation: 0,
               ),
               child: Text(
-                'Yes',
+                'Yes'.tr,
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.bold,
@@ -124,7 +132,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
             bottom: false,
             child: Center(
               child: Text(
-                'Account Setting',
+                'account_setting'.tr,
                 style: TextStyle(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.bold,
@@ -143,7 +151,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Account Management',
+                  'account_management'.tr,
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
@@ -152,7 +160,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                 ),
                 UIHelper.verticalSpace(6.h),
                 Text(
-                  'Manage your profile, security settings, dark mode and language.',
+                  'account_subtitle'.tr,
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w400,
@@ -163,8 +171,8 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
 
                 // Card 1: Profile
                 FinanceCardWidget(
-                  title: 'Profile',
-                  subtitle: 'Personal details & information',
+                  title: 'profile'.tr,
+                  subtitle: 'profile_subtitle'.tr,
                   iconData: Icons.person_outline_rounded,
                   onTap: () => _handleProfileTap(context),
                 ),
@@ -172,8 +180,8 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
 
                 // Card 2: Security
                 FinanceCardWidget(
-                  title: 'Security',
-                  subtitle: 'Password, 2FA & active sessions',
+                  title: 'security'.tr,
+                  subtitle: 'security_subtitle'.tr,
                   iconData: Icons.security_outlined,
                   onTap: () => _handleSecurityTap(context),
                 ),
@@ -181,8 +189,8 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
 
                 // Card 3: Dark Mode Switch Card
                 AccountSwitchCardWidget(
-                  title: 'Dark Mode',
-                  subtitle: _isDarkMode ? 'Dark theme enabled' : 'Light theme enabled',
+                  title: 'dark_mode'.tr,
+                  subtitle: _isDarkMode ? 'dark_mode_on'.tr : 'dark_mode_off'.tr,
                   iconData: Icons.dark_mode_outlined,
                   value: _isDarkMode,
                   onChanged: (val) {
@@ -202,17 +210,22 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
 
                 // Card 4: Language Change Switch Card
                 AccountSwitchCardWidget(
-                  title: 'Change Language',
-                  subtitle: _isBengali ? 'Language: Bengali (বাংলা)' : 'Language: English (EN)',
+                  title: 'change_language'.tr,
+                  subtitle: _isBengali ? 'lang_bn'.tr : 'lang_en'.tr,
                   iconData: Icons.language_outlined,
                   value: _isBengali,
-                  onChanged: (val) {
+                  onChanged: (val) async {
+                    await appData.write('isBengali', val);
+                    if (!context.mounted) return;
                     setState(() {
                       _isBengali = val;
                     });
+                    Get.updateLocale(
+                      val ? const Locale('bn', 'BD') : const Locale('en', 'US'),
+                    );
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(_isBengali ? 'Language switched to Bengali' : 'Language switched to English'),
+                        content: Text(val ? 'Language switched to Bengali' : 'Language switched to English'),
                         backgroundColor: primaryOrange,
                         duration: const Duration(milliseconds: 600),
                       ),
@@ -223,8 +236,8 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
 
                 // Card 5: Logout Card
                 FinanceCardWidget(
-                  title: 'Logout',
-                  subtitle: 'Sign out of your account securely',
+                  title: 'logout'.tr,
+                  subtitle: 'logout_subtitle'.tr,
                   iconData: Icons.logout_rounded,
                   onTap: () => _showLogoutConfirmation(context),
                 ),

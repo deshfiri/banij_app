@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../constants/color.dart';
 import '../../../helpers/ui_helpers.dart';
@@ -43,7 +44,7 @@ class FinanceScreenBody extends StatelessWidget {
             bottom: false,
             child: Center(
               child: Text(
-                'Finance',
+                'finance'.tr,
                 style: TextStyle(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.bold,
@@ -62,7 +63,7 @@ class FinanceScreenBody extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Financial Management',
+                  'financial_management'.tr,
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
@@ -71,7 +72,7 @@ class FinanceScreenBody extends StatelessWidget {
                 ),
                 UIHelper.verticalSpace(6.h),
                 Text(
-                  'Manage your invoices and track payment receipts in one place.',
+                  'financial_subtitle'.tr,
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w400,
@@ -82,8 +83,8 @@ class FinanceScreenBody extends StatelessWidget {
 
                 // Card 1: Invoice
                 FinanceCardWidget(
-                  title: 'Invoice',
-                  subtitle: 'Manage, create & view invoices',
+                  title: 'invoice'.tr,
+                  subtitle: 'invoice_subtitle'.tr,
                   iconData: Icons.receipt_long_outlined,
                   onTap: () => _handleInvoiceTap(context),
                 ),
@@ -91,8 +92,8 @@ class FinanceScreenBody extends StatelessWidget {
 
                 // Card 2: Receipts
                 FinanceCardWidget(
-                  title: 'Receipts',
-                  subtitle: 'Track payment receipts & transactions',
+                  title: 'receipts'.tr,
+                  subtitle: 'receipts_subtitle'.tr,
                   iconData: Icons.payments_outlined,
                   onTap: () => _handleReceiptsTap(context),
                 ),

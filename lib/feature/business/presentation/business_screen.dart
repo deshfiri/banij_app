@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../constants/color.dart';
 import '../../../helpers/ui_helpers.dart';
@@ -44,7 +45,7 @@ class BusinessScreenBody extends StatelessWidget {
             bottom: false,
             child: Center(
               child: Text(
-                'Business',
+                'business'.tr,
                 style: TextStyle(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.bold,
@@ -63,7 +64,7 @@ class BusinessScreenBody extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Business Management',
+                  'business_management'.tr,
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
@@ -72,7 +73,7 @@ class BusinessScreenBody extends StatelessWidget {
                 ),
                 UIHelper.verticalSpace(6.h),
                 Text(
-                  'Manage your company verification and active subscriptions.',
+                  'business_subtitle'.tr,
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w400,
@@ -83,8 +84,8 @@ class BusinessScreenBody extends StatelessWidget {
 
                 // Card 1: Verification
                 FinanceCardWidget(
-                  title: 'Verification',
-                  subtitle: 'KYC & business identity verification',
+                  title: 'verification'.tr,
+                  subtitle: 'verification_subtitle'.tr,
                   iconData: Icons.verified_user_outlined,
                   onTap: () => _handleVerificationTap(context),
                 ),
@@ -92,8 +93,8 @@ class BusinessScreenBody extends StatelessWidget {
 
                 // Card 2: Subscription
                 FinanceCardWidget(
-                  title: 'Subscription',
-                  subtitle: 'Manage your plans & billing',
+                  title: 'subscription'.tr,
+                  subtitle: 'subscription_subtitle'.tr,
                   iconData: Icons.card_membership_outlined,
                   onTap: () => _handleSubscriptionTap(context),
                 ),

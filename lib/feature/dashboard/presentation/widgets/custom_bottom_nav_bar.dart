@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../../constants/color.dart';
 
@@ -34,7 +35,7 @@ class CustomBottomNavBar extends StatelessWidget {
                 child: _buildNavItem(
                   index: 0,
                   icon: Icons.home_filled,
-                  label: 'Dashboard',
+                  label: 'dashboard'.tr,
                   isActive: currentIndex == 0,
                 ),
               ),
@@ -44,7 +45,7 @@ class CustomBottomNavBar extends StatelessWidget {
                 child: _buildNavItem(
                   index: 1,
                   icon: Icons.euro_symbol_rounded,
-                  label: 'Finance',
+                  label: 'finance'.tr,
                   isActive: currentIndex == 1,
                 ),
               ),
@@ -84,7 +85,7 @@ class CustomBottomNavBar extends StatelessWidget {
                 child: _buildNavItem(
                   index: 3,
                   icon: Icons.business_center_outlined,
-                  label: 'Business',
+                  label: 'business'.tr,
                   isActive: currentIndex == 3,
                 ),
               ),
@@ -94,7 +95,7 @@ class CustomBottomNavBar extends StatelessWidget {
                 child: _buildNavItem(
                   index: 4,
                   icon: Icons.person_outline_rounded,
-                  label: 'Account',
+                  label: 'account'.tr,
                   isActive: currentIndex == 4,
                 ),
               ),

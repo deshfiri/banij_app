@@ -1,17 +1,16 @@
 import 'dart:developer';
 import 'dart:io';
 
-
-
 import 'package:auto_animated/auto_animated.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:provider/provider.dart';
 
+import 'constants/app_translations.dart';
 import 'constants/custome_theme.dart';
 import 'gen/colors.gen.dart';
 import 'helpers/all_routes.dart';
@@ -63,8 +62,6 @@ void main() async {
   runApp(MyApp());
 }
 
-
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -97,6 +94,7 @@ class UtillScreenMobile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    bool isBn = appData.read('isBengali') ?? false;
     return ScreenUtilInit(
       designSize: const Size(375, 812),
       minTextAdapt: true,
@@ -105,6 +103,9 @@ class UtillScreenMobile extends StatelessWidget {
         return GetMaterialApp(
           debugShowCheckedModeBanner: false,
           title: 'Banij',
+          translations: AppTranslations(),
+          locale: isBn ? const Locale('bn', 'BD') : const Locale('en', 'US'),
+          fallbackLocale: const Locale('en', 'US'),
           theme: ThemeData(
             useMaterial3: true,
             primaryColor: const Color(0xFFFD6B04),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../../common_widget/custom_button.dart';
 import '../../../../common_widget/custom_form_field.dart';
@@ -35,10 +36,10 @@ class _LoginScreenState extends State<LoginScreen> {
   void _handleSignIn() {
     FocusScope.of(context).unfocus();
     if (_formKey.currentState!.validate()) {
-
+      final modeText = _isSupplierMode ? 'Active Supplier' : 'New Account';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Processing Sign In as ...'),
+          content: Text('Processing Sign In as $modeText...'),
           backgroundColor: primaryOrange,
           duration: const Duration(milliseconds: 800),
         ),
@@ -77,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   UIHelper.verticalSpace(0.h),
                   Text(
-                    'Welcome back',
+                    'welcome_back'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 24.sp,
@@ -87,7 +88,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   UIHelper.verticalSpace(8.h),
                   Text(
-                    'Sign in to access your workspace and continue managing\nyour business.',
+                    'sign_in_workspace'.tr,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 13.sp,
@@ -99,8 +100,51 @@ class _LoginScreenState extends State<LoginScreen> {
                   UIHelper.verticalSpace(28.h),
 
                   // Supplier vs New Account Switcher
-
-
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                    decoration: BoxDecoration(
+                      color: inputFillColor,
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(color: cardBorderColor),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _isSupplierMode ? 'Active Supplier' : 'New Account',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.bold,
+                                color: textMain,
+                              ),
+                            ),
+                            SizedBox(height: 2.h),
+                            Text(
+                              _isSupplierMode
+                                  ? 'Signing in with supplier privileges'
+                                  : 'Signing in with new account mode',
+                              style: TextStyle(
+                                fontSize: 11.sp,
+                                color: textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Switch(
+                          value: _isSupplierMode,
+                          activeThumbColor: primaryOrange,
+                          onChanged: (value) {
+                            setState(() {
+                              _isSupplierMode = value;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
                   UIHelper.verticalSpace(24.h),
 
                   // 2. Passkey Button
@@ -108,7 +152,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () {},
                     icon: Icon(Icons.key, color: primaryOrange, size: 18.sp),
                     label: Text(
-                      'Sign in with a passkey',
+                      'sign_in_passkey'.tr,
                       style: TextStyle(
                         color: textMain,
                         fontSize: 14.sp,
@@ -135,7 +179,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 12.w),
                         child: Text(
-                          'OR CONTINUE WITH EMAIL',
+                          'or_email'.tr,
                           style: TextStyle(
                             color: textMuted,
                             fontSize: 11.sp,
@@ -155,7 +199,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'Email address',
+                      'email_address'.tr,
                       style: TextStyle(
                         color: textMain,
                         fontSize: 13.sp,
@@ -167,7 +211,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   CustomFormField(
                     controller: _emailController,
                     inputType: TextInputType.emailAddress,
-                    hintText: 'Enter your email',
+                    hintText: 'enter_email'.tr,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return 'Please enter your email';
@@ -188,7 +232,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Password',
+                        'password'.tr,
                         style: TextStyle(
                           color: textMain,
                           fontSize: 13.sp,
@@ -198,7 +242,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       GestureDetector(
                         onTap: () {},
                         child: Text(
-                          'Forgot password?',
+                          'forgot_password'.tr,
                           style: TextStyle(
                             color: primaryOrange,
                             fontSize: 12.sp,
@@ -213,7 +257,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: _passwordController,
                     isPass: true,
                     isObsecure: _obscurePassword,
-                    hintText: 'Enter your password',
+                    hintText: 'enter_password'.tr,
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscurePassword
@@ -262,7 +306,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       UIHelper.horizontalSpace(8.w),
                       Text(
-                        'Remember me',
+                        'remember_me'.tr,
                         style: TextStyle(
                           color: textMain,
                           fontSize: 13.sp,
@@ -276,7 +320,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   // 7. Sign In Button
                   CustomButton(
                     onTap: _handleSignIn,
-                    btnName: 'Sign in',
+                    btnName: 'sign_in'.tr,
                   ),
                   UIHelper.verticalSpace(24.h),
 
@@ -286,8 +330,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       Text(
                         _isSupplierRegister
-                            ? 'Want to become a supplier? '
-                            : 'New to the platform? ',
+                            ? 'become_supplier_prompt'.tr
+                            : 'new_platform'.tr,
                         style: TextStyle(
                           color: textMuted,
                           fontSize: 13.sp,
@@ -305,8 +349,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                         child: Text(
                           _isSupplierRegister
-                              ? 'Become a Supplier'
-                              : 'Create an account',
+                              ? 'become_supplier'.tr
+                              : 'create_account'.tr,
                           style: TextStyle(
                             color: primaryOrange,
                             fontSize: 13.sp,
@@ -316,6 +360,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ],
                   ),
+                  UIHelper.verticalSpace(12.h),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -342,7 +387,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   UIHelper.verticalSpace(24.h),
 
                   // Language Switcher Icon
-
+                  Center(
+                    child: Icon(Icons.g_translate, color: textMuted, size: 20.sp),
+                  ),
                 ],
               ),
             ),
