@@ -93,6 +93,10 @@ class AppTranslations extends Translations {
           'invoices_tab': 'Invoices',
           'receipts_tab': 'Receipts',
           'appearance_tab': 'Appearance',
+          'Are you sure you want to logout?': 'Are you sure you want to logout?',
+          'You will need to sign in again to access your account and workspace.': 'You will need to sign in again to access your account and workspace.',
+          'No': 'No',
+          'Yes': 'Yes',
         },
         'bn_BD': {
           'welcome_back': 'স্বাগতম',
@@ -184,6 +188,10 @@ class AppTranslations extends Translations {
           'invoices_tab': 'ইনভয়েস',
           'receipts_tab': 'রসিদ',
           'appearance_tab': 'অ্যাপিয়ারেন্স',
+          'Are you sure you want to logout?': 'আপনি কি নিশ্চিত যে আপনি লগআউট করতে চান?',
+          'You will need to sign in again to access your account and workspace.': 'আপনার অ্যাকাউন্ট এবং ওয়ার্কস্পেস অ্যাক্সেস করতে আপনাকে আবার সাইন ইন করতে হবে।',
+          'No': 'না',
+          'Yes': 'হ্যাঁ',
         },
       };
 }

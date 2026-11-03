@@ -6,9 +6,8 @@ import '../../../../common_widget/custom_button.dart';
 import '../../../../common_widget/custom_form_field.dart';
 import '../../../../constants/color.dart';
 import '../../../../constants/image_const.dart';
+import '../../../../helpers/all_routes.dart';
 import '../../../../helpers/ui_helpers.dart';
-import '../../../dashboard/presentation/dashboard_screen.dart';
-import '../register_screen/registerScreen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -25,6 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
   bool _obscurePassword = true;
   bool _isSupplierMode = false; // false = New Account, true = Active Supplier
   bool _isSupplierRegister = false; // false = Create account, true = Become a supplier
+  bool _isLoading = false;
 
   @override
   void dispose() {
@@ -33,9 +33,21 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _handleSignIn() {
+  Future<void> _handleSignIn() async {
     FocusScope.of(context).unfocus();
     if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+
+      // Simulate API response delay
+      await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
+
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+
       final modeText = _isSupplierMode ? 'Active Supplier' : 'New Account';
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -44,12 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
           duration: const Duration(milliseconds: 800),
         ),
       );
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const DashboardScreen(),
-        ),
-      );
+      Navigator.pushReplacementNamed(context, Routes.dashboardScreen);
     }
   }
 
@@ -100,7 +107,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   UIHelper.verticalSpace(28.h),
 
                   // Supplier vs New Account Switcher
-
 
 
                   // 2. Passkey Button
@@ -277,6 +283,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   CustomButton(
                     onTap: _handleSignIn,
                     btnName: 'sign_in'.tr,
+                    isLoading: _isLoading,
                   ),
                   UIHelper.verticalSpace(24.h),
 
@@ -296,12 +303,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const RegisterScreen(),
-                            ),
-                          );
+                          Navigator.pushNamed(context, Routes.signupScreen);
                         },
                         child: Text(
                           _isSupplierRegister
@@ -341,7 +343,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                   UIHelper.verticalSpace(24.h),
-
 
 
                 ],

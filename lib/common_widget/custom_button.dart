@@ -18,6 +18,7 @@ class CustomButton extends StatelessWidget {
   final Widget? suffixIcons;
   final TextStyle? textStyle;
   final double? isBorderRadius;
+  final bool isLoading;
 
   const CustomButton({
     super.key,
@@ -34,12 +35,13 @@ class CustomButton extends StatelessWidget {
     this.gradientBottomColor,
     this.suffixIcons,
     this.horizontalSpace,
+    this.isLoading = false,
   });
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onTap,
+      onTap: isLoading ? null : onTap,
       borderRadius: BorderRadius.circular(isBorderRadius?.r ?? 10.r),
       child: Container(
         alignment: Alignment.center,
@@ -63,22 +65,33 @@ class CustomButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            if (icons != null) ...[
-              icons!,
-              UIHelper.horizontalSpace(horizontalSpace ?? 16.w),
-            ],
-            Text(
-              btnName,
-              style: textStyle ??
-                  TextStyle(
-                    color: Colors.white,
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-            if (suffixIcons != null) ...[
-              UIHelper.horizontalSpace(horizontalSpace ?? 16.w),
-              suffixIcons!,
+            if (isLoading)
+              SizedBox(
+                width: 22.w,
+                height: 22.h,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5.w,
+                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+            else ...[
+              if (icons != null) ...[
+                icons!,
+                UIHelper.horizontalSpace(horizontalSpace ?? 16.w),
+              ],
+              Text(
+                btnName,
+                style: textStyle ??
+                    TextStyle(
+                      color: Colors.white,
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              if (suffixIcons != null) ...[
+                UIHelper.horizontalSpace(horizontalSpace ?? 16.w),
+                suffixIcons!,
+              ],
             ],
           ],
         ),

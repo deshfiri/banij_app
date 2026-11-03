@@ -7,9 +7,9 @@ import '../../../common_widget/custom_button.dart';
 import '../../../common_widget/custom_form_field.dart';
 import '../../../constants/color.dart';
 import '../../../helpers/di.dart';
+import '../../../helpers/all_routes.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../../providers/theme_provider.dart';
-import '../../auth/presentation/login_screen/loginScreen.dart';
 import '../../finance/presentation/finance_screen.dart';
 
 class AccountScreenBody extends StatefulWidget {
@@ -74,45 +74,67 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
               color: AppColorsTheme.textMutedColor(context),
             ),
           ),
+          actionsPadding: EdgeInsets.zero,
           actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-              },
-              child: Text(
-                'No'.tr,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColorsTheme.textMutedColor(context),
-                ),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-                Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const LoginScreen(),
+            Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 0.h, 16.w, 16.h),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.pop(dialogContext);
+                      },
+                      style: OutlinedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                        side: BorderSide(
+                          color: AppColorsTheme.borderColor(context),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                      ),
+                      child: Text(
+                        'No'.tr,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColorsTheme.textMainColor(context),
+                        ),
+                      ),
+                    ),
                   ),
-                  (route) => false,
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryOrange,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.r),
-                ),
-                elevation: 0,
-              ),
-              child: Text(
-                'Yes'.tr,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.bold,
-                ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(dialogContext);
+                        Navigator.pushNamedAndRemoveUntil(
+                          context,
+                          Routes.loginScreen,
+                          (route) => false,
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryOrange,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'Yes'.tr,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -617,7 +639,6 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                   ..._tabs.map((tab) {
                     final isSelected = _selectedTab == tab;
 
-                    // Translate tab display name if needed or map key
                     String tabLabel = tab;
                     if (tab == 'Profile') tabLabel = 'profile'.tr;
                     if (tab == 'Security') tabLabel = 'security'.tr;

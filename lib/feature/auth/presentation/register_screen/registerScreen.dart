@@ -31,6 +31,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscureConfirmPassword = true;
   bool _acceptTerms = false;
   bool _acceptPrivacy = false;
+  bool _isLoading = false;
 
   String _selectedGender = 'Not specified';
   final List<String> _genderOptions = [
@@ -91,7 +92,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  void _handleCreateAccount() {
+  Future<void> _handleCreateAccount() async {
     FocusScope.of(context).unfocus();
     if (!_formKey.currentState!.validate()) {
       return;
@@ -108,6 +109,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
       return;
     }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    // Simulate API response delay
+    await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
+
+    if (!mounted) return;
+    setState(() {
+      _isLoading = false;
+    });
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -512,6 +525,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   CustomButton(
                     onTap: _handleCreateAccount,
                     btnName: 'Create account',
+                    isLoading: _isLoading,
                   ),
                   UIHelper.verticalSpace(24.h),
 
