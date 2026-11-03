@@ -18,9 +18,9 @@ class CustomBottomNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: inputFillColor,
+        color: AppColorsTheme.cardBg(context),
         border: Border(
-          top: BorderSide(color: cardBorderColor, width: 1.w),
+          top: BorderSide(color: AppColorsTheme.borderColor(context), width: 1.w),
         ),
       ),
       child: SafeArea(
@@ -33,6 +33,7 @@ class CustomBottomNavBar extends StatelessWidget {
               // 1. Dashboard Tab
               Expanded(
                 child: _buildNavItem(
+                  context: context,
                   index: 0,
                   icon: Icons.home_filled,
                   label: 'dashboard'.tr,
@@ -43,6 +44,7 @@ class CustomBottomNavBar extends StatelessWidget {
               // 2. Finance Tab
               Expanded(
                 child: _buildNavItem(
+                  context: context,
                   index: 1,
                   icon: Icons.euro_symbol_rounded,
                   label: 'finance'.tr,
@@ -83,6 +85,7 @@ class CustomBottomNavBar extends StatelessWidget {
               // 4. Business Tab
               Expanded(
                 child: _buildNavItem(
+                  context: context,
                   index: 3,
                   icon: Icons.business_center_outlined,
                   label: 'business'.tr,
@@ -93,6 +96,7 @@ class CustomBottomNavBar extends StatelessWidget {
               // 5. Account Tab
               Expanded(
                 child: _buildNavItem(
+                  context: context,
                   index: 4,
                   icon: Icons.person_outline_rounded,
                   label: 'account'.tr,
@@ -107,11 +111,14 @@ class CustomBottomNavBar extends StatelessWidget {
   }
 
   Widget _buildNavItem({
+    required BuildContext context,
     required int index,
     required IconData icon,
     required String label,
     required bool isActive,
   }) {
+    final inactiveColor = AppColorsTheme.textMutedColor(context);
+
     return GestureDetector(
       onTap: () => onTap(index),
       behavior: HitTestBehavior.opaque,
@@ -134,7 +141,7 @@ class CustomBottomNavBar extends StatelessWidget {
           Icon(
             icon,
             size: 22.sp,
-            color: isActive ? primaryOrange : textMuted,
+            color: isActive ? primaryOrange : inactiveColor,
           ),
           SizedBox(height: 4.h),
           Text(
@@ -144,7 +151,7 @@ class CustomBottomNavBar extends StatelessWidget {
             style: TextStyle(
               fontSize: 11.sp,
               fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-              color: isActive ? primaryOrange : textMuted,
+              color: isActive ? primaryOrange : inactiveColor,
             ),
           ),
           SizedBox(height: 6.h),

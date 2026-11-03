@@ -40,10 +40,12 @@ class StatusCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
-        color: inputFillColor,
+        color: AppColorsTheme.cardBg(context),
         borderRadius: BorderRadius.circular(16.r),
         border: Border.all(
           color: primaryOrange.withValues(alpha: 0.4),
@@ -51,7 +53,7 @@ class StatusCardWidget extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: primaryOrange.withValues(alpha: 0.06),
+            color: primaryOrange.withValues(alpha: isDark ? 0.0 : 0.06),
             blurRadius: 16.r,
             offset: const Offset(0, 6),
           ),
@@ -70,8 +72,8 @@ class StatusCardWidget extends StatelessWidget {
               children: [
                 TextSpan(
                   text: statusTitle,
-                  style: const TextStyle(
-                    color: textMain,
+                  style: TextStyle(
+                    color: AppColorsTheme.textMainColor(context),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -91,9 +93,9 @@ class StatusCardWidget extends StatelessWidget {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFF9F5),
+              color: isDark ? const Color(0xFF221A15) : const Color(0xFFFFF9F5),
               borderRadius: BorderRadius.circular(10.r),
-              border: Border.all(color: cardBorderColor),
+              border: Border.all(color: AppColorsTheme.borderColor(context)),
             ),
             child: Row(
               children: [
@@ -109,7 +111,7 @@ class StatusCardWidget extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 15.sp,
                       fontWeight: FontWeight.w600,
-                      color: textMain,
+                      color: AppColorsTheme.textMainColor(context),
                     ),
                   ),
                 ),
@@ -128,7 +130,7 @@ class StatusCardWidget extends StatelessWidget {
                     Icon(
                       item.iconData,
                       size: 20.sp,
-                      color: textMain,
+                      color: AppColorsTheme.textMainColor(context),
                     ),
                     SizedBox(width: 12.w),
                     Expanded(
@@ -142,8 +144,8 @@ class StatusCardWidget extends StatelessWidget {
                           children: [
                             TextSpan(
                               text: item.title,
-                              style: const TextStyle(
-                                color: textMain,
+                              style: TextStyle(
+                                color: AppColorsTheme.textMainColor(context),
                                 fontWeight: FontWeight.w500,
                               ),
                             ),

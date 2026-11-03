@@ -56,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: lightBackground,
+      backgroundColor: AppColorsTheme.background(context),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -83,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(
                       fontSize: 24.sp,
                       fontWeight: FontWeight.bold,
-                      color: textMain,
+                      color: AppColorsTheme.textMainColor(context),
                     ),
                   ),
                   UIHelper.verticalSpace(8.h),
@@ -93,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     style: TextStyle(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w500,
-                      color: textMuted,
+                      color: AppColorsTheme.textMutedColor(context),
                       height: 1.4,
                     ),
                   ),
@@ -103,9 +103,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
                     decoration: BoxDecoration(
-                      color: inputFillColor,
+                      color: AppColorsTheme.cardBg(context),
                       borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(color: cardBorderColor),
+                      border: Border.all(color: AppColorsTheme.borderColor(context)),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -118,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               style: TextStyle(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.bold,
-                                color: textMain,
+                                color: AppColorsTheme.textMainColor(context),
                               ),
                             ),
                             SizedBox(height: 2.h),
@@ -128,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   : 'Signing in with new account mode',
                               style: TextStyle(
                                 fontSize: 11.sp,
-                                color: textMuted,
+                                color: AppColorsTheme.textMutedColor(context),
                               ),
                             ),
                           ],
@@ -154,15 +154,15 @@ class _LoginScreenState extends State<LoginScreen> {
                     label: Text(
                       'sign_in_passkey'.tr,
                       style: TextStyle(
-                        color: textMain,
+                        color: AppColorsTheme.textMainColor(context),
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
                     style: OutlinedButton.styleFrom(
-                      backgroundColor: Colors.white,
+                      backgroundColor: AppColorsTheme.cardBg(context),
                       padding: EdgeInsets.symmetric(vertical: 14.h),
-                      side: const BorderSide(color: cardBorderColor),
+                      side: BorderSide(color: AppColorsTheme.borderColor(context)),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10.r),
                       ),
@@ -173,23 +173,23 @@ class _LoginScreenState extends State<LoginScreen> {
                   // 3. Divider
                   Row(
                     children: [
-                      const Expanded(
-                        child: Divider(color: cardBorderColor, thickness: 1),
+                      Expanded(
+                        child: Divider(color: AppColorsTheme.borderColor(context), thickness: 1),
                       ),
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 12.w),
                         child: Text(
                           'or_email'.tr,
                           style: TextStyle(
-                            color: textMuted,
+                            color: AppColorsTheme.textMutedColor(context),
                             fontSize: 11.sp,
                             fontWeight: FontWeight.w600,
                             letterSpacing: 0.5,
                           ),
                         ),
                       ),
-                      const Expanded(
-                        child: Divider(color: cardBorderColor, thickness: 1),
+                      Expanded(
+                        child: Divider(color: AppColorsTheme.borderColor(context), thickness: 1),
                       ),
                     ],
                   ),
@@ -201,7 +201,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Text(
                       'email_address'.tr,
                       style: TextStyle(
-                        color: textMain,
+                        color: AppColorsTheme.textMainColor(context),
                         fontSize: 13.sp,
                         fontWeight: FontWeight.w600,
                       ),
@@ -234,7 +234,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Text(
                         'password'.tr,
                         style: TextStyle(
-                          color: textMain,
+                          color: AppColorsTheme.textMainColor(context),
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w600,
                         ),
@@ -263,7 +263,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         _obscurePassword
                             ? Icons.visibility_outlined
                             : Icons.visibility_off_outlined,
-                        color: textMuted,
+                        color: AppColorsTheme.textMutedColor(context),
                         size: 20.sp,
                       ),
                       onPressed: () {
@@ -293,7 +293,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Checkbox(
                           value: _rememberMe,
                           activeColor: primaryOrange,
-                          side: const BorderSide(color: cardBorderColor),
+                          side: BorderSide(color: AppColorsTheme.borderColor(context)),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4.r),
                           ),
@@ -308,7 +308,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Text(
                         'remember_me'.tr,
                         style: TextStyle(
-                          color: textMain,
+                          color: AppColorsTheme.textMainColor(context),
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w600,
                         ),
@@ -333,7 +333,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             ? 'become_supplier_prompt'.tr
                             : 'new_platform'.tr,
                         style: TextStyle(
-                          color: textMuted,
+                          color: AppColorsTheme.textMutedColor(context),
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w500,
                         ),
@@ -367,7 +367,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Text(
                         'Supplier Registration Mode',
                         style: TextStyle(
-                          color: textMain,
+                          color: AppColorsTheme.textMainColor(context),
                           fontSize: 12.sp,
                           fontWeight: FontWeight.w600,
                         ),
@@ -388,7 +388,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   // Language Switcher Icon
                   Center(
-                    child: Icon(Icons.g_translate, color: textMuted, size: 20.sp),
+                    child: Icon(Icons.g_translate, color: AppColorsTheme.textMutedColor(context), size: 20.sp),
                   ),
                 ],
               ),

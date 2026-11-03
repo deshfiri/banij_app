@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import 'constants/color.dart';
 import 'constants/image_const.dart';
-import 'gen/colors.gen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -32,8 +32,10 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.cFFFFFF,
+      backgroundColor: AppColorsTheme.background(context),
       body: Center(
         child: AnimatedOpacity(
           duration: const Duration(seconds: 1),
@@ -43,7 +45,7 @@ class _SplashScreenState extends State<SplashScreen>
             scale: _scale,
             curve: Curves.easeInOut,
             child: Image.asset(
-              logo,
+              isDark ? whiteLogo : logo,
               width: 200.w,
               fit: BoxFit.contain,
             ),

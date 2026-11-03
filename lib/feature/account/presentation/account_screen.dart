@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 
 import '../../../constants/color.dart';
 import '../../../helpers/di.dart';
 import '../../../helpers/ui_helpers.dart';
+import '../../../providers/theme_provider.dart';
 import '../../auth/presentation/login_screen/loginScreen.dart';
 import '../../finance/presentation/finance_screen.dart';
 
@@ -16,7 +18,6 @@ class AccountScreenBody extends StatefulWidget {
 }
 
 class _AccountScreenBodyState extends State<AccountScreenBody> {
-  bool _isDarkMode = false;
   late bool _isBengali;
 
   @override
@@ -51,20 +52,20 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16.r),
           ),
-          backgroundColor: inputFillColor,
+          backgroundColor: AppColorsTheme.cardBg(context),
           title: Text(
             'Are you sure you want to logout?'.tr,
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.bold,
-              color: textMain,
+              color: AppColorsTheme.textMainColor(context),
             ),
           ),
           content: Text(
             'You will need to sign in again to access your account and workspace.'.tr,
             style: TextStyle(
               fontSize: 13.sp,
-              color: textMuted,
+              color: AppColorsTheme.textMutedColor(context),
             ),
           ),
           actions: [
@@ -77,7 +78,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                 style: TextStyle(
                   fontSize: 14.sp,
                   fontWeight: FontWeight.w600,
-                  color: textMuted,
+                  color: AppColorsTheme.textMutedColor(context),
                 ),
               ),
             ),
@@ -116,136 +117,139 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Account Header / AppBar
-        Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 20.w),
-          decoration: BoxDecoration(
-            color: inputFillColor,
-            border: Border(
-              bottom: BorderSide(color: cardBorderColor, width: 1.w),
+    final themeProvider = context.watch<ThemeProvider>();
+
+    return Container(
+      color: AppColorsTheme.background(context),
+      child: Column(
+        children: [
+          // Account Header / AppBar
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 20.w),
+            decoration: BoxDecoration(
+              color: AppColorsTheme.cardBg(context),
+              border: Border(
+                bottom: BorderSide(color: AppColorsTheme.borderColor(context), width: 1.w),
+              ),
             ),
-          ),
-          child: SafeArea(
-            bottom: false,
-            child: Center(
-              child: Text(
-                'account_setting'.tr,
-                style: TextStyle(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.bold,
-                  color: textMain,
+            child: SafeArea(
+              bottom: false,
+              child: Center(
+                child: Text(
+                  'account_setting'.tr,
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColorsTheme.textMainColor(context),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
 
-        // Body Content with Cards & Switches
-        Expanded(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'account_management'.tr,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold,
-                    color: textMain,
+          // Body Content with Cards & Switches
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'account_management'.tr,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColorsTheme.textMainColor(context),
+                    ),
                   ),
-                ),
-                UIHelper.verticalSpace(6.h),
-                Text(
-                  'account_subtitle'.tr,
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w400,
-                    color: textMuted,
+                  UIHelper.verticalSpace(6.h),
+                  Text(
+                    'account_subtitle'.tr,
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w400,
+                      color: AppColorsTheme.textMutedColor(context),
+                    ),
                   ),
-                ),
-                UIHelper.verticalSpace(20.h),
+                  UIHelper.verticalSpace(20.h),
 
-                // Card 1: Profile
-                FinanceCardWidget(
-                  title: 'profile'.tr,
-                  subtitle: 'profile_subtitle'.tr,
-                  iconData: Icons.person_outline_rounded,
-                  onTap: () => _handleProfileTap(context),
-                ),
-                UIHelper.verticalSpace(16.h),
+                  // Card 1: Profile
+                  FinanceCardWidget(
+                    title: 'profile'.tr,
+                    subtitle: 'profile_subtitle'.tr,
+                    iconData: Icons.person_outline_rounded,
+                    onTap: () => _handleProfileTap(context),
+                  ),
+                  UIHelper.verticalSpace(16.h),
 
-                // Card 2: Security
-                FinanceCardWidget(
-                  title: 'security'.tr,
-                  subtitle: 'security_subtitle'.tr,
-                  iconData: Icons.security_outlined,
-                  onTap: () => _handleSecurityTap(context),
-                ),
-                UIHelper.verticalSpace(16.h),
+                  // Card 2: Security
+                  FinanceCardWidget(
+                    title: 'security'.tr,
+                    subtitle: 'security_subtitle'.tr,
+                    iconData: Icons.security_outlined,
+                    onTap: () => _handleSecurityTap(context),
+                  ),
+                  UIHelper.verticalSpace(16.h),
 
-                // Card 3: Dark Mode Switch Card
-                AccountSwitchCardWidget(
-                  title: 'dark_mode'.tr,
-                  subtitle: _isDarkMode ? 'dark_mode_on'.tr : 'dark_mode_off'.tr,
-                  iconData: Icons.dark_mode_outlined,
-                  value: _isDarkMode,
-                  onChanged: (val) {
-                    setState(() {
-                      _isDarkMode = val;
-                    });
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(_isDarkMode ? 'Dark Mode Enabled' : 'Light Mode Enabled'),
-                        backgroundColor: primaryOrange,
-                        duration: const Duration(milliseconds: 600),
-                      ),
-                    );
-                  },
-                ),
-                UIHelper.verticalSpace(16.h),
+                  // Card 3: Dark Mode Switch Card
+                  AccountSwitchCardWidget(
+                    title: 'dark_mode'.tr,
+                    subtitle: themeProvider.isDarkMode ? 'dark_mode_on'.tr : 'dark_mode_off'.tr,
+                    iconData: Icons.dark_mode_outlined,
+                    value: themeProvider.isDarkMode,
+                    onChanged: (val) {
+                      context.read<ThemeProvider>().toggleDarkMode(val);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(val ? 'Dark Mode Enabled' : 'Light Mode Enabled'),
+                          backgroundColor: primaryOrange,
+                          duration: const Duration(milliseconds: 600),
+                        ),
+                      );
+                    },
+                  ),
+                  UIHelper.verticalSpace(16.h),
 
-                // Card 4: Language Change Switch Card
-                AccountSwitchCardWidget(
-                  title: 'change_language'.tr,
-                  subtitle: _isBengali ? 'lang_bn'.tr : 'lang_en'.tr,
-                  iconData: Icons.language_outlined,
-                  value: _isBengali,
-                  onChanged: (val) async {
-                    await appData.write('isBengali', val);
-                    if (!context.mounted) return;
-                    setState(() {
-                      _isBengali = val;
-                    });
-                    Get.updateLocale(
-                      val ? const Locale('bn', 'BD') : const Locale('en', 'US'),
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(val ? 'Language switched to Bengali' : 'Language switched to English'),
-                        backgroundColor: primaryOrange,
-                        duration: const Duration(milliseconds: 600),
-                      ),
-                    );
-                  },
-                ),
-                UIHelper.verticalSpace(16.h),
+                  // Card 4: Language Change Switch Card
+                  AccountSwitchCardWidget(
+                    title: 'change_language'.tr,
+                    subtitle: _isBengali ? 'lang_bn'.tr : 'lang_en'.tr,
+                    iconData: Icons.language_outlined,
+                    value: _isBengali,
+                    onChanged: (val) async {
+                      await appData.write('isBengali', val);
+                      if (!context.mounted) return;
+                      setState(() {
+                        _isBengali = val;
+                      });
+                      Get.updateLocale(
+                        val ? const Locale('bn', 'BD') : const Locale('en', 'US'),
+                      );
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(val ? 'Language switched to Bengali' : 'Language switched to English'),
+                          backgroundColor: primaryOrange,
+                          duration: const Duration(milliseconds: 600),
+                        ),
+                      );
+                    },
+                  ),
+                  UIHelper.verticalSpace(16.h),
 
-                // Card 5: Logout Card
-                FinanceCardWidget(
-                  title: 'logout'.tr,
-                  subtitle: 'logout_subtitle'.tr,
-                  iconData: Icons.logout_rounded,
-                  onTap: () => _showLogoutConfirmation(context),
-                ),
-              ],
+                  // Card 5: Logout Card
+                  FinanceCardWidget(
+                    title: 'logout'.tr,
+                    subtitle: 'logout_subtitle'.tr,
+                    iconData: Icons.logout_rounded,
+                    onTap: () => _showLogoutConfirmation(context),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -268,15 +272,17 @@ class AccountSwitchCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
-        color: inputFillColor,
+        color: AppColorsTheme.cardBg(context),
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: cardBorderColor, width: 1.w),
+        border: Border.all(color: AppColorsTheme.borderColor(context), width: 1.w),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
+            color: Colors.black.withValues(alpha: isDark ? 0.0 : 0.03),
             blurRadius: 10.r,
             offset: const Offset(0, 4),
           ),
@@ -287,7 +293,7 @@ class AccountSwitchCardWidget extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(12.w),
             decoration: BoxDecoration(
-              color: const Color(0xFFFFF7F2),
+              color: isDark ? const Color(0xFF221A15) : const Color(0xFFFFF7F2),
               borderRadius: BorderRadius.circular(12.r),
               border: Border.all(
                 color: primaryOrange.withValues(alpha: 0.2),
@@ -309,7 +315,7 @@ class AccountSwitchCardWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
-                    color: textMain,
+                    color: AppColorsTheme.textMainColor(context),
                   ),
                 ),
                 SizedBox(height: 4.h),
@@ -318,7 +324,7 @@ class AccountSwitchCardWidget extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w400,
-                    color: textMuted,
+                    color: AppColorsTheme.textMutedColor(context),
                   ),
                 ),
               ],

@@ -103,7 +103,7 @@ final class CustomFormField extends StatelessWidget {
             horizontal: 16.w,
           ),
           filled: true,
-          fillColor: fillColor ?? inputFillColor,
+          fillColor: fillColor ?? AppColorsTheme.cardBg(context),
           isDense: true,
           suffixIcon: suffixIcon,
           prefixIcon:
@@ -114,7 +114,7 @@ final class CustomFormField extends StatelessWidget {
           hintStyle:
               hintsTextStyle ??
               TextStyle(
-                color: textMuted,
+                color: AppColorsTheme.textMutedColor(context),
                 fontSize: hintFontSize ?? 14.sp,
               ),
           labelText: labelText,
@@ -138,18 +138,18 @@ final class CustomFormField extends StatelessWidget {
           disabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(borderRadius ?? 10.r),
             borderSide: BorderSide(
-              color: disableColor ?? cardBorderColor,
+              color: disableColor ?? AppColorsTheme.borderColor(context),
               width: 1.w,
             ),
           ),
           errorBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(borderRadius ?? 10.r),
-            borderSide:  BorderSide(color: Colors.redAccent, width: 1.w),
+            borderSide: BorderSide(color: Colors.redAccent, width: 1.w),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(borderRadius ?? 10.r),
             borderSide: BorderSide(
-              color: enableBorderColor ?? cardBorderColor,
+              color: enableBorderColor ?? AppColorsTheme.borderColor(context),
               width: 1.w,
             ),
           ),
@@ -157,7 +157,7 @@ final class CustomFormField extends StatelessWidget {
         style:
             style ??
             TextStyle(
-              color: textMain,
+              color: AppColorsTheme.textMainColor(context),
               fontSize: 14.sp,
               fontWeight: FontWeight.w500,
             ),

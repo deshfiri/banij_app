@@ -20,6 +20,7 @@ import 'helpers/navigation_service.dart';
 import 'helpers/register_provider.dart';
 import 'loading.dart';
 import 'networks/dio/dio.dart';
+import 'providers/theme_provider.dart';
 
 // Future<void> backgroundHandler(RemoteMessage message) async {}
 
@@ -95,6 +96,7 @@ class UtillScreenMobile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     bool isBn = appData.read('isBengali') ?? false;
+    final themeProvider = context.watch<ThemeProvider>();
     return ScreenUtilInit(
       designSize: const Size(375, 812),
       minTextAdapt: true,
@@ -106,14 +108,32 @@ class UtillScreenMobile extends StatelessWidget {
           translations: AppTranslations(),
           locale: isBn ? const Locale('bn', 'BD') : const Locale('en', 'US'),
           fallbackLocale: const Locale('en', 'US'),
+          themeMode: themeProvider.themeMode,
           theme: ThemeData(
             useMaterial3: true,
+            brightness: Brightness.light,
             primaryColor: const Color(0xFFFD6B04),
             scaffoldBackgroundColor: const Color(0xFFFAFAFA),
             colorScheme: ColorScheme.fromSeed(
               seedColor: const Color(0xFFFD6B04),
               primary: const Color(0xFFFD6B04),
               surface: const Color(0xFFFFFFFF),
+              brightness: Brightness.light,
+            ),
+            textSelectionTheme: const TextSelectionThemeData(
+              cursorColor: AppColors.allPrimaryColor,
+            ),
+          ),
+          darkTheme: ThemeData(
+            useMaterial3: true,
+            brightness: Brightness.dark,
+            primaryColor: const Color(0xFFFD6B04),
+            scaffoldBackgroundColor: const Color(0xFF121212),
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFFFD6B04),
+              primary: const Color(0xFFFD6B04),
+              surface: const Color(0xFF1E1E1E),
+              brightness: Brightness.dark,
             ),
             textSelectionTheme: const TextSelectionThemeData(
               cursorColor: AppColors.allPrimaryColor,

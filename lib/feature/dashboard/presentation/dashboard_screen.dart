@@ -33,7 +33,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildBodyContent() {
+  Widget _buildBodyContent(bool isDark) {
     switch (_currentIndex) {
       case 0:
         return SingleChildScrollView(
@@ -43,7 +43,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               // 1. Banij Header Logo
               Center(
                 child: Image.asset(
-                  logo,
+                  isDark ? whiteLogo : logo,
                   width: 130.w,
                   height: 55.h,
                   fit: BoxFit.contain,
@@ -58,7 +58,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 style: TextStyle(
                   fontSize: 22.sp,
                   fontWeight: FontWeight.bold,
-                  color: textMain,
+                  color: AppColorsTheme.textMainColor(context),
                 ),
               ),
               UIHelper.verticalSpace(20.h),
@@ -93,13 +93,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: lightBackground,
+      backgroundColor: AppColorsTheme.background(context),
       body: SafeArea(
         child: Column(
           children: [
             Expanded(
-              child: _buildBodyContent(),
+              child: _buildBodyContent(isDark),
             ),
           ],
         ),

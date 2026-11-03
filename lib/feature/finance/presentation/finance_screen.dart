@@ -28,80 +28,83 @@ class FinanceScreenBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Finance Header / AppBar
-        Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 20.w),
-          decoration: BoxDecoration(
-            color: inputFillColor,
-            border: Border(
-              bottom: BorderSide(color: cardBorderColor, width: 1.w),
+    return Container(
+      color: AppColorsTheme.background(context),
+      child: Column(
+        children: [
+          // Finance Header / AppBar
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 20.w),
+            decoration: BoxDecoration(
+              color: AppColorsTheme.cardBg(context),
+              border: Border(
+                bottom: BorderSide(color: AppColorsTheme.borderColor(context), width: 1.w),
+              ),
             ),
-          ),
-          child: SafeArea(
-            bottom: false,
-            child: Center(
-              child: Text(
-                'finance'.tr,
-                style: TextStyle(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.bold,
-                  color: textMain,
+            child: SafeArea(
+              bottom: false,
+              child: Center(
+                child: Text(
+                  'finance'.tr,
+                  style: TextStyle(
+                    fontSize: 20.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColorsTheme.textMainColor(context),
+                  ),
                 ),
               ),
             ),
           ),
-        ),
 
-        // Body Content with Cards
-        Expanded(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'financial_management'.tr,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.bold,
-                    color: textMain,
+          // Body Content with Cards
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'financial_management'.tr,
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColorsTheme.textMainColor(context),
+                    ),
                   ),
-                ),
-                UIHelper.verticalSpace(6.h),
-                Text(
-                  'financial_subtitle'.tr,
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w400,
-                    color: textMuted,
+                  UIHelper.verticalSpace(6.h),
+                  Text(
+                    'financial_subtitle'.tr,
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w400,
+                      color: AppColorsTheme.textMutedColor(context),
+                    ),
                   ),
-                ),
-                UIHelper.verticalSpace(20.h),
+                  UIHelper.verticalSpace(20.h),
 
-                // Card 1: Invoice
-                FinanceCardWidget(
-                  title: 'invoice'.tr,
-                  subtitle: 'invoice_subtitle'.tr,
-                  iconData: Icons.receipt_long_outlined,
-                  onTap: () => _handleInvoiceTap(context),
-                ),
-                UIHelper.verticalSpace(16.h),
+                  // Card 1: Invoice
+                  FinanceCardWidget(
+                    title: 'invoice'.tr,
+                    subtitle: 'invoice_subtitle'.tr,
+                    iconData: Icons.receipt_long_outlined,
+                    onTap: () => _handleInvoiceTap(context),
+                  ),
+                  UIHelper.verticalSpace(16.h),
 
-                // Card 2: Receipts
-                FinanceCardWidget(
-                  title: 'receipts'.tr,
-                  subtitle: 'receipts_subtitle'.tr,
-                  iconData: Icons.payments_outlined,
-                  onTap: () => _handleReceiptsTap(context),
-                ),
-              ],
+                  // Card 2: Receipts
+                  FinanceCardWidget(
+                    title: 'receipts'.tr,
+                    subtitle: 'receipts_subtitle'.tr,
+                    iconData: Icons.payments_outlined,
+                    onTap: () => _handleReceiptsTap(context),
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -122,17 +125,19 @@ class FinanceCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: EdgeInsets.all(18.w),
         decoration: BoxDecoration(
-          color: inputFillColor,
+          color: AppColorsTheme.cardBg(context),
           borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: cardBorderColor, width: 1.w),
+          border: Border.all(color: AppColorsTheme.borderColor(context), width: 1.w),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
+              color: Colors.black.withValues(alpha: isDark ? 0.0 : 0.03),
               blurRadius: 10.r,
               offset: const Offset(0, 4),
             ),
@@ -144,7 +149,7 @@ class FinanceCardWidget extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(12.w),
               decoration: BoxDecoration(
-                color: const Color(0xFFFFF7F2),
+                color: isDark ? const Color(0xFF221A15) : const Color(0xFFFFF7F2),
                 borderRadius: BorderRadius.circular(12.r),
                 border: Border.all(
                   color: primaryOrange.withValues(alpha: 0.2),
@@ -168,7 +173,7 @@ class FinanceCardWidget extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.bold,
-                      color: textMain,
+                      color: AppColorsTheme.textMainColor(context),
                     ),
                   ),
                   SizedBox(height: 4.h),
@@ -177,7 +182,7 @@ class FinanceCardWidget extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w400,
-                      color: textMuted,
+                      color: AppColorsTheme.textMutedColor(context),
                     ),
                   ),
                 ],
@@ -188,7 +193,7 @@ class FinanceCardWidget extends StatelessWidget {
             Icon(
               Icons.arrow_forward_ios_rounded,
               size: 16.sp,
-              color: textMuted,
+              color: AppColorsTheme.textMutedColor(context),
             ),
           ],
         ),

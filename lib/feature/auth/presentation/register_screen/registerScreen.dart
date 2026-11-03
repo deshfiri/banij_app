@@ -63,6 +63,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   Future<void> _selectDateOfBirth() async {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final DateTime? picked = await showDatePicker(
       context: context,
       initialDate: DateTime(2000, 1, 1),
@@ -71,11 +72,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
-            colorScheme: const ColorScheme.light(
+            colorScheme: ColorScheme.light(
               primary: primaryOrange,
               onPrimary: Colors.white,
-              surface: Colors.white,
-              onSurface: textMain,
+              surface: isDark ? const Color(0xFF1A1A1A) : Colors.white,
+              onSurface: isDark ? Colors.white : textMain,
             ),
           ),
           child: child!,
@@ -116,7 +117,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildFieldLabel(String label) {
+  Widget _buildFieldLabel(BuildContext context, String label) {
     return Column(
       children: [
         Align(
@@ -124,7 +125,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Text(
             label,
             style: TextStyle(
-              color: textMain,
+              color: AppColorsTheme.textMainColor(context),
               fontSize: 13.sp,
               fontWeight: FontWeight.w600,
             ),
@@ -137,8 +138,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: lightBackground,
+      backgroundColor: AppColorsTheme.background(context),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -151,7 +154,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   // Logo
                   Center(
                     child: Image.asset(
-                      logo,
+                      isDark ? whiteLogo : logo,
                       width: 140.w,
                       height: 70.h,
                       fit: BoxFit.contain,
@@ -164,13 +167,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     style: TextStyle(
                       fontSize: 13.sp,
                       fontWeight: FontWeight.w500,
-                      color: textMuted,
+                      color: AppColorsTheme.textMutedColor(context),
                     ),
                   ),
                   UIHelper.verticalSpace(24.h),
 
                   // 1. Name
-                  _buildFieldLabel('Name'),
+                  _buildFieldLabel(context, 'Name'),
                   CustomFormField(
                     controller: _nameController,
                     hintText: 'Full name',
@@ -184,7 +187,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   UIHelper.verticalSpace(16.h),
 
                   // 2. Email address
-                  _buildFieldLabel('Email address'),
+                  _buildFieldLabel(context, 'Email address'),
                   CustomFormField(
                     controller: _emailController,
                     inputType: TextInputType.emailAddress,
@@ -205,7 +208,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   UIHelper.verticalSpace(16.h),
 
                   // 3. Mobile number
-                  _buildFieldLabel('Mobile number'),
+                  _buildFieldLabel(context, 'Mobile number'),
                   CustomFormField(
                     controller: _phoneController,
                     inputType: TextInputType.phone,
@@ -222,14 +225,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     'We send a verification code to this number.',
                     style: TextStyle(
                       fontSize: 12.sp,
-                      color: textMuted,
+                      color: AppColorsTheme.textMutedColor(context),
                       fontWeight: FontWeight.w400,
                     ),
                   ),
                   UIHelper.verticalSpace(16.h),
 
                   // 4. Password
-                  _buildFieldLabel('Password'),
+                  _buildFieldLabel(context, 'Password'),
                   CustomFormField(
                     controller: _passwordController,
                     isPass: true,
@@ -240,7 +243,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         _obscurePassword
                             ? Icons.visibility_outlined
                             : Icons.visibility_off_outlined,
-                        color: textMuted,
+                        color: AppColorsTheme.textMutedColor(context),
                         size: 20.sp,
                       ),
                       onPressed: () {
@@ -262,7 +265,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   UIHelper.verticalSpace(16.h),
 
                   // 5. Confirm password
-                  _buildFieldLabel('Confirm password'),
+                  _buildFieldLabel(context, 'Confirm password'),
                   CustomFormField(
                     controller: _confirmPasswordController,
                     isPass: true,
@@ -273,7 +276,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         _obscureConfirmPassword
                             ? Icons.visibility_outlined
                             : Icons.visibility_off_outlined,
-                        color: textMuted,
+                        color: AppColorsTheme.textMutedColor(context),
                         size: 20.sp,
                       ),
                       onPressed: () {
@@ -300,13 +303,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     style: TextStyle(
                       fontSize: 12.sp,
                       fontWeight: FontWeight.w500,
-                      color: textMuted,
+                      color: AppColorsTheme.textMutedColor(context),
                     ),
                   ),
                   UIHelper.verticalSpace(16.h),
 
                   // 6. Date of birth
-                  _buildFieldLabel('Date of birth'),
+                  _buildFieldLabel(context, 'Date of birth'),
                   CustomFormField(
                     controller: _dobController,
                     isRead: true,
@@ -315,7 +318,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     suffixIcon: IconButton(
                       icon: Icon(
                         Icons.calendar_today_outlined,
-                        color: textMuted,
+                        color: AppColorsTheme.textMutedColor(context),
                         size: 18.sp,
                       ),
                       onPressed: _selectDateOfBirth,
@@ -324,24 +327,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   UIHelper.verticalSpace(16.h),
 
                   // 7. Gender Dropdown
-                  _buildFieldLabel('Gender'),
+                  _buildFieldLabel(context, 'Gender'),
                   Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 16.w,
                       vertical: 2.h,
                     ),
                     decoration: BoxDecoration(
-                      color: inputFillColor,
+                      color: AppColorsTheme.cardBg(context),
                       borderRadius: BorderRadius.circular(10.r),
-                      border: Border.all(color: cardBorderColor),
+                      border: Border.all(color: AppColorsTheme.borderColor(context)),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
                         value: _selectedGender,
                         isExpanded: true,
+                        dropdownColor: AppColorsTheme.cardBg(context),
                         icon: Icon(
                           Icons.keyboard_arrow_down,
-                          color: textMuted,
+                          color: AppColorsTheme.textMutedColor(context),
                           size: 20.sp,
                         ),
                         onChanged: (newValue) {
@@ -359,7 +363,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   gender,
                                   style: TextStyle(
                                     fontSize: 14.sp,
-                                    color: textMain,
+                                    color: AppColorsTheme.textMainColor(context),
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -371,24 +375,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   UIHelper.verticalSpace(16.h),
 
                   // 8. Country Dropdown
-                  _buildFieldLabel('Country'),
+                  _buildFieldLabel(context, 'Country'),
                   Container(
                     padding: EdgeInsets.symmetric(
                       horizontal: 16.w,
                       vertical: 2.h,
                     ),
                     decoration: BoxDecoration(
-                      color: inputFillColor,
+                      color: AppColorsTheme.cardBg(context),
                       borderRadius: BorderRadius.circular(10.r),
-                      border: Border.all(color: cardBorderColor),
+                      border: Border.all(color: AppColorsTheme.borderColor(context)),
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton<String>(
                         value: _selectedCountry,
                         isExpanded: true,
+                        dropdownColor: AppColorsTheme.cardBg(context),
                         icon: Icon(
                           Icons.keyboard_arrow_down,
-                          color: textMuted,
+                          color: AppColorsTheme.textMutedColor(context),
                           size: 20.sp,
                         ),
                         onChanged: (newValue) {
@@ -406,7 +411,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                   country,
                                   style: TextStyle(
                                     fontSize: 14.sp,
-                                    color: textMain,
+                                    color: AppColorsTheme.textMainColor(context),
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
@@ -418,7 +423,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   UIHelper.verticalSpace(16.h),
 
                   // 9. Nationality
-                  _buildFieldLabel('Nationality'),
+                  _buildFieldLabel(context, 'Nationality'),
                   CustomFormField(
                     controller: _nationalityController,
                     hintText: 'Bangladeshi',
@@ -426,7 +431,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   UIHelper.verticalSpace(16.h),
 
                   // 10. Partner code
-                  _buildFieldLabel('Partner code'),
+                  _buildFieldLabel(context, 'Partner code'),
                   CustomFormField(
                     controller: _partnerCodeController,
                     hintText: 'Optional',
@@ -442,7 +447,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: Checkbox(
                           value: _acceptTerms,
                           activeColor: primaryOrange,
-                          side: const BorderSide(color: cardBorderColor),
+                          side: BorderSide(color: AppColorsTheme.borderColor(context)),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4.r),
                           ),
@@ -458,7 +463,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: Text(
                           'I accept the terms and conditions',
                           style: TextStyle(
-                            color: textMain,
+                            color: AppColorsTheme.textMainColor(context),
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w500,
                           ),
@@ -477,7 +482,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: Checkbox(
                           value: _acceptPrivacy,
                           activeColor: primaryOrange,
-                          side: const BorderSide(color: cardBorderColor),
+                          side: BorderSide(color: AppColorsTheme.borderColor(context)),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(4.r),
                           ),
@@ -493,7 +498,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         child: Text(
                           'I accept the privacy policy',
                           style: TextStyle(
-                            color: textMain,
+                            color: AppColorsTheme.textMainColor(context),
                             fontSize: 13.sp,
                             fontWeight: FontWeight.w500,
                           ),
@@ -517,7 +522,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       Text(
                         'Already have an account? ',
                         style: TextStyle(
-                          color: textMuted,
+                          color: AppColorsTheme.textMutedColor(context),
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w500,
                         ),

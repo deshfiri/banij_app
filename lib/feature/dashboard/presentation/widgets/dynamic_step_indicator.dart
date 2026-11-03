@@ -62,7 +62,7 @@ class DynamicStepIndicator extends StatelessWidget {
                             ? Colors.transparent
                             : (stepNum <= currentStep
                                 ? successGreen
-                                : cardBorderColor),
+                                : AppColorsTheme.borderColor(context)),
                       ),
                     ),
                     // Circle Node
@@ -73,11 +73,13 @@ class DynamicStepIndicator extends StatelessWidget {
                         shape: BoxShape.circle,
                         color: isCompleted
                             ? successGreen
-                            : (isActive ? Colors.white : Colors.white),
+                            : AppColorsTheme.cardBg(context),
                         border: Border.all(
                           color: isCompleted
                               ? successGreen
-                              : (isActive ? primaryOrange : cardBorderColor),
+                              : (isActive
+                                  ? primaryOrange
+                                  : AppColorsTheme.borderColor(context)),
                           width: isActive ? 2.w : 1.5.w,
                         ),
                       ),
@@ -95,7 +97,9 @@ class DynamicStepIndicator extends StatelessWidget {
                                 fontWeight: isActive
                                     ? FontWeight.bold
                                     : FontWeight.w500,
-                                color: isActive ? primaryOrange : textMuted,
+                                color: isActive
+                                    ? primaryOrange
+                                    : AppColorsTheme.textMutedColor(context),
                               ),
                             ),
                     ),
@@ -109,7 +113,7 @@ class DynamicStepIndicator extends StatelessWidget {
                                 ? successGreen
                                 : (isActive
                                     ? primaryOrange
-                                    : cardBorderColor)),
+                                    : AppColorsTheme.borderColor(context))),
                       ),
                     ),
                   ],
@@ -125,8 +129,10 @@ class DynamicStepIndicator extends StatelessWidget {
                     fontWeight:
                         isActive || isCompleted ? FontWeight.bold : FontWeight.w500,
                     color: isCompleted
-                        ? textMain
-                        : (isActive ? textMain : textMuted),
+                        ? AppColorsTheme.textMainColor(context)
+                        : (isActive
+                            ? AppColorsTheme.textMainColor(context)
+                            : AppColorsTheme.textMutedColor(context)),
                   ),
                 ),
 
