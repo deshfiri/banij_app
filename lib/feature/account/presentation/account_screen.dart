@@ -230,12 +230,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
               subtitle: 'change_password_sub'.tr,
               iconData: Icons.lock_outline_rounded,
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Opening Change Password...'),
-                    backgroundColor: primaryOrange,
-                  ),
-                );
+                Navigator.pushNamed(context, Routes.changePasswordScreen);
               },
             ),
           ],

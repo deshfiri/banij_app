@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 
 import '../feature/account/presentation/account_screen_wrapper.dart';
+import '../feature/account/presentation/change_password_screen.dart';
 import '../feature/auth/presentation/forgot_password_screen/forgot_password_screen.dart';
 import '../feature/auth/presentation/login_screen/loginScreen.dart';
 import '../feature/auth/presentation/onboarding_screen/onboarding_screen.dart';
@@ -27,6 +28,7 @@ final class Routes {
   static const String kycVerificationScreen = '/kycVerificationScreen';
   static const String verificationHistoryScreen = '/verificationHistoryScreen';
   static const String accountScreen = '/accountScreen';
+  static const String changePasswordScreen = '/changePasswordScreen';
   static const String dashboardScreen = '/dashboardScreen';
 }
 
@@ -74,6 +76,10 @@ final class RouteGenerator {
         return Platform.isAndroid
             ? _AdvancedTransitionRoute(widget: AccountScreen(initialTab: initialTab), settings: settings)
             : CupertinoPageRoute(builder: (context) => AccountScreen(initialTab: initialTab), settings: settings);
+      case Routes.changePasswordScreen:
+        return Platform.isAndroid
+            ? _AdvancedTransitionRoute(widget: const ChangePasswordScreen(), settings: settings)
+            : CupertinoPageRoute(builder: (context) => const ChangePasswordScreen(), settings: settings);
       case Routes.dashboardScreen:
         return Platform.isAndroid
             ? _AdvancedTransitionRoute(widget: const DashboardScreen(), settings: settings)

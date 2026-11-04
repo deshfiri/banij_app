@@ -2,6 +2,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/account_provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/change_pass_provider.dart';
 import '../providers/dashboard_provider.dart';
 import '../providers/forgot_password_provider.dart';
 import '../providers/kyc_verification_provider.dart';
@@ -20,4 +21,5 @@ var providers = [
   ChangeNotifierProvider<SupplierDashboardProvider>(create: (_) => SupplierDashboardProvider()),
   ChangeNotifierProvider<AccountProvider>(create: (_) => AccountProvider()),
   ChangeNotifierProvider<KycVerificationProvider>(create: (_) => KycVerificationProvider()),
+  ChangeNotifierProvider<ChangePassProvider>(create: (_) => ChangePassProvider()),
 ];

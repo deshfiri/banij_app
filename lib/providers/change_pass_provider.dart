@@ -1,25 +1,79 @@
 import 'package:flutter/material.dart';
 
-class ChangePassProvider extends ChangeNotifier{
+import '../constants/color.dart';
 
-  bool _changePass = true;
-  bool get changePass => _changePass;
-  void toggleChangePassword() {
-    _changePass = !_changePass;
-    notifyListeners();
-  }
-  bool _oldPass = true;
-  bool get oldPass => _oldPass;
-  void toggleOldPassword() {
-    _oldPass = !_oldPass;
-    notifyListeners();
-  }
+class ChangePassProvider extends ChangeNotifier {
+  final TextEditingController currentPasswordController = TextEditingController();
+  final TextEditingController newPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
 
-  bool _isCurrenPass = true;
-  bool get isCurrenPass => _isCurrenPass;
+  bool _isCurrentPassVisible = true;
+  bool _isNewPassVisible = true;
+  bool _isConfirmPassVisible = true;
+  bool _isLoading = false;
+
+  bool get isCurrentPassVisible => _isCurrentPassVisible;
+  bool get isNewPassVisible => _isNewPassVisible;
+  bool get isConfirmPassVisible => _isConfirmPassVisible;
+  bool get isLoading => _isLoading;
+
   void toggleCurrentPassword() {
-    _isCurrenPass = !_isCurrenPass;
+    _isCurrentPassVisible = !_isCurrentPassVisible;
     notifyListeners();
   }
 
+  void toggleNewPassword() {
+    _isNewPassVisible = !_isNewPassVisible;
+    notifyListeners();
+  }
+
+  void toggleConfirmPassword() {
+    _isConfirmPassVisible = !_isConfirmPassVisible;
+    notifyListeners();
+  }
+
+  Future<bool> updatePassword(BuildContext context, GlobalKey<FormState> formKey) async {
+    FocusScope.of(context).unfocus();
+    if (!formKey.currentState!.validate()) {
+      return false;
+    }
+
+    _isLoading = true;
+    notifyListeners();
+
+    await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
+
+    _isLoading = false;
+    notifyListeners();
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Password updated successfully!'),
+          backgroundColor: primaryOrange,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      Navigator.pop(context);
+    }
+    return true;
+  }
+
+  void resetForm() {
+    currentPasswordController.clear();
+    newPasswordController.clear();
+    confirmPasswordController.clear();
+    _isCurrentPassVisible = true;
+    _isNewPassVisible = true;
+    _isConfirmPassVisible = true;
+    _isLoading = false;
+  }
+
+  @override
+  void dispose() {
+    currentPasswordController.dispose();
+    newPasswordController.dispose();
+    confirmPasswordController.dispose();
+    super.dispose();
+  }
 }
