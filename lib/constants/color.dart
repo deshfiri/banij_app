@@ -28,6 +28,11 @@ class AppColorsTheme {
     return isDark ? darkInputFillColor : inputFillColor;
   }
 
+  static Color innerCardBg(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? const Color(0xFF151517) : const Color(0xFFF3F4F6);
+  }
+
   static Color borderColor(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return isDark ? darkCardBorderColor : cardBorderColor;

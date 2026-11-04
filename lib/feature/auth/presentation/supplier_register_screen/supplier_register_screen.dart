@@ -1,103 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../common_widget/custom_button.dart';
+import '../../../../common_widget/custom_field_label.dart';
 import '../../../../common_widget/custom_form_field.dart';
+import '../../../../common_widget/custom_password_field.dart';
 import '../../../../constants/color.dart';
 import '../../../../constants/image_const.dart';
 import '../../../../helpers/ui_helpers.dart';
+import '../../../../providers/supplier_register_provider.dart';
 
-class SupplierRegisterScreen extends StatefulWidget {
+class SupplierRegisterScreen extends StatelessWidget {
+  static final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   const SupplierRegisterScreen({super.key});
 
-  @override
-  State<SupplierRegisterScreen> createState() => _SupplierRegisterScreenState();
-}
-
-class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
-  int _currentStep = 1; // 1: Business, 2: Contact, 3: Security
-
-  // Step 1 Controllers (Business)
-  final TextEditingController _businessNameController = TextEditingController();
-  final TextEditingController _contactPersonController = TextEditingController();
-  final TextEditingController _businessAddressController = TextEditingController();
-
-  // Step 2 Controllers (Contact & documents)
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
-  final TextEditingController _tradeLicenceController = TextEditingController();
-  final TextEditingController _tinController = TextEditingController();
-
-  // Step 3 Controllers (Account security)
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
-  bool _obscurePassword = true;
-  bool _obscureConfirmPassword = true;
-
-  bool _isLoading = false;
-
-  @override
-  void dispose() {
-    _businessNameController.dispose();
-    _contactPersonController.dispose();
-    _businessAddressController.dispose();
-    _emailController.dispose();
-    _phoneController.dispose();
-    _tradeLicenceController.dispose();
-    _tinController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
-  }
-
-  void _handleContinue() {
-    FocusScope.of(context).unfocus();
-    if (_formKey.currentState!.validate()) {
-      if (_currentStep < 3) {
-        setState(() {
-          _currentStep++;
-        });
-      } else {
-        _submitRegistration();
-      }
-    }
-  }
-
-  void _handleBack() {
-    if (_currentStep > 1) {
-      setState(() {
-        _currentStep--;
-      });
-    } else {
-      Navigator.pop(context);
-    }
-  }
-
-  Future<void> _submitRegistration() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
-
-    if (!mounted) return;
-    setState(() {
-      _isLoading = false;
-    });
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Supplier registration submitted successfully!'),
-        backgroundColor: primaryOrange,
-      ),
-    );
-    Navigator.pop(context);
-  }
-
-  Widget _buildStepIndicator() {
+  Widget _buildStepIndicator(BuildContext context, int currentStep) {
     final steps = [
       {'num': 1, 'title': 'step_business'.tr},
       {'num': 2, 'title': 'step_contact'.tr},
@@ -110,8 +30,8 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
         final step = steps[index];
         final stepNum = step['num'] as int;
         final stepTitle = step['title'] as String;
-        final isCompleted = stepNum < _currentStep;
-        final isActive = stepNum == _currentStep;
+        final isCompleted = stepNum < currentStep;
+        final isActive = stepNum == currentStep;
         final isLast = index == steps.length - 1;
 
         const successGreen = Color(0xFF10B981);
@@ -127,7 +47,7 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
                       height: 2.h,
                       color: index == 0
                           ? Colors.transparent
-                          : (stepNum <= _currentStep
+                          : (stepNum <= currentStep
                               ? successGreen
                               : AppColorsTheme.borderColor(context)),
                     ),
@@ -166,7 +86,7 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
                       height: 2.h,
                       color: isLast
                           ? Colors.transparent
-                          : (stepNum < _currentStep
+                          : (stepNum < currentStep
                               ? successGreen
                               : AppColorsTheme.borderColor(context)),
                     ),
@@ -191,38 +111,10 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
     );
   }
 
-  Widget _buildFieldLabel(String label, {bool isRequired = true}) {
-    return Column(
-      children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: RichText(
-            text: TextSpan(
-              text: label,
-              style: TextStyle(
-                color: AppColorsTheme.textMainColor(context),
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w600,
-              ),
-              children: isRequired
-                  ? const [
-                      TextSpan(
-                        text: ' *',
-                        style: TextStyle(color: primaryOrange),
-                      ),
-                    ]
-                  : [],
-            ),
-          ),
-        ),
-        UIHelper.verticalSpace(8.h),
-      ],
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final provider = context.watch<SupplierRegisterProvider>();
 
     return Scaffold(
       backgroundColor: AppColorsTheme.background(context),
@@ -235,10 +127,18 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // Top Logo Header
+                  // Top Logo Header with Back Icon
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
+                      IconButton(
+                        onPressed: () => provider.handleBack(context),
+                        icon: Icon(
+                          Icons.arrow_back,
+                          color: AppColorsTheme.textMainColor(context),
+                          size: 22.sp,
+                        ),
+                      ),
+                      UIHelper.horizontalSpace(4.w),
                       Image.asset(
                         isDark ? whiteLogo : logo,
                         width: 100.w,
@@ -296,7 +196,7 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
                   UIHelper.verticalSpace(24.h),
 
                   // 3-Step Indicator
-                  _buildStepIndicator(),
+                  _buildStepIndicator(context, provider.currentStep),
                   UIHelper.verticalSpace(28.h),
 
                   // Section Header Card
@@ -316,9 +216,9 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
                             borderRadius: BorderRadius.circular(10.r),
                           ),
                           child: Icon(
-                            _currentStep == 1
+                            provider.currentStep == 1
                                 ? Icons.business
-                                : (_currentStep == 2
+                                : (provider.currentStep == 2
                                     ? Icons.email_outlined
                                     : Icons.lock_outline),
                             color: primaryOrange,
@@ -331,9 +231,9 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                _currentStep == 1
+                                provider.currentStep == 1
                                     ? 'business_information'.tr
-                                    : (_currentStep == 2
+                                    : (provider.currentStep == 2
                                         ? 'contact_and_documents'.tr
                                         : 'account_security'.tr),
                                 style: TextStyle(
@@ -344,9 +244,9 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
                               ),
                               UIHelper.verticalSpace(2.h),
                               Text(
-                                _currentStep == 1
+                                provider.currentStep == 1
                                     ? 'business_info_subtitle'.tr
-                                    : (_currentStep == 2
+                                    : (provider.currentStep == 2
                                         ? 'contact_and_documents_subtitle'.tr
                                         : 'account_security_subtitle'.tr),
                                 style: TextStyle(
@@ -364,28 +264,28 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
                   UIHelper.verticalSpace(24.h),
 
                   // Step 1 Fields (Business)
-                  if (_currentStep == 1) ...[
-                    _buildFieldLabel('business_name'.tr),
+                  if (provider.currentStep == 1) ...[
+                    CustomFieldLabel(label: 'business_name'.tr, isRequired: true),
                     CustomFormField(
-                      controller: _businessNameController,
+                      controller: provider.businessNameController,
                       hintText: 'enter_business_name'.tr,
                       validator: (val) => val == null || val.trim().isEmpty
                           ? 'Please enter business name'
                           : null,
                     ),
                     UIHelper.verticalSpace(16.h),
-                    _buildFieldLabel('contact_person'.tr),
+                    CustomFieldLabel(label: 'contact_person'.tr, isRequired: true),
                     CustomFormField(
-                      controller: _contactPersonController,
+                      controller: provider.contactPersonController,
                       hintText: 'enter_contact_person'.tr,
                       validator: (val) => val == null || val.trim().isEmpty
                           ? 'Please enter contact person name'
                           : null,
                     ),
                     UIHelper.verticalSpace(16.h),
-                    _buildFieldLabel('business_address'.tr),
+                    CustomFieldLabel(label: 'business_address'.tr, isRequired: true),
                     CustomFormField(
-                      controller: _businessAddressController,
+                      controller: provider.businessAddressController,
                       maxline: 4,
                       hintText: 'enter_business_address'.tr,
                       validator: (val) => val == null || val.trim().isEmpty
@@ -395,10 +295,10 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
                   ],
 
                   // Step 2 Fields (Contact & documents)
-                  if (_currentStep == 2) ...[
-                    _buildFieldLabel('email_address'.tr),
+                  if (provider.currentStep == 2) ...[
+                    CustomFieldLabel(label: 'email_address'.tr, isRequired: true),
                     CustomFormField(
-                      controller: _emailController,
+                      controller: provider.emailController,
                       inputType: TextInputType.emailAddress,
                       hintText: 'email@example.com',
                       validator: (val) {
@@ -413,9 +313,9 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
                       },
                     ),
                     UIHelper.verticalSpace(16.h),
-                    _buildFieldLabel('phone_number'.tr),
+                    CustomFieldLabel(label: 'phone_number'.tr, isRequired: true),
                     CustomFormField(
-                      controller: _phoneController,
+                      controller: provider.phoneController,
                       inputType: TextInputType.phone,
                       hintText: '+8801XXXXXXXXX',
                       validator: (val) => val == null || val.trim().isEmpty
@@ -423,39 +323,27 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
                           : null,
                     ),
                     UIHelper.verticalSpace(16.h),
-                    _buildFieldLabel('trade_licence_optional'.tr, isRequired: false),
+                    CustomFieldLabel(label: 'trade_licence_optional'.tr, isRequired: false),
                     CustomFormField(
-                      controller: _tradeLicenceController,
+                      controller: provider.tradeLicenceController,
                       hintText: 'Trade licence number',
                     ),
                     UIHelper.verticalSpace(16.h),
-                    _buildFieldLabel('tin_optional'.tr, isRequired: false),
+                    CustomFieldLabel(label: 'tin_optional'.tr, isRequired: false),
                     CustomFormField(
-                      controller: _tinController,
+                      controller: provider.tinController,
                       hintText: 'Tax identification number',
                     ),
                   ],
 
                   // Step 3 Fields (Account security)
-                  if (_currentStep == 3) ...[
-                    _buildFieldLabel('password'.tr),
-                    CustomFormField(
-                      controller: _passwordController,
-                      isPass: true,
-                      isObsecure: _obscurePassword,
+                  if (provider.currentStep == 3) ...[
+                    CustomFieldLabel(label: 'password'.tr, isRequired: true),
+                    CustomPasswordField(
+                      controller: provider.passwordController,
                       hintText: 'create_password'.tr,
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                          color: AppColorsTheme.textMutedColor(context),
-                          size: 20.sp,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscurePassword = !_obscurePassword;
-                          });
-                        },
-                      ),
+                      isObscure: provider.obscurePassword,
+                      onToggleObscure: provider.toggleObscurePassword,
                       validator: (val) {
                         if (val == null || val.isEmpty) {
                           return 'Please create password';
@@ -467,29 +355,17 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
                       },
                     ),
                     UIHelper.verticalSpace(16.h),
-                    _buildFieldLabel('Confirm password'),
-                    CustomFormField(
-                      controller: _confirmPasswordController,
-                      isPass: true,
-                      isObsecure: _obscureConfirmPassword,
+                    CustomFieldLabel(label: 'Confirm password', isRequired: true),
+                    CustomPasswordField(
+                      controller: provider.confirmPasswordController,
                       hintText: 'Confirm password',
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscureConfirmPassword ? Icons.visibility_outlined : Icons.visibility_off_outlined,
-                          color: AppColorsTheme.textMutedColor(context),
-                          size: 20.sp,
-                        ),
-                        onPressed: () {
-                          setState(() {
-                            _obscureConfirmPassword = !_obscureConfirmPassword;
-                          });
-                        },
-                      ),
+                      isObscure: provider.obscureConfirmPassword,
+                      onToggleObscure: provider.toggleObscureConfirmPassword,
                       validator: (val) {
                         if (val == null || val.isEmpty) {
                           return 'Please confirm password';
                         }
-                        if (val != _passwordController.text) {
+                        if (val != provider.passwordController.text) {
                           return 'Passwords do not match';
                         }
                         return null;
@@ -505,7 +381,7 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
                       // Back Button
                       Expanded(
                         child: OutlinedButton(
-                          onPressed: _handleBack,
+                          onPressed: () => provider.handleBack(context),
                           style: OutlinedButton.styleFrom(
                             backgroundColor: AppColorsTheme.cardBg(context),
                             padding: EdgeInsets.symmetric(vertical: 14.h),
@@ -536,9 +412,9 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
                       Expanded(
                         flex: 2,
                         child: CustomButton(
-                          onTap: _handleContinue,
-                          btnName: _currentStep == 3 ? 'create_supplier_account'.tr : 'continue'.tr,
-                          isLoading: _isLoading,
+                          onTap: () => provider.handleContinue(context, _formKey),
+                          btnName: provider.currentStep == 3 ? 'create_supplier_account'.tr : 'continue'.tr,
+                          isLoading: provider.isLoading,
                         ),
                       ),
                     ],

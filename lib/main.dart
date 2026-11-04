@@ -2,7 +2,6 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:auto_animated/auto_animated.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_displaymode/flutter_displaymode.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -112,6 +111,7 @@ class UtillScreenMobile extends StatelessWidget {
           theme: ThemeData(
             useMaterial3: true,
             brightness: Brightness.light,
+            textTheme: GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme),
             fontFamilyFallback: [
               'LiAdor',
               GoogleFonts.hindSiliguri().fontFamily!,
@@ -133,6 +133,7 @@ class UtillScreenMobile extends StatelessWidget {
           darkTheme: ThemeData(
             useMaterial3: true,
             brightness: Brightness.dark,
+            textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
             fontFamilyFallback: [
               'LiAdor',
               GoogleFonts.hindSiliguri().fontFamily!,

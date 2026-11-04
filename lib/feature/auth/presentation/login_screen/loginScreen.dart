@@ -1,67 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../common_widget/custom_button.dart';
+import '../../../../common_widget/custom_checkbox_tile.dart';
+import '../../../../common_widget/custom_field_label.dart';
 import '../../../../common_widget/custom_form_field.dart';
+import '../../../../common_widget/custom_password_field.dart';
 import '../../../../constants/color.dart';
 import '../../../../constants/image_const.dart';
 import '../../../../helpers/all_routes.dart';
 import '../../../../helpers/ui_helpers.dart';
+import '../../../../providers/auth_provider.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends StatelessWidget {
+  static final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() => _LoginScreenState();
-}
-
-class _LoginScreenState extends State<LoginScreen> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  bool _rememberMe = false;
-  bool _obscurePassword = true;
-  bool _isSupplierMode = false; // false = New Account, true = Active Supplier
-  bool _isSupplierRegister = false; // false = Create account, true = Become a supplier
-  bool _isLoading = false;
-
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _handleSignIn() async {
-    FocusScope.of(context).unfocus();
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
-
-      // Simulate API response delay
-      await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
-
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-      });
-
-      final modeText = _isSupplierMode ? 'Active Supplier' : 'New Account';
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Processing Sign In as $modeText...'),
-          backgroundColor: primaryOrange,
-          duration: const Duration(milliseconds: 800),
-        ),
-      );
-      Navigator.pushReplacementNamed(context, Routes.dashboardScreen);
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final authProvider = context.watch<AuthProvider>();
+
     return Scaffold(
       backgroundColor: AppColorsTheme.background(context),
       body: SafeArea(
@@ -105,9 +66,6 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   UIHelper.verticalSpace(28.h),
-
-                  // Supplier vs New Account Switcher
-
 
                   // 2. Passkey Button
                   OutlinedButton.icon(
@@ -158,20 +116,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   UIHelper.verticalSpace(24.h),
 
                   // 4. Email Input Field with Validation
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'email_address'.tr,
-                      style: TextStyle(
-                        color: AppColorsTheme.textMainColor(context),
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                  UIHelper.verticalSpace(8.h),
+                  CustomFieldLabel(label: 'email_address'.tr),
                   CustomFormField(
-                    controller: _emailController,
+                    controller: authProvider.emailController,
                     inputType: TextInputType.emailAddress,
                     hintText: 'enter_email'.tr,
                     validator: (value) {
@@ -189,7 +136,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   UIHelper.verticalSpace(16.h),
 
-                  // 5. Password Input Field & Forgot Password with Validation
+                  // 5. Password Input Field & Forgot Password
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -217,25 +164,11 @@ class _LoginScreenState extends State<LoginScreen> {
                     ],
                   ),
                   UIHelper.verticalSpace(8.h),
-                  CustomFormField(
-                    controller: _passwordController,
-                    isPass: true,
-                    isObsecure: _obscurePassword,
+                  CustomPasswordField(
+                    controller: authProvider.passwordController,
                     hintText: 'enter_password'.tr,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                        color: AppColorsTheme.textMutedColor(context),
-                        size: 20.sp,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                    ),
+                    isObscure: authProvider.obscurePassword,
+                    onToggleObscure: authProvider.toggleObscurePassword,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your password';
@@ -249,43 +182,23 @@ class _LoginScreenState extends State<LoginScreen> {
                   UIHelper.verticalSpace(14.h),
 
                   // 6. Remember Me Checkbox
-                  Row(
-                    children: [
-                      SizedBox(
-                        width: 20.w,
-                        height: 20.h,
-                        child: Checkbox(
-                          value: _rememberMe,
-                          activeColor: primaryOrange,
-                          side: BorderSide(color: AppColorsTheme.borderColor(context)),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4.r),
-                          ),
-                          onChanged: (value) {
-                            setState(() {
-                              _rememberMe = value ?? false;
-                            });
-                          },
-                        ),
-                      ),
-                      UIHelper.horizontalSpace(8.w),
-                      Text(
-                        'remember_me'.tr,
-                        style: TextStyle(
-                          color: AppColorsTheme.textMainColor(context),
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
+                  CustomCheckboxTile(
+                    value: authProvider.rememberMe,
+                    onChanged: authProvider.toggleRememberMe,
+                    label: 'remember_me'.tr,
+                    labelStyle: TextStyle(
+                      color: AppColorsTheme.textMainColor(context),
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                   UIHelper.verticalSpace(24.h),
 
                   // 7. Sign In Button
                   CustomButton(
-                    onTap: _handleSignIn,
+                    onTap: () => authProvider.handleSignIn(context, _formKey),
                     btnName: 'sign_in'.tr,
-                    isLoading: _isLoading,
+                    isLoading: authProvider.isLoading,
                   ),
                   UIHelper.verticalSpace(24.h),
 
@@ -294,7 +207,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        _isSupplierRegister
+                        authProvider.isSupplierRegister
                             ? 'become_supplier_prompt'.tr
                             : 'new_platform'.tr,
                         style: TextStyle(
@@ -305,14 +218,14 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          if (_isSupplierRegister) {
+                          if (authProvider.isSupplierRegister) {
                             Navigator.pushNamed(context, Routes.supplierRegisterScreen);
                           } else {
                             Navigator.pushNamed(context, Routes.signupScreen);
                           }
                         },
                         child: Text(
-                          _isSupplierRegister
+                          authProvider.isSupplierRegister
                               ? 'become_supplier'.tr
                               : 'create_account'.tr,
                           style: TextStyle(
@@ -338,19 +251,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       SizedBox(width: 8.w),
                       Switch.adaptive(
-                        value: _isSupplierRegister,
+                        value: authProvider.isSupplierRegister,
                         activeThumbColor: primaryOrange,
-                        onChanged: (val) {
-                          setState(() {
-                            _isSupplierRegister = val;
-                          });
-                        },
+                        onChanged: authProvider.toggleSupplierRegister,
                       ),
                     ],
                   ),
                   UIHelper.verticalSpace(24.h),
-
-
                 ],
               ),
             ),

@@ -57,20 +57,10 @@ class CustomBottomNavBar extends StatelessWidget {
                 ),
               ),
 
-              // 3. Center App Theme Toggle (Dark / Light Switch)
+              // 3. Center Plush / Plus Quick Action Button
               Expanded(
                 child: GestureDetector(
-                  onTap: () {
-                    final newMode = !isDark;
-                    context.read<ThemeProvider>().toggleDarkMode(newMode);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(newMode ? 'Dark Mode Enabled' : 'Light Mode Enabled'),
-                        backgroundColor: primaryOrange,
-                        duration: const Duration(milliseconds: 600),
-                      ),
-                    );
-                  },
+                  onTap: () => onTap(2),
                   behavior: HitTestBehavior.opaque,
                   child: Center(
                     child: AnimatedContainer(
@@ -78,24 +68,24 @@ class CustomBottomNavBar extends StatelessWidget {
                       width: 52.w,
                       height: 40.h,
                       decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF221A15) : primaryOrange,
+                        color: primaryOrange,
                         borderRadius: BorderRadius.circular(14.r),
                         border: Border.all(
-                          color: isDark ? primaryOrange : Colors.transparent,
+                          color: isDark ? primaryOrange : Colors.white,
                           width: 1.5.w,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: primaryOrange.withValues(alpha: isDark ? 0.2 : 0.35),
-                            blurRadius: 8.r,
-                            offset: const Offset(0, 3),
+                            color: primaryOrange.withValues(alpha: isDark ? 0.3 : 0.4),
+                            blurRadius: 10.r,
+                            offset: const Offset(0, 4),
                           ),
                         ],
                       ),
                       child: Icon(
-                        isDark ? Icons.wb_sunny_rounded : Icons.dark_mode_outlined,
+                        Icons.add_rounded,
                         color: Colors.white,
-                        size: 22.sp,
+                        size: 26.sp,
                       ),
                     ),
                   ),

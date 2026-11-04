@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 
 import '../../../common_widget/custom_button.dart';
 import '../../../constants/color.dart';
 import '../../../constants/image_const.dart';
 import '../../../helpers/ui_helpers.dart';
+import '../../../providers/dashboard_provider.dart';
 import '../../account/presentation/account_screen.dart';
 import '../../business/presentation/business_screen.dart';
 import '../../finance/presentation/finance_screen.dart';
@@ -14,34 +16,13 @@ import 'widgets/dashboard_hub_widget.dart';
 import 'widgets/dynamic_step_indicator.dart';
 import 'widgets/status_card_widget.dart';
 
-class DashboardScreen extends StatefulWidget {
+class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
-  @override
-  State<DashboardScreen> createState() => _DashboardScreenState();
-}
-
-class _DashboardScreenState extends State<DashboardScreen> {
-  int _currentIndex = 0;
-  final int _currentStep = 3; // KYC step is step 3
-  bool _isKycSubmitted = false;
-
-  void _handleSubmitKYC() {
-    setState(() {
-      _isKycSubmitted = true;
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('KYC documents submitted successfully!'),
-        backgroundColor: primaryOrange,
-      ),
-    );
-  }
-
-  Widget _buildBodyContent(bool isDark) {
-    switch (_currentIndex) {
+  Widget _buildBodyContent(BuildContext context, DashboardProvider dashboardProvider, bool isDark) {
+    switch (dashboardProvider.currentIndex) {
       case 0:
-        if (_isKycSubmitted) {
+        if (dashboardProvider.isKycSubmitted) {
           return const DashboardHubWidget();
         }
         return SingleChildScrollView(
@@ -72,7 +53,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               UIHelper.verticalSpace(20.h),
 
               // 3. Dynamic Step Indicator
-              DynamicStepIndicator(currentStep: _currentStep),
+              DynamicStepIndicator(currentStep: dashboardProvider.currentStep),
               UIHelper.verticalSpace(24.h),
 
               // 4. KYC Status Card
@@ -81,7 +62,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
               // 5. Submit KYC Action Button
               CustomButton(
-                onTap: _handleSubmitKYC,
+                onTap: () {
+                  dashboardProvider.submitKYC();
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('KYC documents submitted successfully!'),
+                      backgroundColor: primaryOrange,
+                    ),
+                  );
+                },
                 btnName: 'submit_kyc'.tr,
               ),
               UIHelper.verticalSpace(20.h),
@@ -102,6 +91,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final dashboardProvider = context.watch<DashboardProvider>();
 
     return Scaffold(
       backgroundColor: AppColorsTheme.background(context),
@@ -109,7 +99,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Column(
           children: [
             Expanded(
-              child: _buildBodyContent(isDark),
+              child: _buildBodyContent(context, dashboardProvider, isDark),
             ),
           ],
         ),
@@ -117,7 +107,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       // Custom Bottom Navigation Bar
       bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: _currentIndex == 2 ? 0 : _currentIndex,
+        currentIndex: dashboardProvider.currentIndex == 2 ? 0 : dashboardProvider.currentIndex,
         onTap: (index) {
           if (index == 2) {
             // Center (+) Button action
@@ -129,9 +119,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             );
             return;
           }
-          setState(() {
-            _currentIndex = index;
-          });
+          dashboardProvider.setBottomNavIndex(index);
         },
       ),
     );
