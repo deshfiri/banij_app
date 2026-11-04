@@ -45,7 +45,8 @@ class CustomButton extends StatelessWidget {
       borderRadius: BorderRadius.circular(isBorderRadius?.r ?? 10.r),
       child: Container(
         alignment: Alignment.center,
-        padding: EdgeInsets.symmetric(vertical: padding ?? 14.h),
+        constraints: BoxConstraints(minHeight: 48.h),
+        padding: EdgeInsets.symmetric(vertical: padding ?? 14.h, horizontal: 16.w),
         width: double.maxFinite,
         decoration: BoxDecoration(
           color: gradient ? null : (color ?? primaryOrange),
@@ -64,6 +65,7 @@ class CustomButton extends StatelessWidget {
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             if (isLoading)
               SizedBox(
@@ -77,19 +79,24 @@ class CustomButton extends StatelessWidget {
             else ...[
               if (icons != null) ...[
                 icons!,
-                UIHelper.horizontalSpace(horizontalSpace ?? 16.w),
+                UIHelper.horizontalSpace(horizontalSpace ?? 12.w),
               ],
-              Text(
-                btnName,
-                style: textStyle ??
-                    TextStyle(
-                      color: Colors.white,
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
+              Flexible(
+                child: Text(
+                  btnName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: textStyle ??
+                      TextStyle(
+                        color: Colors.white,
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
               ),
               if (suffixIcons != null) ...[
-                UIHelper.horizontalSpace(horizontalSpace ?? 16.w),
+                UIHelper.horizontalSpace(horizontalSpace ?? 12.w),
                 suffixIcons!,
               ],
             ],
