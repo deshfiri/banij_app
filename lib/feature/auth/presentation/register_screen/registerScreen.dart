@@ -104,7 +104,7 @@ class RegisterScreen extends StatelessWidget {
                     hintText: 'full_name'.tr,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter your full name';
+                        return 'err_enter_name'.tr;
                       }
                       return null;
                     },
@@ -119,13 +119,13 @@ class RegisterScreen extends StatelessWidget {
                     hintText: 'email@example.com',
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter your email address';
+                        return 'err_enter_email'.tr;
                       }
                       final emailRegex = RegExp(
                         r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                       );
                       if (!emailRegex.hasMatch(value.trim())) {
-                        return 'Please enter a valid email address';
+                        return 'err_valid_email'.tr;
                       }
                       return null;
                     },
@@ -140,7 +140,7 @@ class RegisterScreen extends StatelessWidget {
                     hintText: '+8801XXXXXXXXX',
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter your mobile number';
+                        return 'err_enter_phone'.tr;
                       }
                       return null;
                     },
@@ -165,10 +165,10 @@ class RegisterScreen extends StatelessWidget {
                     onToggleObscure: provider.toggleObscurePassword,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter a password';
+                        return 'err_enter_password'.tr;
                       }
                       if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
+                        return 'err_password_length'.tr;
                       }
                       return null;
                     },
@@ -184,10 +184,10 @@ class RegisterScreen extends StatelessWidget {
                     onToggleObscure: provider.toggleObscureConfirmPassword,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please confirm your password';
+                        return 'err_confirm_password'.tr;
                       }
                       if (value != provider.passwordController.text) {
-                        return 'Passwords do not match';
+                        return 'err_passwords_match'.tr;
                       }
                       return null;
                     },
@@ -281,8 +281,8 @@ class RegisterScreen extends StatelessWidget {
                       final success = await provider.handleCreateAccount(context, _formKey);
                       if (success && context.mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Creating account successfully...'),
+                          SnackBar(
+                            content: Text('creating_account_success'.tr),
                             backgroundColor: primaryOrange,
                           ),
                         );

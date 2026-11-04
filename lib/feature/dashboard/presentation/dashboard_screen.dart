@@ -19,73 +19,62 @@ import 'widgets/status_card_widget.dart';
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
-  Widget _buildBodyContent(BuildContext context, DashboardProvider dashboardProvider, bool isDark) {
-    switch (dashboardProvider.currentIndex) {
-      case 0:
-        if (dashboardProvider.isKycSubmitted) {
-          return const DashboardHubWidget();
-        }
-        return SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-          child: Column(
-            children: [
-              // 1. Banij Header Logo
-              Center(
-                child: Image.asset(
-                  isDark ? whiteLogo : logo,
-                  width: 130.w,
-                  height: 55.h,
-                  fit: BoxFit.contain,
-                ),
-              ),
-              UIHelper.verticalSpace(12.h),
-
-              // 2. Title
-              Text(
-                'setting_up_account'.tr,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 22.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppColorsTheme.textMainColor(context),
-                ),
-              ),
-              UIHelper.verticalSpace(20.h),
-
-              // 3. Dynamic Step Indicator
-              DynamicStepIndicator(currentStep: dashboardProvider.currentStep),
-              UIHelper.verticalSpace(24.h),
-
-              // 4. KYC Status Card
-              StatusCardWidget(),
-              UIHelper.verticalSpace(28.h),
-
-              // 5. Submit KYC Action Button
-              CustomButton(
-                onTap: () {
-                  dashboardProvider.submitKYC();
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('KYC documents submitted successfully!'),
-                      backgroundColor: primaryOrange,
-                    ),
-                  );
-                },
-                btnName: 'submit_kyc'.tr,
-              ),
-              UIHelper.verticalSpace(20.h),
-            ],
-          ),
-        );
-      case 1:
-        return const FinanceScreenBody();
-      case 3:
-        return const BusinessScreenBody();
-      case 4:
-        return const AccountScreenBody();
-      default:
-        return const SizedBox.shrink();
+  Widget _buildDashboardTab(BuildContext context, DashboardProvider dashboardProvider, bool isDark) {
+    if (dashboardProvider.isKycSubmitted) {
+      return const DashboardHubWidget();
     }
+    return SingleChildScrollView(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+      child: Column(
+        children: [
+          // 1. Banij Header Logo
+          Center(
+            child: Image.asset(
+              isDark ? whiteLogo : logo,
+              width: 130.w,
+              height: 55.h,
+              fit: BoxFit.contain,
+            ),
+          ),
+          UIHelper.verticalSpace(12.h),
+
+          // 2. Title
+          Text(
+            'setting_up_account'.tr,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 22.sp,
+              fontWeight: FontWeight.bold,
+              color: AppColorsTheme.textMainColor(context),
+            ),
+          ),
+          UIHelper.verticalSpace(20.h),
+
+          // 3. Dynamic Step Indicator
+          DynamicStepIndicator(currentStep: dashboardProvider.currentStep),
+          UIHelper.verticalSpace(24.h),
+
+          // 4. KYC Status Card
+          StatusCardWidget(),
+          UIHelper.verticalSpace(28.h),
+
+          // 5. Submit KYC Action Button
+          CustomButton(
+            onTap: () {
+              dashboardProvider.submitKYC();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('kyc_submitted_success'.tr),
+                  backgroundColor: primaryOrange,
+                ),
+              );
+            },
+            btnName: 'submit_kyc'.tr,
+          ),
+          UIHelper.verticalSpace(20.h),
+        ],
+      ),
+    );
   }
 
   @override
@@ -96,11 +85,23 @@ class DashboardScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColorsTheme.background(context),
       body: SafeArea(
-        child: Column(
+        child: IndexedStack(
+          index: dashboardProvider.currentIndex,
           children: [
-            Expanded(
-              child: _buildBodyContent(context, dashboardProvider, isDark),
-            ),
+            // Index 0: Dashboard Tab
+            _buildDashboardTab(context, dashboardProvider, isDark),
+
+            // Index 1: Finance Tab
+            const FinanceScreenBody(),
+
+            // Index 2: Quick Action Placeholder
+            const SizedBox.shrink(),
+
+            // Index 3: Business Tab
+            const BusinessScreenBody(),
+
+            // Index 4: Account Tab
+            const AccountScreenBody(),
           ],
         ),
       ),
@@ -112,8 +113,8 @@ class DashboardScreen extends StatelessWidget {
           if (index == 2) {
             // Center (+) Button action
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Quick Action (+) clicked'),
+              SnackBar(
+                content: Text('quick_action_clicked'.tr),
                 backgroundColor: primaryOrange,
               ),
             );

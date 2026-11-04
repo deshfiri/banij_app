@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 import '../constants/color.dart';
 
@@ -48,10 +49,10 @@ class ChangePassProvider extends ChangeNotifier {
 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Password updated successfully!'),
+        SnackBar(
+          content: Text('password_updated_success'.tr),
           backgroundColor: primaryOrange,
-          duration: Duration(seconds: 2),
+          duration: const Duration(seconds: 2),
         ),
       );
       Navigator.pop(context);

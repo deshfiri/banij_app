@@ -270,7 +270,7 @@ class SupplierRegisterScreen extends StatelessWidget {
                       controller: provider.businessNameController,
                       hintText: 'enter_business_name'.tr,
                       validator: (val) => val == null || val.trim().isEmpty
-                          ? 'Please enter business name'
+                          ? 'err_enter_business_name'.tr
                           : null,
                     ),
                     UIHelper.verticalSpace(16.h),
@@ -279,7 +279,7 @@ class SupplierRegisterScreen extends StatelessWidget {
                       controller: provider.contactPersonController,
                       hintText: 'enter_contact_person'.tr,
                       validator: (val) => val == null || val.trim().isEmpty
-                          ? 'Please enter contact person name'
+                          ? 'err_enter_contact_person'.tr
                           : null,
                     ),
                     UIHelper.verticalSpace(16.h),
@@ -289,7 +289,7 @@ class SupplierRegisterScreen extends StatelessWidget {
                       maxline: 4,
                       hintText: 'enter_business_address'.tr,
                       validator: (val) => val == null || val.trim().isEmpty
-                          ? 'Please enter business address'
+                          ? 'err_enter_business_address'.tr
                           : null,
                     ),
                   ],
@@ -303,11 +303,11 @@ class SupplierRegisterScreen extends StatelessWidget {
                       hintText: 'email@example.com',
                       validator: (val) {
                         if (val == null || val.trim().isEmpty) {
-                          return 'Please enter email address';
+                          return 'err_enter_email'.tr;
                         }
                         final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
                         if (!emailRegex.hasMatch(val.trim())) {
-                          return 'Please enter a valid email address';
+                          return 'err_valid_email'.tr;
                         }
                         return null;
                       },
@@ -319,7 +319,7 @@ class SupplierRegisterScreen extends StatelessWidget {
                       inputType: TextInputType.phone,
                       hintText: '+8801XXXXXXXXX',
                       validator: (val) => val == null || val.trim().isEmpty
-                          ? 'Please enter mobile number'
+                          ? 'err_enter_phone'.tr
                           : null,
                     ),
                     UIHelper.verticalSpace(16.h),
@@ -346,27 +346,27 @@ class SupplierRegisterScreen extends StatelessWidget {
                       onToggleObscure: provider.toggleObscurePassword,
                       validator: (val) {
                         if (val == null || val.isEmpty) {
-                          return 'Please create password';
+                          return 'err_enter_password'.tr;
                         }
                         if (val.length < 6) {
-                          return 'Password must be at least 6 characters';
+                          return 'err_password_length'.tr;
                         }
                         return null;
                       },
                     ),
                     UIHelper.verticalSpace(16.h),
-                    CustomFieldLabel(label: 'Confirm password', isRequired: true),
+                    CustomFieldLabel(label: 'confirm_password'.tr, isRequired: true),
                     CustomPasswordField(
                       controller: provider.confirmPasswordController,
-                      hintText: 'Confirm password',
+                      hintText: 'confirm_password'.tr,
                       isObscure: provider.obscureConfirmPassword,
                       onToggleObscure: provider.toggleObscureConfirmPassword,
                       validator: (val) {
                         if (val == null || val.isEmpty) {
-                          return 'Please confirm password';
+                          return 'err_confirm_password'.tr;
                         }
                         if (val != provider.passwordController.text) {
-                          return 'Passwords do not match';
+                          return 'err_passwords_match'.tr;
                         }
                         return null;
                       },

@@ -86,7 +86,7 @@ class ChangePasswordScreen extends StatelessWidget {
                         onToggleObscure: provider.toggleCurrentPassword,
                         validator: (val) {
                           if (val == null || val.isEmpty) {
-                            return 'Please enter your current password';
+                            return 'err_enter_current_password'.tr;
                           }
                           return null;
                         },
@@ -102,10 +102,10 @@ class ChangePasswordScreen extends StatelessWidget {
                         onToggleObscure: provider.toggleNewPassword,
                         validator: (val) {
                           if (val == null || val.isEmpty) {
-                            return 'Please enter a new password';
+                            return 'err_enter_new_password'.tr;
                           }
                           if (val.length < 6) {
-                            return 'Password must be at least 6 characters';
+                            return 'err_password_length'.tr;
                           }
                           return null;
                         },
@@ -121,10 +121,10 @@ class ChangePasswordScreen extends StatelessWidget {
                         onToggleObscure: provider.toggleConfirmPassword,
                         validator: (val) {
                           if (val == null || val.isEmpty) {
-                            return 'Please confirm your new password';
+                            return 'err_confirm_new_password'.tr;
                           }
                           if (val != provider.newPasswordController.text) {
-                            return 'Passwords do not match';
+                            return 'err_passwords_match'.tr;
                           }
                           return null;
                         },

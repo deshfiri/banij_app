@@ -123,13 +123,13 @@ class LoginScreen extends StatelessWidget {
                     hintText: 'enter_email'.tr,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
-                        return 'Please enter your email';
+                        return 'err_enter_email'.tr;
                       }
                       final emailRegex = RegExp(
                         r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
                       );
                       if (!emailRegex.hasMatch(value.trim())) {
-                        return 'Please enter a valid email address';
+                        return 'err_valid_email'.tr;
                       }
                       return null;
                     },
@@ -171,10 +171,10 @@ class LoginScreen extends StatelessWidget {
                     onToggleObscure: authProvider.toggleObscurePassword,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your password';
+                        return 'err_enter_password'.tr;
                       }
                       if (value.length < 6) {
-                        return 'Password must be at least 6 characters';
+                        return 'err_password_length'.tr;
                       }
                       return null;
                     },
