@@ -170,7 +170,7 @@ class SupplierDrawerWidget extends StatelessWidget {
               isSelected: activeDrawerItem == 'Profile',
               onTap: () {
                 onItemSelect('Profile');
-                _closeAndNavigate(context, Routes.accountScreen);
+                _closeAndNavigate(context, Routes.accountScreen, arguments: 'supplier');
               },
             ),
             _buildDrawerItem(
@@ -180,7 +180,7 @@ class SupplierDrawerWidget extends StatelessWidget {
               isSelected: activeDrawerItem == 'Security',
               onTap: () {
                 onItemSelect('Security');
-                _closeAndNavigate(context, Routes.accountScreen);
+                _closeAndNavigate(context, Routes.accountScreen, arguments: 'supplier');
               },
             ),
           ],

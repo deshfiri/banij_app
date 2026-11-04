@@ -103,7 +103,7 @@ class SupplierDashboardScreen extends StatelessWidget {
                       ),
                       IconButton(
                         onPressed: () {
-                          Navigator.pushNamed(context, Routes.accountScreen);
+                          Navigator.pushNamed(context, Routes.accountScreen, arguments: 'supplier');
                         },
                         icon: Icon(
                           Icons.person_outline,
@@ -164,11 +164,11 @@ class SupplierDashboardScreen extends StatelessWidget {
           if (index == 0) {
             // Supplier Dashboard
           } else if (index == 1) {
-            Navigator.pushNamed(context, Routes.accountScreen, arguments: 'Invoices');
+            Navigator.pushNamed(context, Routes.accountScreen, arguments: 'supplier');
           } else if (index == 3) {
             Navigator.pushNamed(context, Routes.verificationHistoryScreen);
           } else if (index == 4) {
-            Navigator.pushNamed(context, Routes.accountScreen);
+            Navigator.pushNamed(context, Routes.accountScreen, arguments: 'supplier');
           }
         },
       ),
