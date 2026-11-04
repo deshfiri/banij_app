@@ -127,7 +127,7 @@ class SupplierDrawerWidget extends StatelessWidget {
               isSelected: activeDrawerItem == 'Application & KYC',
               onTap: () {
                 onItemSelect('Application & KYC');
-                onCloseDrawer();
+                _closeAndNavigate(context, Routes.kycVerificationScreen);
               },
             ),
             UIHelper.verticalSpace(24.h),
@@ -153,14 +153,7 @@ class SupplierDrawerWidget extends StatelessWidget {
               isSelected: activeDrawerItem == 'Notifications',
               onTap: () {
                 onItemSelect('Notifications');
-                onCloseDrawer();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Notifications'),
-                    backgroundColor: primaryOrange,
-                    duration: Duration(milliseconds: 700),
-                  ),
-                );
+                _closeAndNavigate(context, Routes.notificationScreen);
               },
             ),
             _buildDrawerItem(

@@ -10,6 +10,7 @@ import '../feature/auth/presentation/onboarding_screen/onboarding_screen.dart';
 import '../feature/auth/presentation/register_screen/registerScreen.dart';
 import '../feature/auth/presentation/supplier_register_screen/supplier_register_screen.dart';
 import '../feature/business/presentation/kyc_verification_screen.dart';
+import '../feature/business/presentation/notification_screen.dart';
 import '../feature/business/presentation/supplier_dashboard_screen.dart';
 import '../feature/business/presentation/verification_history_screen.dart';
 import '../feature/dashboard/presentation/dashboard_screen.dart';
@@ -26,6 +27,7 @@ final class Routes {
   static const String supplierRegisterScreen = '/supplierRegisterScreen';
   static const String supplierDashboardScreen = '/supplierDashboardScreen';
   static const String kycVerificationScreen = '/kycVerificationScreen';
+  static const String notificationScreen = '/notificationScreen';
   static const String verificationHistoryScreen = '/verificationHistoryScreen';
   static const String accountScreen = '/accountScreen';
   static const String changePasswordScreen = '/changePasswordScreen';
@@ -67,6 +69,10 @@ final class RouteGenerator {
         return Platform.isAndroid
             ? _AdvancedTransitionRoute(widget: const KycVerificationScreen(), settings: settings)
             : CupertinoPageRoute(builder: (context) => const KycVerificationScreen(), settings: settings);
+      case Routes.notificationScreen:
+        return Platform.isAndroid
+            ? _AdvancedTransitionRoute(widget: const NotificationScreen(), settings: settings)
+            : CupertinoPageRoute(builder: (context) => const NotificationScreen(), settings: settings);
       case Routes.verificationHistoryScreen:
         return Platform.isAndroid
             ? _AdvancedTransitionRoute(widget: const VerificationHistoryScreen(), settings: settings)

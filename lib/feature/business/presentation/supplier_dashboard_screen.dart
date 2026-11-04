@@ -87,13 +87,7 @@ class SupplierDashboardScreen extends StatelessWidget {
                     children: [
                       IconButton(
                         onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Notifications'),
-                              backgroundColor: primaryOrange,
-                              duration: Duration(milliseconds: 700),
-                            ),
-                          );
+                          Navigator.pushNamed(context, Routes.notificationScreen);
                         },
                         icon: Icon(
                           Icons.notifications_none,
