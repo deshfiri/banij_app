@@ -12,10 +12,15 @@ import '../../../../constants/image_const.dart';
 import '../../../../helpers/ui_helpers.dart';
 import '../../../../providers/supplier_register_provider.dart';
 
-class SupplierRegisterScreen extends StatelessWidget {
-  static final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
+class SupplierRegisterScreen extends StatefulWidget {
   const SupplierRegisterScreen({super.key});
+
+  @override
+  State<SupplierRegisterScreen> createState() => _SupplierRegisterScreenState();
+}
+
+class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   Widget _buildStepIndicator(BuildContext context, int currentStep) {
     final steps = [
@@ -305,7 +310,7 @@ class SupplierRegisterScreen extends StatelessWidget {
                         if (val == null || val.trim().isEmpty) {
                           return 'err_enter_email'.tr;
                         }
-                        final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
+                        final emailRegex = RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$');
                         if (!emailRegex.hasMatch(val.trim())) {
                           return 'err_valid_email'.tr;
                         }
@@ -326,13 +331,13 @@ class SupplierRegisterScreen extends StatelessWidget {
                     CustomFieldLabel(label: 'trade_licence_optional'.tr, isRequired: false),
                     CustomFormField(
                       controller: provider.tradeLicenceController,
-                      hintText: 'Trade licence number',
+                      hintText: 'trade_licence_optional'.tr,
                     ),
                     UIHelper.verticalSpace(16.h),
                     CustomFieldLabel(label: 'tin_optional'.tr, isRequired: false),
                     CustomFormField(
                       controller: provider.tinController,
-                      hintText: 'Tax identification number',
+                      hintText: 'tin_optional'.tr,
                     ),
                   ],
 

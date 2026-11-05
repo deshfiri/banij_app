@@ -30,13 +30,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _isBengali = appData.read('isBengali') ?? false;
     _pageController = PageController(initialPage: 0);
 
-    // Auto-slide timer every 4 seconds
-    _autoSlideTimer = Timer.periodic(const Duration(milliseconds: 4000), (timer) {
+    // Auto-slide every 4.5 seconds
+    _autoSlideTimer = Timer.periodic(const Duration(milliseconds: 4500), (timer) {
       if (_pageController.hasClients) {
         int nextPage = (_currentPage + 1) % 3;
         _pageController.animateToPage(
           nextPage,
-          duration: const Duration(milliseconds: 650),
+          duration: const Duration(milliseconds: 600),
           curve: Curves.easeInOutCubic,
         );
       }
@@ -63,9 +63,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(
-          newIsBengali
-              ? 'Language switched to Bengali (বাংলা)'
-              : 'Language switched to English',
+          newIsBengali ? 'lang_switched_bn'.tr : 'lang_switched_en'.tr,
         ),
         backgroundColor: primaryOrange,
         duration: const Duration(milliseconds: 700),
@@ -82,518 +80,459 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final themeProvider = context.watch<ThemeProvider>();
     final isDark = themeProvider.isDarkMode;
 
+    final List<Map<String, String>> slides = [
+      {
+        'image': 'assets/images/onboarding_store.png',
+        'badge': 'business_overview'.tr,
+        'title': 'onboarding_title_1'.tr.toUpperCase(),
+        'subtitle': 'onboarding_subtitle_1'.tr,
+      },
+      {
+        'image': 'assets/images/onborading2.jpeg',
+        'badge': 'order_operations'.tr,
+        'title': 'onboarding_title_2'.tr.toUpperCase(),
+        'subtitle': 'onboarding_subtitle_2'.tr,
+      },
+      {
+        'image': 'assets/images/onboarding_global.png',
+        'badge': 'global_network'.tr,
+        'title': 'onboarding_title_3'.tr.toUpperCase(),
+        'subtitle': 'onboarding_subtitle_3'.tr,
+      },
+    ];
+
+    // Soft peach/cream background matching reference UI
+    final bgColor = isDark ? const Color(0xFF121214) : const Color(0xFFFFF8F5);
+
     return Scaffold(
-      backgroundColor: isDark ? darkBackground : primaryOrange,
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: isDark
-                ? [
-                    const Color(0xFF1E130B),
-                    darkBackground,
-                    const Color(0xFF0D0907),
-                  ]
-                : [
-                    const Color(0xFFFF8533),
-                    const Color(0xFFFD6B04),
-                    const Color(0xFFD15300),
-                  ],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              // Top Bar: Modern Vendor Logo & Theme/Language Controls
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Image.asset(
-                      whiteLogo,
-                      width: 120.w,
-                      height: 40.h,
-                      fit: BoxFit.contain,
-                    ),
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // App Theme Switcher
-                        GestureDetector(
-                          onTap: () {
-                            final newMode = !isDark;
-                            context.read<ThemeProvider>().toggleDarkMode(newMode);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(newMode ? 'Dark Mode Enabled' : 'Light Mode Enabled'),
-                                backgroundColor: primaryOrange,
-                                duration: const Duration(milliseconds: 600),
-                              ),
-                            );
-                          },
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
-                            padding: EdgeInsets.all(8.w),
-                            margin: EdgeInsets.only(right: 8.w),
-                            decoration: BoxDecoration(
-                              color: isDark ? const Color(0xFF221A15) : Colors.white.withValues(alpha: 0.25),
-                              borderRadius: BorderRadius.circular(20.r),
-                              border: Border.all(
-                                color: isDark ? primaryOrange : Colors.white.withValues(alpha: 0.6),
-                                width: 1.w,
-                              ),
-                            ),
-                            child: Icon(
-                              isDark ? Icons.wb_sunny_rounded : Icons.dark_mode_outlined,
-                              color: Colors.white,
-                              size: 16.sp,
-                            ),
-                          ),
-                        ),
-
-                        // Language Toggle Button
-                        GestureDetector(
-                          onTap: _toggleLanguage,
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 250),
-                            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 7.h),
-                            decoration: BoxDecoration(
-                              color: _isBengali ? Colors.white : Colors.white.withValues(alpha: 0.25),
-                              borderRadius: BorderRadius.circular(20.r),
-                              border: Border.all(color: Colors.white.withValues(alpha: 0.6), width: 1.w),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.g_translate,
-                                  color: _isBengali ? primaryOrange : Colors.white,
-                                  size: 16.sp,
-                                ),
-                                UIHelper.horizontalSpace(6.w),
-                                Text(
-                                  _isBengali ? 'বাংলা' : 'EN',
-                                  style: TextStyle(
-                                    fontSize: 12.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: _isBengali ? primaryOrange : Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+      backgroundColor: bgColor,
+      body: Stack(
+        children: [
+          // 1. Top Background Orange Decorative Accent Shapes & Circles
+          Positioned(
+            top: -40.h,
+            right: -40.w,
+            child: Container(
+              width: 160.w,
+              height: 160.h,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: primaryOrange.withValues(alpha: isDark ? 0.12 : 0.15),
               ),
+            ),
+          ),
+          Positioned(
+            top: 60.h,
+            left: -30.w,
+            child: Container(
+              width: 120.w,
+              height: 180.h,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(60.r),
+                color: primaryOrange.withValues(alpha: isDark ? 0.08 : 0.15),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 220.h,
+            left: 20.w,
+            child: Container(
+              width: 16.w,
+              height: 16.h,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: primaryOrange.withValues(alpha: isDark ? 0.2 : 0.10),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 180.h,
+            right: 24.w,
+            child: Container(
+              width: 24.w,
+              height: 24.h,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: primaryOrange.withValues(alpha: isDark ? 0.3 : 0.9),
+              ),
+            ),
+          ),
 
-              // Content Area
-              Expanded(
-                child: SingleChildScrollView(
-                  physics: const BouncingScrollPhysics(),
-                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+          // 2. Main Onboarding Body Content Layer
+          SafeArea(
+            child: Column(
+              children: [
+                // Perfectly Centered Logo & Top Controls Bar
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+                  child: Stack(
+                    alignment: Alignment.center,
                     children: [
-                      UIHelper.verticalSpace(6.h),
-
-                      // Supplier Network Glass Tag
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.18),
-                          borderRadius: BorderRadius.circular(20.r),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.25),
-                          ),
+                      // 100% Perfectly Centered Brand Logo
+                      Center(
+                        child: Image.asset(
+                          isDark ? whiteLogo : logo,
+                          width: 120.w,
+                          height: 38.h,
+                          fit: BoxFit.contain,
                         ),
+                      ),
+
+                      // Top Right Positioned Controls (Theme & Language Switchers)
+                      Positioned(
+                        right: 0,
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Container(
-                              width: 6.w,
-                              height: 6.h,
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
+                            // Theme Switcher Button
+                            GestureDetector(
+                              onTap: () {
+                                final newMode = !isDark;
+                                context.read<ThemeProvider>().toggleDarkMode(newMode);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      newMode
+                                          ? 'dark_mode_enabled'.tr
+                                          : 'light_mode_enabled'.tr,
+                                    ),
+                                    backgroundColor: primaryOrange,
+                                    duration: const Duration(milliseconds: 600),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                padding: EdgeInsets.all(7.w),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? const Color(0xFF221A15)
+                                      : Colors.white.withValues(alpha: 0.8),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: AppColorsTheme.borderColor(context),
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.05),
+                                      blurRadius: 6.r,
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  isDark ? Icons.wb_sunny_rounded : Icons.dark_mode_outlined,
+                                  color: isDark ? const Color(0xFFFFB74D) : primaryOrange,
+                                  size: 16.sp,
+                                ),
                               ),
                             ),
                             UIHelper.horizontalSpace(6.w),
-                            Text(
-                              'supplier_network'.tr,
-                              style: TextStyle(
-                                fontSize: 11.sp,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                letterSpacing: 1.3,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      UIHelper.verticalSpace(12.h),
 
-                      // Hero Title
-                      Text(
-                        'onboarding_title'.tr,
-                        style: TextStyle(
-                          fontSize: 27.sp,
-                          fontWeight: FontWeight.w800,
-                          color: Colors.white,
-                          height: 1.22,
-                          letterSpacing: -0.4,
-                        ),
-                      ),
-                      UIHelper.verticalSpace(10.h),
-
-                      // Subtitle
-                      Text(
-                        'onboarding_subtitle'.tr,
-                        style: TextStyle(
-                          fontSize: 13.5.sp,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.white.withValues(alpha: 0.92),
-                          height: 1.45,
-                          letterSpacing: 0.1,
-                        ),
-                      ),
-                      UIHelper.verticalSpace(24.h),
-
-                      // Carousel View with Asset Image Cards (Expanded generous height to prevent overflow)
-                      SizedBox(
-                        height: 270.h,
-                        child: PageView(
-                          controller: _pageController,
-                          onPageChanged: (index) {
-                            setState(() {
-                              _currentPage = index;
-                            });
-                          },
-                          children: [
-                            _buildAssetImageCard(
-                              context,
-                              assetPath: 'assets/images/onboarding_store.png',
-                              badgeText: 'Retail Store Front',
-                              cardTitle: 'business_overview'.tr,
-                              cardSubtitle: 'Manage active shop products & inventory in real time.',
-                              tagText: 'KYC Verified',
-                              cardGradient: const [Color(0xFF2A1608), Color(0xFF140B04)],
-                            ),
-                            _buildAssetImageCard(
-                              context,
-                              assetPath: 'assets/images/onboarding_logistics.png',
-                              badgeText: 'Express Dispatch',
-                              cardTitle: 'order_operations'.tr,
-                              cardSubtitle: 'Seamlessly pack, ship, and fulfill buyer orders instantly.',
-                              tagText: 'Live Tracking',
-                              cardGradient: const [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
-                            ),
-                            _buildAssetImageCard(
-                              context,
-                              assetPath: 'assets/images/onboarding_global.png',
-                              badgeText: 'Wholesale Ecosystem',
-                              cardTitle: 'global_network'.tr,
-                              cardSubtitle: 'Connect with reliable wholesale suppliers and scale fast.',
-                              tagText: 'Global Partner',
-                              cardGradient: const [Color(0xFF0B251D), Color(0xFF061A13)],
-                            ),
-                          ],
-                        ),
-                      ),
-                      UIHelper.verticalSpace(16.h),
-
-                      // Harmonized Image Slider Cursor (Modern Gradient Dots)
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: List.generate(3, (index) {
-                          final isSelected = _currentPage == index;
-                          return AnimatedContainer(
-                            duration: const Duration(milliseconds: 300),
-                            margin: EdgeInsets.symmetric(horizontal: 5.w),
-                            height: 8.h,
-                            width: isSelected ? 32.w : 8.w,
-                            decoration: BoxDecoration(
-                              gradient: isSelected
-                                  ? const LinearGradient(
-                                      colors: [Colors.white, Color(0xFFFFD1A9)],
-                                    )
-                                  : null,
-                              color: isSelected ? null : Colors.white.withValues(alpha: 0.35),
-                              borderRadius: BorderRadius.circular(4.r),
-                              boxShadow: isSelected
-                                  ? [
-                                      BoxShadow(
-                                        color: Colors.white.withValues(alpha: 0.5),
-                                        blurRadius: 6.r,
-                                        offset: const Offset(0, 2),
+                            // Language Switcher Pill Button
+                            GestureDetector(
+                              onTap: _toggleLanguage,
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? const Color(0xFF221A15)
+                                      : Colors.white.withValues(alpha: 0.9),
+                                  borderRadius: BorderRadius.circular(20.r),
+                                  border: Border.all(
+                                    color: AppColorsTheme.borderColor(context),
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.05),
+                                      blurRadius: 6.r,
+                                    ),
+                                  ],
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.g_translate,
+                                      color: primaryOrange,
+                                      size: 14.sp,
+                                    ),
+                                    UIHelper.horizontalSpace(4.w),
+                                    Text(
+                                      _isBengali ? 'বাংলা' : 'EN',
+                                      style: TextStyle(
+                                        fontSize: 11.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColorsTheme.textMainColor(context),
                                       ),
-                                    ]
-                                  : null,
-                            ),
-                          );
-                        }),
-                      ),
-                      UIHelper.verticalSpace(24.h),
-
-                      // Glassmorphism Shield Trust Badge
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(16.r),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.25),
-                          ),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: EdgeInsets.all(6.w),
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.2),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.verified_user,
-                                color: Colors.white,
-                                size: 18.sp,
-                              ),
-                            ),
-                            UIHelper.horizontalSpace(12.w),
-                            Expanded(
-                              child: Text(
-                                'built_for_reliable'.tr,
-                                style: TextStyle(
-                                  fontSize: 13.sp,
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 0.1,
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                      UIHelper.verticalSpace(20.h),
+                    ],
+                  ),
+                ),
 
-                      // Footer Link: Already have a Supplier account? Sign in
-                      Container(
-                        padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 16.w),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(30.r),
-                        ),
-                        child: Row(
+                // 3. Centered 3-Slide Carousel Content Area
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: slides.length,
+                    onPageChanged: (index) {
+                      setState(() {
+                        _currentPage = index;
+                      });
+                    },
+                    itemBuilder: (context, index) {
+                      final slide = slides[index];
+                      return Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 24.w),
+                        child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(
-                              'already_supplier'.tr,
-                              style: TextStyle(
-                                color: Colors.white.withValues(alpha: 0.95),
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.w500,
+                            // High Definition Business Illustration Stage Card
+                            Container(
+                              width: double.infinity,
+                              height: 245.h,
+                              decoration: BoxDecoration(
+                                color: isDark
+                                    ? const Color(0xFF1E1E24)
+                                    : const Color(0xFFF4F6F9),
+                                borderRadius: BorderRadius.circular(24.r),
+                                border: Border.all(
+                                  color: AppColorsTheme.borderColor(context),
+                                  width: 1.w,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: primaryOrange.withValues(alpha: isDark ? 0.12 : 0.08),
+                                    blurRadius: 20.r,
+                                    offset: const Offset(0, 8),
+                                  ),
+                                ],
                               ),
-                            ),
-                            GestureDetector(
-                              onTap: _navigateToLogin,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
+                              child: Stack(
                                 children: [
-                                  Text(
-                                    'sign_in'.tr,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 13.5.sp,
-                                      fontWeight: FontWeight.bold,
-                                      decoration: TextDecoration.underline,
-                                      decorationColor: Colors.white,
+                                  // Stage Background Circle Accent Glow
+                                  Center(
+                                    child: Container(
+                                      width: 170.w,
+                                      height: 170.h,
+                                      decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        color: isDark
+                                            ? primaryOrange.withValues(alpha: 0.1)
+                                            : const Color(0xFFFEEBE7),
+                                      ),
                                     ),
                                   ),
-                                  UIHelper.horizontalSpace(4.w),
-                                  Icon(
-                                    Icons.arrow_forward_ios_rounded,
-                                    color: Colors.white,
-                                    size: 12.sp,
+
+                                  // High Resolution Business Feature Image
+                                  Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+                                      child: Image.asset(
+                                        slide['image'] ?? '',
+                                        fit: BoxFit.contain,
+                                        errorBuilder: (context, error, stackTrace) {
+                                          return Icon(
+                                            Icons.business_center_rounded,
+                                            size: 70.sp,
+                                            color: primaryOrange,
+                                          );
+                                        },
+                                      ),
+                                    ),
+                                  ),
+
+                                  // Top Left Business Domain Tag Badge
+                                  Positioned(
+                                    top: 14.h,
+                                    left: 14.w,
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
+                                      decoration: BoxDecoration(
+                                        color: isDark ? const Color(0xFF282830) : Colors.white,
+                                        borderRadius: BorderRadius.circular(16.r),
+                                        border: Border.all(
+                                          color: primaryOrange.withValues(alpha: 0.3),
+                                        ),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: Colors.black.withValues(alpha: isDark ? 0.0 : 0.05),
+                                            blurRadius: 8.r,
+                                          ),
+                                        ],
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.storefront_rounded,
+                                            size: 13.sp,
+                                            color: primaryOrange,
+                                          ),
+                                          UIHelper.horizontalSpace(5.w),
+                                          Text(
+                                            slide['badge'] ?? '',
+                                            style: TextStyle(
+                                              fontSize: 11.sp,
+                                              fontWeight: FontWeight.bold,
+                                              color: primaryOrange,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
+
+                            UIHelper.verticalSpace(28.h),
+
+                            // Centered Bold Uppercase Headline
+                            Text(
+                              slide['title'] ?? '',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 21.sp,
+                                fontWeight: FontWeight.w900,
+                                color: AppColorsTheme.textMainColor(context),
+                                letterSpacing: 0.8,
+                              ),
+                            ),
+
+                            UIHelper.verticalSpace(12.h),
+
+                            // Centered Subtitle Description Paragraph
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 10.w),
+                              child: Text(
+                                slide['subtitle'] ?? '',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 13.5.sp,
+                                  fontWeight: FontWeight.w400,
+                                  color: AppColorsTheme.textMutedColor(context),
+                                  height: 1.45,
+                                ),
+                              ),
+                            ),
+
+                            UIHelper.verticalSpace(20.h),
+
+                            // Centered 3-Dot Page Indicator
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: List.generate(3, (dotIndex) {
+                                final isSelected = _currentPage == dotIndex;
+                                return AnimatedContainer(
+                                  duration: const Duration(milliseconds: 300),
+                                  margin: EdgeInsets.symmetric(horizontal: 4.w),
+                                  height: isSelected ? 10.h : 8.h,
+                                  width: isSelected ? 10.w : 8.w,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: isSelected
+                                        ? primaryOrange
+                                        : (isDark
+                                            ? const Color(0xFF3F3F46)
+                                            : const Color(0xFFFED7AA)),
+                                    border: Border.all(
+                                      color: isSelected
+                                          ? primaryOrange
+                                          : (isDark
+                                              ? const Color(0xFF52525B)
+                                              : const Color(0xFFFDBA74)),
+                                      width: 1.w,
+                                    ),
+                                  ),
+                                );
+                              }),
+                            ),
                           ],
                         ),
-                      ),
-                      UIHelper.verticalSpace(16.h),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // Carousel Slider Card featuring Shop/Vendor Asset Image with Overlaid Titles & Subtitles (Zero Overflow Stack Positioning)
-  Widget _buildAssetImageCard(
-    BuildContext context, {
-    required String assetPath,
-    required String badgeText,
-    required String cardTitle,
-    required String cardSubtitle,
-    required String tagText,
-    required List<Color> cardGradient,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24.r),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 20.r,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24.r),
-        child: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: cardGradient,
-            ),
-          ),
-          child: Stack(
-            children: [
-              // 1. Background Shop/Vendor Asset Image
-              Positioned.fill(
-                child: Opacity(
-                  opacity: 0.50,
-                  child: Image.asset(
-                    assetPath,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(color: const Color(0xFF2C2C30));
+                      );
                     },
                   ),
                 ),
-              ),
 
-              // 2. Dark Gradient Overlay for Text Contrast
-              Positioned.fill(
-                child: DecoratedBox(
+                // 4. Custom Peach Bottom Container Footer (Color #FCC6BB)
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 24.h),
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Colors.black.withValues(alpha: 0.15),
-                        Colors.black.withValues(alpha: 0.85),
-                      ],
+                    color: isDark ? const Color(0xFF261D1B) : primaryOrange.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(32.r),
+                      topRight: Radius.circular(32.r),
                     ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+                        blurRadius: 20.r,
+                        offset: const Offset(0, -6),
+                      ),
+                    ],
                   ),
-                ),
-              ),
-
-              // 3. Top Badges Row (Positioned at top)
-              Positioned(
-                top: 16.h,
-                left: 16.w,
-                right: 16.w,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                      decoration: BoxDecoration(
-                        color: primaryOrange,
-                        borderRadius: BorderRadius.circular(20.r),
-                      ),
-                      child: Text(
-                        badgeText,
-                        style: TextStyle(
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(20.r),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Container(
-                            width: 6.w,
-                            height: 6.h,
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Color(0xFF10B981),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Primary Orange Rounded Pill Button ("GET STARTED")
+                      SizedBox(
+                        width: double.infinity,
+                        height: 52.h,
+                        child: ElevatedButton(
+                          onPressed: _navigateToLogin,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: primaryOrange,
+                            foregroundColor: Colors.white,
+                            elevation: 4,
+                            shadowColor: primaryOrange.withValues(alpha: 0.2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(26.r),
                             ),
                           ),
-                          UIHelper.horizontalSpace(4.w),
-                          Text(
-                            tagText,
+                          child: Text(
+                            'get_started'.tr.toUpperCase(),
                             style: TextStyle(
-                              fontSize: 10.sp,
+                              fontSize: 15.sp,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
+                              letterSpacing: 1.2,
                             ),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
 
-              // 4. Bottom Title & Subtitle (Positioned at bottom)
-              Positioned(
-                bottom: 16.h,
-                left: 16.w,
-                right: 16.w,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      cardTitle,
-                      style: TextStyle(
-                        fontSize: 18.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        letterSpacing: -0.3,
+                      UIHelper.verticalSpace(14.h),
+
+                      // Secondary Centered Skip Link ("SKIP")
+                      GestureDetector(
+                        onTap: _navigateToLogin,
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 16.w),
+                          child: Text(
+                            'skip'.tr.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w700,
+                              color: isDark ? Colors.white70 : const Color(0xFF6E281C),
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ),
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    UIHelper.verticalSpace(4.h),
-                    Text(
-                      cardSubtitle,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        color: Colors.white.withValues(alpha: 0.9),
-                        height: 1.3,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

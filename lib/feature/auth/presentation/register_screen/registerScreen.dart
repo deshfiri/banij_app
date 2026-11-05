@@ -14,10 +14,15 @@ import '../../../../constants/image_const.dart';
 import '../../../../helpers/ui_helpers.dart';
 import '../../../../providers/sign_up_provider.dart';
 
-class RegisterScreen extends StatelessWidget {
-  static final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
+class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   Future<void> _selectDateOfBirth(BuildContext context, SignUpProvider provider) async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -122,7 +127,7 @@ class RegisterScreen extends StatelessWidget {
                         return 'err_enter_email'.tr;
                       }
                       final emailRegex = RegExp(
-                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                        r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$',
                       );
                       if (!emailRegex.hasMatch(value.trim())) {
                         return 'err_valid_email'.tr;
@@ -255,7 +260,7 @@ class RegisterScreen extends StatelessWidget {
                   CustomFieldLabel(label: 'partner_code'.tr),
                   CustomFormField(
                     controller: provider.partnerCodeController,
-                    hintText: 'Optional',
+                    hintText: 'optional_later'.tr,
                   ),
                   UIHelper.verticalSpace(20.h),
 

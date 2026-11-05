@@ -55,8 +55,11 @@ class SupplierDrawerWidget extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.all(10.w),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFECE0),
+                      color: isDark ? const Color(0xFF221A15) : const Color(0xFFFFECE0),
                       borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(
+                        color: primaryOrange.withValues(alpha: 0.2),
+                      ),
                     ),
                     child: Icon(
                       Icons.local_shipping,

@@ -60,7 +60,7 @@ class NotificationScreen extends StatelessWidget {
                     TextButton(
                       onPressed: () => notificationProvider.markAllAsRead(),
                       child: Text(
-                        'Mark all as read',
+                        'mark_all_read'.tr,
                         style: TextStyle(
                           fontSize: 12.sp,
                           fontWeight: FontWeight.bold,
@@ -77,7 +77,7 @@ class NotificationScreen extends StatelessWidget {
               child: notificationProvider.notifications.isEmpty
                   ? Center(
                       child: Text(
-                        'No notifications yet',
+                        'no_notifications'.tr,
                         style: TextStyle(
                           fontSize: 14.sp,
                           color: AppColorsTheme.textMutedColor(context),

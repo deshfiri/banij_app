@@ -174,8 +174,8 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
               child: CustomButton(
                 onTap: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Profile updated successfully!'),
+                    SnackBar(
+                      content: Text('profile_updated_success'.tr),
                       backgroundColor: primaryOrange,
                     ),
                   );
@@ -503,7 +503,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                 context.read<ThemeProvider>().toggleDarkMode(val);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(val ? 'Dark Mode Enabled' : 'Light Mode Enabled'),
+                    content: Text(val ? 'dark_mode_enabled'.tr : 'light_mode_enabled'.tr),
                     backgroundColor: primaryOrange,
                     duration: const Duration(milliseconds: 600),
                   ),
@@ -529,7 +529,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                 );
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(val ? 'Language switched to Bengali' : 'Language switched to English'),
+                    content: Text(val ? 'lang_switched_bn'.tr : 'lang_switched_en'.tr),
                     backgroundColor: primaryOrange,
                     duration: const Duration(milliseconds: 600),
                   ),
@@ -677,8 +677,8 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                                 child: CustomButton(
                                   onTap: () {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Supplier profile updated successfully!'),
+                                      SnackBar(
+                                        content: Text('supplier_profile_updated_success'.tr),
                                         backgroundColor: primaryOrange,
                                       ),
                                     );

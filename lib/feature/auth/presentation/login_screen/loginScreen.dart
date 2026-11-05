@@ -14,10 +14,15 @@ import '../../../../helpers/all_routes.dart';
 import '../../../../helpers/ui_helpers.dart';
 import '../../../../providers/auth_provider.dart';
 
-class LoginScreen extends StatelessWidget {
-  static final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
@@ -126,7 +131,7 @@ class LoginScreen extends StatelessWidget {
                         return 'err_enter_email'.tr;
                       }
                       final emailRegex = RegExp(
-                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                        r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$',
                       );
                       if (!emailRegex.hasMatch(value.trim())) {
                         return 'err_valid_email'.tr;

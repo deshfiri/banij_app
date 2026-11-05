@@ -10,10 +10,15 @@ import '../../../constants/color.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../../providers/change_pass_provider.dart';
 
-class ChangePasswordScreen extends StatelessWidget {
-  static final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
+class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
+
+  @override
+  State<ChangePasswordScreen> createState() => _ChangePasswordScreenState();
+}
+
+class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {

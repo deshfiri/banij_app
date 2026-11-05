@@ -11,14 +11,20 @@ import '../../../../constants/image_const.dart';
 import '../../../../helpers/ui_helpers.dart';
 import '../../../../providers/forgot_password_provider.dart';
 
-class ForgotPasswordScreen extends StatelessWidget {
-  static final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
+class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
+
+  @override
+  State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
+}
+
+class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final provider = context.watch<ForgotPasswordProvider>();
 
     return Scaffold(
       backgroundColor: AppColorsTheme.background(context),
@@ -79,20 +85,18 @@ class ForgotPasswordScreen extends StatelessWidget {
                   ),
                   UIHelper.verticalSpace(32.h),
 
-                  // 2. Email Input Field with Validation
+                  // 2. Email Input Field with Validation & Bound Controller
                   CustomFieldLabel(label: 'email_address'.tr),
                   CustomFormField(
+                    controller: provider.emailController,
                     inputType: TextInputType.emailAddress,
                     hintText: 'enter_email'.tr,
-                    onChanged: (val) {
-                      context.read<ForgotPasswordProvider>().updateEmail(val);
-                    },
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return 'please_enter_email'.tr;
                       }
                       final emailRegex = RegExp(
-                        r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                        r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$',
                       );
                       if (!emailRegex.hasMatch(value.trim())) {
                         return 'valid_email_address'.tr;

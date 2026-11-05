@@ -12,10 +12,15 @@ import '../../dashboard/presentation/widgets/custom_bottom_nav_bar.dart';
 import 'widgets/application_status_card_widget.dart';
 import 'widgets/supplier_drawer_widget.dart';
 
-class SupplierDashboardScreen extends StatelessWidget {
-  static final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
+class SupplierDashboardScreen extends StatefulWidget {
   const SupplierDashboardScreen({super.key});
+
+  @override
+  State<SupplierDashboardScreen> createState() => _SupplierDashboardScreenState();
+}
+
+class _SupplierDashboardScreenState extends State<SupplierDashboardScreen> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   void _handleOpenApplication(BuildContext context) {
     Navigator.pushNamed(context, Routes.kycVerificationScreen);
@@ -147,10 +152,10 @@ class SupplierDashboardScreen extends StatelessWidget {
         onTap: (index) {
           if (index == 2) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Quick Action (+) clicked'),
+              SnackBar(
+                content: Text('quick_action_clicked'.tr),
                 backgroundColor: primaryOrange,
-                duration: Duration(milliseconds: 800),
+                duration: const Duration(milliseconds: 800),
               ),
             );
             return;

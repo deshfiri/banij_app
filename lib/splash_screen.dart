@@ -24,7 +24,7 @@ class _SplashScreenState extends State<SplashScreen>
   void initState() {
     super.initState();
 
-    // Hide status bar without triggering system immersive prompt alerts
+    // Hide status bar during splash launch animation
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.manual,
       overlays: [],
@@ -70,25 +70,43 @@ class _SplashScreenState extends State<SplashScreen>
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: SystemUiOverlayStyle(
+      value: const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
-        statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
       ),
       child: Scaffold(
-        backgroundColor: AppColorsTheme.background(context),
-        body: Center(
-          child: AnimatedOpacity(
-            duration: const Duration(seconds: 1),
-            opacity: _opacity,
-            child: AnimatedScale(
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: isDark
+                  ? [
+                      const Color(0xFF1E130B),
+                      darkBackground,
+                      const Color(0xFF0D0907),
+                    ]
+                  : [
+                      const Color(0xFFFF8533),
+                      const Color(0xFFFD6B04),
+                      const Color(0xFFD15300),
+                    ],
+            ),
+          ),
+          child: Center(
+            child: AnimatedOpacity(
               duration: const Duration(seconds: 1),
-              scale: _scale,
-              curve: Curves.easeInOut,
-              child: Image.asset(
-                isDark ? whiteLogo : logo,
-                width: 200.w,
-                fit: BoxFit.contain,
+              opacity: _opacity,
+              child: AnimatedScale(
+                duration: const Duration(seconds: 1),
+                scale: _scale,
+                curve: Curves.easeInOut,
+                child: Image.asset(
+                  whiteLogo,
+                  width: 210.w,
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
           ),
