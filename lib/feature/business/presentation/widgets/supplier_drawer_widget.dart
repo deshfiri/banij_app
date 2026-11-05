@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 
 import '../../../../constants/color.dart';
 import '../../../../constants/image_const.dart';
 import '../../../../helpers/all_routes.dart';
 import '../../../../helpers/ui_helpers.dart';
+import '../../../../providers/account_provider.dart';
 
 class SupplierDrawerWidget extends StatelessWidget {
   final String activeDrawerItem;
@@ -29,7 +31,7 @@ class SupplierDrawerWidget extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Drawer(
-      backgroundColor: AppColorsTheme.cardBg(context),
+      backgroundColor: AppColorsTheme.background(context),
       child: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -179,9 +181,114 @@ class SupplierDrawerWidget extends StatelessWidget {
                 _closeAndNavigate(context, Routes.changePasswordScreen);
               },
             ),
+
+            const Spacer(),
+            Divider(color: AppColorsTheme.borderColor(context)),
+            _buildDrawerItem(
+              context: context,
+              icon: Icons.logout_rounded,
+              title: 'logout'.tr,
+              isSelected: false,
+              isRed: true,
+              onTap: () {
+                onCloseDrawer();
+                _showLogoutConfirmation(context);
+              },
+            ),
+            UIHelper.verticalSpace(12.h),
           ],
         ),
       ),
+    );
+  }
+
+  void _showLogoutConfirmation(BuildContext context) {
+    final accountProvider = context.read<AccountProvider>();
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          backgroundColor: AppColorsTheme.cardBg(context),
+          title: Text(
+            'Are you sure you want to logout?'.tr,
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              color: AppColorsTheme.textMainColor(context),
+            ),
+          ),
+          content: Text(
+            'You will need to sign in again to access your account and workspace.'.tr,
+            style: TextStyle(
+              fontSize: 13.sp,
+              color: AppColorsTheme.textMutedColor(context),
+            ),
+          ),
+          actionsPadding: EdgeInsets.zero,
+          actions: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 0.h, 16.w, 16.h),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () {
+                        Navigator.pop(dialogContext);
+                      },
+                      style: OutlinedButton.styleFrom(
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                        side: BorderSide(
+                          color: AppColorsTheme.borderColor(context),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                      ),
+                      child: Text(
+                        'No'.tr,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColorsTheme.textMainColor(context),
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(dialogContext);
+                        accountProvider.logout(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryOrange,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 12.h),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: Text(
+                        'Yes'.tr,
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -191,7 +298,12 @@ class SupplierDrawerWidget extends StatelessWidget {
     required String title,
     required bool isSelected,
     required VoidCallback onTap,
+    bool isRed = false,
   }) {
+    final color = isRed
+        ? Colors.redAccent
+        : (isSelected ? Colors.white : AppColorsTheme.textMainColor(context));
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 3.h),
       child: Material(
@@ -202,7 +314,9 @@ class SupplierDrawerWidget extends StatelessWidget {
           child: Container(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
             decoration: BoxDecoration(
-              color: isSelected ? primaryOrange : Colors.transparent,
+              color: isSelected
+                  ? primaryOrange
+                  : (isRed ? Colors.redAccent.withValues(alpha: 0.1) : Colors.transparent),
               borderRadius: BorderRadius.circular(10.r),
             ),
             child: Row(
@@ -210,15 +324,15 @@ class SupplierDrawerWidget extends StatelessWidget {
                 Icon(
                   icon,
                   size: 20.sp,
-                  color: isSelected ? Colors.white : AppColorsTheme.textMainColor(context),
+                  color: color,
                 ),
                 UIHelper.horizontalSpace(14.w),
                 Text(
                   title,
                   style: TextStyle(
                     fontSize: 14.sp,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                    color: isSelected ? Colors.white : AppColorsTheme.textMainColor(context),
+                    fontWeight: isSelected || isRed ? FontWeight.bold : FontWeight.w500,
+                    color: color,
                   ),
                 ),
               ],

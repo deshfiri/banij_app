@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../constants/app_constants.dart';
 import '../helpers/all_routes.dart';
 import '../helpers/di.dart';
+import '../helpers/navigation_service.dart';
 
 class AccountProvider extends ChangeNotifier {
   final TextEditingController nameController =
@@ -28,11 +29,7 @@ class AccountProvider extends ChangeNotifier {
 
   void logout(BuildContext context) {
     appData.write(kKeyIsLoggedIn, false);
-    Navigator.pushNamedAndRemoveUntil(
-      context,
-      Routes.onboardingScreen,
-      (route) => false,
-    );
+    NavigationService.navigateToReplacementUntil(Routes.onboardingScreen);
   }
 
   @override
