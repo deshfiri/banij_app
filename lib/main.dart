@@ -94,8 +94,8 @@ class UtillScreenMobile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    bool isBn = appData.read('isBengali') ?? false;
     final themeProvider = context.watch<ThemeProvider>();
+    final isBn = appData.read('isBengali') ?? false;
     return ScreenUtilInit(
       designSize: const Size(375, 812),
       minTextAdapt: true,
@@ -105,7 +105,7 @@ class UtillScreenMobile extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           title: 'Banij',
           translations: AppTranslations(),
-          locale: isBn ? const Locale('bn', 'BD') : const Locale('en', 'US'),
+          locale: Get.locale ?? (isBn ? const Locale('bn', 'BD') : const Locale('en', 'US')),
           fallbackLocale: const Locale('en', 'US'),
           themeMode: themeProvider.themeMode,
           theme: ThemeData(

@@ -65,7 +65,7 @@ class CustomButton extends StatelessWidget {
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.max,
           children: [
             if (isLoading)
               SizedBox(
@@ -81,7 +81,7 @@ class CustomButton extends StatelessWidget {
                 icons!,
                 UIHelper.horizontalSpace(horizontalSpace ?? 12.w),
               ],
-              Flexible(
+              Expanded(
                 child: Text(
                   btnName,
                   maxLines: 1,
@@ -90,7 +90,7 @@ class CustomButton extends StatelessWidget {
                   style: textStyle ??
                       TextStyle(
                         color: Colors.white,
-                        fontSize: 15.sp,
+                        fontSize: 12.5.sp,
                         fontWeight: FontWeight.bold,
                       ),
                 ),

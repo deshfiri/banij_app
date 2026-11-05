@@ -164,21 +164,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               children: [
                 // Perfectly Centered Logo & Top Controls Bar
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+                  padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 12.h),
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      // 100% Perfectly Centered Brand Logo
                       Center(
                         child: Image.asset(
                           isDark ? whiteLogo : logo,
                           width: 120.w,
-                          height: 38.h,
+                          height: 50.h,
                           fit: BoxFit.contain,
                         ),
                       ),
 
-                      // Top Right Positioned Controls (Theme & Language Switchers)
                       Positioned(
                         right: 0,
                         child: Row(
@@ -315,7 +313,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               ),
                               child: Stack(
                                 children: [
-                                  // Stage Background Circle Accent Glow
                                   Center(
                                     child: Container(
                                       width: 170.w,
@@ -439,14 +436,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                                     color: isSelected
                                         ? primaryOrange
                                         : (isDark
-                                            ? const Color(0xFF3F3F46)
-                                            : const Color(0xFFFED7AA)),
+                                        ? const Color(0xFF3F3F46)
+                                        : const Color(0xFFFED7AA)),
                                     border: Border.all(
                                       color: isSelected
                                           ? primaryOrange
                                           : (isDark
-                                              ? const Color(0xFF52525B)
-                                              : const Color(0xFFFDBA74)),
+                                          ? const Color(0xFF52525B)
+                                          : const Color(0xFFFDBA74)),
                                       width: 1.w,
                                     ),
                                   ),
