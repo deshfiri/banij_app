@@ -25,6 +25,14 @@ class _LoginScreenState extends State<LoginScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
+  void dispose() {
+    try {
+      context.read<AuthProvider>().resetLoginForm();
+    } catch (_) {}
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final authProvider = context.watch<AuthProvider>();
 
@@ -155,6 +163,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       GestureDetector(
                         onTap: () {
+                          authProvider.resetLoginForm();
                           Navigator.pushNamed(context, Routes.forgotPasswordScreen);
                         },
                         child: Text(
@@ -223,6 +232,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       GestureDetector(
                         onTap: () {
+                          authProvider.resetLoginForm();
                           if (authProvider.isSupplierRegister) {
                             Navigator.pushNamed(context, Routes.supplierRegisterScreen);
                           } else {
