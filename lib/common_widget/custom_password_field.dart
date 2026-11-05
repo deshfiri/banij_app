@@ -13,6 +13,7 @@ class CustomPasswordField extends StatelessWidget {
   final Function(String)? onChanged;
   final FocusNode? focusNode;
   final TextInputAction? textInputAction;
+  final List<String>? autofillHints;
 
   const CustomPasswordField({
     super.key,
@@ -24,6 +25,7 @@ class CustomPasswordField extends StatelessWidget {
     this.onChanged,
     this.focusNode,
     this.textInputAction = TextInputAction.next,
+    this.autofillHints,
   });
 
   @override
@@ -36,6 +38,7 @@ class CustomPasswordField extends StatelessWidget {
       focusNode: focusNode,
       textInputAction: textInputAction,
       onChanged: onChanged,
+      autofillHints: autofillHints,
       suffixIcon: IconButton(
         icon: Icon(
           isObscure

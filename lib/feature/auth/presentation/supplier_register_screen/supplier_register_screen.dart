@@ -12,15 +12,10 @@ import '../../../../constants/image_const.dart';
 import '../../../../helpers/ui_helpers.dart';
 import '../../../../providers/supplier_register_provider.dart';
 
-class SupplierRegisterScreen extends StatefulWidget {
+class SupplierRegisterScreen extends StatelessWidget {
+  static final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
   const SupplierRegisterScreen({super.key});
-
-  @override
-  State<SupplierRegisterScreen> createState() => _SupplierRegisterScreenState();
-}
-
-class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   Widget _buildStepIndicator(BuildContext context, int currentStep) {
     final steps = [
@@ -310,7 +305,7 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
                         if (val == null || val.trim().isEmpty) {
                           return 'err_enter_email'.tr;
                         }
-                        final emailRegex = RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$');
+                        final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
                         if (!emailRegex.hasMatch(val.trim())) {
                           return 'err_valid_email'.tr;
                         }
@@ -331,13 +326,13 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
                     CustomFieldLabel(label: 'trade_licence_optional'.tr, isRequired: false),
                     CustomFormField(
                       controller: provider.tradeLicenceController,
-                      hintText: 'trade_licence_optional'.tr,
+                      hintText: 'Trade licence number',
                     ),
                     UIHelper.verticalSpace(16.h),
                     CustomFieldLabel(label: 'tin_optional'.tr, isRequired: false),
                     CustomFormField(
                       controller: provider.tinController,
-                      hintText: 'tin_optional'.tr,
+                      hintText: 'Tax identification number',
                     ),
                   ],
 

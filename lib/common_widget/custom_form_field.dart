@@ -37,6 +37,7 @@ final class CustomFormField extends StatelessWidget {
   final Color? focusBorderColor;
   final Color? fillColor;
   final TextStyle? hintsTextStyle;
+  final List<String>? autofillHints;
 
   const CustomFormField({
     super.key,
@@ -72,6 +73,7 @@ final class CustomFormField extends StatelessWidget {
     this.hintsTextStyle,
     this.contentPadding,
     this.onTap,
+    this.autofillHints,
   });
 
   @override
@@ -97,6 +99,7 @@ final class CustomFormField extends StatelessWidget {
         onTap: onTap,
         inputFormatters: inputFormatters,
         enabled: isEnabled,
+        autofillHints: autofillHints,
         decoration: InputDecoration(
           contentPadding: EdgeInsets.symmetric(
             vertical: contentPadding ?? 14.h,

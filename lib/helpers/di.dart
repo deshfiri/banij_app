@@ -10,6 +10,6 @@ final appData = locator.get<GetStorage>();
 
 Future<void> diSetUp() async {
   locator.registerSingleton<GetStorage>(GetStorage());
-
-
+  await Hive.initFlutter();
+  await Hive.openBox('auth_box');
 }

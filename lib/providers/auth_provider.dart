@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import '../helpers/all_routes.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -11,6 +12,34 @@ class AuthProvider extends ChangeNotifier {
   bool _isSupplierRegister = false;
   bool _isLoading = false;
 
+  AuthProvider() {
+    _loadSavedCredentials();
+    emailController.addListener(_autoSaveCredentials);
+    passwordController.addListener(_autoSaveCredentials);
+  }
+
+  void _loadSavedCredentials() {
+    try {
+      final box = Hive.box('auth_box');
+      final remember = box.get('rememberMe', defaultValue: false) as bool;
+      if (remember) {
+        _rememberMe = true;
+        emailController.text = box.get('email', defaultValue: '') as String;
+        passwordController.text = box.get('password', defaultValue: '') as String;
+      }
+    } catch (_) {}
+  }
+
+  void _autoSaveCredentials() {
+    if (_rememberMe) {
+      try {
+        final box = Hive.box('auth_box');
+        box.put('email', emailController.text.trim());
+        box.put('password', passwordController.text);
+      } catch (_) {}
+    }
+  }
+
   bool get rememberMe => _rememberMe;
   bool get obscurePassword => _obscurePassword;
   bool get isSupplierMode => _isSupplierMode;
@@ -19,6 +48,17 @@ class AuthProvider extends ChangeNotifier {
 
   void toggleRememberMe(bool? value) {
     _rememberMe = value ?? false;
+    try {
+      final box = Hive.box('auth_box');
+      box.put('rememberMe', _rememberMe);
+      if (!_rememberMe) {
+        box.delete('email');
+        box.delete('password');
+      } else {
+        box.put('email', emailController.text.trim());
+        box.put('password', passwordController.text);
+      }
+    } catch (_) {}
     notifyListeners();
   }
 
@@ -43,6 +83,18 @@ class AuthProvider extends ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
+      try {
+        final box = Hive.box('auth_box');
+        box.put('rememberMe', _rememberMe);
+        if (_rememberMe) {
+          box.put('email', emailController.text.trim());
+          box.put('password', passwordController.text);
+        } else {
+          box.delete('email');
+          box.delete('password');
+        }
+      } catch (_) {}
+
       await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
 
       _isLoading = false;
@@ -57,9 +109,23 @@ class AuthProvider extends ChangeNotifier {
   }
 
   void resetLoginForm() {
-    emailController.clear();
-    passwordController.clear();
-    _rememberMe = false;
+    try {
+      final box = Hive.box('auth_box');
+      final remember = box.get('rememberMe', defaultValue: false) as bool;
+      if (remember) {
+        _rememberMe = true;
+        emailController.text = box.get('email', defaultValue: '') as String;
+        passwordController.text = box.get('password', defaultValue: '') as String;
+      } else {
+        emailController.clear();
+        passwordController.clear();
+        _rememberMe = false;
+      }
+    } catch (_) {
+      emailController.clear();
+      passwordController.clear();
+      _rememberMe = false;
+    }
     _obscurePassword = true;
     _isSupplierMode = false;
     _isSupplierRegister = false;

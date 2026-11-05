@@ -44,10 +44,11 @@ class _LoginScreenState extends State<LoginScreen> {
             padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
             child: Form(
               key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+              child: AutofillGroup(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                   // 1. Logo (Header)
                   Center(
                     child: Image.asset(
@@ -134,6 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: authProvider.emailController,
                     inputType: TextInputType.emailAddress,
                     hintText: 'enter_email'.tr,
+                    autofillHints: const [AutofillHints.email],
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return 'err_enter_email'.tr;
@@ -183,6 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     hintText: 'enter_password'.tr,
                     isObscure: authProvider.obscurePassword,
                     onToggleObscure: authProvider.toggleObscurePassword,
+                    autofillHints: const [AutofillHints.password],
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'err_enter_password'.tr;
@@ -217,60 +220,72 @@ class _LoginScreenState extends State<LoginScreen> {
                   UIHelper.verticalSpace(24.h),
 
                   // 8. Dynamic Sign Up & Supplier Switcher Link at Bottom
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        authProvider.isSupplierRegister
-                            ? 'become_supplier_prompt'.tr
-                            : 'new_platform'.tr,
-                        style: TextStyle(
-                          color: AppColorsTheme.textMutedColor(context),
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          authProvider.resetLoginForm();
-                          if (authProvider.isSupplierRegister) {
-                            Navigator.pushNamed(context, Routes.supplierRegisterScreen);
-                          } else {
-                            Navigator.pushNamed(context, Routes.signupScreen);
-                          }
-                        },
-                        child: Text(
-                          authProvider.isSupplierRegister
-                              ? 'become_supplier'.tr
-                              : 'create_account'.tr,
-                          style: TextStyle(
-                            color: primaryOrange,
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.bold,
+                  Consumer<AuthProvider>(
+                    builder: (context, provider, child) {
+                      return Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                provider.isSupplierRegister
+                                    ? 'become_supplier_prompt'.tr
+                                    : 'new_platform'.tr,
+                                style: TextStyle(
+                                  color: AppColorsTheme.textMutedColor(context),
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                              UIHelper.horizontalSpace(4.w),
+                              GestureDetector(
+                                onTap: () {
+                                  final isSupplier = provider.isSupplierRegister;
+                                  provider.resetLoginForm();
+                                  if (isSupplier) {
+                                    Navigator.pushNamed(context, Routes.supplierRegisterScreen);
+                                  } else {
+                                    Navigator.pushNamed(context, Routes.signupScreen);
+                                  }
+                                },
+                                child: Text(
+                                  provider.isSupplierRegister
+                                      ? 'become_supplier'.tr
+                                      : 'create_account'.tr,
+                                  style: TextStyle(
+                                    color: primaryOrange,
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  UIHelper.verticalSpace(12.h),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'supplier_registration_mode'.tr,
-                        style: TextStyle(
-                          color: AppColorsTheme.textMainColor(context),
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      SizedBox(width: 8.w),
-                      Switch.adaptive(
-                        value: authProvider.isSupplierRegister,
-                        activeThumbColor: primaryOrange,
-                        onChanged: authProvider.toggleSupplierRegister,
-                      ),
-                    ],
+                          UIHelper.verticalSpace(12.h),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'supplier_registration_mode'.tr,
+                                style: TextStyle(
+                                  color: AppColorsTheme.textMainColor(context),
+                                  fontSize: 12.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              Switch.adaptive(
+                                value: provider.isSupplierRegister,
+                                activeThumbColor: primaryOrange,
+                                onChanged: (val) {
+                                  provider.toggleSupplierRegister(val);
+                                },
+                              ),
+                            ],
+                          ),
+                        ],
+                      );
+                    },
                   ),
                   UIHelper.verticalSpace(24.h),
                 ],
@@ -279,6 +294,6 @@ class _LoginScreenState extends State<LoginScreen> {
           ),
         ),
       ),
-    );
+    ));
   }
 }
