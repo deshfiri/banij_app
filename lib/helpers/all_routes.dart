@@ -51,49 +51,69 @@ final class RouteGenerator {
             : CupertinoPageRoute(builder: (context) => const LoginScreen(), settings: settings);
       case Routes.signupScreen:
         return Platform.isAndroid
-            ? _AdvancedTransitionRoute(widget: const RegisterScreen(), settings: settings)
+            ? _LightningFastTransitionRoute(widget: const RegisterScreen(), settings: settings)
             : CupertinoPageRoute(builder: (context) => const RegisterScreen(), settings: settings);
       case Routes.forgotPasswordScreen:
         return Platform.isAndroid
-            ? _AdvancedTransitionRoute(widget: const ForgotPasswordScreen(), settings: settings)
+            ? _LightningFastTransitionRoute(widget: const ForgotPasswordScreen(), settings: settings)
             : CupertinoPageRoute(builder: (context) => const ForgotPasswordScreen(), settings: settings);
       case Routes.supplierRegisterScreen:
         return Platform.isAndroid
-            ? _AdvancedTransitionRoute(widget: const SupplierRegisterScreen(), settings: settings)
+            ? _LightningFastTransitionRoute(widget: const SupplierRegisterScreen(), settings: settings)
             : CupertinoPageRoute(builder: (context) => const SupplierRegisterScreen(), settings: settings);
       case Routes.supplierDashboardScreen:
         return Platform.isAndroid
-            ? _AdvancedTransitionRoute(widget: const SupplierDashboardScreen(), settings: settings)
+            ? _LightningFastTransitionRoute(widget: const SupplierDashboardScreen(), settings: settings)
             : CupertinoPageRoute(builder: (context) => const SupplierDashboardScreen(), settings: settings);
       case Routes.kycVerificationScreen:
         return Platform.isAndroid
-            ? _AdvancedTransitionRoute(widget: const KycVerificationScreen(), settings: settings)
+            ? _LightningFastTransitionRoute(widget: const KycVerificationScreen(), settings: settings)
             : CupertinoPageRoute(builder: (context) => const KycVerificationScreen(), settings: settings);
       case Routes.notificationScreen:
         return Platform.isAndroid
-            ? _AdvancedTransitionRoute(widget: const NotificationScreen(), settings: settings)
+            ? _LightningFastTransitionRoute(widget: const NotificationScreen(), settings: settings)
             : CupertinoPageRoute(builder: (context) => const NotificationScreen(), settings: settings);
       case Routes.verificationHistoryScreen:
         return Platform.isAndroid
-            ? _AdvancedTransitionRoute(widget: const VerificationHistoryScreen(), settings: settings)
+            ? _LightningFastTransitionRoute(widget: const VerificationHistoryScreen(), settings: settings)
             : CupertinoPageRoute(builder: (context) => const VerificationHistoryScreen(), settings: settings);
       case Routes.accountScreen:
         final initialTab = settings.arguments as String?;
         return Platform.isAndroid
-            ? _AdvancedTransitionRoute(widget: AccountScreen(initialTab: initialTab), settings: settings)
+            ? _LightningFastTransitionRoute(widget: AccountScreen(initialTab: initialTab), settings: settings)
             : CupertinoPageRoute(builder: (context) => AccountScreen(initialTab: initialTab), settings: settings);
       case Routes.changePasswordScreen:
         return Platform.isAndroid
-            ? _AdvancedTransitionRoute(widget: const ChangePasswordScreen(), settings: settings)
+            ? _LightningFastTransitionRoute(widget: const ChangePasswordScreen(), settings: settings)
             : CupertinoPageRoute(builder: (context) => const ChangePasswordScreen(), settings: settings);
       case Routes.dashboardScreen:
         return Platform.isAndroid
-            ? _AdvancedTransitionRoute(widget: const DashboardScreen(), settings: settings)
+            ? _LightningFastTransitionRoute(widget: const DashboardScreen(), settings: settings)
             : CupertinoPageRoute(builder: (context) => const DashboardScreen(), settings: settings);
     }
 
     return null;
   }
+}
+
+class _LightningFastTransitionRoute extends PageRouteBuilder {
+  final Widget widget;
+  @override
+  final RouteSettings settings;
+
+  _LightningFastTransitionRoute({required this.widget, required this.settings})
+    : super(
+        settings: settings,
+        transitionDuration: const Duration(milliseconds: 120),
+        reverseTransitionDuration: const Duration(milliseconds: 100),
+        pageBuilder: (context, animation, secondaryAnimation) => widget,
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return FadeTransition(
+            opacity: animation,
+            child: child,
+          );
+        },
+      );
 }
 
 class _AdvancedTransitionRoute extends PageRouteBuilder {
