@@ -16,73 +16,126 @@ class ApplicationStatusCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
         color: AppColorsTheme.cardBg(context),
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(20.r),
         border: Border.all(
           color: AppColorsTheme.borderColor(context),
           width: 1.w,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+            blurRadius: 16.r,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'application_status'.tr,
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.bold,
-              color: AppColorsTheme.textMainColor(context),
-            ),
-          ),
-          UIHelper.verticalSpace(12.h),
-          Divider(color: AppColorsTheme.borderColor(context)),
-          UIHelper.verticalSpace(14.h),
-
-          // Status Badge: KYC pending
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: 12.w,
-              vertical: 6.h,
-            ),
-            decoration: BoxDecoration(
-              color: const Color(0xFF0369A1).withValues(alpha: 0.15),
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(
-                color: const Color(0xFF0284C7).withValues(alpha: 0.3),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.assignment_turned_in_outlined,
-                  color: const Color(0xFF38BDF8),
-                  size: 15.sp,
+          // Header Row: Title & Pending Badge
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'application_status'.tr,
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w800,
+                  color: AppColorsTheme.textMainColor(context),
+                  letterSpacing: 0.3,
                 ),
-                UIHelper.horizontalSpace(6.w),
-                Text(
-                  'kyc_pending'.tr,
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.bold,
-                    color: const Color(0xFF38BDF8),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 10.w,
+                  vertical: 5.h,
+                ),
+                decoration: BoxDecoration(
+                  color: primaryOrange.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(
+                    color: primaryOrange.withValues(alpha: 0.3),
+                    width: 1.w,
                   ),
                 ),
-              ],
-            ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.hourglass_top_rounded,
+                      color: primaryOrange,
+                      size: 13.sp,
+                    ),
+                    UIHelper.horizontalSpace(4.w),
+                    Text(
+                      'kyc_pending'.tr,
+                      style: TextStyle(
+                        fontSize: 11.5.sp,
+                        fontWeight: FontWeight.w700,
+                        color: primaryOrange,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          UIHelper.verticalSpace(18.h),
+          UIHelper.verticalSpace(14.h),
 
-          // What happens next
+          // Progress Indicator Bar (50% Completion)
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Application Completion',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColorsTheme.textMutedColor(context),
+                    ),
+                  ),
+                  Text(
+                    '50%',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.bold,
+                      color: primaryOrange,
+                    ),
+                  ),
+                ],
+              ),
+              UIHelper.verticalSpace(6.h),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(8.r),
+                child: LinearProgressIndicator(
+                  value: 0.5,
+                  minHeight: 6.h,
+                  backgroundColor: AppColorsTheme.borderColor(context),
+                  valueColor: const AlwaysStoppedAnimation<Color>(primaryOrange),
+                ),
+              ),
+            ],
+          ),
+          UIHelper.verticalSpace(16.h),
+          Divider(color: AppColorsTheme.borderColor(context), thickness: 1),
+          UIHelper.verticalSpace(14.h),
+
+          // What Happens Next Section
           Text(
             'what_happens_next'.tr,
             style: TextStyle(
               fontSize: 14.sp,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w800,
               color: AppColorsTheme.textMainColor(context),
             ),
           ),
@@ -90,17 +143,17 @@ class ApplicationStatusCardWidget extends StatelessWidget {
           Text(
             'upload_kyc_desc'.tr,
             style: TextStyle(
-              fontSize: 13.sp,
+              fontSize: 12.5.sp,
               fontWeight: FontWeight.w400,
               color: AppColorsTheme.textMutedColor(context),
-              height: 1.4,
+              height: 1.45,
             ),
           ),
-          UIHelper.verticalSpace(22.h),
+          UIHelper.verticalSpace(20.h),
 
-          // Open Application Button
+          // Open Application Action Button
           SizedBox(
-            width: 160.w,
+            width: double.infinity,
             child: CustomButton(
               onTap: onOpenApplication,
               btnName: 'open_application'.tr,
