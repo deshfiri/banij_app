@@ -69,8 +69,8 @@ class DynamicStepIndicator extends StatelessWidget {
                     ),
                     // Circle Node
                     Container(
-                      width: 30.w,
-                      height: 30.h,
+                      width: 28.w,
+                      height: 28.h,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: isCompleted
@@ -90,12 +90,12 @@ class DynamicStepIndicator extends StatelessWidget {
                           ? Icon(
                               Icons.check,
                               color: Colors.white,
-                              size: 16.sp,
+                              size: 15.sp,
                             )
                           : Text(
                               '$stepNum',
                               style: TextStyle(
-                                fontSize: 13.sp,
+                                fontSize: 12.sp,
                                 fontWeight: isActive
                                     ? FontWeight.bold
                                     : FontWeight.w500,
@@ -121,16 +121,21 @@ class DynamicStepIndicator extends StatelessWidget {
                 SizedBox(height: 6.h),
 
                 // Title Label
-                Text(
-                  step.title,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 11.5.sp,
-                    fontWeight:
-                        isActive || isCompleted ? FontWeight.bold : FontWeight.w500,
-                    color: isCompleted || isActive
-                        ? AppColorsTheme.textMainColor(context)
-                        : AppColorsTheme.textMutedColor(context),
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    step.title,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      fontWeight:
+                          isActive || isCompleted ? FontWeight.bold : FontWeight.w500,
+                      color: isCompleted || isActive
+                          ? AppColorsTheme.textMainColor(context)
+                          : AppColorsTheme.textMutedColor(context),
+                    ),
                   ),
                 ),
 
@@ -139,7 +144,7 @@ class DynamicStepIndicator extends StatelessWidget {
                   SizedBox(height: 4.h),
                   Container(
                     padding:
-                        EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                        EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                     decoration: BoxDecoration(
                       color: const Color(0xFFFFECE0),
                       borderRadius: BorderRadius.circular(10.r),
@@ -147,7 +152,7 @@ class DynamicStepIndicator extends StatelessWidget {
                     child: Text(
                       step.badgeText!,
                       style: TextStyle(
-                        fontSize: 9.5.sp,
+                        fontSize: 9.sp,
                         fontWeight: FontWeight.bold,
                         color: primaryOrange,
                       ),

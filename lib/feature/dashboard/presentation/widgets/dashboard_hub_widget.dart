@@ -460,7 +460,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
               crossAxisCount: 2,
               crossAxisSpacing: 14.w,
               mainAxisSpacing: 14.h,
-              childAspectRatio: 1.15,
+              childAspectRatio: 1.05,
             ),
             delegate: SliverChildBuilderDelegate(
               (context, index) {

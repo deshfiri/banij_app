@@ -24,14 +24,26 @@ class CustomBottomNavBar extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: AppColorsTheme.cardBg(context),
-        border: Border(
-          top: BorderSide(color: AppColorsTheme.borderColor(context), width: 1.w),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(24.r),
+          topRight: Radius.circular(24.r),
         ),
+        border: Border.all(
+          color: AppColorsTheme.borderColor(context),
+          width: 1.w,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+            blurRadius: 24.r,
+            offset: const Offset(0, -8),
+          ),
+        ],
       ),
       child: SafeArea(
         top: false,
         child: SizedBox(
-          height: 68.h,
+          height: 72.h,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
@@ -51,13 +63,13 @@ class CustomBottomNavBar extends StatelessWidget {
                 child: _buildNavItem(
                   context: context,
                   index: 1,
-                  icon: Icons.euro_symbol_rounded,
+                  icon: Icons.receipt_long_rounded,
                   label: 'finance'.tr,
                   isActive: currentIndex == 1,
                 ),
               ),
 
-              // 3. Center Plush / Plus Quick Action Button
+              // 3. Center Quick Action Button (+)
               Expanded(
                 child: GestureDetector(
                   onTap: () => onTap(2),
@@ -65,27 +77,27 @@ class CustomBottomNavBar extends StatelessWidget {
                   child: Center(
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 300),
-                      width: 52.w,
-                      height: 40.h,
+                      width: 50.w,
+                      height: 42.h,
                       decoration: BoxDecoration(
                         color: primaryOrange,
-                        borderRadius: BorderRadius.circular(14.r),
+                        borderRadius: BorderRadius.circular(16.r),
                         border: Border.all(
                           color: isDark ? primaryOrange : Colors.white,
-                          width: 1.5.w,
+                          width: 2.w,
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: primaryOrange.withValues(alpha: isDark ? 0.3 : 0.4),
-                            blurRadius: 10.r,
-                            offset: const Offset(0, 4),
+                            color: primaryOrange.withValues(alpha: isDark ? 0.4 : 0.5),
+                            blurRadius: 14.r,
+                            offset: const Offset(0, 5),
                           ),
                         ],
                       ),
                       child: Icon(
                         Icons.add_rounded,
                         color: Colors.white,
-                        size: 26.sp,
+                        size: 28.sp,
                       ),
                     ),
                   ),
@@ -132,40 +144,43 @@ class CustomBottomNavBar extends StatelessWidget {
     return GestureDetector(
       onTap: () => onTap(index),
       behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          // Top Active Indicator Line
-          Container(
-            height: 3.h,
-            width: 30.w,
-            decoration: BoxDecoration(
-              color: isActive ? primaryOrange : Colors.transparent,
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(2.r),
-                bottomRight: Radius.circular(2.r),
+      child: Center(
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 6.h),
+          decoration: BoxDecoration(
+            color: isActive
+                ? primaryOrange.withValues(alpha: 0.12)
+                : Colors.transparent,
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 22.sp,
+                color: isActive ? primaryOrange : inactiveColor,
               ),
-            ),
+              SizedBox(height: 3.h),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.visible,
+                  style: TextStyle(
+                    fontSize: 10.sp,
+                    fontWeight: isActive ? FontWeight.w900 : FontWeight.w600,
+                    color: isActive ? primaryOrange : inactiveColor,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const Spacer(),
-          Icon(
-            icon,
-            size: 22.sp,
-            color: isActive ? primaryOrange : inactiveColor,
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 11.sp,
-              fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
-              color: isActive ? primaryOrange : inactiveColor,
-            ),
-          ),
-          SizedBox(height: 6.h),
-        ],
+        ),
       ),
     );
   }

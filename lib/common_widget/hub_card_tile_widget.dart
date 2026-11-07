@@ -26,14 +26,14 @@ class HubCardTileWidget extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(18.r),
         splashColor: primaryOrange.withValues(alpha: 0.15),
         highlightColor: primaryOrange.withValues(alpha: 0.08),
         child: Container(
-          padding: EdgeInsets.all(16.w),
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
           decoration: BoxDecoration(
             color: AppColorsTheme.cardBg(context),
-            borderRadius: BorderRadius.circular(20.r),
+            borderRadius: BorderRadius.circular(18.r),
             border: Border.all(
               color: isDark
                   ? AppColorsTheme.borderColor(context)
@@ -42,13 +42,13 @@ class HubCardTileWidget extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
-                blurRadius: 16.r,
-                offset: const Offset(0, 6),
+                color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.04),
+                blurRadius: 12.r,
+                offset: const Offset(0, 4),
               ),
               BoxShadow(
-                color: primaryOrange.withValues(alpha: isDark ? 0.04 : 0.03),
-                blurRadius: 8.r,
+                color: primaryOrange.withValues(alpha: isDark ? 0.04 : 0.02),
+                blurRadius: 6.r,
                 offset: const Offset(0, 2),
               ),
             ],
@@ -62,10 +62,10 @@ class HubCardTileWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: EdgeInsets.all(11.w),
+                    padding: EdgeInsets.all(9.w),
                     decoration: BoxDecoration(
                       color: const Color(0xFFFFECE0).withValues(alpha: isDark ? 0.2 : 0.9),
-                      borderRadius: BorderRadius.circular(14.r),
+                      borderRadius: BorderRadius.circular(12.r),
                       border: Border.all(
                         color: primaryOrange.withValues(alpha: 0.25),
                         width: 1.w,
@@ -74,11 +74,11 @@ class HubCardTileWidget extends StatelessWidget {
                     child: Icon(
                       iconData,
                       color: primaryOrange,
-                      size: 22.sp,
+                      size: 20.sp,
                     ),
                   ),
                   Container(
-                    padding: EdgeInsets.all(7.w),
+                    padding: EdgeInsets.all(6.w),
                     decoration: BoxDecoration(
                       color: isDark
                           ? const Color(0xFF221A15)
@@ -97,7 +97,7 @@ class HubCardTileWidget extends StatelessWidget {
                   ),
                 ],
               ),
-              UIHelper.verticalSpace(12.h),
+              UIHelper.verticalSpace(8.h),
 
               // Bottom text: Bold Title & Uppercase Subtitle Tag
               Column(
@@ -107,22 +107,22 @@ class HubCardTileWidget extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 15.sp,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w900,
                       color: AppColorsTheme.textMainColor(context),
-                      height: 1.25,
+                      height: 1.2,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  UIHelper.verticalSpace(3.h),
+                  UIHelper.verticalSpace(2.h),
                   Text(
                     subtitle.toUpperCase(),
                     style: TextStyle(
-                      fontSize: 9.5.sp,
+                      fontSize: 9.sp,
                       fontWeight: FontWeight.w800,
                       color: AppColorsTheme.textMutedColor(context),
-                      letterSpacing: 1.0,
+                      letterSpacing: 0.8,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

@@ -220,16 +220,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
             _buildDashboardTab(context, dashboardProvider),
 
             // Index 1: Finance Tab
-            const FinanceScreenBody(),
+            FinanceScreenBody(
+              onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
+            ),
 
             // Index 2: Quick Action Placeholder
             const SizedBox.shrink(),
 
             // Index 3: Business Tab
-            const BusinessScreenBody(),
+            BusinessScreenBody(
+              onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
+            ),
 
             // Index 4: Account Tab
-            const AccountScreenBody(),
+            AccountScreenBody(
+              onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
+            ),
           ],
         ),
       ),

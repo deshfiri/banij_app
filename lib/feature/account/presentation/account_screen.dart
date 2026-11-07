@@ -8,6 +8,7 @@ import '../../../common_widget/custom_field_label.dart';
 import '../../../common_widget/custom_form_field.dart';
 import '../../../common_widget/finance_card_widget.dart';
 import '../../../constants/color.dart';
+import '../../../constants/image_const.dart';
 import '../../../helpers/all_routes.dart';
 import '../../../helpers/di.dart';
 import '../../../helpers/ui_helpers.dart';
@@ -16,7 +17,13 @@ import '../../../providers/theme_provider.dart';
 
 class AccountScreenBody extends StatefulWidget {
   final String? initialTab;
-  const AccountScreenBody({super.key, this.initialTab});
+  final VoidCallback? onOpenDrawer;
+
+  const AccountScreenBody({
+    super.key,
+    this.initialTab,
+    this.onOpenDrawer,
+  });
 
   @override
   State<AccountScreenBody> createState() => _AccountScreenBodyState();
@@ -559,15 +566,15 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
     final accountProvider = context.watch<AccountProvider>();
     final canPop = Navigator.canPop(context);
     final isSupplier = widget.initialTab == 'supplier';
+    final isDark = themeProvider.isDarkMode;
 
     return Container(
       color: AppColorsTheme.background(context),
       child: Column(
         children: [
-          // Account Header / AppBar with Back Icon if navigable
+          // Account Top Header / AppBar Stack (Fixed Centered Logo)
           Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
             decoration: BoxDecoration(
               color: AppColorsTheme.cardBg(context),
               border: Border(
@@ -579,37 +586,74 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
             ),
             child: SafeArea(
               bottom: false,
-              child: Row(
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  if (canPop) ...[
-                    IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: Icon(
-                        Icons.arrow_back,
-                        color: AppColorsTheme.textMainColor(context),
-                        size: 22.sp,
+                  // 100% Dead-Centered Logo
+                  Center(
+                    child: Image.asset(
+                      isDark ? whiteLogo : logo,
+                      width: 110.w,
+                      height: 36.h,
+                      fit: BoxFit.contain,
+                    ),
+                  ),
+                  // Left Back Button or Menu Icon
+                  if (canPop)
+                    Positioned(
+                      left: 0,
+                      child: IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: Icon(
+                          Icons.arrow_back,
+                          color: AppColorsTheme.textMainColor(context),
+                          size: 22.sp,
+                        ),
+                      ),
+                    )
+                  else if (widget.onOpenDrawer != null)
+                    Positioned(
+                      left: 0,
+                      child: IconButton(
+                        onPressed: widget.onOpenDrawer,
+                        icon: Icon(
+                          Icons.menu_rounded,
+                          color: AppColorsTheme.textMainColor(context),
+                          size: 24.sp,
+                        ),
                       ),
                     ),
-                    UIHelper.horizontalSpace(8.w),
-                  ],
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  // Right Action Icons: Notifications & Profile
+                  Positioned(
+                    right: 0,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
-                          isSupplier ? 'supplier_dashboard'.tr : 'settings'.tr,
-                          style: TextStyle(
-                            fontSize: 20.sp,
-                            fontWeight: FontWeight.bold,
-                            color: AppColorsTheme.textMainColor(context),
-                          ),
-                        ),
-                        UIHelper.verticalSpace(2.h),
-                        Text(
-                          isSupplier ? 'account_management'.tr : 'account_subtitle'.tr,
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: AppColorsTheme.textMutedColor(context),
+                        IconButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, Routes.notificationScreen);
+                          },
+                          icon: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Icon(
+                                Icons.notifications_none_rounded,
+                                color: AppColorsTheme.textMainColor(context),
+                                size: 22.sp,
+                              ),
+                              Positioned(
+                                top: -2.h,
+                                right: -2.w,
+                                child: Container(
+                                  width: 8.w,
+                                  height: 8.h,
+                                  decoration: const BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: primaryOrange,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
