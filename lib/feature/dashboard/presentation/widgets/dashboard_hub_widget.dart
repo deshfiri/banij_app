@@ -9,6 +9,7 @@ import '../../../../constants/image_const.dart';
 import '../../../../helpers/all_routes.dart';
 import '../../../../helpers/ui_helpers.dart';
 import '../../../../providers/dashboard_provider.dart';
+import 'product_category_detail_sheet.dart';
 
 class HubItem {
   final String titleKey;
@@ -441,13 +442,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                   subtitle: item.tagKey.tr,
                   iconData: item.iconData,
                   onTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('Opening ${item.titleKey.tr}...'),
-                        backgroundColor: primaryOrange,
-                        duration: const Duration(milliseconds: 800),
-                      ),
-                    );
+                    ProductCategoryDetailSheet.show(context, item.titleKey.tr);
                   },
                 );
               },
