@@ -27,26 +27,28 @@ class HubCardTileWidget extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(20.r),
-        splashColor: primaryOrange.withValues(alpha: 0.12),
-        highlightColor: primaryOrange.withValues(alpha: 0.06),
+        splashColor: primaryOrange.withValues(alpha: 0.15),
+        highlightColor: primaryOrange.withValues(alpha: 0.08),
         child: Container(
           padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
             color: AppColorsTheme.cardBg(context),
             borderRadius: BorderRadius.circular(20.r),
             border: Border.all(
-              color: AppColorsTheme.borderColor(context),
+              color: isDark
+                  ? AppColorsTheme.borderColor(context)
+                  : const Color(0xFFFFECE0),
               width: 1.2.w,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.04),
-                blurRadius: 14.r,
+                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                blurRadius: 16.r,
                 offset: const Offset(0, 6),
               ),
               BoxShadow(
-                color: primaryOrange.withValues(alpha: isDark ? 0.03 : 0.02),
-                blurRadius: 6.r,
+                color: primaryOrange.withValues(alpha: isDark ? 0.04 : 0.03),
+                blurRadius: 8.r,
                 offset: const Offset(0, 2),
               ),
             ],
@@ -55,14 +57,14 @@ class HubCardTileWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Top row: Soft Peach Icon Box & Chevron Arrow
+              // Top row: Soft Peach Icon Box & Chevron Circle
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
                     padding: EdgeInsets.all(11.w),
                     decoration: BoxDecoration(
-                      color: primaryOrange.withValues(alpha: isDark ? 0.16 : 0.14),
+                      color: const Color(0xFFFFECE0).withValues(alpha: isDark ? 0.2 : 0.9),
                       borderRadius: BorderRadius.circular(14.r),
                       border: Border.all(
                         color: primaryOrange.withValues(alpha: 0.25),
@@ -76,17 +78,21 @@ class HubCardTileWidget extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: EdgeInsets.all(6.w),
+                    padding: EdgeInsets.all(7.w),
                     decoration: BoxDecoration(
                       color: isDark
                           ? const Color(0xFF221A15)
-                          : Colors.grey.withValues(alpha: 0.08),
+                          : const Color(0xFFFAFAFA),
                       shape: BoxShape.circle,
+                      border: Border.all(
+                        color: AppColorsTheme.borderColor(context),
+                        width: 0.8.w,
+                      ),
                     ),
                     child: Icon(
                       Icons.arrow_forward_ios_rounded,
                       color: AppColorsTheme.textMutedColor(context),
-                      size: 12.sp,
+                      size: 11.sp,
                     ),
                   ),
                 ],
@@ -102,7 +108,7 @@ class HubCardTileWidget extends StatelessWidget {
                     title,
                     style: TextStyle(
                       fontSize: 15.sp,
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w900,
                       color: AppColorsTheme.textMainColor(context),
                       height: 1.25,
                     ),
@@ -114,9 +120,9 @@ class HubCardTileWidget extends StatelessWidget {
                     subtitle.toUpperCase(),
                     style: TextStyle(
                       fontSize: 9.5.sp,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w800,
                       color: AppColorsTheme.textMutedColor(context),
-                      letterSpacing: 0.9,
+                      letterSpacing: 1.0,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

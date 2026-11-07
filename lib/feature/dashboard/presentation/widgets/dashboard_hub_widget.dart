@@ -9,6 +9,7 @@ import '../../../../constants/image_const.dart';
 import '../../../../helpers/all_routes.dart';
 import '../../../../helpers/ui_helpers.dart';
 import '../../../../providers/dashboard_provider.dart';
+import '../../../finance/presentation/widgets/invoices_receipts_sheet.dart';
 import 'product_category_detail_sheet.dart';
 
 class HubItem {
@@ -57,71 +58,94 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
     HubItem(titleKey: 'hub_transactions', category: 'Finance', tagKey: 'tag_finance', iconData: Icons.swap_horiz_rounded),
   ];
 
+  void _handleCardTap(BuildContext context, HubItem item) {
+    if (item.category == 'Finance' ||
+        item.titleKey == 'hub_invoices' ||
+        item.titleKey == 'hub_receipts' ||
+        item.titleKey == 'hub_transactions' ||
+        item.titleKey == 'hub_reports') {
+      final initialTab = (item.titleKey == 'hub_receipts' || item.titleKey == 'hub_transactions')
+          ? 'Receipts'
+          : 'Invoices';
+      InvoicesReceiptsSheet.show(context, initialTab: initialTab);
+    } else {
+      ProductCategoryDetailSheet.show(context, item.titleKey.tr);
+    }
+  }
+
   Widget _buildMetricCard({
     required BuildContext context,
     required String title,
     required String value,
     required IconData icon,
     required Color color,
+    VoidCallback? onTap,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(
-        color: AppColorsTheme.cardBg(context),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: AppColorsTheme.borderColor(context),
-          width: 1.w,
+        child: Container(
+          padding: EdgeInsets.all(14.w),
+          decoration: BoxDecoration(
+            color: AppColorsTheme.cardBg(context),
+            borderRadius: BorderRadius.circular(16.r),
+            border: Border.all(
+              color: AppColorsTheme.borderColor(context),
+              width: 1.w,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
+                blurRadius: 10.r,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(10.w),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Icon(icon, color: color, size: 20.sp),
+              ),
+              UIHelper.horizontalSpace(10.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      value,
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w900,
+                        color: AppColorsTheme.textMainColor(context),
+                      ),
+                    ),
+                    UIHelper.verticalSpace(2.h),
+                    Text(
+                      title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11.5.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColorsTheme.textMutedColor(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
-            blurRadius: 10.r,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(10.w),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: Icon(icon, color: color, size: 20.sp),
-          ),
-          UIHelper.horizontalSpace(10.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w900,
-                    color: AppColorsTheme.textMainColor(context),
-                  ),
-                ),
-                UIHelper.verticalSpace(2.h),
-                Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 11.5.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColorsTheme.textMutedColor(context),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -315,6 +339,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                             value: '12 Active',
                             icon: Icons.shopping_bag_outlined,
                             color: primaryOrange,
+                            onTap: () => ProductCategoryDetailSheet.show(context, 'hub_products'.tr),
                           ),
                         ),
                         UIHelper.horizontalSpace(12.w),
@@ -325,6 +350,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                             value: '4 Pending',
                             icon: Icons.format_list_bulleted_rounded,
                             color: const Color(0xFF0284C7),
+                            onTap: () => ProductCategoryDetailSheet.show(context, 'hub_orders'.tr),
                           ),
                         ),
                       ],
@@ -339,6 +365,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                             value: '৳ 45,800',
                             icon: Icons.account_balance_wallet_outlined,
                             color: const Color(0xFF10B981),
+                            onTap: () => InvoicesReceiptsSheet.show(context, initialTab: 'Receipts'),
                           ),
                         ),
                         UIHelper.horizontalSpace(12.w),
@@ -349,6 +376,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                             value: '8 Issued',
                             icon: Icons.receipt_long_outlined,
                             color: const Color(0xFF8B5CF6),
+                            onTap: () => InvoicesReceiptsSheet.show(context, initialTab: 'Invoices'),
                           ),
                         ),
                       ],
@@ -441,9 +469,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                   title: item.titleKey.tr,
                   subtitle: item.tagKey.tr,
                   iconData: item.iconData,
-                  onTap: () {
-                    ProductCategoryDetailSheet.show(context, item.titleKey.tr);
-                  },
+                  onTap: () => _handleCardTap(context, item),
                 );
               },
               childCount: filteredItems.length,

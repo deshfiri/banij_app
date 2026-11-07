@@ -5,8 +5,8 @@ import 'package:get/get.dart';
 import '../../../../common_widget/hub_card_tile_widget.dart';
 import '../../../../constants/color.dart';
 import '../../../../constants/image_const.dart';
-import '../../../../helpers/all_routes.dart';
 import '../../../../helpers/ui_helpers.dart';
+import 'invoices_receipts_sheet.dart';
 
 class FinanceHubItem {
   final String titleKey;
@@ -82,21 +82,10 @@ class _FinanceHubWidgetState extends State<FinanceHubWidget> {
   ];
 
   void _handleItemTap(BuildContext context, FinanceHubItem item) {
-    if (item.targetTab != null) {
-      Navigator.pushNamed(
-        context,
-        Routes.accountScreen,
-        arguments: item.targetTab,
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Opening ${item.titleKey.tr}...'),
-          backgroundColor: primaryOrange,
-          duration: const Duration(milliseconds: 800),
-        ),
-      );
-    }
+    InvoicesReceiptsSheet.show(
+      context,
+      initialTab: item.targetTab == 'Receipts' ? 'Receipts' : 'Invoices',
+    );
   }
 
   @override

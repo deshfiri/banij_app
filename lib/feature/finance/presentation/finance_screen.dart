@@ -4,18 +4,18 @@ import 'package:get/get.dart';
 
 import '../../../common_widget/finance_card_widget.dart';
 import '../../../constants/color.dart';
-import '../../../helpers/all_routes.dart';
 import '../../../helpers/ui_helpers.dart';
+import 'widgets/invoices_receipts_sheet.dart';
 
 class FinanceScreenBody extends StatelessWidget {
   const FinanceScreenBody({super.key});
 
   void _handleInvoiceTap(BuildContext context) {
-    Navigator.pushNamed(context, Routes.accountScreen, arguments: 'Invoices');
+    InvoicesReceiptsSheet.show(context, initialTab: 'Invoices');
   }
 
   void _handleReceiptsTap(BuildContext context) {
-    Navigator.pushNamed(context, Routes.accountScreen, arguments: 'Receipts');
+    InvoicesReceiptsSheet.show(context, initialTab: 'Receipts');
   }
 
   @override
