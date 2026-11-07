@@ -31,6 +31,11 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     _isBengali = appData.read('isBengali') ?? false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        context.read<AuthProvider>().resetLoginForm();
+      } catch (_) {}
+    });
   }
 
   Future<void> _toggleLanguage() async {

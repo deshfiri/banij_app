@@ -9,9 +9,12 @@ import '../../../../common_widget/custom_dropdown_field.dart';
 import '../../../../common_widget/custom_field_label.dart';
 import '../../../../common_widget/custom_form_field.dart';
 import '../../../../common_widget/custom_password_field.dart';
+import '../../../../constants/app_constants.dart';
 import '../../../../constants/color.dart';
 import '../../../../constants/image_const.dart';
+import '../../../../helpers/all_routes.dart';
 import '../../../../helpers/di.dart';
+import '../../../../helpers/navigation_service.dart';
 import '../../../../helpers/ui_helpers.dart';
 import '../../../../providers/sign_up_provider.dart';
 import '../../../../providers/theme_provider.dart';
@@ -31,6 +34,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void initState() {
     super.initState();
     _isBengali = appData.read('isBengali') ?? false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        context.read<SignUpProvider>().resetSignUpForm();
+      } catch (_) {}
+    });
+  }
+
+  @override
+  void dispose() {
+    try {
+      context.read<SignUpProvider>().resetSignUpForm();
+    } catch (_) {}
+    super.dispose();
   }
 
   Future<void> _toggleLanguage() async {
@@ -425,12 +441,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             onTap: () async {
                               final success = await provider.handleCreateAccount(context, _formKey);
                               if (success && context.mounted) {
+                                appData.write(kKeyIsLoggedIn, true);
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text('creating_account_success'.tr),
                                     backgroundColor: primaryOrange,
+                                    duration: const Duration(seconds: 1),
                                   ),
                                 );
+                                NavigationService.navigateToReplacementUntil(Routes.dashboardScreen);
                               }
                             },
                             btnName: 'create_account'.tr,

@@ -545,8 +545,8 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
             ),
             UIHelper.verticalSpace(16.h),
 
-            // Logout Card
-            FinanceCardWidget(
+            // Logout Action Card
+            AccountActionCardWidget(
               title: 'logout'.tr,
               subtitle: 'logout_subtitle'.tr,
               iconData: Icons.logout_rounded,
@@ -566,6 +566,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
     final accountProvider = context.watch<AccountProvider>();
     final canPop = Navigator.canPop(context);
     final isSupplier = widget.initialTab == 'supplier';
+
     final isDark = themeProvider.isDarkMode;
 
     return Container(
@@ -772,7 +773,8 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                         ),
                         UIHelper.verticalSpace(24.h),
 
-                        FinanceCardWidget(
+                        // Logout Action Card
+                        AccountActionCardWidget(
                           title: 'logout'.tr,
                           subtitle: 'logout_subtitle'.tr,
                           iconData: Icons.logout_rounded,
@@ -871,17 +873,17 @@ class AccountSwitchCardWidget extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: EdgeInsets.all(18.w),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: AppColorsTheme.cardBg(context),
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(18.r),
         border: Border.all(
           color: AppColorsTheme.borderColor(context),
           width: 1.w,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.0 : 0.03),
+            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
             blurRadius: 10.r,
             offset: const Offset(0, 4),
           ),
@@ -890,21 +892,22 @@ class AccountSwitchCardWidget extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.all(12.w),
+            padding: EdgeInsets.all(11.w),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF221A15) : const Color(0xFFFFF7F2),
-              borderRadius: BorderRadius.circular(12.r),
+              color: primaryOrange.withValues(alpha: isDark ? 0.16 : 0.14),
+              borderRadius: BorderRadius.circular(14.r),
               border: Border.all(
-                color: primaryOrange.withValues(alpha: 0.2),
+                color: primaryOrange.withValues(alpha: 0.25),
+                width: 1.w,
               ),
             ),
             child: Icon(
               iconData,
-              size: 24.sp,
+              size: 22.sp,
               color: primaryOrange,
             ),
           ),
-          SizedBox(width: 16.w),
+          SizedBox(width: 14.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -913,11 +916,11 @@ class AccountSwitchCardWidget extends StatelessWidget {
                   title,
                   style: TextStyle(
                     fontSize: 15.sp,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
                     color: AppColorsTheme.textMainColor(context),
                   ),
                 ),
-                SizedBox(height: 4.h),
+                SizedBox(height: 3.h),
                 Text(
                   subtitle,
                   style: TextStyle(
@@ -935,6 +938,102 @@ class AccountSwitchCardWidget extends StatelessWidget {
             onChanged: onChanged,
           ),
         ],
+      ),
+    );
+  }
+}
+
+class AccountActionCardWidget extends StatelessWidget {
+  final String title;
+  final String subtitle;
+  final IconData iconData;
+  final VoidCallback onTap;
+
+  const AccountActionCardWidget({
+    super.key,
+    required this.title,
+    required this.subtitle,
+    required this.iconData,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18.r),
+        child: Container(
+          padding: EdgeInsets.all(16.w),
+          decoration: BoxDecoration(
+            color: AppColorsTheme.cardBg(context),
+            borderRadius: BorderRadius.circular(18.r),
+            border: Border.all(
+              color: AppColorsTheme.borderColor(context),
+              width: 1.w,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
+                blurRadius: 10.r,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(11.w),
+                decoration: BoxDecoration(
+                  color: primaryOrange.withValues(alpha: isDark ? 0.16 : 0.14),
+                  borderRadius: BorderRadius.circular(14.r),
+                  border: Border.all(
+                    color: primaryOrange.withValues(alpha: 0.25),
+                    width: 1.w,
+                  ),
+                ),
+                child: Icon(
+                  iconData,
+                  size: 22.sp,
+                  color: primaryOrange,
+                ),
+              ),
+              SizedBox(width: 14.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w800,
+                        color: AppColorsTheme.textMainColor(context),
+                      ),
+                    ),
+                    SizedBox(height: 3.h),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w400,
+                        color: AppColorsTheme.textMutedColor(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                size: 20.sp,
+                color: AppColorsTheme.textMutedColor(context),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

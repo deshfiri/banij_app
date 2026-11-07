@@ -66,6 +66,7 @@ class SupplierRegisterProvider extends ChangeNotifier {
     await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
 
     _isLoading = false;
+    resetSupplierForm();
     notifyListeners();
 
     if (context.mounted) {

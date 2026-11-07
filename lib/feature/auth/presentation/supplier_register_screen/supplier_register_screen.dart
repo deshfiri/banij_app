@@ -29,6 +29,19 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
   void initState() {
     super.initState();
     _isBengali = appData.read('isBengali') ?? false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        context.read<SupplierRegisterProvider>().resetSupplierForm();
+      } catch (_) {}
+    });
+  }
+
+  @override
+  void dispose() {
+    try {
+      context.read<SupplierRegisterProvider>().resetSupplierForm();
+    } catch (_) {}
+    super.dispose();
   }
 
   Future<void> _toggleLanguage() async {

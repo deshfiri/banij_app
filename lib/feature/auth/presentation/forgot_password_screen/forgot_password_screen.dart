@@ -28,6 +28,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   void initState() {
     super.initState();
     _isBengali = appData.read('isBengali') ?? false;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        context.read<ForgotPasswordProvider>().resetForm();
+      } catch (_) {}
+    });
+  }
+
+  @override
+  void dispose() {
+    try {
+      context.read<ForgotPasswordProvider>().resetForm();
+    } catch (_) {}
+    super.dispose();
   }
 
   Future<void> _toggleLanguage() async {

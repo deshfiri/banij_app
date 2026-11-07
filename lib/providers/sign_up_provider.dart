@@ -104,6 +104,7 @@ class SignUpProvider extends ChangeNotifier {
 
     _isLoading = false;
     notifyListeners();
+    resetSignUpForm();
     return true;
   }
 

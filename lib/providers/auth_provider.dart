@@ -90,6 +90,8 @@ class AuthProvider extends ChangeNotifier {
           box.put('email', emailController.text.trim());
           box.put('password', passwordController.text);
         } else {
+          emailController.clear();
+          passwordController.clear();
           box.delete('email');
           box.delete('password');
         }
