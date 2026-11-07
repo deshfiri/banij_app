@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 
 import '../../../../constants/color.dart';
 
@@ -8,7 +7,6 @@ class StatusCardWidget extends StatelessWidget {
   final String statusTitle;
   final String statusHighlight;
   final String progressLabel;
-  final IconData progressIcon;
   final List<StatusItemModel> items;
 
   StatusCardWidget({
@@ -16,24 +14,23 @@ class StatusCardWidget extends StatelessWidget {
     String? statusTitle,
     String? statusHighlight,
     String? progressLabel,
-    this.progressIcon = Icons.donut_large_rounded,
     List<StatusItemModel>? items,
-  })  : statusTitle = statusTitle ?? 'current_status'.tr,
-        statusHighlight = statusHighlight ?? 'kyc_pending'.tr,
-        progressLabel = progressLabel ?? 'documents_pending'.tr,
+  })  : statusTitle = statusTitle ?? 'Current status: ',
+        statusHighlight = statusHighlight ?? 'KYC pending',
+        progressLabel = progressLabel ?? 'Documents Pending',
         items = items ??
             [
-              StatusItemModel(
-                title: 'government_id'.tr,
+              const StatusItemModel(
+                title: 'Government ID',
                 iconData: Icons.badge_outlined,
               ),
-              StatusItemModel(
-                title: 'proof_of_address'.tr,
+              const StatusItemModel(
+                title: 'Proof of Address',
                 iconData: Icons.location_on_outlined,
               ),
-              StatusItemModel(
-                title: 'self_declaration'.tr,
-                statusTag: 'pending_tag'.tr,
+              const StatusItemModel(
+                title: 'Self-Declaration Form',
+                statusTag: '(Pending)',
                 iconData: Icons.circle_outlined,
               ),
             ];
@@ -43,17 +40,17 @@ class StatusCardWidget extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: EdgeInsets.all(18.w),
+      padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
         color: AppColorsTheme.cardBg(context),
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(18.r),
         border: Border.all(
-          color: primaryOrange.withValues(alpha: 0.4),
-          width: 1.5.w,
+          color: primaryOrange.withValues(alpha: 0.5),
+          width: 1.2.w,
         ),
         boxShadow: [
           BoxShadow(
-            color: primaryOrange.withValues(alpha: isDark ? 0.0 : 0.06),
+            color: primaryOrange.withValues(alpha: isDark ? 0.0 : 0.05),
             blurRadius: 16.r,
             offset: const Offset(0, 6),
           ),
@@ -66,7 +63,7 @@ class StatusCardWidget extends StatelessWidget {
           RichText(
             text: TextSpan(
               style: TextStyle(
-                fontSize: 18.sp,
+                fontSize: 17.sp,
                 fontFamily: Theme.of(context).textTheme.bodyMedium?.fontFamily,
               ),
               children: [
@@ -89,18 +86,20 @@ class StatusCardWidget extends StatelessWidget {
           ),
           SizedBox(height: 16.h),
 
-          // Inner Status Box: Documents Pending
+          // Inner Light Box: Documents Pending with Circular Orange Sync Icon
           Container(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF221A15) : const Color(0xFFFFF9F5),
-              borderRadius: BorderRadius.circular(10.r),
-              border: Border.all(color: AppColorsTheme.borderColor(context)),
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(
+                color: primaryOrange.withValues(alpha: 0.2),
+              ),
             ),
             child: Row(
               children: [
                 Icon(
-                  progressIcon,
+                  Icons.sync_rounded,
                   size: 22.sp,
                   color: primaryOrange,
                 ),
@@ -110,7 +109,7 @@ class StatusCardWidget extends StatelessWidget {
                     progressLabel,
                     style: TextStyle(
                       fontSize: 15.sp,
-                      fontWeight: FontWeight.w600,
+                      fontWeight: FontWeight.bold,
                       color: AppColorsTheme.textMainColor(context),
                     ),
                   ),
@@ -120,11 +119,11 @@ class StatusCardWidget extends StatelessWidget {
           ),
           SizedBox(height: 20.h),
 
-          // Document List
+          // Document Items List
           Column(
             children: items.map((item) {
               return Padding(
-                padding: EdgeInsets.only(bottom: 12.h),
+                padding: EdgeInsets.only(bottom: 14.h),
                 child: Row(
                   children: [
                     Icon(
@@ -132,7 +131,7 @@ class StatusCardWidget extends StatelessWidget {
                       size: 20.sp,
                       color: AppColorsTheme.textMainColor(context),
                     ),
-                    SizedBox(width: 12.w),
+                    SizedBox(width: 14.w),
                     Expanded(
                       child: RichText(
                         text: TextSpan(
@@ -146,7 +145,7 @@ class StatusCardWidget extends StatelessWidget {
                               text: item.title,
                               style: TextStyle(
                                 color: AppColorsTheme.textMainColor(context),
-                                fontWeight: FontWeight.w500,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
                             if (item.statusTag != null) ...[
@@ -155,7 +154,7 @@ class StatusCardWidget extends StatelessWidget {
                                 text: item.statusTag!,
                                 style: const TextStyle(
                                   color: primaryOrange,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.bold,
                                 ),
                               ),
                             ],

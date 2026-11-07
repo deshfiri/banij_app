@@ -62,13 +62,15 @@ class DynamicStepIndicator extends StatelessWidget {
                             ? Colors.transparent
                             : (stepNum <= currentStep
                                 ? successGreen
-                                : AppColorsTheme.borderColor(context)),
+                                : (isActive
+                                    ? primaryOrange
+                                    : AppColorsTheme.borderColor(context))),
                       ),
                     ),
                     // Circle Node
                     Container(
-                      width: 28.w,
-                      height: 28.h,
+                      width: 30.w,
+                      height: 30.h,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: isCompleted
@@ -111,9 +113,7 @@ class DynamicStepIndicator extends StatelessWidget {
                             ? Colors.transparent
                             : (isCompleted
                                 ? successGreen
-                                : (isActive
-                                    ? primaryOrange
-                                    : AppColorsTheme.borderColor(context))),
+                                : AppColorsTheme.borderColor(context)),
                       ),
                     ),
                   ],
@@ -125,14 +125,12 @@ class DynamicStepIndicator extends StatelessWidget {
                   step.title,
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 12.sp,
+                    fontSize: 11.5.sp,
                     fontWeight:
                         isActive || isCompleted ? FontWeight.bold : FontWeight.w500,
-                    color: isCompleted
+                    color: isCompleted || isActive
                         ? AppColorsTheme.textMainColor(context)
-                        : (isActive
-                            ? AppColorsTheme.textMainColor(context)
-                            : AppColorsTheme.textMutedColor(context)),
+                        : AppColorsTheme.textMutedColor(context),
                   ),
                 ),
 
@@ -141,7 +139,7 @@ class DynamicStepIndicator extends StatelessWidget {
                   SizedBox(height: 4.h),
                   Container(
                     padding:
-                        EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                        EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
                     decoration: BoxDecoration(
                       color: const Color(0xFFFFECE0),
                       borderRadius: BorderRadius.circular(10.r),
@@ -149,7 +147,7 @@ class DynamicStepIndicator extends StatelessWidget {
                     child: Text(
                       step.badgeText!,
                       style: TextStyle(
-                        fontSize: 10.sp,
+                        fontSize: 9.5.sp,
                         fontWeight: FontWeight.bold,
                         color: primaryOrange,
                       ),

@@ -5,7 +5,6 @@ import 'package:provider/provider.dart';
 
 import '../../../common_widget/custom_button.dart';
 import '../../../constants/color.dart';
-import '../../../constants/image_const.dart';
 import '../../../helpers/all_routes.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../../providers/dashboard_provider.dart';
@@ -16,6 +15,7 @@ import '../../finance/presentation/finance_screen.dart';
 import 'widgets/custom_bottom_nav_bar.dart';
 import 'widgets/dashboard_hub_widget.dart';
 import 'widgets/dynamic_step_indicator.dart';
+import 'widgets/package_selection_widget.dart';
 import 'widgets/status_card_widget.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -34,19 +34,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  Widget _buildDashboardTab(BuildContext context, DashboardProvider dashboardProvider, bool isDark) {
+  Widget _buildDashboardTab(BuildContext context, DashboardProvider dashboardProvider) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     if (dashboardProvider.isKycSubmitted) {
-      return const DashboardHubWidget();
+      return DashboardHubWidget(
+        onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
+      );
     }
+
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
       child: Column(
         children: [
           UIHelper.verticalSpace(12.h),
 
-          // Title
+          // Title Header
           Text(
-            'setting_up_account'.tr,
+            dashboardProvider.currentStep == 4
+                ? 'Select Subscription Package'
+                : (dashboardProvider.currentStep == 5
+                    ? 'Account Under Review'
+                    : 'setting_up_account'.tr),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 22.sp,
@@ -56,27 +65,135 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           UIHelper.verticalSpace(20.h),
 
-          // Dynamic Step Indicator
+          // Dynamic Step Indicator (Steps 1 to 5)
           DynamicStepIndicator(currentStep: dashboardProvider.currentStep),
           UIHelper.verticalSpace(24.h),
 
-          // KYC Status Card
-          StatusCardWidget(),
-          UIHelper.verticalSpace(28.h),
+          // Step 3: KYC Documents Pending
+          if (dashboardProvider.currentStep == 3) ...[
+            StatusCardWidget(),
+            UIHelper.verticalSpace(28.h),
+            CustomButton(
+              onTap: () {
+                dashboardProvider.submitKYC();
+                Navigator.pushNamed(context, Routes.kycVerificationScreen);
+              },
+              btnName: 'Submit your KYC documents',
+            ),
+          ],
 
-          // Submit KYC Action Button
-          CustomButton(
-            onTap: () {
-              dashboardProvider.submitKYC();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('kyc_submitted_success'.tr),
-                  backgroundColor: primaryOrange,
+          // Step 4: Package Selection
+          if (dashboardProvider.currentStep == 4) ...[
+            PackageSelectionWidget(
+              onContinue: () {
+                dashboardProvider.completePackageSelection();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Package selected successfully!'),
+                    backgroundColor: primaryOrange,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              },
+            ),
+          ],
+
+          // Step 5: Approval Pending & Unlock Workspace
+          if (dashboardProvider.currentStep >= 5) ...[
+            Container(
+              padding: EdgeInsets.all(20.w),
+              decoration: BoxDecoration(
+                color: AppColorsTheme.cardBg(context),
+                borderRadius: BorderRadius.circular(18.r),
+                border: Border.all(
+                  color: const Color(0xFF10B981).withValues(alpha: 0.5),
+                  width: 1.5.w,
                 ),
-              );
-            },
-            btnName: 'submit_kyc'.tr,
-          ),
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF10B981).withValues(alpha: isDark ? 0.0 : 0.06),
+                    blurRadius: 16.r,
+                    offset: const Offset(0, 6),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Approval Status',
+                        style: TextStyle(
+                          fontSize: 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColorsTheme.textMainColor(context),
+                        ),
+                      ),
+                      Container(
+                        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF10B981).withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
+                        child: Text(
+                          'FINAL STEP',
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF10B981),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  UIHelper.verticalSpace(14.h),
+                  Container(
+                    padding: EdgeInsets.all(14.w),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF10B981).withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(12.r),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.verified_rounded,
+                          size: 24.sp,
+                          color: const Color(0xFF10B981),
+                        ),
+                        UIHelper.horizontalSpace(12.w),
+                        Expanded(
+                          child: Text(
+                            'Package Confirmed! Your account is undergoing final workspace verification.',
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w600,
+                              color: AppColorsTheme.textMainColor(context),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            UIHelper.verticalSpace(28.h),
+            CustomButton(
+              onTap: () {
+                dashboardProvider.unlockDashboard();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Welcome to your Product Dashboard!'),
+                    backgroundColor: primaryOrange,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+              },
+              btnName: 'Unlock Workspace Dashboard',
+            ),
+          ],
           UIHelper.verticalSpace(20.h),
         ],
       ),
@@ -85,7 +202,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final dashboardProvider = context.watch<DashboardProvider>();
 
     return Scaffold(
@@ -97,118 +213,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onCloseDrawer: () => _closeDrawer(context),
       ),
       body: SafeArea(
-        child: Column(
+        child: IndexedStack(
+          index: dashboardProvider.currentIndex,
           children: [
-            // Top App Bar Header Stack (Fixed Centered Logo & Drawer Menu Icon)
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-              decoration: BoxDecoration(
-                color: AppColorsTheme.cardBg(context),
-                border: Border(
-                  bottom: BorderSide(
-                    color: AppColorsTheme.borderColor(context),
-                    width: 1.w,
-                  ),
-                ),
-              ),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  // 100% Dead-Centered Logo
-                  Center(
-                    child: Image.asset(
-                      isDark ? whiteLogo : logo,
-                      width: 110.w,
-                      height: 36.h,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                  // Left Drawer Menu Icon
-                  Positioned(
-                    left: 0,
-                    child: IconButton(
-                      onPressed: () {
-                        _scaffoldKey.currentState?.openDrawer();
-                      },
-                      icon: Icon(
-                        Icons.menu_rounded,
-                        color: AppColorsTheme.textMainColor(context),
-                        size: 24.sp,
-                      ),
-                    ),
-                  ),
-                  // Right Action Icons: Notifications & Profile
-                  Positioned(
-                    right: 0,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, Routes.notificationScreen);
-                          },
-                          icon: Stack(
-                            clipBehavior: Clip.none,
-                            children: [
-                              Icon(
-                                Icons.notifications_none_rounded,
-                                color: AppColorsTheme.textMainColor(context),
-                                size: 22.sp,
-                              ),
-                              Positioned(
-                                top: -2.h,
-                                right: -2.w,
-                                child: Container(
-                                  width: 8.w,
-                                  height: 8.h,
-                                  decoration: const BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: primaryOrange,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            dashboardProvider.setBottomNavIndex(4);
-                          },
-                          icon: Icon(
-                            Icons.person_outline_rounded,
-                            color: AppColorsTheme.textMainColor(context),
-                            size: 22.sp,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            // Index 0: Dashboard Tab
+            _buildDashboardTab(context, dashboardProvider),
 
-            // Indexed Stack Screen Tabs
-            Expanded(
-              child: IndexedStack(
-                index: dashboardProvider.currentIndex,
-                children: [
-                  // Index 0: Dashboard Tab
-                  _buildDashboardTab(context, dashboardProvider, isDark),
+            // Index 1: Finance Tab
+            const FinanceScreenBody(),
 
-                  // Index 1: Finance Tab
-                  const FinanceScreenBody(),
+            // Index 2: Quick Action Placeholder
+            const SizedBox.shrink(),
 
-                  // Index 2: Quick Action Placeholder
-                  const SizedBox.shrink(),
+            // Index 3: Business Tab
+            const BusinessScreenBody(),
 
-                  // Index 3: Business Tab
-                  const BusinessScreenBody(),
-
-                  // Index 4: Account Tab
-                  const AccountScreenBody(),
-                ],
-              ),
-            ),
+            // Index 4: Account Tab
+            const AccountScreenBody(),
           ],
         ),
       ),

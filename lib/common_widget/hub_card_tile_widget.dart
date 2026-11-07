@@ -20,31 +20,40 @@ class HubCardTileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.all(14.w),
+        padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
           color: AppColorsTheme.cardBg(context),
-          borderRadius: BorderRadius.circular(16.r),
+          borderRadius: BorderRadius.circular(18.r),
           border: Border.all(
             color: AppColorsTheme.borderColor(context),
             width: 1.w,
           ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
+              blurRadius: 10.r,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Top row: Icon Box & Chevron Right
+            // Top row: Soft Peach Icon Box & Chevron Right
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Container(
                   padding: EdgeInsets.all(10.w),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFFFECE0),
-                    borderRadius: BorderRadius.circular(12.r),
+                    color: primaryOrange.withValues(alpha: isDark ? 0.15 : 0.12),
+                    borderRadius: BorderRadius.circular(14.r),
                   ),
                   child: Icon(
                     iconData,
@@ -53,35 +62,41 @@ class HubCardTileWidget extends StatelessWidget {
                   ),
                 ),
                 Icon(
-                  Icons.chevron_right,
+                  Icons.arrow_forward_ios_rounded,
                   color: AppColorsTheme.textMutedColor(context),
-                  size: 20.sp,
+                  size: 14.sp,
                 ),
               ],
             ),
-            // Bottom texts: Title & Subtitle Tag
+            UIHelper.verticalSpace(12.h),
+
+            // Bottom text: Bold Title & Uppercase Subtitle Tag
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   title,
                   style: TextStyle(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 14.5.sp,
+                    fontWeight: FontWeight.w800,
                     color: AppColorsTheme.textMainColor(context),
+                    height: 1.2,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                UIHelper.verticalSpace(2.h),
+                UIHelper.verticalSpace(3.h),
                 Text(
-                  subtitle,
+                  subtitle.toUpperCase(),
                   style: TextStyle(
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.w600,
+                    fontSize: 9.5.sp,
+                    fontWeight: FontWeight.w700,
                     color: AppColorsTheme.textMutedColor(context),
-                    letterSpacing: 0.5,
+                    letterSpacing: 0.8,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
