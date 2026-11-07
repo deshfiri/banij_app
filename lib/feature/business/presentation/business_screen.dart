@@ -122,7 +122,7 @@ class BusinessScreenBody extends StatelessWidget {
           // Body Content with Cards
           Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+              padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 100.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

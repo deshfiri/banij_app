@@ -454,7 +454,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
 
         // 4. Screenshot-Matched 2-Column Cards Grid
         SliverPadding(
-          padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 24.h),
+          padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 100.h),
           sliver: SliverGrid(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,

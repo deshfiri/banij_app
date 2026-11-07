@@ -668,7 +668,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
           // Main Body Settings Content
           Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+              padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 100.h),
               child: isSupplier
                   ? Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

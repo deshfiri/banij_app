@@ -402,7 +402,7 @@ class _SupplierDashboardScreenState extends State<SupplierDashboardScreen> {
                       icon: Icons.settings_outlined,
                       onTap: () => Navigator.pushNamed(context, Routes.accountScreen, arguments: 'supplier'),
                     ),
-                    UIHelper.verticalSpace(24.h),
+                    UIHelper.verticalSpace(100.h),
                   ],
                 ),
               ),
