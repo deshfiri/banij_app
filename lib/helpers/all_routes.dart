@@ -104,22 +104,35 @@ class _AdvancedTransitionRoute extends PageRouteBuilder {
   _AdvancedTransitionRoute({required this.widget, required this.settings})
     : super(
         settings: settings,
-        transitionDuration: const Duration(milliseconds: 350),
-        reverseTransitionDuration: const Duration(milliseconds: 300),
+        transitionDuration: const Duration(milliseconds: 500),
+        reverseTransitionDuration: const Duration(milliseconds: 400),
         pageBuilder: (context, animation, secondaryAnimation) => widget,
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(1.0, 0.0);
-          const end = Offset.zero;
           const curve = Curves.easeInOutCubic;
 
-          var slideTween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-          var fadeTween = Tween<double>(begin: 0.0, end: 1.0).chain(CurveTween(curve: curve));
+          var slideTween = Tween(
+            begin: const Offset(0.0, 0.08),
+            end: Offset.zero,
+          ).chain(CurveTween(curve: curve));
+
+          var fadeTween = Tween<double>(
+            begin: 0.0,
+            end: 1.0,
+          ).chain(CurveTween(curve: curve));
+
+          var scaleTween = Tween<double>(
+            begin: 0.95,
+            end: 1.0,
+          ).chain(CurveTween(curve: curve));
 
           return SlideTransition(
             position: animation.drive(slideTween),
-            child: FadeTransition(
-              opacity: animation.drive(fadeTween),
-              child: child,
+            child: ScaleTransition(
+              scale: animation.drive(scaleTween),
+              child: FadeTransition(
+                opacity: animation.drive(fadeTween),
+                child: child,
+              ),
             ),
           );
         },

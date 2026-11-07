@@ -135,25 +135,11 @@ class _SplashScreenState extends State<SplashScreen>
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Logo Container with Soft Glow
-                        Container(
-                          padding: EdgeInsets.all(20.w),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: isDark ? 0.08 : 0.18),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.15),
-                                blurRadius: 24.r,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                          ),
-                          child: Image.asset(
-                            whiteLogo,
-                            width: 150.w,
-                            fit: BoxFit.contain,
-                          ),
+                        // Logo without circular background
+                        Image.asset(
+                          whiteLogo,
+                          width: 200.w,
+                          fit: BoxFit.contain,
                         ),
                         UIHelper.verticalSpace(18.h),
                         Text(

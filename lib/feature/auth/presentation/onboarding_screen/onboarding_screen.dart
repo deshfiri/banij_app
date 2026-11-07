@@ -6,10 +6,10 @@ import 'package:provider/provider.dart';
 
 import '../../../../constants/color.dart';
 import '../../../../constants/image_const.dart';
-import '../../../../helpers/all_routes.dart';
 import '../../../../helpers/di.dart';
 import '../../../../helpers/ui_helpers.dart';
 import '../../../../providers/theme_provider.dart';
+import '../login_screen/loginScreen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -72,7 +72,26 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   void _navigateToLogin() {
-    Navigator.pushReplacementNamed(context, Routes.loginScreen);
+    Navigator.pushReplacement(
+      context,
+      PageRouteBuilder(
+        pageBuilder: (context, animation, secondaryAnimation) => const LoginScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          return AnimatedBuilder(
+            animation: animation,
+            builder: (context, animChild) {
+              return ClipPath(
+                clipper: _WaveClipper(animation.value),
+                child: animChild,
+              );
+            },
+            child: child,
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 1200),
+        reverseTransitionDuration: const Duration(milliseconds: 500),
+      ),
+    );
   }
 
   @override
@@ -532,5 +551,27 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         ],
       ),
     );
+  }
+}
+
+class _WaveClipper extends CustomClipper<Path> {
+  final double progress;
+
+  _WaveClipper(this.progress);
+
+  @override
+  Path getClip(Size size) {
+    Path path = Path();
+    double radius = progress * size.height * 1.5;
+    path.addOval(Rect.fromCircle(
+      center: Offset(size.width * 0.5, size.height * 0.85),
+      radius: radius,
+    ));
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant _WaveClipper oldClipper) {
+    return oldClipper.progress != progress;
   }
 }
