@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 
 import '../../../common_widget/finance_card_widget.dart';
 import '../../../constants/color.dart';
 import '../../../constants/image_const.dart';
 import '../../../helpers/all_routes.dart';
 import '../../../helpers/ui_helpers.dart';
+import '../../../providers/dashboard_provider.dart';
+import '../../../providers/supplier_dashboard_provider.dart';
 
 class BusinessScreenBody extends StatelessWidget {
   final VoidCallback? onOpenDrawer;
@@ -22,6 +25,20 @@ class BusinessScreenBody extends StatelessWidget {
 
   void _handleSubscriptionTap(BuildContext context) {
     Navigator.pushNamed(context, Routes.accountScreen, arguments: 'Package');
+  }
+
+  void _handleProfileTap(BuildContext context) {
+    try {
+      final dashProvider = Provider.of<DashboardProvider>(context, listen: false);
+      dashProvider.setBottomNavIndex(4);
+      return;
+    } catch (_) {}
+    try {
+      final supplierProvider = Provider.of<SupplierDashboardProvider>(context, listen: false);
+      supplierProvider.setBottomNavIndex(4);
+      return;
+    } catch (_) {}
+    Navigator.pushNamed(context, Routes.accountScreen);
   }
 
   @override
@@ -103,9 +120,7 @@ class BusinessScreenBody extends StatelessWidget {
                         ),
                       ),
                       IconButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, Routes.accountScreen);
-                        },
+                        onPressed: () => _handleProfileTap(context),
                         icon: Icon(
                           Icons.person_outline_rounded,
                           color: AppColorsTheme.textMainColor(context),
