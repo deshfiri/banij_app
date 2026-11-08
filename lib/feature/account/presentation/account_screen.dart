@@ -14,6 +14,7 @@ import '../../../helpers/di.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../../providers/account_provider.dart';
 import '../../../providers/theme_provider.dart';
+import '../../finance/presentation/widgets/invoice_receipt_preview_modal.dart';
 
 class AccountScreenBody extends StatefulWidget {
   final String? initialTab;
@@ -443,7 +444,19 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
               title: 'Invoice #INV-2026-001',
               subtitle: '৳49,500.00 · Unpaid',
               iconData: Icons.receipt_long_outlined,
-              onTap: () {},
+              onTap: () {
+                InvoiceReceiptPreviewModal.show(
+                  context,
+                  title: 'Invoice',
+                  docNo: 'INV-2026-001',
+                  clientOrGateway: 'Considine Supermarket Ltd',
+                  date: '05 Nov 2026',
+                  dueDateOrTime: '20 Nov 2026',
+                  amount: '৳49,500.00',
+                  status: 'PENDING',
+                  isInvoice: true,
+                );
+              },
             ),
           ],
         );
@@ -473,7 +486,19 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
               title: 'Receipt #REC-2026-089',
               subtitle: '৳25,500.00 · Completed',
               iconData: Icons.payments_outlined,
-              onTap: () {},
+              onTap: () {
+                InvoiceReceiptPreviewModal.show(
+                  context,
+                  title: 'Receipt',
+                  docNo: 'REC-2026-089',
+                  clientOrGateway: 'bKash Merchant Payment',
+                  date: '04 Nov 2026, 04:30 PM',
+                  dueDateOrTime: '04 Nov 2026, 04:30 PM',
+                  amount: '৳25,500.00',
+                  status: 'VERIFIED',
+                  isInvoice: false,
+                );
+              },
             ),
           ],
         );
