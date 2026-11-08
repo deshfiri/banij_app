@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:path/path.dart' as NavigationService;
+import 'navigation_service.dart';
 
 
 /// Contains useful consts to reduce boilerplate and duplicate code

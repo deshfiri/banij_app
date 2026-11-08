@@ -53,7 +53,7 @@ class CustomFinanceAppBar extends StatelessWidget
                   width: 85.w,
                   height: 85.w,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.12),
+                    color: Colors.white.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(30.r),
                   ),
                 ),
@@ -69,7 +69,7 @@ class CustomFinanceAppBar extends StatelessWidget
                     width: 95.w,
                     height: 120.h,
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.08),
+                      color: Colors.white.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(30.r),
                     ),
                   ),
@@ -185,10 +185,10 @@ class _GlassIconButton extends StatelessWidget {
             width: 34.w,
             height: 34.w,
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
+              color: Colors.white.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12.r),
               border: Border.all(
-                color: Colors.white.withOpacity(0.25),
+                color: Colors.white.withValues(alpha: 0.25),
                 width: 1,
               ),
             ),

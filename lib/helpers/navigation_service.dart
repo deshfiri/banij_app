@@ -42,9 +42,9 @@ final class NavigationService {
   ) =>
       navigatorKey.currentState!.pushNamed(routeName, arguments: obj);
 
-  static get goBack => navigatorKey.currentState!.pop();
+  static dynamic get goBack => navigatorKey.currentState!.pop();
 
-  static get goBeBack => navigatorKey.currentState!.canPop();
+  static bool get goBeBack => navigatorKey.currentState!.canPop();
 
-  static get context => navigatorKey.currentContext;
+  static BuildContext? get context => navigatorKey.currentContext;
 }

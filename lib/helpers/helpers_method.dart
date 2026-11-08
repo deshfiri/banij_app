@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:io';
 import 'dart:ui';
 
@@ -799,7 +798,7 @@ class LoadingHelper {
             if (!isLoading) return const SizedBox();
 
             return Container(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withValues(alpha: 0.5),
               child: const Center(child: CircularProgressIndicator()),
             );
           },

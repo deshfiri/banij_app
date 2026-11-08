@@ -25,10 +25,10 @@ final class EndPoints {
 
   static String signup() => "/register";
   static String requestRevierw() => "/finance/finance_requisition_list.php";
-  static String AllRequestReview() =>
+  static String allRequestReview() =>
       "/finance/finance_requisition_crn_list.php";
-  static String ReviewAccept() => "/finance/finance_requisition_approve.php";
-  static String AllReviewAccept() =>
+  static String reviewAccept() => "/finance/finance_requisition_approve.php";
+  static String allReviewAccept() =>
       "/finance/finance_requisition_crn_approve_cancel.php";
   static String editAmount() =>
       "/finance/finance_requisition_update_crn_amount.php";

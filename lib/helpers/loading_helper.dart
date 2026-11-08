@@ -7,7 +7,7 @@ extension Loader on Future {
   Future<dynamic> waitingForSucess() async {
     showDialog(
       barrierColor: AppColors.c000000.withValues(alpha: 0.1),
-      context: NavigationService.context,
+      context: NavigationService.context!,
       builder:
           (context) => Center(
             child: CircularProgressIndicator(
@@ -110,7 +110,7 @@ extension Loader on Future {
   // Future<void> waitingForFuturewithTime() async {
   //   try {
   //     showDialog(
-  //       context: NavigationService.context,
+  //       context: NavigationService.context!,
   //       barrierColor: AppColors.cF4F4F4,
   //       builder: (context) => loadingIndicatorCircle(context: context),
   //     );
@@ -118,7 +118,7 @@ extension Loader on Future {
   //     NavigationService.goBack;
   //     if (result) {
   //       showDialog(
-  //         context: NavigationService.context,
+  //         context: NavigationService.context!,
   //         builder: (context) => shimmer(context: NavigationService.context, name: Assets.lottie.success, size: 120.sp),
   //       );
   //       await Future.delayed(const Duration(milliseconds: 800), () {
@@ -136,7 +136,7 @@ extension Loader on Future {
   //     bool result = await this;
   //     if (result) {
   //       showDialog(
-  //         context: NavigationService.context,
+  //         context: NavigationService.context!,
   //         builder: (context) => shimmer(context: NavigationService.context, name: Assets.lottie.success, size: 120.sp),
   //       );
   //       await Future.delayed(const Duration(milliseconds: 800), () {
@@ -153,7 +153,7 @@ extension Loader on Future {
   //   bool retunValue = await then(
   //     (value) async {
   //       showDialog(
-  //         context: NavigationService.context,
+  //         context: NavigationService.context!,
   //         builder: (context) => shimmer(context: NavigationService.context, name: Assets.lottie.success, size: 120.sp),
   //       );
   //       await Future.delayed(const Duration(milliseconds: 800), () {

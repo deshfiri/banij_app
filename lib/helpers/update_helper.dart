@@ -134,8 +134,6 @@ class CustomRejectDialog extends StatelessWidget {
   }
 }
 
-// ignore_for_file: must_be_immutable
-
 class CustomStatusDialog extends StatelessWidget {
   final Color? iconColor;
   final IconData? iconData;
