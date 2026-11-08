@@ -53,6 +53,10 @@ final class EndPoints {
   static String upcomingEvents() => "/upcoming_events";
   // static String updatePartnerInfo() => "/update-partner/$KkID";
   static String storePartner() => "/partner-information/store";
+  static String invoicesList() => "/finance/invoices.php";
+  static String receiptsList() => "/finance/receipts.php";
+  static String invoiceDetail(String id) => "/finance/invoice_detail.php?id=$id";
+  static String receiptDetail(String id) => "/finance/receipt_detail.php?id=$id";
   static String specialDay() => "/partner/special-days/26";
   static String logout() => "/auth/logout.php";
   static String deletePartner() => "/partner/remove";

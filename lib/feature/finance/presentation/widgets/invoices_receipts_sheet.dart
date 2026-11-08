@@ -52,6 +52,7 @@ class InvoicesReceiptsSheet extends StatefulWidget {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
+
       builder: (context) => InvoicesReceiptsSheet(initialTab: initialTab),
     );
   }
@@ -152,34 +153,34 @@ class _InvoicesReceiptsSheetState extends State<InvoicesReceiptsSheet>
     final statusColor = _getStatusColor(invoice.status);
 
     return Container(
-      margin: EdgeInsets.only(bottom: 16.h),
+      margin: EdgeInsets.only(bottom: 10.h),
       decoration: BoxDecoration(
         color: AppColorsTheme.cardBg(context),
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(14.r),
         border: Border.all(
           color: AppColorsTheme.borderColor(context),
-          width: 1.w,
+          width: 0.8.w,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
-            blurRadius: 12.r,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
+            blurRadius: 8.r,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(14.r),
         child: Container(
           decoration: BoxDecoration(
             border: Border(
               left: BorderSide(
                 color: statusColor,
-                width: 5.w,
+                width: 4.w,
               ),
             ),
           ),
-          padding: EdgeInsets.all(16.w),
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -190,22 +191,22 @@ class _InvoicesReceiptsSheetState extends State<InvoicesReceiptsSheet>
                   Row(
                     children: [
                       Container(
-                        padding: EdgeInsets.all(8.w),
+                        padding: EdgeInsets.all(5.w),
                         decoration: BoxDecoration(
                           color: primaryOrange.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(12.r),
+                          borderRadius: BorderRadius.circular(8.r),
                         ),
                         child: Icon(
                           Icons.receipt_long_rounded,
                           color: primaryOrange,
-                          size: 18.sp,
+                          size: 16.sp,
                         ),
                       ),
-                      UIHelper.horizontalSpace(10.w),
+                      UIHelper.horizontalSpace(6.w),
                       Text(
                         invoice.invoiceNo,
                         style: TextStyle(
-                          fontSize: 15.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w900,
                           color: AppColorsTheme.textMainColor(context),
                         ),
@@ -213,10 +214,10 @@ class _InvoicesReceiptsSheetState extends State<InvoicesReceiptsSheet>
                     ],
                   ),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                    padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.5.h),
                     decoration: BoxDecoration(
                       color: statusColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(14.r),
+                      borderRadius: BorderRadius.circular(10.r),
                       border: Border.all(
                         color: statusColor.withValues(alpha: 0.35),
                       ),
@@ -224,7 +225,7 @@ class _InvoicesReceiptsSheetState extends State<InvoicesReceiptsSheet>
                     child: Text(
                       invoice.status,
                       style: TextStyle(
-                        fontSize: 10.sp,
+                        fontSize: 8.5.sp,
                         fontWeight: FontWeight.w900,
                         color: statusColor,
                         letterSpacing: 0.5,
@@ -233,15 +234,15 @@ class _InvoicesReceiptsSheetState extends State<InvoicesReceiptsSheet>
                   ),
                 ],
               ),
-              UIHelper.verticalSpace(12.h),
+              UIHelper.verticalSpace(8.h),
 
               // Client Business Name Card
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.all(10.w),
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
                 decoration: BoxDecoration(
                   color: AppColorsTheme.innerCardBg(context),
-                  borderRadius: BorderRadius.circular(12.r),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -249,31 +250,33 @@ class _InvoicesReceiptsSheetState extends State<InvoicesReceiptsSheet>
                     Text(
                       invoice.clientName,
                       style: TextStyle(
-                        fontSize: 13.5.sp,
+                        fontSize: 11.5.sp,
                         fontWeight: FontWeight.bold,
                         color: AppColorsTheme.textMainColor(context),
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    UIHelper.verticalSpace(4.h),
+                    UIHelper.verticalSpace(2.h),
                     Row(
                       children: [
-                        Icon(Icons.calendar_today_rounded, size: 12.sp, color: AppColorsTheme.textMutedColor(context)),
-                        UIHelper.horizontalSpace(6.w),
+                        Icon(Icons.calendar_today_rounded, size: 10.sp, color: AppColorsTheme.textMutedColor(context)),
+                        UIHelper.horizontalSpace(4.w),
                         Text(
                           'Issued: ${invoice.date}',
                           style: TextStyle(
-                            fontSize: 11.sp,
+                            fontSize: 9.5.sp,
                             fontWeight: FontWeight.w500,
                             color: AppColorsTheme.textMutedColor(context),
                           ),
                         ),
-                        UIHelper.horizontalSpace(12.w),
-                        Icon(Icons.event_available_rounded, size: 12.sp, color: statusColor),
-                        UIHelper.horizontalSpace(6.w),
+                        UIHelper.horizontalSpace(8.w),
+                        Icon(Icons.event_available_rounded, size: 10.sp, color: statusColor),
+                        UIHelper.horizontalSpace(4.w),
                         Text(
                           'Due: ${invoice.dueDate}',
                           style: TextStyle(
-                            fontSize: 11.sp,
+                            fontSize: 9.5.sp,
                             fontWeight: FontWeight.w700,
                             color: statusColor,
                           ),
@@ -283,7 +286,7 @@ class _InvoicesReceiptsSheetState extends State<InvoicesReceiptsSheet>
                   ],
                 ),
               ),
-              UIHelper.verticalSpace(14.h),
+              UIHelper.verticalSpace(8.h),
 
               // Amount & Modern Design Preview Action Button
               Row(
@@ -295,50 +298,53 @@ class _InvoicesReceiptsSheetState extends State<InvoicesReceiptsSheet>
                       Text(
                         'Total Amount',
                         style: TextStyle(
-                          fontSize: 10.sp,
+                          fontSize: 9.sp,
                           color: AppColorsTheme.textMutedColor(context),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      UIHelper.verticalSpace(2.h),
+                      UIHelper.verticalSpace(1.h),
                       Text(
                         invoice.amount,
                         style: TextStyle(
-                          fontSize: 17.sp,
+                          fontSize: 14.sp,
                           fontWeight: FontWeight.w900,
                           color: primaryOrange,
                         ),
                       ),
                     ],
                   ),
-                  ElevatedButton.icon(
-                    onPressed: () => InvoiceReceiptPreviewModal.show(
-                      context,
-                      title: 'Invoice',
-                      docNo: invoice.invoiceNo,
-                      clientOrGateway: invoice.clientName,
-                      date: invoice.date,
-                      dueDateOrTime: invoice.dueDate,
-                      amount: invoice.amount,
-                      status: invoice.status,
-                      isInvoice: true,
-                    ),
-                    icon: Icon(Icons.preview_rounded, size: 15.sp),
-                    label: Text(
-                      'Design Preview',
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.bold,
+                  SizedBox(
+                    height: 32.h,
+                    child: ElevatedButton.icon(
+                      onPressed: () => InvoiceReceiptPreviewModal.show(
+                        context,
+                        title: 'Invoice',
+                        docNo: invoice.invoiceNo,
+                        clientOrGateway: invoice.clientName,
+                        date: invoice.date,
+                        dueDateOrTime: invoice.dueDate,
+                        amount: invoice.amount,
+                        status: invoice.status,
+                        isInvoice: true,
                       ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryOrange,
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
+                      icon: Icon(Icons.preview_rounded, size: 12.sp),
+                      label: Text(
+                        'Design Preview',
+                        style: TextStyle(
+                          fontSize: 10.5.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      elevation: 0,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryOrange,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                        elevation: 0,
+                      ),
                     ),
                   ),
                 ],
@@ -354,34 +360,34 @@ class _InvoicesReceiptsSheetState extends State<InvoicesReceiptsSheet>
     const statusColor = Color(0xFF10B981);
 
     return Container(
-      margin: EdgeInsets.only(bottom: 16.h),
+      margin: EdgeInsets.only(bottom: 10.h),
       decoration: BoxDecoration(
         color: AppColorsTheme.cardBg(context),
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(14.r),
         border: Border.all(
           color: AppColorsTheme.borderColor(context),
-          width: 1.w,
+          width: 0.8.w,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
-            blurRadius: 12.r,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
+            blurRadius: 8.r,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(20.r),
+        borderRadius: BorderRadius.circular(14.r),
         child: Container(
           decoration: BoxDecoration(
             border: Border(
               left: BorderSide(
                 color: statusColor,
-                width: 5.w,
+                width: 4.w,
               ),
             ),
           ),
-          padding: EdgeInsets.all(16.w),
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -392,22 +398,22 @@ class _InvoicesReceiptsSheetState extends State<InvoicesReceiptsSheet>
                   Row(
                     children: [
                       Container(
-                        padding: EdgeInsets.all(8.w),
+                        padding: EdgeInsets.all(5.w),
                         decoration: BoxDecoration(
                           color: statusColor.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(12.r),
+                          borderRadius: BorderRadius.circular(8.r),
                         ),
                         child: Icon(
                           Icons.payments_rounded,
                           color: statusColor,
-                          size: 18.sp,
+                          size: 16.sp,
                         ),
                       ),
-                      UIHelper.horizontalSpace(10.w),
+                      UIHelper.horizontalSpace(6.w),
                       Text(
                         receipt.receiptNo,
                         style: TextStyle(
-                          fontSize: 15.sp,
+                          fontSize: 12.sp,
                           fontWeight: FontWeight.w900,
                           color: AppColorsTheme.textMainColor(context),
                         ),
@@ -415,10 +421,10 @@ class _InvoicesReceiptsSheetState extends State<InvoicesReceiptsSheet>
                     ],
                   ),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.5.h),
                     decoration: BoxDecoration(
                       color: statusColor.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(14.r),
+                      borderRadius: BorderRadius.circular(12.r),
                       border: Border.all(
                         color: statusColor.withValues(alpha: 0.35),
                       ),
@@ -426,7 +432,7 @@ class _InvoicesReceiptsSheetState extends State<InvoicesReceiptsSheet>
                     child: Text(
                       receipt.status,
                       style: TextStyle(
-                        fontSize: 10.sp,
+                        fontSize: 8.5.sp,
                         fontWeight: FontWeight.w900,
                         color: statusColor,
                         letterSpacing: 0.5,
@@ -435,15 +441,15 @@ class _InvoicesReceiptsSheetState extends State<InvoicesReceiptsSheet>
                   ),
                 ],
               ),
-              UIHelper.verticalSpace(12.h),
+              UIHelper.verticalSpace(8.h),
 
               // Payment Gateway Card Container
               Container(
                 width: double.infinity,
-                padding: EdgeInsets.all(10.w),
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
                 decoration: BoxDecoration(
                   color: AppColorsTheme.innerCardBg(context),
-                  borderRadius: BorderRadius.circular(12.r),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -451,20 +457,22 @@ class _InvoicesReceiptsSheetState extends State<InvoicesReceiptsSheet>
                     Text(
                       receipt.gateway,
                       style: TextStyle(
-                        fontSize: 13.5.sp,
+                        fontSize: 11.5.sp,
                         fontWeight: FontWeight.bold,
                         color: AppColorsTheme.textMainColor(context),
                       ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    UIHelper.verticalSpace(4.h),
+                    UIHelper.verticalSpace(3.h),
                     Row(
                       children: [
-                        Icon(Icons.access_time_rounded, size: 12.sp, color: AppColorsTheme.textMutedColor(context)),
-                        UIHelper.horizontalSpace(6.w),
+                        Icon(Icons.access_time_rounded, size: 10.sp, color: AppColorsTheme.textMutedColor(context)),
+                        UIHelper.horizontalSpace(4.w),
                         Text(
                           receipt.date,
                           style: TextStyle(
-                            fontSize: 11.sp,
+                            fontSize: 9.5.sp,
                             fontWeight: FontWeight.w500,
                             color: AppColorsTheme.textMutedColor(context),
                           ),
@@ -474,7 +482,7 @@ class _InvoicesReceiptsSheetState extends State<InvoicesReceiptsSheet>
                   ],
                 ),
               ),
-              UIHelper.verticalSpace(14.h),
+              UIHelper.verticalSpace(8.h),
 
               // Amount & Modern Design Preview Button
               Row(
@@ -486,50 +494,53 @@ class _InvoicesReceiptsSheetState extends State<InvoicesReceiptsSheet>
                       Text(
                         'Verified Amount',
                         style: TextStyle(
-                          fontSize: 10.sp,
+                          fontSize: 9.5.sp,
                           color: AppColorsTheme.textMutedColor(context),
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      UIHelper.verticalSpace(2.h),
+                      UIHelper.verticalSpace(1.h),
                       Text(
                         receipt.amount,
                         style: TextStyle(
-                          fontSize: 17.sp,
+                          fontSize: 14.sp,
                           fontWeight: FontWeight.w900,
                           color: statusColor,
                         ),
                       ),
                     ],
                   ),
-                  ElevatedButton.icon(
-                    onPressed: () => InvoiceReceiptPreviewModal.show(
-                      context,
-                      title: 'Receipt',
-                      docNo: receipt.receiptNo,
-                      clientOrGateway: receipt.gateway,
-                      date: receipt.date,
-                      dueDateOrTime: receipt.date,
-                      amount: receipt.amount,
-                      status: receipt.status,
-                      isInvoice: false,
-                    ),
-                    icon: Icon(Icons.preview_rounded, size: 15.sp),
-                    label: Text(
-                      'Design Preview',
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.bold,
+                  SizedBox(
+                    height: 32.h,
+                    child: ElevatedButton.icon(
+                      onPressed: () => InvoiceReceiptPreviewModal.show(
+                        context,
+                        title: 'Receipt',
+                        docNo: receipt.receiptNo,
+                        clientOrGateway: receipt.gateway,
+                        date: receipt.date,
+                        dueDateOrTime: receipt.date,
+                        amount: receipt.amount,
+                        status: receipt.status,
+                        isInvoice: false,
                       ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: statusColor,
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.r),
+                      icon: Icon(Icons.preview_rounded, size: 12.sp),
+                      label: Text(
+                        'Design Preview',
+                        style: TextStyle(
+                          fontSize: 10.5.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      elevation: 0,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: statusColor,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                        elevation: 0,
+                      ),
                     ),
                   ),
                 ],
@@ -636,28 +647,33 @@ class _InvoicesReceiptsSheetState extends State<InvoicesReceiptsSheet>
           ),
           UIHelper.verticalSpace(14.h),
 
-          // Tab Bar Switcher (Invoices & Receipts)
+          // Tab Bar Switcher (Invoices & Receipts) matching user screenshot
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 20.w),
             child: Container(
-              height: 44.h,
+              height: 38.h,
               decoration: BoxDecoration(
-                color: AppColorsTheme.cardBg(context),
-                borderRadius: BorderRadius.circular(22.r),
-                border: Border.all(color: AppColorsTheme.borderColor(context)),
+                color: AppColorsTheme.innerCardBg(context),
+                borderRadius: BorderRadius.circular(19.r),
               ),
               child: TabBar(
                 controller: _tabController,
+                dividerColor: Colors.transparent,
+                indicatorColor: Colors.transparent,
                 indicator: BoxDecoration(
                   color: primaryOrange,
-                  borderRadius: BorderRadius.circular(20.r),
+                  borderRadius: BorderRadius.circular(17.r),
                 ),
                 indicatorSize: TabBarIndicatorSize.tab,
                 labelColor: Colors.white,
                 unselectedLabelColor: AppColorsTheme.textMutedColor(context),
                 labelStyle: TextStyle(
-                  fontSize: 13.sp,
+                  fontSize: 11.5.sp,
                   fontWeight: FontWeight.bold,
+                ),
+                unselectedLabelStyle: TextStyle(
+                  fontSize: 11.5.sp,
+                  fontWeight: FontWeight.w600,
                 ),
                 tabs: const [
                   Tab(text: 'Invoices'),
@@ -742,7 +758,7 @@ class _InvoicesReceiptsSheetState extends State<InvoicesReceiptsSheet>
                   },
                 ),
 
-                // Receipts ListTab
+                // Receipts List Tab
                 ListView.builder(
                   padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 6.h),
                   itemCount: filteredReceipts.length,
