@@ -71,11 +71,11 @@ class _InvoiceReceiptPreviewModalState extends State<InvoiceReceiptPreviewModal>
         'preview_title': 'Design Preview',
         'invoice_type': 'Official B2B Invoice & Quote',
         'receipt_type': 'Official Money Receipt',
-        'company_name': 'Company Name Here',
-        'company_address': 'Your Business Address 000C FEL, Dhaka',
+        'company_name': 'Banij B2B Ecosystem Ltd',
+        'company_address': 'House 42, Road 11, Banani, Dhaka',
         'money_receipt': 'MONEY RECEIPT',
         'phone': '01700-000000',
-        'email': 'support@banij.com',
+        'email': 'support@banij.com.bd',
         'no_label': 'NO.',
         'date_label': 'Date',
         'received_from': 'Received with thanks from',
@@ -83,9 +83,9 @@ class _InvoiceReceiptPreviewModalState extends State<InvoiceReceiptPreviewModal>
         'in_word': 'In word',
         'amount_in_words_val': 'Forty-Five Thousand Taka Only',
         'for_label': 'For',
-        'for_val': 'B2B Wholesale',
+        'for_val': 'B2B Wholesale Settlement',
         'branch_label': 'Branch',
-        'branch_val': 'Dhaka Hub',
+        'branch_val': 'Dhaka Main Hub',
         'acct_label': 'ACCT.',
         'acct_val': 'ACC-99',
         'paid_label': 'PAID',
@@ -95,18 +95,19 @@ class _InvoiceReceiptPreviewModalState extends State<InvoiceReceiptPreviewModal>
         'received_by': 'Received by',
         'authorized_sig': 'Authorized Sign',
         'company_tagline': 'LOGO HERE TAGLINE',
-        'customer_heading': 'CUSTOMER / BUYER',
+        'customer_heading': 'BILLED TO / CUSTOMER',
+        'issuer_heading': 'ISSUED BY',
         'desc': 'DESCRIPTION',
         'qty': 'QTY',
         'rate': 'RATE',
         'amount_col': 'AMOUNT',
-        'item_1': 'Wholesale Supply (Batch #1)',
-        'item_2': 'Express Dispatch & Logistics',
+        'item_1': 'Wholesale Supply & Inventory (Batch #1)',
+        'item_2': 'Express Dispatch & Logistics Handling',
         'subtotal': 'Subtotal',
-        'taxable': 'Taxable',
-        'tax_rate': 'Tax rate',
-        'tax_due': 'Tax due',
-        'other': 'Other',
+        'taxable': 'Taxable Amount',
+        'tax_rate': 'Tax Rate (VAT)',
+        'tax_due': 'Tax Due',
+        'other': 'Other Charges',
         'total_due': 'TOTAL Due',
         'terms_title': 'TERMS AND CONDITIONS',
         'term_1': '1. Customer will be billed after invoice acceptance.',
@@ -120,11 +121,11 @@ class _InvoiceReceiptPreviewModalState extends State<InvoiceReceiptPreviewModal>
         'preview_title': 'ডিজাইন প্রিভিউ',
         'invoice_type': 'অফিসিয়াল বিটুবি ইনভয়েস ও কোট',
         'receipt_type': 'অফিসিয়াল মানি রসিদ',
-        'company_name': 'কোম্পানির নাম এখানে',
-        'company_address': 'আপনার ব্যবসার ঠিকানা, ঢাকা',
+        'company_name': 'বাণিজ বিটুবি ইকোসিস্টেম লিমিটেড',
+        'company_address': 'হাউস ৪২, রোড ১১, বনানী, ঢাকা',
         'money_receipt': 'মানি রসিদ',
         'phone': '০১৭১০-০০০০০০',
-        'email': 'support@banij.com',
+        'email': 'support@banij.com.bd',
         'no_label': 'নম্বর',
         'date_label': 'তারিখ',
         'received_from': 'ধন্যবাদসহ প্রাপ্তিস্থান',
@@ -132,7 +133,7 @@ class _InvoiceReceiptPreviewModalState extends State<InvoiceReceiptPreviewModal>
         'in_word': 'কথায়',
         'amount_in_words_val': 'পঁয়তাল্লিশ হাজার টাকা মাত্র',
         'for_label': 'বাবদ',
-        'for_val': 'পাইকারি সরবরাহ',
+        'for_val': 'পাইকারি সরবরাহ সেটেলমেন্ট',
         'branch_label': 'শাখা',
         'branch_val': 'ঢাকা হাব',
         'acct_label': 'অ্যাকাউন্ট',
@@ -144,18 +145,19 @@ class _InvoiceReceiptPreviewModalState extends State<InvoiceReceiptPreviewModal>
         'received_by': 'গ্রহীতা',
         'authorized_sig': 'অনুমোদিত স্বাক্ষর',
         'company_tagline': 'লোগো এখানে ট্যাগলাইন',
-        'customer_heading': 'গ্রাহক / ক্রেতা',
+        'customer_heading': 'গ্রাহক / বিল প্রাপক',
+        'issuer_heading': 'ইস্যুকারী প্রতিষ্ঠান',
         'desc': 'বিবরণ',
         'qty': 'পরিমাণ',
         'rate': 'দর',
         'amount_col': 'টাকা',
-        'item_1': 'পাইকারি পণ্য সরবরাহ (ব্যাচ #১)',
-        'item_2': 'এক্সপ্রেস ডিসপ্যাচ ও লজিস্টিকস',
+        'item_1': 'পাইকারি পণ্য সরবরাহ ও ইনভেন্টরি (ব্যাচ #১)',
+        'item_2': 'এক্সপ্রেস ডিসপ্যাচ ও লজিস্টিকস হ্যান্ডলিং',
         'subtotal': 'সাবটোটাল',
-        'taxable': 'ট্যাক্সযোগ্য',
-        'tax_rate': 'ট্যাক্স হার',
+        'taxable': 'ট্যাক্সযোগ্য পরিমাণ',
+        'tax_rate': 'ট্যাক্স হার (ভ্যাট)',
         'tax_due': 'প্রদেয় ট্যাক্স',
-        'other': 'অন্যান্য',
+        'other': 'অন্যান্য চার্জ',
         'total_due': 'সর্বমোট প্রদেয়',
         'terms_title': 'শর্তাবলী',
         'term_1': '১. ইনভয়েস গ্রহণের পর গ্রাহককে বিল করা হবে।',
@@ -190,7 +192,23 @@ class _InvoiceReceiptPreviewModalState extends State<InvoiceReceiptPreviewModal>
     });
 
     try {
-      final directory = await getApplicationDocumentsDirectory();
+      Directory? directory;
+      if (Platform.isAndroid) {
+        directory = await getDownloadsDirectory();
+        directory ??= Directory('/storage/emulated/0/Download');
+        if (!await directory.exists()) {
+          try {
+            await directory.create(recursive: true);
+          } catch (_) {
+            directory = await getExternalStorageDirectory();
+          }
+        }
+      } else {
+        directory = await getDownloadsDirectory() ?? await getApplicationDocumentsDirectory();
+      }
+
+      directory ??= await getApplicationDocumentsDirectory();
+
       final fileName = '${widget.docNo}.txt';
       final file = File('${directory.path}/$fileName');
 
@@ -204,7 +222,7 @@ Client/Gateway: ${widget.clientOrGateway}
 Amount: ${widget.amount}
 Status: ${widget.status}
 ---------------------------------------------
-${_t('success_msg')}
+Saved to Phone Storage: ${file.path}
 =============================================
 ''';
 
@@ -225,7 +243,7 @@ ${_t('success_msg')}
                 SizedBox(width: 8.w),
                 Expanded(
                   child: Text(
-                    '${widget.docNo}${_t('success_msg')}\nPath: ${file.path}',
+                    'Saved to Phone Storage!\nPath: ${file.path}',
                     style: TextStyle(fontSize: 11.sp),
                   ),
                 ),
@@ -678,7 +696,7 @@ ${_t('success_msg')}
                 ),
                 UIHelper.verticalSpace(16.h),
 
-                // Bottom Row: Amount Box, Received By, Authorized Signature (Fully Responsive with Expanded)
+                // Bottom Row: Amount Box, Received By, Authorized Signature
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   crossAxisAlignment: CrossAxisAlignment.end,
@@ -821,172 +839,253 @@ ${_t('success_msg')}
     );
   }
 
-  // Professional Tabular Invoice Layout
+  // Highly Perfect, Attractive, and User-Friendly Tabular Invoice Layout
   Widget _buildInvoiceLayout(BuildContext context, bool isDark, Color statusColor) {
     return Container(
-      padding: EdgeInsets.all(14.w),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: AppColorsTheme.cardBg(context),
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(20.r),
         border: Border.all(
-          color: AppColorsTheme.borderColor(context),
+          color: primaryOrange.withValues(alpha: 0.3),
           width: 1.5.w,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.05),
-            blurRadius: 12.r,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: isDark ? 0.25 : 0.06),
+            blurRadius: 16.r,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          // Top Invoice Header Banner (Orange Accent Card)
+          Container(
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              color: primaryOrange.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(14.r),
+              border: Border.all(color: primaryOrange.withValues(alpha: 0.3)),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
                   children: [
                     Image.asset(
                       isDark ? whiteLogo : logo,
-                      width: 100.w,
-                      height: 32.h,
+                      width: 80.w,
+                      height: 28.h,
                       fit: BoxFit.contain,
-                    ),
-                    UIHelper.verticalSpace(6.h),
-                    Text(
-                      _t('company_address'),
-                      style: TextStyle(
-                        fontSize: 10.5.sp,
-                        color: AppColorsTheme.textMutedColor(context),
-                      ),
-                    ),
-                    Text(
-                      'Phone: ${_t('phone')}',
-                      style: TextStyle(
-                        fontSize: 10.5.sp,
-                        color: AppColorsTheme.textMutedColor(context),
-                      ),
                     ),
                   ],
                 ),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(color: statusColor.withValues(alpha: 0.3)),
+                  ),
+                  child: Text(
+                    widget.status,
+                    style: TextStyle(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w900,
+                      color: statusColor,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          UIHelper.verticalSpace(14.h),
+
+          // Issuer & Invoice Meta Info Row
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Issuer Card
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.all(10.w),
+                  decoration: BoxDecoration(
+                    color: AppColorsTheme.innerCardBg(context),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _t('issuer_heading'),
+                        style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w900, color: primaryOrange),
+                      ),
+                      UIHelper.verticalSpace(2.h),
+                      Text(
+                        _t('company_name'),
+                        style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        _t('company_address'),
+                        style: TextStyle(fontSize: 9.5.sp, color: AppColorsTheme.textMutedColor(context)),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
               ),
               UIHelper.horizontalSpace(10.w),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    'QUOTE / INVOICE',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w900,
-                      color: primaryOrange,
-                    ),
+              // Meta Card
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.all(10.w),
+                  decoration: BoxDecoration(
+                    color: AppColorsTheme.innerCardBg(context),
+                    borderRadius: BorderRadius.circular(12.r),
                   ),
-                  UIHelper.verticalSpace(6.h),
-                  Container(
-                    padding: EdgeInsets.all(8.w),
-                    decoration: BoxDecoration(
-                      border: Border.all(color: AppColorsTheme.borderColor(context)),
-                      borderRadius: BorderRadius.circular(8.r),
-                      color: AppColorsTheme.innerCardBg(context),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text('Date: ${widget.date}', style: TextStyle(fontSize: 10.sp, color: AppColorsTheme.textMainColor(context))),
-                        Text('Invoice #: ${widget.docNo}', style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: primaryOrange)),
-                        Text('Customer ID: CUST-8821', style: TextStyle(fontSize: 10.sp, color: AppColorsTheme.textMainColor(context))),
-                      ],
-                    ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'INVOICE META',
+                        style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w900, color: primaryOrange),
+                      ),
+                      UIHelper.verticalSpace(2.h),
+                      Text(
+                        '# ${widget.docNo}',
+                        style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      Text(
+                        'Date: ${widget.date}',
+                        style: TextStyle(fontSize: 9.5.sp, color: AppColorsTheme.textMutedColor(context)),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ],
           ),
-          UIHelper.verticalSpace(14.h),
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-            decoration: BoxDecoration(
-              color: primaryOrange,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(8.r),
-                topRight: Radius.circular(8.r),
-              ),
-            ),
-            child: Text(
-              _t('customer_heading'),
-              style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w900, color: Colors.white),
-            ),
-          ),
+          UIHelper.verticalSpace(12.h),
+
+          // Client / Billed To Card
           Container(
             width: double.infinity,
             padding: EdgeInsets.all(10.w),
             decoration: BoxDecoration(
-              border: Border.all(color: AppColorsTheme.borderColor(context)),
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(8.r),
-                bottomRight: Radius.circular(8.r),
-              ),
               color: AppColorsTheme.innerCardBg(context),
+              borderRadius: BorderRadius.circular(12.r),
             ),
-            child: Text(
-              widget.clientOrGateway,
-              style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _t('customer_heading'),
+                  style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w900, color: primaryOrange),
+                ),
+                UIHelper.verticalSpace(2.h),
+                Text(
+                  widget.clientOrGateway,
+                  style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
           UIHelper.verticalSpace(14.h),
+
           // Itemized Table Header
           Container(
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
             decoration: BoxDecoration(
               color: primaryOrange,
-              borderRadius: BorderRadius.circular(6.r),
+              borderRadius: BorderRadius.circular(8.r),
             ),
             child: Row(
               children: [
-                Expanded(flex: 5, child: Text(_t('desc'), style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: Colors.white))),
-                Expanded(flex: 2, child: Text(_t('qty'), textAlign: TextAlign.center, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: Colors.white))),
-                Expanded(flex: 2, child: Text(_t('rate'), textAlign: TextAlign.right, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: Colors.white))),
-                Expanded(flex: 3, child: Text(_t('amount_col'), textAlign: TextAlign.right, style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: Colors.white))),
+                Expanded(flex: 5, child: Text(_t('desc'), style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.bold, color: Colors.white))),
+                Expanded(flex: 2, child: Text(_t('qty'), textAlign: TextAlign.center, style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.bold, color: Colors.white))),
+                Expanded(flex: 2, child: Text(_t('rate'), textAlign: TextAlign.right, style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.bold, color: Colors.white))),
+                Expanded(flex: 3, child: Text(_t('amount_col'), textAlign: TextAlign.right, style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.bold, color: Colors.white))),
               ],
             ),
           ),
           UIHelper.verticalSpace(4.h),
-          _buildInvoiceTableRow(context, _t('item_1'), '1', widget.amount, widget.amount),
-          _buildInvoiceTableRow(context, _t('item_2'), '5 hrs', '৳ 1,500.00', '৳ 7,500.00'),
-          UIHelper.verticalSpace(12.h),
-          Divider(color: AppColorsTheme.borderColor(context)),
-          UIHelper.verticalSpace(8.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(_t('total_due'), style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: AppColorsTheme.textMainColor(context))),
-              Text(widget.amount, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: primaryOrange)),
-            ],
+          _buildInvoiceTableRow(context, _t('item_1'), '1 Unit', widget.amount, widget.amount, isAlternate: false),
+          _buildInvoiceTableRow(context, _t('item_2'), '5 Hrs', '৳ 1,500.00', '৳ 7,500.00', isAlternate: true),
+          UIHelper.verticalSpace(14.h),
+
+          // Summary Card
+          Container(
+            padding: EdgeInsets.all(12.w),
+            decoration: BoxDecoration(
+              color: AppColorsTheme.innerCardBg(context),
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: AppColorsTheme.borderColor(context)),
+            ),
+            child: Column(
+              children: [
+                _buildSummaryRow(context, _t('subtotal'), widget.amount),
+                _buildSummaryRow(context, _t('taxable'), '৳ 5,200.00'),
+                _buildSummaryRow(context, _t('tax_rate'), '6.25%'),
+                _buildSummaryRow(context, _t('tax_due'), '৳ 325.00'),
+                Divider(color: AppColorsTheme.borderColor(context), height: 16.h),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      _t('total_due'),
+                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w900, color: primaryOrange),
+                    ),
+                    Text(
+                      widget.amount,
+                      style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: primaryOrange),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildInvoiceTableRow(BuildContext context, String desc, String qty, String rate, String amount) {
+  Widget _buildInvoiceTableRow(BuildContext context, String desc, String qty, String rate, String amount, {required bool isAlternate}) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: AppColorsTheme.borderColor(context).withValues(alpha: 0.5))),
+        color: isAlternate ? AppColorsTheme.innerCardBg(context).withValues(alpha: 0.5) : Colors.transparent,
+        borderRadius: BorderRadius.circular(6.r),
+        border: Border(bottom: BorderSide(color: AppColorsTheme.borderColor(context).withValues(alpha: 0.4))),
       ),
       child: Row(
         children: [
-          Expanded(flex: 5, child: Text(desc, style: TextStyle(fontSize: 10.5.sp, color: AppColorsTheme.textMainColor(context)))),
-          Expanded(flex: 2, child: Text(qty, textAlign: TextAlign.center, style: TextStyle(fontSize: 10.5.sp, color: AppColorsTheme.textMutedColor(context)))),
-          Expanded(flex: 2, child: Text(rate, textAlign: TextAlign.right, style: TextStyle(fontSize: 10.5.sp, color: AppColorsTheme.textMutedColor(context)))),
-          Expanded(flex: 3, child: Text(amount, textAlign: TextAlign.right, style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)))),
+          Expanded(flex: 5, child: Text(desc, style: TextStyle(fontSize: 10.sp, color: AppColorsTheme.textMainColor(context)), maxLines: 1, overflow: TextOverflow.ellipsis)),
+          Expanded(flex: 2, child: Text(qty, textAlign: TextAlign.center, style: TextStyle(fontSize: 10.sp, color: AppColorsTheme.textMutedColor(context)), maxLines: 1, overflow: TextOverflow.ellipsis)),
+          Expanded(flex: 2, child: Text(rate, textAlign: TextAlign.right, style: TextStyle(fontSize: 10.sp, color: AppColorsTheme.textMutedColor(context)), maxLines: 1, overflow: TextOverflow.ellipsis)),
+          Expanded(flex: 3, child: Text(amount, textAlign: TextAlign.right, style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)), maxLines: 1, overflow: TextOverflow.ellipsis)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryRow(BuildContext context, String label, String value) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 3.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: TextStyle(fontSize: 10.sp, color: AppColorsTheme.textMutedColor(context)), maxLines: 1, overflow: TextOverflow.ellipsis),
+          Text(value, style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.w600, color: AppColorsTheme.textMainColor(context)), maxLines: 1, overflow: TextOverflow.ellipsis),
         ],
       ),
     );
