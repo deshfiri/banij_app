@@ -172,31 +172,7 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
               ),
 
-              // Cinematic background glowing ambient circles
-              Positioned(
-                top: -80.h,
-                right: -80.w,
-                child: Container(
-                  width: 260.w,
-                  height: 260.h,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.22),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: -60.h,
-                left: -60.w,
-                child: Container(
-                  width: 240.w,
-                  height: 240.h,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.white.withValues(alpha: 0.18),
-                  ),
-                ),
-              ),
+
 
               // Center Ultra-Premium Content with White Logo, Squash & Stretch, Wobble & Pulsing Halo
               Center(
@@ -218,7 +194,7 @@ class _SplashScreenState extends State<SplashScreen>
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              // Banij White Logo Image with ultra-radiant pulsing halo
+                              // Banij Primary Logo Image with ultra-radiant pulsing halo
                               Container(
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
@@ -236,41 +212,20 @@ class _SplashScreenState extends State<SplashScreen>
                                   ],
                                 ),
                                 child: Image.asset(
-                                  whiteLogo,
+                                  logo,
                                   width: 210.w,
                                   fit: BoxFit.contain,
                                 ),
                               ),
                               UIHelper.verticalSpace(24.h),
-                              // Cinematic Tagline Badge
-                              Container(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 18.w,
-                                  vertical: 8.h,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.white.withValues(alpha: 0.2),
-                                  borderRadius: BorderRadius.circular(24.r),
-                                  border: Border.all(
-                                    color: Colors.white.withValues(alpha: 0.4),
-                                    width: 1.2,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.05),
-                                      blurRadius: 12,
-                                      offset: const Offset(0, 4),
-                                    ),
-                                  ],
-                                ),
-                                child: Text(
-                                  'Wholesale & Supply Chain',
-                                  style: TextStyle(
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                    letterSpacing: 1.6,
-                                  ),
+                              // Subtitle text without card
+                              Text(
+                                'Wholesale & Supply Chain',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white.withValues(alpha: 0.95),
+                                  letterSpacing: 1.5,
                                 ),
                               ),
                             ],
