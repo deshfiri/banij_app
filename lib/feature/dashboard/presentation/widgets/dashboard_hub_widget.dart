@@ -17,12 +17,14 @@ class HubItem {
   final String category;
   final String tagKey;
   final IconData iconData;
+  final Color categoryColor;
 
   const HubItem({
     required this.titleKey,
     required this.category,
     required this.tagKey,
     required this.iconData,
+    required this.categoryColor,
   });
 }
 
@@ -44,18 +46,90 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
   final List<String> _filters = ['All', 'Products', 'Sales & Orders', 'Finance'];
 
   final List<HubItem> _allHubItems = const [
-    HubItem(titleKey: 'hub_products', category: 'Products', tagKey: 'tag_products', iconData: Icons.shopping_bag_outlined),
-    HubItem(titleKey: 'hub_my_products', category: 'Products', tagKey: 'tag_products', iconData: Icons.grid_view_rounded),
-    HubItem(titleKey: 'hub_my_damages', category: 'Products', tagKey: 'tag_products', iconData: Icons.warning_amber_rounded),
-    HubItem(titleKey: 'hub_all_orders', category: 'Sales & Orders', tagKey: 'tag_sales_orders', iconData: Icons.format_list_bulleted_rounded),
-    HubItem(titleKey: 'hub_customers', category: 'Sales & Orders', tagKey: 'tag_sales_orders', iconData: Icons.people_outline_rounded),
-    HubItem(titleKey: 'hub_orders', category: 'Sales & Orders', tagKey: 'tag_sales_orders', iconData: Icons.description_outlined),
-    HubItem(titleKey: 'hub_my_websites', category: 'Sales & Orders', tagKey: 'tag_sales_orders', iconData: Icons.language_outlined),
-    HubItem(titleKey: 'hub_store_orders', category: 'Sales & Orders', tagKey: 'tag_sales_orders', iconData: Icons.storefront_outlined),
-    HubItem(titleKey: 'hub_invoices', category: 'Finance', tagKey: 'tag_finance', iconData: Icons.receipt_long_outlined),
-    HubItem(titleKey: 'hub_receipts', category: 'Finance', tagKey: 'tag_finance', iconData: Icons.payments_outlined),
-    HubItem(titleKey: 'hub_reports', category: 'Finance', tagKey: 'tag_finance', iconData: Icons.bar_chart_rounded),
-    HubItem(titleKey: 'hub_transactions', category: 'Finance', tagKey: 'tag_finance', iconData: Icons.swap_horiz_rounded),
+    HubItem(
+      titleKey: 'hub_products',
+      category: 'Products',
+      tagKey: 'tag_products',
+      iconData: Icons.shopping_bag_outlined,
+      categoryColor: primaryOrange,
+    ),
+    HubItem(
+      titleKey: 'hub_my_products',
+      category: 'Products',
+      tagKey: 'tag_products',
+      iconData: Icons.grid_view_rounded,
+      categoryColor: primaryOrange,
+    ),
+    HubItem(
+      titleKey: 'hub_my_damages',
+      category: 'Products',
+      tagKey: 'tag_products',
+      iconData: Icons.warning_amber_rounded,
+      categoryColor: primaryOrange,
+    ),
+    HubItem(
+      titleKey: 'hub_all_orders',
+      category: 'Sales & Orders',
+      tagKey: 'tag_sales_orders',
+      iconData: Icons.format_list_bulleted_rounded,
+      categoryColor: Color(0xFF0284C7),
+    ),
+    HubItem(
+      titleKey: 'hub_customers',
+      category: 'Sales & Orders',
+      tagKey: 'tag_sales_orders',
+      iconData: Icons.people_outline_rounded,
+      categoryColor: Color(0xFF0284C7),
+    ),
+    HubItem(
+      titleKey: 'hub_orders',
+      category: 'Sales & Orders',
+      tagKey: 'tag_sales_orders',
+      iconData: Icons.description_outlined,
+      categoryColor: Color(0xFF0284C7),
+    ),
+    HubItem(
+      titleKey: 'hub_my_websites',
+      category: 'Sales & Orders',
+      tagKey: 'tag_sales_orders',
+      iconData: Icons.language_outlined,
+      categoryColor: Color(0xFF0284C7),
+    ),
+    HubItem(
+      titleKey: 'hub_store_orders',
+      category: 'Sales & Orders',
+      tagKey: 'tag_sales_orders',
+      iconData: Icons.storefront_outlined,
+      categoryColor: Color(0xFF0284C7),
+    ),
+    HubItem(
+      titleKey: 'hub_invoices',
+      category: 'Finance',
+      tagKey: 'tag_finance',
+      iconData: Icons.receipt_long_outlined,
+      categoryColor: Color(0xFF8B5CF6),
+    ),
+    HubItem(
+      titleKey: 'hub_receipts',
+      category: 'Finance',
+      tagKey: 'tag_finance',
+      iconData: Icons.payments_outlined,
+      categoryColor: Color(0xFF10B981),
+    ),
+    HubItem(
+      titleKey: 'hub_reports',
+      category: 'Finance',
+      tagKey: 'tag_finance',
+      iconData: Icons.bar_chart_rounded,
+      categoryColor: Color(0xFF8B5CF6),
+    ),
+    HubItem(
+      titleKey: 'hub_transactions',
+      category: 'Finance',
+      tagKey: 'tag_finance',
+      iconData: Icons.swap_horiz_rounded,
+      categoryColor: Color(0xFF10B981),
+    ),
   ];
 
   void _handleCardTap(BuildContext context, HubItem item) {
@@ -73,6 +147,125 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
     }
   }
 
+  IconData _getFilterIcon(String filter) {
+    switch (filter) {
+      case 'Products':
+        return Icons.shopping_bag_outlined;
+      case 'Sales & Orders':
+        return Icons.format_list_bulleted_rounded;
+      case 'Finance':
+        return Icons.account_balance_wallet_outlined;
+      default:
+        return Icons.grid_view_rounded;
+    }
+  }
+
+  Widget _buildWorkspaceHeaderCard(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+        decoration: BoxDecoration(
+          color: AppColorsTheme.cardBg(context),
+          borderRadius: BorderRadius.circular(16.r),
+          border: Border.all(
+            color: isDark
+                ? AppColorsTheme.borderColor(context)
+                : primaryOrange.withValues(alpha: 0.2),
+            width: 1.w,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
+              blurRadius: 10.r,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(8.w),
+                  decoration: BoxDecoration(
+                    color: primaryOrange.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(
+                      color: primaryOrange.withValues(alpha: 0.25),
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.storefront_rounded,
+                    color: primaryOrange,
+                    size: 19.sp,
+                  ),
+                ),
+                UIHelper.horizontalSpace(10.w),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'considine_group'.tr,
+                      style: TextStyle(
+                        fontSize: 15.sp,
+                        fontWeight: FontWeight.w800,
+                        color: AppColorsTheme.textMainColor(context),
+                      ),
+                    ),
+                    UIHelper.verticalSpace(1.h),
+                    Text(
+                      'Business Workspace',
+                      style: TextStyle(
+                        fontSize: 11.sp,
+                        fontWeight: FontWeight.w500,
+                        color: AppColorsTheme.textMutedColor(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+              decoration: BoxDecoration(
+                color: primaryOrange.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(16.r),
+                border: Border.all(
+                  color: primaryOrange.withValues(alpha: 0.3),
+                  width: 1.w,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.verified_user_rounded,
+                    color: primaryOrange,
+                    size: 12.sp,
+                  ),
+                  UIHelper.horizontalSpace(4.w),
+                  Text(
+                    'owner'.tr.toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 9.5.sp,
+                      fontWeight: FontWeight.w800,
+                      color: primaryOrange,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildMetricCard({
     required BuildContext context,
     required String title,
@@ -87,35 +280,38 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(14.r),
         child: Container(
-          padding: EdgeInsets.all(14.w),
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 9.h),
           decoration: BoxDecoration(
             color: AppColorsTheme.cardBg(context),
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(14.r),
             border: Border.all(
-              color: AppColorsTheme.borderColor(context),
+              color: color.withValues(alpha: isDark ? 0.3 : 0.16),
               width: 1.w,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
-                blurRadius: 10.r,
-                offset: const Offset(0, 4),
+                color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.025),
+                blurRadius: 8.r,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
           child: Row(
             children: [
               Container(
-                padding: EdgeInsets.all(10.w),
+                padding: EdgeInsets.all(7.5.w),
                 decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(12.r),
+                  color: color.withValues(alpha: 0.13),
+                  borderRadius: BorderRadius.circular(10.r),
+                  border: Border.all(
+                    color: color.withValues(alpha: 0.22),
+                  ),
                 ),
-                child: Icon(icon, color: color, size: 20.sp),
+                child: Icon(icon, color: color, size: 17.sp),
               ),
-              UIHelper.horizontalSpace(10.w),
+              UIHelper.horizontalSpace(8.w),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -124,18 +320,18 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                     Text(
                       value,
                       style: TextStyle(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w900,
+                        fontSize: 13.5.sp,
+                        fontWeight: FontWeight.w800,
                         color: AppColorsTheme.textMainColor(context),
                       ),
                     ),
-                    UIHelper.verticalSpace(2.h),
+                    UIHelper.verticalSpace(1.h),
                     Text(
                       title,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        fontSize: 11.5.sp,
+                        fontSize: 10.5.sp,
                         fontWeight: FontWeight.w600,
                         color: AppColorsTheme.textMutedColor(context),
                       ),
@@ -170,7 +366,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
           backgroundColor: AppColorsTheme.cardBg(context),
           automaticallyImplyLeading: false,
           titleSpacing: 0,
-          toolbarHeight: 56.h,
+          toolbarHeight: 52.h,
           title: Stack(
             alignment: Alignment.center,
             children: [
@@ -178,8 +374,8 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
               Center(
                 child: Image.asset(
                   isDark ? whiteLogo : logo,
-                  width: 110.w,
-                  height: 36.h,
+                  width: 105.w,
+                  height: 34.h,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -191,7 +387,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                   icon: Icon(
                     Icons.menu_rounded,
                     color: AppColorsTheme.textMainColor(context),
-                    size: 24.sp,
+                    size: 23.sp,
                   ),
                 ),
               ),
@@ -211,14 +407,14 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                           Icon(
                             Icons.notifications_none_rounded,
                             color: AppColorsTheme.textMainColor(context),
-                            size: 22.sp,
+                            size: 21.sp,
                           ),
                           Positioned(
                             top: -2.h,
                             right: -2.w,
                             child: Container(
-                              width: 8.w,
-                              height: 8.h,
+                              width: 7.w,
+                              height: 7.h,
                               decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
                                 color: primaryOrange,
@@ -235,7 +431,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                       icon: Icon(
                         Icons.person_outline_rounded,
                         color: AppColorsTheme.textMainColor(context),
-                        size: 22.sp,
+                        size: 21.sp,
                       ),
                     ),
                   ],
@@ -250,80 +446,8 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
           child: Column(
             children: [
               // Considine Group Owner Header Card Banner
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-                child: Container(
-                  padding: EdgeInsets.all(14.w),
-                  decoration: BoxDecoration(
-                    color: AppColorsTheme.cardBg(context),
-                    borderRadius: BorderRadius.circular(18.r),
-                    border: Border.all(color: AppColorsTheme.borderColor(context)),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
-                        blurRadius: 10.r,
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'considine_group'.tr,
-                            style: TextStyle(
-                              fontSize: 17.sp,
-                              fontWeight: FontWeight.w900,
-                              color: AppColorsTheme.textMainColor(context),
-                            ),
-                          ),
-                          UIHelper.verticalSpace(2.h),
-                          Text(
-                            'Business Workspace',
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w500,
-                              color: AppColorsTheme.textMutedColor(context),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                        decoration: BoxDecoration(
-                          color: primaryOrange.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(20.r),
-                          border: Border.all(
-                            color: primaryOrange.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.verified_user_rounded,
-                              color: primaryOrange,
-                              size: 14.sp,
-                            ),
-                            UIHelper.horizontalSpace(6.w),
-                            Text(
-                              'owner'.tr.toUpperCase(),
-                              style: TextStyle(
-                                fontSize: 11.sp,
-                                fontWeight: FontWeight.bold,
-                                color: primaryOrange,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              UIHelper.verticalSpace(4.h),
+              _buildWorkspaceHeaderCard(context),
+              UIHelper.verticalSpace(2.h),
 
               // Metrics Summary Grid Section
               Padding(
@@ -342,7 +466,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                             onTap: () => ProductCategoryDetailSheet.show(context, 'hub_products'.tr),
                           ),
                         ),
-                        UIHelper.horizontalSpace(12.w),
+                        UIHelper.horizontalSpace(10.w),
                         Expanded(
                           child: _buildMetricCard(
                             context: context,
@@ -355,7 +479,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                         ),
                       ],
                     ),
-                    UIHelper.verticalSpace(10.h),
+                    UIHelper.verticalSpace(8.h),
                     Row(
                       children: [
                         Expanded(
@@ -368,7 +492,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                             onTap: () => InvoicesReceiptsSheet.show(context, initialTab: 'Receipts'),
                           ),
                         ),
-                        UIHelper.horizontalSpace(12.w),
+                        UIHelper.horizontalSpace(10.w),
                         Expanded(
                           child: _buildMetricCard(
                             context: context,
@@ -384,7 +508,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                   ],
                 ),
               ),
-              UIHelper.verticalSpace(16.h),
+              UIHelper.verticalSpace(12.h),
             ],
           ),
         ),
@@ -395,7 +519,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
           delegate: _StickyFilterDelegate(
             child: Container(
               color: AppColorsTheme.background(context),
-              padding: EdgeInsets.symmetric(vertical: 6.h),
+              padding: EdgeInsets.symmetric(vertical: 4.h),
               child: ListView.builder(
                 scrollDirection: Axis.horizontal,
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
@@ -411,37 +535,55 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                   if (filter == 'Finance') filterLabel = 'filter_finance'.tr;
 
                   return Padding(
-                    padding: EdgeInsets.only(right: 10.w),
+                    padding: EdgeInsets.only(right: 8.w),
                     child: GestureDetector(
                       onTap: () {
                         setState(() {
                           _selectedFilter = filter;
                         });
                       },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 8.h),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 180),
+                        padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 6.h),
                         decoration: BoxDecoration(
                           color: isSelected ? primaryOrange : AppColorsTheme.cardBg(context),
-                          borderRadius: BorderRadius.circular(20.r),
+                          borderRadius: BorderRadius.circular(18.r),
                           border: Border.all(
                             color: isSelected ? primaryOrange : AppColorsTheme.borderColor(context),
+                            width: 1.w,
                           ),
                           boxShadow: [
-                            if (!isSelected)
+                            if (isSelected)
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: isDark ? 0.1 : 0.02),
+                                color: primaryOrange.withValues(alpha: 0.3),
+                                blurRadius: 6.r,
+                                offset: const Offset(0, 2),
+                              )
+                            else
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: isDark ? 0.08 : 0.02),
                                 blurRadius: 4.r,
                               ),
                           ],
                         ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          filterLabel,
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                            color: isSelected ? Colors.white : AppColorsTheme.textMainColor(context),
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _getFilterIcon(filter),
+                              size: 13.sp,
+                              color: isSelected ? Colors.white : AppColorsTheme.textMutedColor(context),
+                            ),
+                            UIHelper.horizontalSpace(5.w),
+                            Text(
+                              filterLabel,
+                              style: TextStyle(
+                                fontSize: 11.5.sp,
+                                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
+                                color: isSelected ? Colors.white : AppColorsTheme.textMainColor(context),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ),
@@ -452,15 +594,15 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
           ),
         ),
 
-        // 4. Screenshot-Matched 2-Column Cards Grid
+        // 4. Ultra-Sleek Compact 2-Column Cards Grid with Category Colors
         SliverPadding(
-          padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 100.h),
+          padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 100.h),
           sliver: SliverGrid(
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
-              crossAxisSpacing: 14.w,
-              mainAxisSpacing: 14.h,
-              childAspectRatio: 1.05,
+              crossAxisSpacing: 10.w,
+              mainAxisSpacing: 10.h,
+              childAspectRatio: 1.3,
             ),
             delegate: SliverChildBuilderDelegate(
               (context, index) {
@@ -469,6 +611,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                   title: item.titleKey.tr,
                   subtitle: item.tagKey.tr,
                   iconData: item.iconData,
+                  categoryColor: item.categoryColor,
                   onTap: () => _handleCardTap(context, item),
                 );
               },
@@ -492,10 +635,10 @@ class _StickyFilterDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  double get maxExtent => 50.h;
+  double get maxExtent => 44.h;
 
   @override
-  double get minExtent => 50.h;
+  double get minExtent => 44.h;
 
   @override
   bool shouldRebuild(covariant _StickyFilterDelegate oldDelegate) {

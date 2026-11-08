@@ -8,6 +8,7 @@ class HubCardTileWidget extends StatelessWidget {
   final String title;
   final String subtitle;
   final IconData iconData;
+  final Color? categoryColor;
   final VoidCallback? onTap;
 
   const HubCardTileWidget({
@@ -15,41 +16,43 @@ class HubCardTileWidget extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.iconData,
+    this.categoryColor,
     this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accentColor = categoryColor ?? primaryOrange;
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(18.r),
-        splashColor: primaryOrange.withValues(alpha: 0.15),
-        highlightColor: primaryOrange.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(16.r),
+        splashColor: accentColor.withValues(alpha: 0.15),
+        highlightColor: accentColor.withValues(alpha: 0.08),
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
           decoration: BoxDecoration(
             color: AppColorsTheme.cardBg(context),
-            borderRadius: BorderRadius.circular(18.r),
+            borderRadius: BorderRadius.circular(16.r),
             border: Border.all(
               color: isDark
                   ? AppColorsTheme.borderColor(context)
-                  : const Color(0xFFFFECE0),
-              width: 1.2.w,
+                  : accentColor.withValues(alpha: 0.18),
+              width: 1.w,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.04),
-                blurRadius: 12.r,
-                offset: const Offset(0, 4),
+                color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.03),
+                blurRadius: 10.r,
+                offset: const Offset(0, 3),
               ),
               BoxShadow(
-                color: primaryOrange.withValues(alpha: isDark ? 0.04 : 0.02),
+                color: accentColor.withValues(alpha: isDark ? 0.04 : 0.02),
                 blurRadius: 6.r,
-                offset: const Offset(0, 2),
+                offset: const Offset(0, 1),
               ),
             ],
           ),
@@ -57,49 +60,47 @@ class HubCardTileWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Top row: Soft Peach Icon Box & Chevron Circle
+              // Top row: Compact Color-Accented Icon Container & Chevron Arrow Circle
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: EdgeInsets.all(9.w),
+                    padding: EdgeInsets.all(7.w),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFFFECE0).withValues(alpha: isDark ? 0.2 : 0.9),
-                      borderRadius: BorderRadius.circular(12.r),
+                      color: accentColor.withValues(alpha: isDark ? 0.22 : 0.12),
+                      borderRadius: BorderRadius.circular(11.r),
                       border: Border.all(
-                        color: primaryOrange.withValues(alpha: 0.25),
-                        width: 1.w,
+                        color: accentColor.withValues(alpha: 0.28),
+                        width: 0.8.w,
                       ),
                     ),
                     child: Icon(
                       iconData,
-                      color: primaryOrange,
-                      size: 20.sp,
+                      color: accentColor,
+                      size: 17.sp,
                     ),
                   ),
                   Container(
-                    padding: EdgeInsets.all(6.w),
+                    padding: EdgeInsets.all(4.5.w),
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? const Color(0xFF221A15)
-                          : const Color(0xFFFAFAFA),
+                      color: accentColor.withValues(alpha: isDark ? 0.15 : 0.08),
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: AppColorsTheme.borderColor(context),
+                        color: accentColor.withValues(alpha: 0.2),
                         width: 0.8.w,
                       ),
                     ),
                     child: Icon(
                       Icons.arrow_forward_ios_rounded,
-                      color: AppColorsTheme.textMutedColor(context),
-                      size: 11.sp,
+                      color: accentColor,
+                      size: 9.sp,
                     ),
                   ),
                 ],
               ),
-              UIHelper.verticalSpace(8.h),
+              UIHelper.verticalSpace(4.h),
 
-              // Bottom text: Bold Title & Uppercase Subtitle Tag
+              // Bottom text: Compact Bold Title & Uppercase Subtitle Tag
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -107,10 +108,10 @@ class HubCardTileWidget extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w900,
+                      fontSize: 12.5.sp,
+                      fontWeight: FontWeight.w800,
                       color: AppColorsTheme.textMainColor(context),
-                      height: 1.2,
+                      height: 1.15,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -119,10 +120,10 @@ class HubCardTileWidget extends StatelessWidget {
                   Text(
                     subtitle.toUpperCase(),
                     style: TextStyle(
-                      fontSize: 9.sp,
-                      fontWeight: FontWeight.w800,
+                      fontSize: 8.5.sp,
+                      fontWeight: FontWeight.w700,
                       color: AppColorsTheme.textMutedColor(context),
-                      letterSpacing: 0.8,
+                      letterSpacing: 0.6,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
