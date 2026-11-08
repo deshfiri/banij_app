@@ -5,7 +5,7 @@ class AppTranslations extends Translations {
   Map<String, Map<String, String>> get keys => {
         'en_US': {
           'welcome_back': 'Welcome back',
-          'sign_in_workspace': 'Sign in to access your workspace and continue managing\nyour business.',
+          'sign_in_workspace': 'Sign in to access your workspace and\ncontinue managing your business.',
           'sign_in_passkey': 'Sign in with a passkey',
           'or_email': 'OR CONTINUE WITH EMAIL',
           'email_address': 'Email address',
@@ -301,7 +301,7 @@ class AppTranslations extends Translations {
         },
         'bn_BD': {
           'welcome_back': 'স্বাগতম',
-          'sign_in_workspace': 'আপনার কাজের জায়গা অ্যাক্সেস করতে এবং আপনার ব্যবসা পরিচালনা চালিয়ে যেতে সাইন ইন করুন।',
+          'sign_in_workspace': 'আপনার কাজের জায়গা অ্যাক্সেস করতে এবং আপনার\nব্যবসা পরিচালনা চালিয়ে যেতে সাইন ইন করুন।',
           'sign_in_passkey': 'পাসকি দিয়ে সাইন ইন করুন',
           'or_email': 'অথবা ইমেলের মাধ্যমে চালিয়ে যান',
           'email_address': 'ইমেল ঠিকানা',

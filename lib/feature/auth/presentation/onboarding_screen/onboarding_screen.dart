@@ -440,31 +440,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
                             UIHelper.verticalSpace(20.h),
 
-                            // Centered 3-Dot Page Indicator
+                            // Centered Modern Capsule / Pill Cursor Slider Indicator
                             Row(
                               mainAxisSize: MainAxisSize.min,
                               children: List.generate(3, (dotIndex) {
                                 final isSelected = _currentPage == dotIndex;
                                 return AnimatedContainer(
-                                  duration: const Duration(milliseconds: 300),
+                                  duration: const Duration(milliseconds: 350),
+                                  curve: Curves.easeInOut,
                                   margin: EdgeInsets.symmetric(horizontal: 4.w),
-                                  height: isSelected ? 10.h : 8.h,
-                                  width: isSelected ? 10.w : 8.w,
+                                  height: 8.h,
+                                  width: isSelected ? 24.w : 8.w,
                                   decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
+                                    borderRadius: BorderRadius.circular(4.r),
                                     color: isSelected
                                         ? primaryOrange
                                         : (isDark
-                                        ? const Color(0xFF3F3F46)
-                                        : const Color(0xFFFED7AA)),
-                                    border: Border.all(
-                                      color: isSelected
-                                          ? primaryOrange
-                                          : (isDark
-                                          ? const Color(0xFF52525B)
-                                          : const Color(0xFFFDBA74)),
-                                      width: 1.w,
-                                    ),
+                                            ? const Color(0xFF3F3F46)
+                                            : const Color(0xFFFED7AA)),
                                   ),
                                 );
                               }),

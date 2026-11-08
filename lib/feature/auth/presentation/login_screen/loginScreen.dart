@@ -211,46 +211,57 @@ class _LoginScreenState extends State<LoginScreen> {
                               'welcome_back'.tr,
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontSize: 24.sp,
+                                fontSize: 26.sp,
                                 fontWeight: FontWeight.bold,
+                                letterSpacing: -0.3.sp,
                                 color: AppColorsTheme.textMainColor(context),
                               ),
                             ),
-                            UIHelper.verticalSpace(6.h),
-                            Text(
-                              'sign_in_workspace'.tr,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.w500,
-                                color: AppColorsTheme.textMutedColor(context),
-                                height: 1.4,
+                            UIHelper.verticalSpace(8.h),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 16.w),
+                              child: Text(
+                                'sign_in_workspace'.tr,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 14.5.sp,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColorsTheme.textMutedColor(context),
+                                  height: 1.45,
+                                  letterSpacing: 0.1.sp,
+                                ),
                               ),
                             ),
-                            UIHelper.verticalSpace(24.h),
+                            UIHelper.verticalSpace(26.h),
 
                             // Passkey Button
                             OutlinedButton.icon(
                               onPressed: () {},
-                              icon: Icon(Icons.key, color: primaryOrange, size: 18.sp),
+                              icon: Icon(Icons.key_rounded, color: primaryOrange, size: 19.sp),
                               label: Text(
                                 'sign_in_passkey'.tr,
                                 style: TextStyle(
                                   color: AppColorsTheme.textMainColor(context),
                                   fontSize: 14.sp,
                                   fontWeight: FontWeight.w600,
+                                  letterSpacing: 0.2.sp,
                                 ),
                               ),
                               style: OutlinedButton.styleFrom(
                                 backgroundColor: AppColorsTheme.cardBg(context),
                                 padding: EdgeInsets.symmetric(vertical: 14.h),
-                                side: BorderSide(color: AppColorsTheme.borderColor(context)),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12.r),
+                                side: BorderSide(
+                                  color: AppColorsTheme.borderColor(context),
+                                  width: 1.2,
                                 ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(14.r),
+                                ),
+                                elevation: isDark ? 0 : 1,
+                                shadowColor: Colors.black.withValues(alpha: 0.05),
                               ),
                             ),
-                            UIHelper.verticalSpace(20.h),
+                            UIHelper.verticalSpace(22.h),
 
                             // Divider
                             Row(
@@ -259,14 +270,14 @@ class _LoginScreenState extends State<LoginScreen> {
                                   child: Divider(color: AppColorsTheme.borderColor(context), thickness: 1),
                                 ),
                                 Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 12.w),
+                                  padding: EdgeInsets.symmetric(horizontal: 14.w),
                                   child: Text(
                                     'or_email'.tr,
                                     style: TextStyle(
                                       color: AppColorsTheme.textMutedColor(context),
                                       fontSize: 11.sp,
                                       fontWeight: FontWeight.w600,
-                                      letterSpacing: 0.5,
+                                      letterSpacing: 0.6.sp,
                                     ),
                                   ),
                                 ),
@@ -275,10 +286,13 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ],
                             ),
-                            UIHelper.verticalSpace(20.h),
+                            UIHelper.verticalSpace(22.h),
 
                             // Email Input Field
-                            CustomFieldLabel(label: 'email_address'.tr),
+                            CustomFieldLabel(
+                              label: 'email_address'.tr,
+                              fontSize: 13.5.sp,
+                            ),
                             CustomFormField(
                               controller: authProvider.emailController,
                               inputType: TextInputType.emailAddress,
@@ -307,7 +321,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   'password'.tr,
                                   style: TextStyle(
                                     color: AppColorsTheme.textMainColor(context),
-                                    fontSize: 13.sp,
+                                    fontSize: 13.5.sp,
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -320,7 +334,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     'forgot_password'.tr,
                                     style: TextStyle(
                                       color: primaryOrange,
-                                      fontSize: 12.sp,
+                                      fontSize: 12.5.sp,
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -364,6 +378,12 @@ class _LoginScreenState extends State<LoginScreen> {
                               onTap: () => authProvider.handleSignIn(context, _formKey),
                               btnName: 'sign_in'.tr,
                               isLoading: authProvider.isLoading,
+                              textStyle: TextStyle(
+                                color: Colors.white,
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.3.sp,
+                              ),
                             ),
                             UIHelper.verticalSpace(24.h),
 
@@ -410,27 +430,40 @@ class _LoginScreenState extends State<LoginScreen> {
                                         ),
                                       ],
                                     ),
-                                    UIHelper.verticalSpace(12.h),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Text(
-                                          'supplier_registration_mode'.tr,
-                                          style: TextStyle(
-                                            color: AppColorsTheme.textMainColor(context),
-                                            fontSize: 12.sp,
-                                            fontWeight: FontWeight.w600,
+                                    UIHelper.verticalSpace(14.h),
+                                    Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                                      decoration: BoxDecoration(
+                                        color: AppColorsTheme.innerCardBg(context),
+                                        borderRadius: BorderRadius.circular(12.r),
+                                        border: Border.all(
+                                          color: AppColorsTheme.borderColor(context),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            'supplier_registration_mode'.tr,
+                                            style: TextStyle(
+                                              color: AppColorsTheme.textMainColor(context),
+                                              fontSize: 12.5.sp,
+                                              fontWeight: FontWeight.w600,
+                                            ),
                                           ),
-                                        ),
-                                        SizedBox(width: 8.w),
-                                        Switch.adaptive(
-                                          value: provider.isSupplierRegister,
-                                          activeThumbColor: primaryOrange,
-                                          onChanged: (val) {
-                                            provider.toggleSupplierRegister(val);
-                                          },
-                                        ),
-                                      ],
+                                          Transform.scale(
+                                            scale: 0.85,
+                                            child: Switch.adaptive(
+                                              value: provider.isSupplierRegister,
+                                              activeThumbColor: primaryOrange,
+                                              activeTrackColor: primaryOrange.withValues(alpha: 0.3),
+                                              onChanged: (val) {
+                                                provider.toggleSupplierRegister(val);
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 );
