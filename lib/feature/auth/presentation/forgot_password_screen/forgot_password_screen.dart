@@ -283,20 +283,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
                           // Send Reset Instructions Button
                           CustomButton(
-                            onTap: () {
-                              FocusScope.of(context).unfocus();
-                              if (_formKey.currentState!.validate()) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('reset_email_sent'.tr),
-                                    backgroundColor: primaryOrange,
-                                    duration: const Duration(seconds: 2),
-                                  ),
-                                );
-                                Navigator.pop(context);
-                              }
+                            onTap: () async {
+                              await provider.sendResetLink(context, _formKey);
                             },
                             btnName: 'send_reset_instructions'.tr,
+                            isLoading: provider.isLoading,
                           ),
                           UIHelper.verticalSpace(24.h),
 

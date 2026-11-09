@@ -1,6 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+
+import '../constants/app_constants.dart';
+import '../feature/auth/model/response_model.dart';
 import '../helpers/all_routes.dart';
+import '../helpers/di.dart';
+import '../helpers/loading_helper.dart';
+import '../helpers/navigation_service.dart';
+import '../helpers/toast.dart';
+import '../networks/api_access.dart';
+import '../networks/dio/dio.dart';
 
 class AuthProvider extends ChangeNotifier {
   final TextEditingController emailController = TextEditingController();
@@ -79,35 +88,73 @@ class AuthProvider extends ChangeNotifier {
 
   Future<bool> handleSignIn(BuildContext context, GlobalKey<FormState> formKey) async {
     FocusScope.of(context).unfocus();
-    if (formKey.currentState!.validate()) {
-      _isLoading = true;
-      notifyListeners();
+    if (!formKey.currentState!.validate()) {
+      return false;
+    }
 
-      try {
-        final box = Hive.box('auth_box');
-        box.put('rememberMe', _rememberMe);
-        if (_rememberMe) {
-          box.put('email', emailController.text.trim());
-          box.put('password', passwordController.text);
-        } else {
-          emailController.clear();
-          passwordController.clear();
-          box.delete('email');
-          box.delete('password');
-        }
-      } catch (_) {}
+    _isLoading = true;
+    notifyListeners();
 
-      await Future.delayed(const Duration(seconds: 1, milliseconds: 500));
+    try {
+      final box = Hive.box('auth_box');
+      box.put('rememberMe', _rememberMe);
+      if (_rememberMe) {
+        box.put('email', emailController.text.trim());
+        box.put('password', passwordController.text);
+      } else {
+        box.delete('email');
+        box.delete('password');
+      }
+    } catch (_) {}
+
+    try {
+      LoginResponse response = await loginRxObj.userLogin(
+        email: emailController.text.trim(),
+        password: passwordController.text,
+      ).waitingForSucess();
 
       _isLoading = false;
       notifyListeners();
 
-      if (context.mounted) {
-        Navigator.pushReplacementNamed(context, Routes.dashboardScreen);
+      if (response.token != null || response.user != null) {
+        if (response.token != null) {
+          await appData.write(kKeyAccessToken, response.token);
+          DioSingleton.instance.update(response.token!);
+        }
+        await appData.write(kKeyIsLoggedIn, true);
+
+        if (response.user != null) {
+          if (response.user!.name != null) {
+            await appData.write(KkName, response.user!.name);
+          }
+          if (response.user!.email != null) {
+            await appData.write(KkUserEmail, response.user!.email);
+          }
+          if (response.user!.id != null) {
+            await appData.write(KkID, response.user!.id);
+          }
+        }
+
+        ToastUtil.showSuccessMessage('Login successful!');
+        if (context.mounted) {
+          NavigationService.navigateToReplacementUntil(Routes.dashboardScreen);
+        }
+        return true;
+      } else {
+        final errorMsg = response.message ?? 'Login failed. Please check your credentials.';
+        ToastUtil.showErrorMessage(errorMsg);
+        return false;
       }
-      return true;
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      String errorMsg = e.toString().replaceAll('Exception: ', '');
+      if (errorMsg.contains('Failure')) {
+        errorMsg = 'Failed to sign in. Please check your credentials and network connection.';
+      }
+      ToastUtil.showErrorMessage(errorMsg);
+      return false;
     }
-    return false;
   }
 
   void resetLoginForm() {

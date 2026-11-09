@@ -330,8 +330,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               if (value == null || value.isEmpty) {
                                 return 'err_enter_password'.tr;
                               }
-                              if (value.length < 6) {
-                                return 'err_password_length'.tr;
+                              if (value.length < 12) {
+                                return 'Password must be at least 12 characters long';
+                              }
+                              if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                                return 'Password must contain at least one capital letter';
+                              }
+                              if (!RegExp(r'[a-z]').hasMatch(value)) {
+                                return 'Password must contain at least one small letter';
+                              }
+                              if (!RegExp(r'[0-9]').hasMatch(value)) {
+                                return 'Password must contain at least one number';
                               }
                               return null;
                             },
@@ -443,14 +452,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             onTap: () async {
                               final success = await provider.handleCreateAccount(context, _formKey);
                               if (success && context.mounted) {
-                                appData.write(kKeyIsLoggedIn, true);
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text('creating_account_success'.tr),
-                                    backgroundColor: primaryOrange,
-                                    duration: const Duration(seconds: 1),
-                                  ),
-                                );
                                 NavigationService.navigateToReplacementUntil(Routes.dashboardScreen);
                               }
                             },

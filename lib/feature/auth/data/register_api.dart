@@ -19,11 +19,26 @@ final class RegisterApi {
       Response response = await postHttp(EndPoints.signup(), registrationData);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final resData = RegisterResponse.fromRawJson(json.encode(response.data));
-        return resData;
+        if (response.data is Map<String, dynamic>) {
+          return RegisterResponse.fromJson(response.data);
+        } else if (response.data is String) {
+          return RegisterResponse.fromRawJson(response.data);
+        } else {
+          return RegisterResponse.fromRawJson(json.encode(response.data));
+        }
       } else {
         throw DataSource.DEFAULT.getFailure();
       }
+    } on DioException catch (dioError) {
+      if (dioError.response?.data != null) {
+        final data = dioError.response?.data;
+        if (data is Map && data.containsKey('message')) {
+          throw Exception(data['message'].toString());
+        } else if (data is Map && data.containsKey('error')) {
+          throw Exception(data['error'].toString());
+        }
+      }
+      rethrow;
     } catch (error) {
       rethrow;
     }

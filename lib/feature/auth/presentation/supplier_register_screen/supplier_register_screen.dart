@@ -510,8 +510,17 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
                                 if (val == null || val.isEmpty) {
                                   return 'err_enter_password'.tr;
                                 }
-                                if (val.length < 6) {
-                                  return 'err_password_length'.tr;
+                                if (val.length < 12) {
+                                  return 'Password must be at least 12 characters long';
+                                }
+                                if (!RegExp(r'[A-Z]').hasMatch(val)) {
+                                  return 'Password must contain at least one capital letter';
+                                }
+                                if (!RegExp(r'[a-z]').hasMatch(val)) {
+                                  return 'Password must contain at least one small letter';
+                                }
+                                if (!RegExp(r'[0-9]').hasMatch(val)) {
+                                  return 'Password must contain at least one number';
                                 }
                                 return null;
                               },

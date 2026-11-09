@@ -5,7 +5,7 @@
 // const String url = "https://henock.softvencefsd.xyz";
 // import 'package:colten_app/constants/app_constants.dart';
 
-const String url = "https://cargoaim.net/app_api";
+const String url = "https://staging.deshfiri.com/api/mobile/v1";
 
 final class NetworkConstants {
   NetworkConstants._();
@@ -21,7 +21,8 @@ final class NetworkConstants {
 
 final class EndPoints {
   EndPoints._();
-  static String login() => "/auth/login.php";
+  static String login() => "/auth/login";
+  static String logout()=>"/auth/logout";
 
   static String signup() => "/register";
   static String requestRevierw() => "/finance/finance_requisition_list.php";
@@ -37,7 +38,7 @@ final class EndPoints {
   static String requistioanlCanel() =>
       "/finance/finance_requisition_cancel.php";
 
-  static String forgetPass() => "/forget-password";
+  static String forgetPass() => "/password/forgot";
   static String otpVerify() => "/verify-otp";
   static String resendOtp() => "/resend-otp";
   static String resetPassword() => "/reset-password";
@@ -58,7 +59,6 @@ final class EndPoints {
   static String invoiceDetail(String id) => "/finance/invoice_detail.php?id=$id";
   static String receiptDetail(String id) => "/finance/receipt_detail.php?id=$id";
   static String specialDay() => "/partner/special-days/26";
-  static String logout() => "/auth/logout.php";
   static String deletePartner() => "/partner/remove";
   static String deleteAccount() => "/delete-profile";
   static String changePassword() => "/update-password";

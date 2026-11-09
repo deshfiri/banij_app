@@ -6,6 +6,11 @@ import '../helpers/all_routes.dart';
 import '../helpers/di.dart';
 import '../helpers/navigation_service.dart';
 
+import '../feature/account/data/account_api.dart';
+import '../helpers/loading_helper.dart';
+import '../helpers/toast.dart';
+import '../networks/api_access.dart';
+
 class AccountProvider extends ChangeNotifier {
   final TextEditingController nameController =
       TextEditingController(text: 'Mohammad Hira Ashrafi');
@@ -27,8 +32,18 @@ class AccountProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void logout(BuildContext context) {
-    appData.write(kKeyIsLoggedIn, false);
+  Future<void> logout(BuildContext context) async {
+    try {
+      await logoutRxObj.userLogout().waitingForSucess();
+    } catch (_) {}
+
+    await appData.remove(kKeyAccessToken);
+    await appData.write(kKeyIsLoggedIn, false);
+    await appData.remove(KkName);
+    await appData.remove(KkUserEmail);
+    await appData.remove(KkID);
+
+    ToastUtil.showSuccessMessage('Logged out successfully');
     NavigationService.navigateToReplacementUntil(Routes.onboardingScreen);
   }
 

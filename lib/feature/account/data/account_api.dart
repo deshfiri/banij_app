@@ -41,4 +41,12 @@ final class AccountApi {
       rethrow;
     }
   }
+
+  Future<void> logout() async {
+    try {
+      await postHttp(EndPoints.logout());
+    } catch (_) {
+      rethrow;
+    }
+  }
 }

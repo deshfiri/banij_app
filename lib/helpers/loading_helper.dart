@@ -11,7 +11,7 @@ extension Loader on Future {
       builder:
           (context) => Center(
             child: CircularProgressIndicator(
-              color: AppColors.allPrimaryColor,
+              color: Color(0xFFFD6B04),
             ),
             // child: SizedBox(
             //   width: 100,
