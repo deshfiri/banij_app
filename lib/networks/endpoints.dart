@@ -27,6 +27,7 @@ final class EndPoints {
   static String signup() => "/register";
   static String profile()=>"/profile";
   static String package()=>"/packages";
+  static String notification()=>"/notifications";
   static String requestRevierw() => "/finance/finance_requisition_list.php";
   static String allRequestReview() =>
       "/finance/finance_requisition_crn_list.php";
