@@ -25,6 +25,7 @@ final class EndPoints {
   static String logout()=>"/auth/logout";
 
   static String signup() => "/register";
+  static String profile()=>"/profile";
   static String requestRevierw() => "/finance/finance_requisition_list.php";
   static String allRequestReview() =>
       "/finance/finance_requisition_crn_list.php";

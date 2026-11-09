@@ -14,11 +14,16 @@ final class AccountApi {
 
   Future<AccountModel> getProfile() async {
     try {
-      Response response = await getHttp(EndPoints.userProfile());
+      Response response = await getHttp(EndPoints.profile());
 
-      if (response.statusCode == 200) {
-        final data = AccountModel.fromRawJson(json.encode(response.data));
-        return data;
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (response.data is Map<String, dynamic>) {
+          return AccountModel.fromJson(response.data);
+        } else if (response.data is String) {
+          return AccountModel.fromRawJson(response.data);
+        } else {
+          return AccountModel.fromRawJson(json.encode(response.data));
+        }
       } else {
         throw DataSource.DEFAULT.getFailure();
       }
@@ -29,14 +34,29 @@ final class AccountApi {
 
   Future<AccountModel> updateProfile(Map<String, dynamic> updateData) async {
     try {
-      Response response = await postHttp(EndPoints.updateProfile(), updateData);
+      Response response = await patchHttp(EndPoints.profile(), updateData);
 
-      if (response.statusCode == 200) {
-        final data = AccountModel.fromRawJson(json.encode(response.data));
-        return data;
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (response.data is Map<String, dynamic>) {
+          return AccountModel.fromJson(response.data);
+        } else if (response.data is String) {
+          return AccountModel.fromRawJson(response.data);
+        } else {
+          return AccountModel.fromRawJson(json.encode(response.data));
+        }
       } else {
         throw DataSource.DEFAULT.getFailure();
       }
+    } on DioException catch (dioError) {
+      if (dioError.response?.data != null) {
+        final data = dioError.response?.data;
+        if (data is Map && data.containsKey('message')) {
+          throw Exception(data['message'].toString());
+        } else if (data is Map && data.containsKey('error')) {
+          throw Exception(data['error'].toString());
+        }
+      }
+      rethrow;
     } catch (error) {
       rethrow;
     }

@@ -67,6 +67,11 @@ Future<Response> postHttp(String path, [dynamic data]) => DioSingleton
     .dio
     .post(path, data: data, cancelToken: DioSingleton.cancelToken);
 
+Future<Response> patchHttp(String path, [dynamic data]) => DioSingleton
+    .instance
+    .dio
+    .patch(path, data: data, cancelToken: DioSingleton.cancelToken);
+
 Future<Response> putHttp(String path, [dynamic data]) => DioSingleton
     .instance
     .dio

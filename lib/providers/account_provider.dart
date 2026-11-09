@@ -23,6 +23,57 @@ class AccountProvider extends ChangeNotifier {
 
   AccountProvider() {
     _isBengali = appData.read('isBengali') ?? false;
+    fetchUserProfile();
+  }
+
+  Future<void> fetchUserProfile() async {
+    try {
+      final accountModel = await accountRxObj.fetchProfile();
+      if (accountModel.data != null) {
+        if (accountModel.data!.name != null) {
+          nameController.text = accountModel.data!.name!;
+        }
+        if (accountModel.data!.email != null) {
+          emailController.text = accountModel.data!.email!;
+        }
+        notifyListeners();
+      }
+    } catch (e) {
+      final cachedName = appData.read(KkName);
+      final cachedEmail = appData.read(KkUserEmail);
+      if (cachedName != null) nameController.text = cachedName;
+      if (cachedEmail != null) emailController.text = cachedEmail;
+    }
+  }
+
+  Future<void> saveProfile(BuildContext context) async {
+    try {
+      final Map<String, dynamic> updateData = {
+        "name": nameController.text.trim(),
+        "email": emailController.text.trim(),
+      };
+
+      final accountModel = await accountRxObj.saveProfile(updateData).waitingForSucess();
+
+      if (accountModel.data != null) {
+        if (accountModel.data!.name != null) {
+          nameController.text = accountModel.data!.name!;
+          appData.write(KkName, accountModel.data!.name!);
+        }
+        if (accountModel.data!.email != null) {
+          emailController.text = accountModel.data!.email!;
+          appData.write(KkUserEmail, accountModel.data!.email!);
+        }
+      }
+
+      ToastUtil.showSuccessMessage('profile_updated_success'.tr);
+    } catch (e) {
+      String errorMsg = e.toString().replaceAll('Exception: ', '');
+      if (errorMsg.contains('Failure')) {
+        errorMsg = 'Failed to update profile. Please check your details and network connection.';
+      }
+      ToastUtil.showErrorMessage(errorMsg);
+    }
   }
 
   Future<void> toggleLanguage(bool val) async {

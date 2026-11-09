@@ -180,13 +180,8 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
             SizedBox(
               width: 110.w,
               child: CustomButton(
-                onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('profile_updated_success'.tr),
-                      backgroundColor: primaryOrange,
-                    ),
-                  );
+                onTap: () async {
+                  await accountProvider.saveProfile(context);
                 },
                 btnName: 'save'.tr,
               ),
@@ -745,13 +740,8 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                               SizedBox(
                                 width: 110.w,
                                 child: CustomButton(
-                                  onTap: () {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('supplier_profile_updated_success'.tr),
-                                        backgroundColor: primaryOrange,
-                                      ),
-                                    );
+                                  onTap: () async {
+                                    await accountProvider.saveProfile(context);
                                   },
                                   btnName: 'save'.tr,
                                 ),
