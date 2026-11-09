@@ -1,13 +1,16 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'constants/app_constants.dart';
+import 'constants/color.dart';
 import 'constants/image_const.dart';
 import 'helpers/all_routes.dart';
 import 'helpers/di.dart';
 import 'helpers/ui_helpers.dart';
 
+/// 2-Phase (White -> Primary Orange) Logo Animation Splash Screen
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -17,95 +20,119 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-  late AnimationController _entranceController;
-  late AnimationController _driftController;
-  late AnimationController _haloController;
+  late AnimationController _arcDrawController;
+  late AnimationController _bgWipeController;
+  late AnimationController _shimmerController;
+  late AnimationController _taglineController;
 
-  late Animation<double> _scaleXAnimation;
-  late Animation<double> _scaleYAnimation;
-  late Animation<double> _opacityAnimation;
-  late Animation<double> _slideAnimation;
-  late Animation<double> _wobbleAnimation;
-  late Animation<double> _haloAnimation;
+  late Animation<double> _arcProgress;
+  late Animation<double> _bgWipeProgress;
+  late Animation<double> _logoScale;
+  late Animation<double> _logoCrossFade;
+  late Animation<double> _taglineOpacity;
+  late Animation<double> _taglineSpacing;
+
   bool _hasNavigated = false;
+  bool _isOrangePhase = false;
 
   @override
   void initState() {
     super.initState();
 
-    // Hide status bar during splash launch animation
+    // Hide status bar during splash launch
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.manual,
       overlays: [],
     );
 
-    _entranceController = AnimationController(
+    // 1. Arc Stroke Circle Draw (Phase 1 on White Canvas)
+    _arcDrawController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1800),
+      duration: const Duration(milliseconds: 700),
     );
 
-    _driftController = AnimationController(
+    // 2. Radial Background Wipe (White -> Primary Orange)
+    _bgWipeController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 12),
-    )..repeat();
+      duration: const Duration(milliseconds: 850),
+    );
 
-    _haloController = AnimationController(
+    // 3. Continuous Metallic Light Beam Sweep across White Logo
+    _shimmerController = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2200),
-    )..repeat(reverse: true);
+    )..repeat();
 
-    // Squash & Stretch Spring Bounce X
-    _scaleXAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween<double>(begin: 0.4, end: 1.18).chain(CurveTween(curve: Curves.easeOut)), weight: 40),
-      TweenSequenceItem(tween: Tween<double>(begin: 1.18, end: 0.90).chain(CurveTween(curve: Curves.easeInOut)), weight: 25),
-      TweenSequenceItem(tween: Tween<double>(begin: 0.90, end: 1.05).chain(CurveTween(curve: Curves.easeInOut)), weight: 20),
-      TweenSequenceItem(tween: Tween<double>(begin: 1.05, end: 1.0).chain(CurveTween(curve: Curves.elasticOut)), weight: 15),
-    ]).animate(_entranceController);
+    // 4. Tagline Unmask & Letter Spacing Tracking
+    _taglineController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 800),
+    );
 
-    // Squash & Stretch Spring Bounce Y
-    _scaleYAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween<double>(begin: 0.4, end: 0.82).chain(CurveTween(curve: Curves.easeOut)), weight: 40),
-      TweenSequenceItem(tween: Tween<double>(begin: 0.82, end: 1.10).chain(CurveTween(curve: Curves.easeInOut)), weight: 25),
-      TweenSequenceItem(tween: Tween<double>(begin: 1.10, end: 0.96).chain(CurveTween(curve: Curves.easeInOut)), weight: 20),
-      TweenSequenceItem(tween: Tween<double>(begin: 0.96, end: 1.0).chain(CurveTween(curve: Curves.elasticOut)), weight: 15),
-    ]).animate(_entranceController);
+    // Arc Stroke Rotation
+    _arcProgress = CurvedAnimation(
+      parent: _arcDrawController,
+      curve: Curves.easeInOutCubic,
+    );
 
-    // Fade-in opacity
-    _opacityAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+    // Expanding Circle Fill Wipe Progress
+    _bgWipeProgress = CurvedAnimation(
+      parent: _bgWipeController,
+      curve: Curves.easeInOutCubic,
+    );
+
+    // Logo Spring Entrance Scale
+    _logoScale = TweenSequence<double>([
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 0.3, end: 1.15)
+            .chain(CurveTween(curve: Curves.elasticOut)),
+        weight: 60,
+      ),
+      TweenSequenceItem(
+        tween: Tween<double>(begin: 1.15, end: 1.0)
+            .chain(CurveTween(curve: Curves.easeInOutCubic)),
+        weight: 40,
+      ),
+    ]).animate(_arcDrawController);
+
+    // Cross-fade between initial brand mark and White Logo as screen turns orange
+    _logoCrossFade = CurvedAnimation(
+      parent: _bgWipeController,
+      curve: const Interval(0.2, 0.9, curve: Curves.easeInOut),
+    );
+
+    // Tagline Fade-in & Translation
+    _taglineOpacity = CurvedAnimation(
+      parent: _taglineController,
+      curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
+    );
+
+    // Tagline Dynamic Letter Spacing Expansion (0.5.sp -> 2.0.sp)
+    _taglineSpacing = Tween<double>(begin: 0.5, end: 2.0).animate(
       CurvedAnimation(
-        parent: _entranceController,
-        curve: const Interval(0.0, 0.4, curve: Curves.easeInOut),
+        parent: _taglineController,
+        curve: Curves.easeOutCubic,
       ),
     );
 
-    // Slide-up entrance translation
-    _slideAnimation = Tween<double>(begin: 70.0, end: 0.0).animate(
-      CurvedAnimation(
-        parent: _entranceController,
-        curve: const Interval(0.0, 0.6, curve: Curves.easeOutCubic),
-      ),
-    );
+    // Run Animation Pipeline
+    _runAnimationSequence();
+  }
 
-    // Playful rotation wobble
-    _wobbleAnimation = TweenSequence<double>([
-      TweenSequenceItem(tween: Tween<double>(begin: 0.0, end: 0.08), weight: 30),
-      TweenSequenceItem(tween: Tween<double>(begin: 0.08, end: -0.05), weight: 25),
-      TweenSequenceItem(tween: Tween<double>(begin: -0.05, end: 0.03), weight: 25),
-      TweenSequenceItem(tween: Tween<double>(begin: 0.03, end: 0.0), weight: 20),
-    ]).animate(_entranceController);
+  Future<void> _runAnimationSequence() async {
+    // Phase 1: Draw Arc Ring on White Background
+    await _arcDrawController.forward();
+    await Future.delayed(const Duration(milliseconds: 150));
 
-    // Halo pulse animation
-    _haloAnimation = Tween<double>(begin: 20.0, end: 50.0).animate(
-      CurvedAnimation(
-        parent: _haloController,
-        curve: Curves.easeInOutSine,
-      ),
-    );
+    // Phase 2: Radial Color Fill Wipe (White -> Primary Orange)
+    if (mounted) setState(() => _isOrangePhase = true);
+    await _bgWipeController.forward();
 
-    // Start entrance animation and navigate when completely finished
-    _entranceController.forward().whenComplete(() {
-      _navigateToNext();
-    });
+    // Phase 3: Reveal Tagline on Orange Background
+    await _taglineController.forward();
+    await Future.delayed(const Duration(milliseconds: 400));
+
+    _navigateToNext();
   }
 
   void _navigateToNext() {
@@ -125,9 +152,10 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
-    _entranceController.dispose();
-    _driftController.dispose();
-    _haloController.dispose();
+    _arcDrawController.dispose();
+    _bgWipeController.dispose();
+    _shimmerController.dispose();
+    _taglineController.dispose();
     SystemChrome.setEnabledSystemUIMode(
       SystemUiMode.manual,
       overlays: SystemUiOverlay.values,
@@ -138,205 +166,301 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
+      value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
+        statusBarIconBrightness:
+            _isOrangePhase ? Brightness.light : Brightness.dark,
+        statusBarBrightness:
+            _isOrangePhase ? Brightness.dark : Brightness.light,
       ),
       child: Scaffold(
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFFFFB5A4),
-                Color(0xFFFAA18F),
-                Color(0xFFDE745B),
-              ],
-            ),
-          ),
-          child: Stack(
-            children: [
-              // Drifting Water park & logistics background watermark pattern
-              Positioned.fill(
-                child: AnimatedBuilder(
-                  animation: _driftController,
-                  builder: (context, child) {
-                    return CustomPaint(
-                      painter: DriftingWaterParkPatternPainter(
-                        driftOffset: _driftController.value * 65.0,
-                      ),
-                    );
-                  },
-                ),
+        backgroundColor: Colors.white,
+        body: Stack(
+          children: [
+            // 1. Expanding Radial Color Fill Wipe (White -> Primary Orange)
+            Positioned.fill(
+              child: AnimatedBuilder(
+                animation: _bgWipeProgress,
+                builder: (context, child) {
+                  return CustomPaint(
+                    painter: RadialColorWipePainter(
+                      progress: _bgWipeProgress.value,
+                      fillColor: primaryOrange,
+                    ),
+                  );
+                },
               ),
+            ),
 
+            // 2. Center Stage (Rotating Arc Ring + Logo Morph + Shimmer Beam)
+            Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 230.w,
+                    height: 230.h,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // Arc Ring Stroke Draw
+                        AnimatedBuilder(
+                          animation: Listenable.merge([_arcProgress, _bgWipeProgress]),
+                          builder: (context, child) {
+                            return CustomPaint(
+                              size: Size(220.w, 220.h),
+                              painter: ArcRingPainter(
+                                progress: _arcProgress.value,
+                                color: _isOrangePhase ? Colors.white : primaryOrange,
+                              ),
+                            );
+                          },
+                        ),
 
-
-              // Center Ultra-Premium Content with White Logo, Squash & Stretch, Wobble & Pulsing Halo
-              Center(
-                child: AnimatedBuilder(
-                  animation: Listenable.merge([_entranceController, _haloController]),
-                  builder: (context, child) {
-                    return Opacity(
-                      opacity: _opacityAnimation.value,
-                      child: Transform.translate(
-                        offset: Offset(0, _slideAnimation.value),
-                        child: Transform(
-                          alignment: Alignment.center,
-                          transform: Matrix4.diagonal3Values(
-                                _scaleXAnimation.value,
-                                _scaleYAnimation.value,
-                                1.0,
-                              )
-                            ..rotateZ(_wobbleAnimation.value),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              // Banij Primary Logo Image with ultra-radiant pulsing halo
-                              Container(
+                        // Logo Cross-Fade & Shimmer Beam Transition
+                        AnimatedBuilder(
+                          animation: Listenable.merge(
+                              [_logoScale, _logoCrossFade, _shimmerController]),
+                          builder: (context, child) {
+                            final crossFadeVal = _logoCrossFade.value;
+                            return Transform.scale(
+                              scale: _logoScale.value,
+                              child: Container(
+                                padding: EdgeInsets.all(12.w),
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.white.withValues(alpha: 0.5),
-                                      blurRadius: _haloAnimation.value,
-                                      spreadRadius: _haloAnimation.value / 2,
-                                    ),
-                                    BoxShadow(
-                                      color: const Color(0xFFC74B30).withValues(alpha: 0.3),
-                                      blurRadius: 30,
-                                      spreadRadius: 5,
+                                      color: (_isOrangePhase ? Colors.white : primaryOrange)
+                                          .withValues(alpha: 0.35),
+                                      blurRadius: 35.r,
+                                      spreadRadius: 6.r,
                                     ),
                                   ],
                                 ),
-                                child: Image.asset(
-                                  logo,
-                                  width: 210.w,
-                                  fit: BoxFit.contain,
+                                child: Stack(
+                                  alignment: Alignment.center,
+                                  children: [
+                                    // Phase 1 Dark Brand Mark (Fades out)
+                                    Opacity(
+                                      opacity: (1.0 - crossFadeVal).clamp(0.0, 1.0),
+                                      child: Image.asset(
+                                        logo,
+                                        width: 175.w,
+                                        fit: BoxFit.contain,
+                                      ),
+                                    ),
+
+                                    // Phase 2 Crisp White Logo with Shimmer Beam (Fades in)
+                                    Opacity(
+                                      opacity: crossFadeVal,
+                                      child: ShaderMask(
+                                        blendMode: BlendMode.srcATop,
+                                        shaderCallback: (bounds) {
+                                          final progress = _shimmerController.value;
+                                          return LinearGradient(
+                                            begin: Alignment(
+                                              -2.5 + (progress * 5.0),
+                                              -0.5,
+                                            ),
+                                            end: Alignment(
+                                              -1.5 + (progress * 5.0),
+                                              0.5,
+                                            ),
+                                            colors: const [
+                                              Colors.white10,
+                                              Colors.white,
+                                              Colors.white10,
+                                            ],
+                                            stops: const [0.0, 0.5, 1.0],
+                                          ).createShader(bounds);
+                                        },
+                                        child: Image.asset(
+                                          whiteLogo,
+                                          width: 175.w,
+                                          fit: BoxFit.contain,
+                                          errorBuilder: (context, error, stackTrace) {
+                                            return Image.asset(
+                                              logo,
+                                              width: 175.w,
+                                              fit: BoxFit.contain,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              UIHelper.verticalSpace(24.h),
-                              // Subtitle text without card
-                              Text(
-                                'Wholesale & Supply Chain',
-                                style: TextStyle(
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white.withValues(alpha: 0.95),
-                                  letterSpacing: 1.5,
-                                ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  UIHelper.verticalSpace(26.h),
+
+                  // 3. Tagline Unmasking on Orange Background
+                  AnimatedBuilder(
+                    animation: _taglineController,
+                    builder: (context, child) {
+                      return Opacity(
+                        opacity: _taglineOpacity.value,
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 20.w,
+                            vertical: 8.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.18),
+                            borderRadius: BorderRadius.circular(30.r),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.4),
+                              width: 1.w,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.06),
+                                blurRadius: 10.r,
                               ),
                             ],
                           ),
+                          child: Text(
+                            'WHOLESALE & SUPPLY CHAIN ECOSYSTEM',
+                            style: TextStyle(
+                              fontSize: 11.5.sp,
+                              fontWeight: FontWeight.w800,
+                              color: Colors.white,
+                              letterSpacing: _taglineSpacing.value.sp,
+                            ),
+                          ),
                         ),
+                      );
+                    },
+                  ),
+                ],
+              ),
+            ),
+
+            // 4. Bottom Cinematic Loading & Copyright Label
+            Positioned(
+              bottom: 45.h,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: AnimatedBuilder(
+                  animation: _taglineController,
+                  builder: (context, child) {
+                    return Opacity(
+                      opacity: _taglineOpacity.value,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(
+                            width: 28.w,
+                            height: 28.h,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5.w,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white.withValues(alpha: 0.95),
+                              ),
+                            ),
+                          ),
+                          UIHelper.verticalSpace(14.h),
+                          Text(
+                            'Powered by Banij Network · v1.0.0',
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.white.withValues(alpha: 0.8),
+                              letterSpacing: 0.8.sp,
+                            ),
+                          ),
+                        ],
                       ),
                     );
                   },
                 ),
               ),
-
-              // Bottom Cinematic Loading Indicator
-              Positioned(
-                bottom: 50.h,
-                left: 0,
-                right: 0,
-                child: Center(
-                  child: FadeTransition(
-                    opacity: _opacityAnimation,
-                    child: SizedBox(
-                      width: 30.w,
-                      height: 30.h,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          Colors.white.withValues(alpha: 0.95),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
 
-class DriftingWaterParkPatternPainter extends CustomPainter {
-  final double driftOffset;
+/// Radial Color Fill Wipe Custom Painter (White -> Primary Orange)
+class RadialColorWipePainter extends CustomPainter {
+  final double progress;
+  final Color fillColor;
 
-  DriftingWaterParkPatternPainter({required this.driftOffset});
+  RadialColorWipePainter({required this.progress, required this.fillColor});
 
   @override
   void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.085)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.2;
+    if (progress <= 0) return;
+    final center = Offset(size.width / 2, size.height / 2 - 20.h);
+    final maxRadius = math.sqrt(size.width * size.width + size.height * size.height);
+    final currentRadius = maxRadius * progress;
 
-    final fillPaint = Paint()
-      ..color = Colors.white.withValues(alpha: 0.055)
+    final paint = Paint()
+      ..color = fillColor
       ..style = PaintingStyle.fill;
 
-    double spacingX = 65.0;
-    double spacingY = 65.0;
-
-    canvas.save();
-    canvas.translate(0, driftOffset);
-
-    int index = 0;
-    for (double x = 20; x < size.width; x += spacingX) {
-      for (double y = -spacingY; y < size.height + spacingY; y += spacingY) {
-        canvas.save();
-        canvas.translate(x, y);
-
-        if (index % 4 == 0) {
-          // Water drop shape
-          final path = Path();
-          path.moveTo(0, -9);
-          path.quadraticBezierTo(9, 4, 0, 11);
-          path.quadraticBezierTo(-9, 4, 0, -9);
-          canvas.drawPath(path, fillPaint);
-        } else if (index % 4 == 1) {
-          // Wave lines
-          final path = Path();
-          path.moveTo(-9, 0);
-          path.quadraticBezierTo(-4, -5, 0, 0);
-          path.quadraticBezierTo(4, 5, 9, 0);
-          canvas.drawPath(path, paint);
-        } else if (index % 4 == 2) {
-          // Park tree / Pine shape
-          final path = Path();
-          path.moveTo(0, -11);
-          path.lineTo(7, 4);
-          path.lineTo(3, 4);
-          path.lineTo(7, 9);
-          path.lineTo(-7, 9);
-          path.lineTo(-3, 4);
-          path.lineTo(-7, 4);
-          path.close();
-          canvas.drawPath(path, fillPaint);
-        } else {
-          // Small store box / diamond
-          canvas.drawRect(
-            Rect.fromCenter(center: Offset.zero, width: 13, height: 13),
-            paint,
-          );
-        }
-
-        canvas.restore();
-        index++;
-      }
-    }
-    canvas.restore();
+    canvas.drawCircle(center, currentRadius, paint);
   }
 
   @override
-  bool shouldRepaint(covariant DriftingWaterParkPatternPainter oldDelegate) {
-    return oldDelegate.driftOffset != driftOffset;
+  bool shouldRepaint(covariant RadialColorWipePainter oldDelegate) {
+    return oldDelegate.progress != progress || oldDelegate.fillColor != fillColor;
+  }
+}
+
+/// Rotating Arc Accent Ring Painter
+class ArcRingPainter extends CustomPainter {
+  final double progress;
+  final Color color;
+
+  ArcRingPainter({required this.progress, required this.color});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (progress <= 0) return;
+
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width / 2) - 4;
+
+    final rect = Rect.fromCircle(center: center, radius: radius);
+
+    final trackPaint = Paint()
+      ..color = color.withValues(alpha: 0.15)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
+
+    canvas.drawCircle(center, radius, trackPaint);
+
+    final arcPaint = Paint()
+      ..shader = LinearGradient(
+        colors: [
+          color.withValues(alpha: 0.2),
+          color,
+          Colors.white,
+        ],
+      ).createShader(rect)
+      ..style = PaintingStyle.stroke
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 3.5.w;
+
+    final startAngle = -math.pi / 2;
+    final sweepAngle = 2 * math.pi * progress;
+
+    canvas.drawArc(rect, startAngle, sweepAngle, false, arcPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant ArcRingPainter oldDelegate) {
+    return oldDelegate.progress != progress || oldDelegate.color != color;
   }
 }
