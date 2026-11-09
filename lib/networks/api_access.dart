@@ -5,6 +5,7 @@ import '../feature/auth/data/logout_rx.dart';
 import '../feature/auth/data/register_rx.dart';
 import '../feature/business/data/business_rx.dart';
 import '../feature/dashboard/data/dashboard_rx.dart';
+import '../feature/package/data/package_rx.dart';
 
 LoginRx loginRxObj = LoginRx();
 
@@ -19,3 +20,5 @@ AccountRx accountRxObj = AccountRx();
 DashboardRx dashboardRxObj = DashboardRx();
 
 BusinessRx businessRxObj = BusinessRx();
+
+PackageRx packageRxObj = PackageRx();

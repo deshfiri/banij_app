@@ -240,6 +240,9 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
         );
 
       case 'Package':
+        final packages = accountProvider.packageResponse?.data ?? [];
+        final selectedSlug = accountProvider.packageResponse?.selectedSlug;
+
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -260,157 +263,181 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
               ),
             ),
             UIHelper.verticalSpace(20.h),
-            Container(
-              padding: EdgeInsets.all(18.w),
-              decoration: BoxDecoration(
-                color: AppColorsTheme.cardBg(context),
-                borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(color: AppColorsTheme.borderColor(context)),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            if (packages.isEmpty)
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 40.h),
+                  child: CircularProgressIndicator(color: primaryOrange),
+                ),
+              )
+            else
+              ...packages.map((pkg) {
+                final isSelected = pkg.slug == selectedSlug;
+                return Container(
+                  margin: EdgeInsets.only(bottom: 16.h),
+                  padding: EdgeInsets.all(18.w),
+                  decoration: BoxDecoration(
+                    color: AppColorsTheme.cardBg(context),
+                    borderRadius: BorderRadius.circular(16.r),
+                    border: Border.all(
+                      color: isSelected ? primaryOrange : AppColorsTheme.borderColor(context),
+                      width: isSelected ? 2.w : 1.w,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        'standard_package'.tr,
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontWeight: FontWeight.bold,
-                          color: AppColorsTheme.textMainColor(context),
-                        ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 10.w,
-                          vertical: 4.h,
-                        ),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1E3A8A),
-                          borderRadius: BorderRadius.circular(20.r),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              Icons.local_shipping_outlined,
-                              size: 12.sp,
-                              color: Colors.white,
-                            ),
-                            SizedBox(width: 4.w),
-                            Text(
-                              'awaiting_payment'.tr,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              pkg.name ?? '',
                               style: TextStyle(
-                                fontSize: 11.sp,
+                                fontSize: 18.sp,
                                 fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                                color: AppColorsTheme.textMainColor(context),
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                          if (isSelected)
+                            Container(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 10.w,
+                                vertical: 4.h,
+                              ),
+                              decoration: BoxDecoration(
+                                color: primaryOrange,
+                                borderRadius: BorderRadius.circular(20.r),
+                              ),
+                              child: Text(
+                                'Selected',
+                                style: TextStyle(
+                                  fontSize: 11.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
-                    ],
-                  ),
-                  UIHelper.verticalSpace(8.h),
-                  Text(
-                    'no_package_renew'.tr,
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      color: AppColorsTheme.textMutedColor(context),
-                    ),
-                  ),
-                  UIHelper.verticalSpace(16.h),
-                  Text(
-                    'paid'.tr,
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      color: AppColorsTheme.textMutedColor(context),
-                    ),
-                  ),
-                  Text(
-                    '৳49,500.00',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColorsTheme.textMainColor(context),
-                    ),
-                  ),
-                  UIHelper.verticalSpace(12.h),
-                  Text(
-                    'renews_at'.tr,
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      color: AppColorsTheme.textMutedColor(context),
-                    ),
-                  ),
-                  Text(
-                    '৳25,500.00 · Yearly',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColorsTheme.textMainColor(context),
-                    ),
-                  ),
-                  UIHelper.verticalSpace(12.h),
-                  Text(
-                    'how_you_got_it'.tr,
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      color: AppColorsTheme.textMutedColor(context),
-                    ),
-                  ),
-                  Text(
-                    'purchased'.tr,
-                    style: TextStyle(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColorsTheme.textMainColor(context),
-                    ),
-                  ),
-                  UIHelper.verticalSpace(16.h),
-                  Divider(color: AppColorsTheme.borderColor(context)),
-                  UIHelper.verticalSpace(12.h),
-                  Text(
-                    'what_this_includes'.tr,
-                    style: TextStyle(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColorsTheme.textMainColor(context),
-                    ),
-                  ),
-                  UIHelper.verticalSpace(10.h),
-                  Container(
-                    padding: EdgeInsets.all(14.w),
-                    decoration: BoxDecoration(
-                      color: AppColorsTheme.background(context),
-                      borderRadius: BorderRadius.circular(10.r),
-                      border: Border.all(color: AppColorsTheme.borderColor(context)),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
+                      if (pkg.shortDescription != null && pkg.shortDescription!.isNotEmpty) ...[
+                        UIHelper.verticalSpace(6.h),
                         Text(
-                          'dedicated_website'.tr,
+                          pkg.shortDescription!,
                           style: TextStyle(
-                            fontSize: 14.sp,
-                            color: AppColorsTheme.textMainColor(context),
+                            fontSize: 13.sp,
+                            color: AppColorsTheme.textMutedColor(context),
+                          ),
+                        ),
+                      ],
+                      UIHelper.verticalSpace(16.h),
+                      if (pkg.fee?.formatted != null) ...[
+                        Text(
+                          'Fee',
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            color: AppColorsTheme.textMutedColor(context),
                           ),
                         ),
                         Text(
-                          'included'.tr,
+                          pkg.fee!.formatted!,
                           style: TextStyle(
-                            fontSize: 14.sp,
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.bold,
+                            color: AppColorsTheme.textMainColor(context),
+                          ),
+                        ),
+                        UIHelper.verticalSpace(12.h),
+                      ],
+                      if (pkg.activationTotal?.formatted != null) ...[
+                        Text(
+                          'Activation Total',
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            color: AppColorsTheme.textMutedColor(context),
+                          ),
+                        ),
+                        Text(
+                          pkg.activationTotal!.formatted!,
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.bold,
+                            color: AppColorsTheme.textMainColor(context),
+                          ),
+                        ),
+                        UIHelper.verticalSpace(12.h),
+                      ],
+                      if (pkg.validityDays != null) ...[
+                        Text(
+                          'Validity',
+                          style: TextStyle(
+                            fontSize: 11.sp,
+                            color: AppColorsTheme.textMutedColor(context),
+                          ),
+                        ),
+                        Text(
+                          '${pkg.validityDays} Days',
+                          style: TextStyle(
+                            fontSize: 15.sp,
                             fontWeight: FontWeight.w600,
                             color: AppColorsTheme.textMainColor(context),
                           ),
                         ),
+                        UIHelper.verticalSpace(16.h),
                       ],
-                    ),
+                      Divider(color: AppColorsTheme.borderColor(context)),
+                      UIHelper.verticalSpace(12.h),
+                      Text(
+                        'what_this_includes'.tr,
+                        style: TextStyle(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColorsTheme.textMainColor(context),
+                        ),
+                      ),
+                      UIHelper.verticalSpace(10.h),
+                      if (pkg.features == null || pkg.features!.isEmpty)
+                        Padding(
+                          padding: EdgeInsets.symmetric(vertical: 8.h),
+                          child: Text(
+                            'Data not found',
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontStyle: FontStyle.italic,
+                              color: AppColorsTheme.textMutedColor(context),
+                            ),
+                          ),
+                        )
+                      else
+                        ...pkg.features!.map((feature) => Container(
+                              margin: EdgeInsets.only(bottom: 8.h),
+                              padding: EdgeInsets.all(12.w),
+                              decoration: BoxDecoration(
+                                color: AppColorsTheme.background(context),
+                                borderRadius: BorderRadius.circular(10.r),
+                                border: Border.all(color: AppColorsTheme.borderColor(context)),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.check_circle, size: 16.sp, color: primaryOrange),
+                                  UIHelper.horizontalSpace(8.w),
+                                  Expanded(
+                                    child: Text(
+                                      feature,
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
+                                        color: AppColorsTheme.textMainColor(context),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                );
+              }),
           ],
         );
 
