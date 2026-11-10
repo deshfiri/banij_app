@@ -6,6 +6,7 @@ import '../feature/auth/data/register_rx.dart';
 import '../feature/business/data/business_rx.dart';
 import '../feature/business/data/kyc_rx.dart';
 import '../feature/dashboard/data/dashboard_rx.dart';
+import '../feature/dashboard/data/order_rx.dart';
 import '../feature/dashboard/data/product_rx.dart';
 import '../feature/notification/data/notification_rx.dart';
 import '../feature/package/data/package_rx.dart';
@@ -31,3 +32,4 @@ NotificationRx notificationRxObj = NotificationRx();
 KycRx kycRxObj = KycRx();
 
 MyProductRx myProductRxObj = MyProductRx();
+OrderRx orderRxObj = OrderRx();

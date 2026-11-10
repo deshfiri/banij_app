@@ -10,6 +10,7 @@ import '../../../../helpers/all_routes.dart';
 import '../../../../helpers/ui_helpers.dart';
 import '../../../../providers/dashboard_provider.dart';
 import '../../../finance/presentation/widgets/invoices_receipts_sheet.dart';
+import 'order_category_detail_sheet.dart';
 import 'product_category_detail_sheet.dart';
 
 class HubItem {
@@ -142,6 +143,12 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
           ? 'Receipts'
           : 'Invoices';
       InvoicesReceiptsSheet.show(context, initialTab: initialTab);
+    } else if (item.category == 'Sales & Orders' ||
+        item.titleKey == 'hub_orders' ||
+        item.titleKey == 'hub_all_orders' ||
+        item.titleKey == 'hub_store_orders' ||
+        item.titleKey == 'hub_customers') {
+      OrderCategoryDetailSheet.show(context, item.titleKey.tr);
     } else {
       final isCatalog = item.category == 'catalog' || item.titleKey == 'hub_products';
       ProductCategoryDetailSheet.show(context, item.titleKey.tr, isCatalog: isCatalog);
@@ -475,7 +482,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                             value: '4 Pending',
                             icon: Icons.format_list_bulleted_rounded,
                             color: const Color(0xFF0284C7),
-                            onTap: () => ProductCategoryDetailSheet.show(context, 'hub_orders'.tr),
+                            onTap: () => OrderCategoryDetailSheet.show(context, 'hub_orders'.tr),
                           ),
                         ),
                       ],

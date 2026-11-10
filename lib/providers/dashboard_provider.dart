@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../feature/account/model/account_model.dart';
 import '../feature/dashboard/model/dashboard_model.dart';
 import '../feature/dashboard/model/my_product_model.dart';
+import '../feature/dashboard/model/order_model.dart';
 import '../feature/package/model/package_model.dart';
 import '../helpers/toast.dart';
 import '../networks/api_access.dart';
@@ -17,6 +18,7 @@ class DashboardProvider extends ChangeNotifier {
   PackageResponseModel? packageResponse;
   MyProductResponseModel? myProductResponse;
   MyProductResponseModel? catalogProductResponse;
+  OrderResponseModel? orderResponse;
   AccountModel? accountModel;
 
   int get currentIndex => _currentIndex;
@@ -46,6 +48,27 @@ class DashboardProvider extends ChangeNotifier {
 
   bool _isLoadingProducts = false;
   bool get isLoadingProducts => _isLoadingProducts;
+
+  bool _isLoadingOrders = false;
+  bool get isLoadingOrders => _isLoadingOrders;
+
+  Future<void> fetchOrders() async {
+    _isLoadingOrders = true;
+    notifyListeners();
+
+    try {
+      orderResponse = await orderRxObj.fetchOrders();
+    } catch (e) {
+      orderResponse = OrderResponseModel(data: []);
+      String err = e.toString().replaceAll('Exception: ', '');
+      if (err.isNotEmpty) {
+        ToastUtil.showErrorMessage(err);
+      }
+    } finally {
+      _isLoadingOrders = false;
+      notifyListeners();
+    }
+  }
 
   Future<void> fetchMyProducts() async {
     _isLoadingProducts = true;
