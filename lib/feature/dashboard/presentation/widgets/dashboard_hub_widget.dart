@@ -48,8 +48,8 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
   final List<HubItem> _allHubItems = const [
     HubItem(
       titleKey: 'hub_products',
-      category: 'Products',
-      tagKey: 'tag_products',
+      category: 'catalog',
+      tagKey: 'catalog',
       iconData: Icons.shopping_bag_outlined,
       categoryColor: primaryOrange,
     ),

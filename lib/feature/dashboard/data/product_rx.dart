@@ -2,7 +2,7 @@ import 'package:rxdart/rxdart.dart';
 
 import '../../../networks/rx_base.dart';
 import '../model/my_product_model.dart';
-import 'my_product_api.dart';
+import 'product_api.dart';
 
 final class MyProductRx extends RxResponseInt<MyProductResponseModel> {
   final MyProductApi _api = MyProductApi.instance;

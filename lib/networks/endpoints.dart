@@ -32,6 +32,11 @@ final class EndPoints {
   static String notification()=>"/notifications";
   static String accountDelete()=>"/account-deletion";
   static String myProduct()=>"/my-products";
+  static String productCatalog()=>"/catalog";
+  static String catalog() => "/catalog";
+  static String catalogWholesale() => "/catalog/wholesale";
+  static String catalogDropshipping() => "/catalog/dropshipping";
+  static String allocatedStock() => "/allocated-stock";
   static String requestRevierw() => "/finance/finance_requisition_list.php";
   static String allRequestReview() =>
       "/finance/finance_requisition_crn_list.php";

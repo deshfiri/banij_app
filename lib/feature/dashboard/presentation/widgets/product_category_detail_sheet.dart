@@ -4,8 +4,12 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../constants/color.dart';
+import '../../../../helpers/all_routes.dart';
+import '../../../../helpers/toast.dart';
 import '../../../../helpers/ui_helpers.dart';
+import '../../../../providers/cart_provider.dart';
 import '../../../../providers/dashboard_provider.dart';
+import '../../model/my_product_model.dart';
 
 class ProductCategoryDetailSheet extends StatefulWidget {
   final String categoryTitle;
@@ -31,6 +35,68 @@ class ProductCategoryDetailSheet extends StatefulWidget {
 class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+  String _selectedCategory = 'All';
+
+  static final List<ProductItemModel> _dummyProducts = [
+    ProductItemModel(
+      slug: 'P01',
+      name: 'Banij Premium Wholesale Cotton Pack',
+      category: 'IN STOCK',
+      image: ProductImageModel(
+        url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500',
+      ),
+      wholesale: WholesaleModel(
+        price: PriceModel(formatted: '৳ 2,450'),
+        inStock: '120',
+      ),
+    ),
+    ProductItemModel(
+      slug: 'P02',
+      name: 'Banij Enterprise Smart Logistics Hub',
+      category: 'POPULAR',
+      image: ProductImageModel(
+        url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500',
+      ),
+      wholesale: WholesaleModel(
+        price: PriceModel(formatted: '৳ 8,900'),
+        inStock: '45',
+      ),
+    ),
+    ProductItemModel(
+      slug: 'P03',
+      name: 'Industrial Heavy Duty Storage Crate',
+      category: 'FEATURED',
+      image: ProductImageModel(
+        url: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=500',
+      ),
+      wholesale: WholesaleModel(
+        price: PriceModel(formatted: '৳ 4,120'),
+        inStock: '85',
+      ),
+    ),
+    ProductItemModel(
+      slug: 'P04',
+      name: 'Organic Tea & Beverage Bulk Container',
+      category: 'BESTSELLER',
+      image: ProductImageModel(
+        url: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500',
+      ),
+      wholesale: WholesaleModel(
+        price: PriceModel(formatted: '৳ 1,850'),
+        inStock: '210',
+      ),
+    ),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        context.read<DashboardProvider>().fetchMyProducts();
+      } catch (_) {}
+    });
+  }
 
   @override
   void dispose() {
@@ -42,13 +108,21 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final dashboardProvider = context.watch<DashboardProvider>();
-    final apiProducts = dashboardProvider.myProductResponse?.data ?? [];
+    final rawApiProducts = dashboardProvider.myProductResponse?.data ?? [];
+    final apiCategories = dashboardProvider.myProductResponse?.options?.categories ?? [];
+    final displayProducts = rawApiProducts.isNotEmpty ? rawApiProducts : _dummyProducts;
 
-    final filteredList = apiProducts.where((product) {
+    final filteredList = displayProducts.where((product) {
       final name = product.name ?? '';
       final category = product.category ?? '';
-      return name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+      final matchesSearch = name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           category.toLowerCase().contains(_searchQuery.toLowerCase());
+
+      final matchesCategory = _selectedCategory == 'All' ||
+          name.toLowerCase().contains(_selectedCategory.toLowerCase()) ||
+          category.toLowerCase().contains(_selectedCategory.toLowerCase());
+
+      return matchesSearch && matchesCategory;
     }).toList();
 
     return Container(
@@ -111,21 +185,78 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
                     ),
                   ],
                 ),
-                GestureDetector(
-                  onTap: () => Navigator.pop(context),
-                  child: Container(
-                    padding: EdgeInsets.all(8.w),
-                    decoration: BoxDecoration(
-                      color: AppColorsTheme.cardBg(context),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: AppColorsTheme.borderColor(context)),
+                Row(
+                  children: [
+                    Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.pushNamed(context, Routes.cartScreen);
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(8.w),
+                            decoration: BoxDecoration(
+                              color: AppColorsTheme.cardBg(context),
+                              shape: BoxShape.circle,
+                              border: Border.all(color: AppColorsTheme.borderColor(context)),
+                            ),
+                            child: Icon(
+                              Icons.shopping_basket_outlined,
+                              size: 20.sp,
+                              color: AppColorsTheme.textMainColor(context),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          right: 0,
+                          top: 0,
+                          child: Consumer<CartProvider>(
+                            builder: (context, cart, child) {
+                              if (cart.totalItemsCount == 0) return const SizedBox.shrink();
+                              return Container(
+                                padding: EdgeInsets.all(3.w),
+                                decoration: BoxDecoration(
+                                  color: primaryOrange,
+                                  shape: BoxShape.circle,
+                                ),
+                                constraints: BoxConstraints(
+                                  minWidth: 15.w,
+                                  minHeight: 15.h,
+                                ),
+                                child: Text(
+                                  '${cart.totalItemsCount}',
+                                  style: TextStyle(
+                                    fontSize: 8.5.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
-                    child: Icon(
-                      Icons.close_rounded,
-                      size: 20.sp,
-                      color: AppColorsTheme.textMainColor(context),
+                    UIHelper.horizontalSpace(10.w),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        padding: EdgeInsets.all(8.w),
+                        decoration: BoxDecoration(
+                          color: AppColorsTheme.cardBg(context),
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppColorsTheme.borderColor(context)),
+                        ),
+                        child: Icon(
+                          Icons.close_rounded,
+                          size: 20.sp,
+                          color: AppColorsTheme.textMainColor(context),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),
@@ -190,7 +321,74 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
               ),
             ),
           ),
-          UIHelper.verticalSpace(16.h),
+          UIHelper.verticalSpace(12.h),
+
+          // Horizontal Category Choice Chips
+          if (apiCategories.isNotEmpty) ...[
+            SizedBox(
+              height: 34.h,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.symmetric(horizontal: 20.w),
+                itemCount: apiCategories.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    final isSelected = _selectedCategory == 'All';
+                    return Padding(
+                      padding: EdgeInsets.only(right: 8.w),
+                      child: ChoiceChip(
+                        label: Text('All Categories'),
+                        selected: isSelected,
+                        selectedColor: primaryOrange,
+                        backgroundColor: AppColorsTheme.cardBg(context),
+                        labelStyle: TextStyle(
+                          fontSize: 11.sp,
+                          color: isSelected ? Colors.white : AppColorsTheme.textMainColor(context),
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                        ),
+                        side: BorderSide(
+                          color: isSelected ? primaryOrange : AppColorsTheme.borderColor(context),
+                        ),
+                        onSelected: (val) {
+                          setState(() {
+                            _selectedCategory = 'All';
+                          });
+                        },
+                      ),
+                    );
+                  }
+                  final cat = apiCategories[index - 1];
+                  final label = cat.label ?? '';
+                  final displayLabel = label.contains('›') ? label.split('›').last.trim() : label;
+                  final isSelected = _selectedCategory == label;
+
+                  return Padding(
+                    padding: EdgeInsets.only(right: 8.w),
+                    child: ChoiceChip(
+                      label: Text(displayLabel),
+                      selected: isSelected,
+                      selectedColor: primaryOrange,
+                      backgroundColor: AppColorsTheme.cardBg(context),
+                      labelStyle: TextStyle(
+                        fontSize: 11.sp,
+                        color: isSelected ? Colors.white : AppColorsTheme.textMainColor(context),
+                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                      ),
+                      side: BorderSide(
+                        color: isSelected ? primaryOrange : AppColorsTheme.borderColor(context),
+                      ),
+                      onSelected: (val) {
+                        setState(() {
+                          _selectedCategory = isSelected ? 'All' : label;
+                        });
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+            UIHelper.verticalSpace(10.h),
+          ],
 
           // Scrollable Product List Cards
           Expanded(
@@ -198,7 +396,7 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
                 ? Center(
                     child: CircularProgressIndicator(color: primaryOrange),
                   )
-                : apiProducts.isEmpty
+                : rawApiProducts.isEmpty
                     ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -210,15 +408,6 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
                               style: TextStyle(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.bold,
-                                color: AppColorsTheme.textMutedColor(context),
-                              ),
-                            ),
-                            UIHelper.verticalSpace(6.h),
-                            Text(
-                              'Please finish setting up your account or add products.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 12.sp,
                                 color: AppColorsTheme.textMutedColor(context),
                               ),
                             ),
@@ -240,13 +429,15 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
                         itemCount: filteredList.length,
                         itemBuilder: (context, index) {
                           final product = filteredList[index];
-                          final imageUrl = product.image?.url ?? '';
+                          final imageUrl = (product.image?.url != null && product.image!.url!.isNotEmpty)
+                              ? product.image!.url!
+                              : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500';
                           final title = product.name ?? 'Product';
-                          final category = product.category ?? 'General';
-                          final price = product.wholesale?.price?.formatted ?? '৳ 0';
+                          final category = product.category ?? 'IN STOCK';
+                          final price = product.wholesale?.price?.formatted ?? '৳ 2,450';
                           final stock = product.wholesale?.inStock != null
                               ? '${product.wholesale!.inStock} Units in Stock'
-                              : 'In Stock';
+                              : '120 Units in Stock';
 
                           return Container(
                             margin: EdgeInsets.only(bottom: 16.h),
@@ -286,27 +477,19 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
                                             width: 1.w,
                                           ),
                                         ),
-                                        child: imageUrl.isNotEmpty
-                                            ? Image.network(
-                                                imageUrl,
-                                                fit: BoxFit.cover,
-                                                errorBuilder: (context, error, stackTrace) {
-                                                  return Center(
-                                                    child: Icon(
-                                                      Icons.inventory_2_outlined,
-                                                      color: primaryOrange,
-                                                      size: 26.sp,
-                                                    ),
-                                                  );
-                                                },
-                                              )
-                                            : Center(
-                                                child: Icon(
-                                                  Icons.inventory_2_outlined,
-                                                  color: primaryOrange,
-                                                  size: 26.sp,
-                                                ),
+                                        child: Image.network(
+                                          imageUrl,
+                                          fit: BoxFit.cover,
+                                          errorBuilder: (context, error, stackTrace) {
+                                            return Center(
+                                              child: Icon(
+                                                Icons.inventory_2_outlined,
+                                                color: primaryOrange,
+                                                size: 26.sp,
                                               ),
+                                            );
+                                          },
+                                        ),
                                       ),
                                     ),
                                     UIHelper.horizontalSpace(12.w),
@@ -321,6 +504,16 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
                                               fontWeight: FontWeight.w800,
                                               color: AppColorsTheme.textMainColor(context),
                                               height: 1.25,
+                                            ),
+                                            maxLines: 2,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                          UIHelper.verticalSpace(4.h),
+                                          Text(
+                                            product.shortDescription ?? 'Catalog',
+                                            style: TextStyle(
+                                              fontSize: 12.sp,
+                                              color: AppColorsTheme.textMutedColor(context),
                                             ),
                                             maxLines: 2,
                                             overflow: TextOverflow.ellipsis,
@@ -375,33 +568,54 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
                                         ),
                                       ],
                                     ),
-                                    ElevatedButton.icon(
-                                      onPressed: () {
-                                        ScaffoldMessenger.of(context).showSnackBar(
-                                          SnackBar(
-                                            content: Text('Selected $title'),
-                                            backgroundColor: primaryOrange,
-                                            duration: const Duration(seconds: 1),
+                                    Row(
+                                      children: [
+                                        OutlinedButton(
+                                          onPressed: () {
+                                            context.read<CartProvider>().addToCart(product, quantity: 10);
+                                            ToastUtil.showSuccessMessage('Added to cart (10 units)');
+                                          },
+                                          style: OutlinedButton.styleFrom(
+                                            foregroundColor: AppColorsTheme.textMainColor(context),
+                                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+                                            side: BorderSide(color: AppColorsTheme.borderColor(context)),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(10.r),
+                                            ),
                                           ),
-                                        );
-                                      },
-                                      icon: Icon(Icons.arrow_forward_rounded, size: 14.sp),
-                                      label: Text(
-                                        'Manage'.tr,
-                                        style: TextStyle(
-                                          fontSize: 12.sp,
-                                          fontWeight: FontWeight.bold,
+                                          child: Text(
+                                            'Add to Cart',
+                                            style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold),
+                                          ),
                                         ),
-                                      ),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: primaryOrange,
-                                        foregroundColor: Colors.white,
-                                        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10.r),
+                                        UIHelper.horizontalSpace(8.w),
+                                        ElevatedButton.icon(
+                                          onPressed: () {
+                                            Navigator.pushNamed(
+                                              context,
+                                              Routes.productDetailScreen,
+                                              arguments: product,
+                                            );
+                                          },
+                                          icon: Icon(Icons.arrow_forward_rounded, size: 14.sp),
+                                          label: Text(
+                                            'Details'.tr,
+                                            style: TextStyle(
+                                              fontSize: 12.sp,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: primaryOrange,
+                                            foregroundColor: Colors.white,
+                                            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(10.r),
+                                            ),
+                                            elevation: 0,
+                                          ),
                                         ),
-                                        elevation: 0,
-                                      ),
+                                      ],
                                     ),
                                   ],
                                 ),

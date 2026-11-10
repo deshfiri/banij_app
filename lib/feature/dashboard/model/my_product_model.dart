@@ -2,12 +2,14 @@ import 'dart:convert';
 
 class MyProductResponseModel {
   final List<ProductItemModel>? data;
+  final ProductOptionsModel? options;
   final bool? facilityAllowed;
   final bool? success;
   final String? message;
 
   MyProductResponseModel({
     this.data,
+    this.options,
     this.facilityAllowed,
     this.success,
     this.message,
@@ -20,12 +22,21 @@ class MyProductResponseModel {
 
   factory MyProductResponseModel.fromJson(dynamic jsonInput) {
     if (jsonInput is Map<String, dynamic>) {
-      final dataList = jsonInput["data"] ?? [];
+      final rawData = jsonInput["data"];
+      final optionsModel = jsonInput["options"] != null && jsonInput["options"] is Map<String, dynamic>
+          ? ProductOptionsModel.fromJson(jsonInput["options"])
+          : null;
+
+      List<ProductItemModel> items = [];
+
+      if (rawData is List && rawData.isNotEmpty) {
+        items = List<ProductItemModel>.from(
+            rawData.map((x) => ProductItemModel.fromJson(x)));
+      }
+
       return MyProductResponseModel(
-        data: dataList is List
-            ? List<ProductItemModel>.from(
-                dataList.map((x) => ProductItemModel.fromJson(x)))
-            : [],
+        data: items,
+        options: optionsModel,
         facilityAllowed: jsonInput["facility_allowed"] is bool
             ? jsonInput["facility_allowed"]
             : null,
@@ -38,9 +49,54 @@ class MyProductResponseModel {
 
   Map<String, dynamic> toJson() => {
         "data": data != null ? List<dynamic>.from(data!.map((x) => x.toJson())) : [],
+        "options": options?.toJson(),
         "facility_allowed": facilityAllowed,
         if (success != null) "success": success,
         if (message != null) "message": message,
+      };
+}
+
+class ProductOptionsModel {
+  final List<CategoryOptionModel>? categories;
+  final List<CategoryOptionModel>? brands;
+
+  ProductOptionsModel({this.categories, this.brands});
+
+  factory ProductOptionsModel.fromJson(Map<String, dynamic> json) => ProductOptionsModel(
+        categories: json["categories"] is List
+            ? List<CategoryOptionModel>.from(
+                json["categories"].map((x) => CategoryOptionModel.fromJson(x)))
+            : [],
+        brands: json["brands"] is List
+            ? List<CategoryOptionModel>.from(
+                json["brands"].map((x) => CategoryOptionModel.fromJson(x)))
+            : [],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "categories": categories != null
+            ? List<dynamic>.from(categories!.map((x) => x.toJson()))
+            : [],
+        "brands": brands != null
+            ? List<dynamic>.from(brands!.map((x) => x.toJson()))
+            : [],
+      };
+}
+
+class CategoryOptionModel {
+  final String? value;
+  final String? label;
+
+  CategoryOptionModel({this.value, this.label});
+
+  factory CategoryOptionModel.fromJson(Map<String, dynamic> json) => CategoryOptionModel(
+        value: json["value"]?.toString(),
+        label: json["label"]?.toString(),
+      );
+
+  Map<String, dynamic> toJson() => {
+        "value": value,
+        "label": label,
       };
 }
 
@@ -50,6 +106,7 @@ class ProductItemModel {
   final String? sku;
   final String? category;
   final String? brand;
+  final String? shortDescription;
   final bool? isFeatured;
   final String? purchased;
   final String? ownership;
@@ -64,6 +121,7 @@ class ProductItemModel {
     this.sku,
     this.category,
     this.brand,
+    this.shortDescription,
     this.isFeatured,
     this.purchased,
     this.ownership,
@@ -85,6 +143,7 @@ class ProductItemModel {
         sku: json["sku"] as String?,
         category: json["category"] as String?,
         brand: json["brand"] as String?,
+        shortDescription: json["short_description"]?.toString() ?? json["description"]?.toString(),
         isFeatured: json["is_featured"] is bool ? json["is_featured"] : null,
         purchased: json["purchased"]?.toString(),
         ownership: json["ownership"] as String?,
@@ -107,6 +166,7 @@ class ProductItemModel {
         "sku": sku,
         "category": category,
         "brand": brand,
+        "short_description": shortDescription,
         "is_featured": isFeatured,
         "purchased": purchased,
         "ownership": ownership,

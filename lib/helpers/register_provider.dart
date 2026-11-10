@@ -2,6 +2,7 @@ import 'package:provider/provider.dart';
 
 import '../providers/account_provider.dart';
 import '../providers/auth_provider.dart';
+import '../providers/cart_provider.dart';
 import '../providers/change_pass_provider.dart';
 import '../providers/dashboard_provider.dart';
 import '../providers/delete_account_provider.dart';
@@ -22,6 +23,7 @@ var providers = [
   ChangeNotifierProvider<DashboardProvider>(create: (_) => DashboardProvider()),
   ChangeNotifierProvider<SupplierDashboardProvider>(create: (_) => SupplierDashboardProvider()),
   ChangeNotifierProvider<AccountProvider>(create: (_) => AccountProvider()),
+  ChangeNotifierProvider<CartProvider>(create: (_) => CartProvider()),
   ChangeNotifierProvider<KycVerificationProvider>(create: (_) => KycVerificationProvider()),
   ChangeNotifierProvider<ChangePassProvider>(create: (_) => ChangePassProvider()),
   ChangeNotifierProvider<NotificationProvider>(create: (_) => NotificationProvider()),

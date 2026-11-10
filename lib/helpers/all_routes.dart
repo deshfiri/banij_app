@@ -14,7 +14,11 @@ import '../feature/business/presentation/kyc_verification_screen.dart';
 import '../feature/business/presentation/notification_screen.dart';
 import '../feature/business/presentation/supplier_dashboard_screen.dart';
 import '../feature/business/presentation/verification_history_screen.dart';
+import '../feature/dashboard/model/my_product_model.dart';
 import '../feature/dashboard/presentation/dashboard_screen.dart';
+import '../feature/dashboard/presentation/product_detail_screen.dart';
+import '../feature/dashboard/presentation/cart_screen.dart';
+import '../feature/dashboard/presentation/order_now_screen.dart';
 
 final class Routes {
   static final Routes _routes = Routes._internal();
@@ -34,6 +38,9 @@ final class Routes {
   static const String changePasswordScreen = '/changePasswordScreen';
   static const String deleteAccountScreen = '/deleteAccountScreen';
   static const String dashboardScreen = '/dashboardScreen';
+  static const String productDetailScreen = '/productDetailScreen';
+  static const String cartScreen = '/cartScreen';
+  static const String orderNowScreen = '/orderNowScreen';
 }
 
 final class RouteGenerator {
@@ -96,6 +103,20 @@ final class RouteGenerator {
         return Platform.isAndroid
             ? _LightningFastTransitionRoute(widget: const DashboardScreen(), settings: settings)
             : CupertinoPageRoute(builder: (context) => const DashboardScreen(), settings: settings);
+      case Routes.productDetailScreen:
+        final product = settings.arguments as ProductItemModel?;
+        return Platform.isAndroid
+            ? _LightningFastTransitionRoute(widget: ProductDetailScreen(product: product), settings: settings)
+            : CupertinoPageRoute(builder: (context) => ProductDetailScreen(product: product), settings: settings);
+      case Routes.cartScreen:
+        return Platform.isAndroid
+            ? _LightningFastTransitionRoute(widget: const CartScreen(), settings: settings)
+            : CupertinoPageRoute(builder: (context) => const CartScreen(), settings: settings);
+      case Routes.orderNowScreen:
+        final product = settings.arguments as ProductItemModel?;
+        return Platform.isAndroid
+            ? _LightningFastTransitionRoute(widget: OrderNowScreen(product: product), settings: settings)
+            : CupertinoPageRoute(builder: (context) => OrderNowScreen(product: product), settings: settings);
     }
 
     return null;
