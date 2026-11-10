@@ -32,6 +32,7 @@ final class EndPoints {
   static String notification()=>"/notifications";
   static String accountDelete()=>"/account-deletion";
   static String myProduct()=>"/my-products";
+  static String verificationHistory()=>"/kyc/history";
   static String order()=>"/orders";
   static String productCatalog()=>"/catalog";
   static String catalog() => "/catalog";

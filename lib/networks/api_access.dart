@@ -5,6 +5,7 @@ import '../feature/auth/data/logout_rx.dart';
 import '../feature/auth/data/register_rx.dart';
 import '../feature/business/data/business_rx.dart';
 import '../feature/business/data/kyc_rx.dart';
+import '../feature/business/data/verification_history_rx.dart';
 import '../feature/dashboard/data/dashboard_rx.dart';
 import '../feature/dashboard/data/order_rx.dart';
 import '../feature/dashboard/data/product_rx.dart';
@@ -30,6 +31,7 @@ PackageRx packageRxObj = PackageRx();
 NotificationRx notificationRxObj = NotificationRx();
 
 KycRx kycRxObj = KycRx();
+VerificationHistoryRx verificationHistoryRxObj = VerificationHistoryRx();
 
 MyProductRx myProductRxObj = MyProductRx();
 OrderRx orderRxObj = OrderRx();

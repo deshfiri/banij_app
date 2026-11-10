@@ -3,22 +3,48 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../constants/color.dart';
+import '../../../networks/api_access.dart';
 import '../../../helpers/ui_helpers.dart';
+import '../model/verification_history_model.dart';
 
-class VerificationHistoryScreen extends StatelessWidget {
+class VerificationHistoryScreen extends StatefulWidget {
   const VerificationHistoryScreen({super.key});
 
   @override
+  State<VerificationHistoryScreen> createState() => _VerificationHistoryScreenState();
+}
+
+class _VerificationHistoryScreenState extends State<VerificationHistoryScreen> {
+  bool _isLoading = true;
+  VerificationHistoryResponseModel? _responseModel;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchData();
+  }
+
+  Future<void> _fetchData() async {
+    setState(() {
+      _isLoading = true;
+    });
+    try {
+      _responseModel = await verificationHistoryRxObj.fetchVerificationHistory();
+    } catch (_) {
+      _responseModel = VerificationHistoryResponseModel(data: []);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Sample verification history records list
-    final List<Map<String, String>> verificationRecords = [
-      {
-        'title': 'verification'.tr,
-        'meta': 'verification_meta'.tr,
-        'status': 'approved'.tr,
-        'due': 'verification_due'.tr,
-      },
-    ];
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final records = _responseModel?.data ?? [];
 
     return Scaffold(
       backgroundColor: AppColorsTheme.background(context),
@@ -60,95 +86,182 @@ class VerificationHistoryScreen extends StatelessWidget {
               ),
             ),
 
-            // Content Body with ListView.builder
+            // Content Body
             Expanded(
-              child: ListView.builder(
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-                itemCount: verificationRecords.length,
-                itemBuilder: (context, index) {
-                  final record = verificationRecords[index];
-                  return Container(
-                    margin: EdgeInsets.only(bottom: 16.h),
-                    padding: EdgeInsets.all(16.w),
-                    decoration: BoxDecoration(
-                      color: AppColorsTheme.cardBg(context),
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(
-                        color: AppColorsTheme.borderColor(context),
-                        width: 1.w,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Title
-                        Text(
-                          record['title'] ?? '',
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.bold,
-                            color: AppColorsTheme.textMainColor(context),
-                          ),
-                        ),
-                        UIHelper.verticalSpace(6.h),
-
-                        // Meta Dates
-                        Text(
-                          record['meta'] ?? '',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: AppColorsTheme.textMutedColor(context),
-                            height: 1.4,
-                          ),
-                        ),
-                        UIHelper.verticalSpace(14.h),
-
-                        // Status Badge (Approved)
-                        Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: 10.w,
-                            vertical: 4.h,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF065F46).withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(20.r),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
+              child: _isLoading
+                  ? Center(
+                      child: CircularProgressIndicator(color: primaryOrange),
+                    )
+                  : records.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Icon(
-                                Icons.check_circle_outline,
-                                color: const Color(0xFF10B981),
-                                size: 14.sp,
+                                Icons.history_edu_outlined,
+                                size: 54.sp,
+                                color: AppColorsTheme.textMutedColor(context),
                               ),
-                              UIHelper.horizontalSpace(6.w),
+                              UIHelper.verticalSpace(12.h),
                               Text(
-                                record['status'] ?? '',
+                                'Verification history not found',
                                 style: TextStyle(
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: const Color(0xFF10B981),
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColorsTheme.textMutedColor(context),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                        UIHelper.verticalSpace(14.h),
+                        )
+                      : ListView.builder(
+                          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+                          itemCount: records.length,
+                          itemBuilder: (context, index) {
+                            final record = records[index];
+                            final statusLabel = record.statusLabel ?? record.status ?? 'Approved';
+                            final isSuccess = (record.status?.toLowerCase() == 'approved' || record.statusTone == 'success');
+                            final deadline = record.deadlineAt != null ? 'Deadline: ${record.deadlineAt}' : '';
+                            final daysRem = record.daysRemaining != null ? '${record.daysRemaining} days remaining' : '';
 
-                        // Due Date & Remaining Days
-                        Text(
-                          record['due'] ?? '',
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            fontWeight: FontWeight.w500,
-                            color: AppColorsTheme.textMainColor(context),
-                          ),
+                            return Container(
+                              margin: EdgeInsets.only(bottom: 16.h),
+                              padding: EdgeInsets.all(16.w),
+                              decoration: BoxDecoration(
+                                color: AppColorsTheme.cardBg(context),
+                                borderRadius: BorderRadius.circular(16.r),
+                                border: Border.all(
+                                  color: AppColorsTheme.borderColor(context),
+                                  width: 1.w,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
+                                    blurRadius: 10.r,
+                                    offset: const Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Title / ID
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'KYC Submission',
+                                        style: TextStyle(
+                                          fontSize: 16.sp,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColorsTheme.textMainColor(context),
+                                        ),
+                                      ),
+                                      if (record.id != null)
+                                        Text(
+                                          'ID: ${record.id!.substring(0, 8)}...',
+                                          style: TextStyle(
+                                            fontSize: 11.sp,
+                                            color: AppColorsTheme.textMutedColor(context),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                  UIHelper.verticalSpace(6.h),
+
+                                  // Meta Dates
+                                  if (record.submittedAt != null)
+                                    Text(
+                                      'Submitted at: ${record.submittedAt}',
+                                      style: TextStyle(
+                                        fontSize: 12.sp,
+                                        color: AppColorsTheme.textMutedColor(context),
+                                        height: 1.4,
+                                      ),
+                                    ),
+                                  UIHelper.verticalSpace(14.h),
+
+                                  // Status Badge
+                                  Container(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 10.w,
+                                      vertical: 4.h,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: (isSuccess ? const Color(0xFF10B981) : primaryOrange).withValues(alpha: 0.15),
+                                      borderRadius: BorderRadius.circular(20.r),
+                                    ),
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        Icon(
+                                          isSuccess ? Icons.check_circle_outline : Icons.info_outline_rounded,
+                                          color: isSuccess ? const Color(0xFF10B981) : primaryOrange,
+                                          size: 14.sp,
+                                        ),
+                                        UIHelper.horizontalSpace(6.w),
+                                        Text(
+                                          statusLabel,
+                                          style: TextStyle(
+                                            fontSize: 12.sp,
+                                            fontWeight: FontWeight.w600,
+                                            color: isSuccess ? const Color(0xFF10B981) : primaryOrange,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  UIHelper.verticalSpace(14.h),
+
+                                  // Requirements summary if any
+                                  if (record.requirements != null && record.requirements!.isNotEmpty) ...[
+                                    Text(
+                                      'Requirements (${record.requirements!.length})',
+                                      style: TextStyle(
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColorsTheme.textMainColor(context),
+                                      ),
+                                    ),
+                                    UIHelper.verticalSpace(6.h),
+                                    ...record.requirements!.map((req) => Padding(
+                                          padding: EdgeInsets.only(bottom: 4.h),
+                                          child: Row(
+                                            children: [
+                                              Icon(
+                                                req.status == 'approved' ? Icons.check_rounded : Icons.radio_button_unchecked_rounded,
+                                                size: 13.sp,
+                                                color: req.status == 'approved' ? const Color(0xFF10B981) : AppColorsTheme.textMutedColor(context),
+                                              ),
+                                              UIHelper.horizontalSpace(6.w),
+                                              Text(
+                                                '${req.name}: ${req.status}',
+                                                style: TextStyle(
+                                                  fontSize: 12.sp,
+                                                  color: AppColorsTheme.textMutedColor(context),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        )),
+                                    UIHelper.verticalSpace(10.h),
+                                  ],
+
+                                  // Deadline & Days Remaining
+                                  if (daysRem.isNotEmpty || deadline.isNotEmpty)
+                                    Text(
+                                      '$deadline ($daysRem)',
+                                      style: TextStyle(
+                                        fontSize: 12.sp,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppColorsTheme.textMainColor(context),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            );
+                          },
                         ),
-                      ],
-                    ),
-                  );
-                },
-              ),
             ),
           ],
         ),
