@@ -126,3 +126,42 @@ class DeletionRequestData {
         "decision_note": decisionNote,
       };
 }
+
+class AccountDeletionInfoModel {
+  final String? message;
+  final DeletionRequestData? deletionRequest;
+  final bool? success;
+
+  AccountDeletionInfoModel({
+    this.message,
+    this.deletionRequest,
+    this.success,
+  });
+
+  factory AccountDeletionInfoModel.fromRawJson(String str) =>
+      AccountDeletionInfoModel.fromJson(json.decode(str));
+
+  String toRawJson() => json.encode(toJson());
+
+  factory AccountDeletionInfoModel.fromJson(dynamic jsonInput) {
+    if (jsonInput is Map<String, dynamic>) {
+      return AccountDeletionInfoModel(
+        message: jsonInput["message"]?.toString() ?? jsonInput["status"]?.toString(),
+        deletionRequest: jsonInput["deletion_request"] != null &&
+                jsonInput["deletion_request"] is Map<String, dynamic>
+            ? DeletionRequestData.fromJson(jsonInput["deletion_request"])
+            : (jsonInput["data"] != null && jsonInput["data"] is Map<String, dynamic>
+                ? DeletionRequestData.fromJson(jsonInput["data"])
+                : null),
+        success: jsonInput["success"] is bool ? jsonInput["success"] : true,
+      );
+    }
+    return AccountDeletionInfoModel(success: true, message: jsonInput?.toString());
+  }
+
+  Map<String, dynamic> toJson() => {
+        "message": message,
+        "deletion_request": deletionRequest?.toJson(),
+        if (success != null) "success": success,
+      };
+}

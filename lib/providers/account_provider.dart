@@ -6,7 +6,7 @@ import '../helpers/all_routes.dart';
 import '../helpers/di.dart';
 import '../helpers/navigation_service.dart';
 
-import '../feature/account/data/account_api.dart';
+import '../feature/account/model/account_model.dart';
 import '../feature/package/model/package_model.dart';
 import '../helpers/loading_helper.dart';
 import '../helpers/toast.dart';
@@ -19,6 +19,7 @@ class AccountProvider extends ChangeNotifier {
       TextEditingController(text: 'ashrafiashra038@gmail.com');
 
   PackageResponseModel? packageResponse;
+  AccountDeletionInfoModel? deletionInfo;
 
   late bool _isBengali;
 
@@ -28,11 +29,19 @@ class AccountProvider extends ChangeNotifier {
     _isBengali = appData.read('isBengali') ?? false;
     fetchUserProfile();
     fetchPackages();
+    fetchDeletionInfo();
   }
 
   Future<void> fetchPackages() async {
     try {
       packageResponse = await packageRxObj.fetchPackages();
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  Future<void> fetchDeletionInfo() async {
+    try {
+      deletionInfo = await accountRxObj.fetchAccountDeletionInfo();
       notifyListeners();
     } catch (_) {}
   }

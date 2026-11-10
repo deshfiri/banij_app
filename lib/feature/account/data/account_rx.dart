@@ -32,4 +32,13 @@ final class AccountRx extends RxResponseInt<AccountModel> {
       return handleErrorWithReturn(error);
     }
   }
+
+  Future<AccountDeletionInfoModel> fetchAccountDeletionInfo() async {
+    try {
+      AccountDeletionInfoModel data = await _api.getAccountDeletionInfo();
+      return data;
+    } catch (error) {
+      rethrow;
+    }
+  }
 }

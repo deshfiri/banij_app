@@ -197,11 +197,36 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
             ),
             UIHelper.verticalSpace(6.h),
             Text(
-              'delete_account_desc'.tr,
+              accountProvider.deletionInfo?.message ??
+                  accountProvider.deletionInfo?.deletionRequest?.status ??
+                  'delete_account_desc'.tr,
               style: TextStyle(
                 fontSize: 12.sp,
                 height: 1.4,
                 color: AppColorsTheme.textMutedColor(context),
+              ),
+            ),
+            UIHelper.verticalSpace(16.h),
+            SizedBox(
+              width: 140.w,
+              child: OutlinedButton(
+                onPressed: () => Navigator.pushNamed(context, Routes.deleteAccountScreen),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: const Color(0xFFE53935),
+                  side: const BorderSide(color: Color(0xFFE53935)),
+                  padding: EdgeInsets.symmetric(vertical: 12.h),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                ),
+                child: Text(
+                  'Delete Account',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                    color: const Color(0xFFE53935),
+                  ),
+                ),
               ),
             ),
           ],
@@ -771,6 +796,49 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                                     await accountProvider.saveProfile(context);
                                   },
                                   btnName: 'save'.tr,
+                                ),
+                              ),
+                              UIHelper.verticalSpace(28.h),
+                              Text(
+                                'delete_account_title'.tr,
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColorsTheme.textMainColor(context),
+                                ),
+                              ),
+                              UIHelper.verticalSpace(6.h),
+                              Text(
+                                accountProvider.deletionInfo?.message ??
+                                    accountProvider.deletionInfo?.deletionRequest?.status ??
+                                    'delete_account_desc'.tr,
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  height: 1.4,
+                                  color: AppColorsTheme.textMutedColor(context),
+                                ),
+                              ),
+                              UIHelper.verticalSpace(16.h),
+                              SizedBox(
+                                width: 140.w,
+                                child: OutlinedButton(
+                                  onPressed: () => Navigator.pushNamed(context, Routes.deleteAccountScreen),
+                                  style: OutlinedButton.styleFrom(
+                                    foregroundColor: const Color(0xFFE53935),
+                                    side: const BorderSide(color: Color(0xFFE53935)),
+                                    padding: EdgeInsets.symmetric(vertical: 12.h),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(10.r),
+                                    ),
+                                  ),
+                                  child: Text(
+                                    'Delete Account',
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color(0xFFE53935),
+                                    ),
+                                  ),
                                 ),
                               ),
                             ],

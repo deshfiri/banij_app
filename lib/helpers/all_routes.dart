@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 
 import '../feature/account/presentation/account_screen_wrapper.dart';
 import '../feature/account/presentation/change_password_screen.dart';
+import '../feature/account/presentation/delete_account_screen.dart';
 import '../feature/auth/presentation/forgot_password_screen/forgot_password_screen.dart';
 import '../feature/auth/presentation/login_screen/loginScreen.dart';
 import '../feature/auth/presentation/onboarding_screen/onboarding_screen.dart';
@@ -31,6 +32,7 @@ final class Routes {
   static const String verificationHistoryScreen = '/verificationHistoryScreen';
   static const String accountScreen = '/accountScreen';
   static const String changePasswordScreen = '/changePasswordScreen';
+  static const String deleteAccountScreen = '/deleteAccountScreen';
   static const String dashboardScreen = '/dashboardScreen';
 }
 
@@ -86,6 +88,10 @@ final class RouteGenerator {
         return Platform.isAndroid
             ? _LightningFastTransitionRoute(widget: const ChangePasswordScreen(), settings: settings)
             : CupertinoPageRoute(builder: (context) => const ChangePasswordScreen(), settings: settings);
+      case Routes.deleteAccountScreen:
+        return Platform.isAndroid
+            ? _LightningFastTransitionRoute(widget: const DeleteAccountScreen(), settings: settings)
+            : CupertinoPageRoute(builder: (context) => const DeleteAccountScreen(), settings: settings);
       case Routes.dashboardScreen:
         return Platform.isAndroid
             ? _LightningFastTransitionRoute(widget: const DashboardScreen(), settings: settings)
