@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../feature/account/model/account_model.dart';
 import '../feature/dashboard/model/dashboard_model.dart';
+import '../feature/dashboard/model/my_product_model.dart';
 import '../feature/package/model/package_model.dart';
+import '../helpers/toast.dart';
 import '../networks/api_access.dart';
 
 class DashboardProvider extends ChangeNotifier {
@@ -12,6 +14,7 @@ class DashboardProvider extends ChangeNotifier {
   int _selectedPackageIndex = 0;
   DashboardModel? _dashboardModel;
   PackageResponseModel? packageResponse;
+  MyProductResponseModel? myProductResponse;
   AccountModel? accountModel;
 
   int get currentIndex => _currentIndex;
@@ -36,6 +39,28 @@ class DashboardProvider extends ChangeNotifier {
     fetchDashboard();
     fetchPackages();
     fetchProfile();
+    fetchMyProducts();
+  }
+
+  bool _isLoadingProducts = false;
+  bool get isLoadingProducts => _isLoadingProducts;
+
+  Future<void> fetchMyProducts() async {
+    _isLoadingProducts = true;
+    notifyListeners();
+
+    try {
+      myProductResponse = await myProductRxObj.fetchProducts();
+    } catch (e) {
+      myProductResponse = MyProductResponseModel(data: []);
+      String err = e.toString().replaceAll('Exception: ', '');
+      if (err.contains('account_not_activated') || err.contains('Finish setting up')) {
+        ToastUtil.showErrorMessage(err);
+      }
+    } finally {
+      _isLoadingProducts = false;
+      notifyListeners();
+    }
   }
 
   Future<void> fetchDashboard() async {

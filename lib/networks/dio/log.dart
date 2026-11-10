@@ -9,16 +9,20 @@ import '../../helpers/all_routes.dart';
 import '../../helpers/di.dart';
 import '../../helpers/navigation_service.dart';
 import '../../helpers/toast.dart';
+import '../endpoints.dart';
 import '../exception_handler/data_source.dart';
 
 final class Logger extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
+    final token = appData.read(kKeyAccessToken);
+    if (token != null && token.toString().isNotEmpty) {
+      options.headers[NetworkConstants.AUTHORIZATION] = "Bearer $token";
+    }
     log("= = = Dio Request = = =");
     log("${options.headers}");
     log("${options.data}");
     log("${options.contentType}");
-    log("${options.extra}");
     log("${options.baseUrl}${options.path}");
     return super.onRequest(options, handler);
   }

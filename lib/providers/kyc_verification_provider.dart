@@ -1,14 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../helpers/loading_helper.dart';
+import '../helpers/toast.dart';
+import '../networks/api_access.dart';
+
 class KycVerificationProvider extends ChangeNotifier {
   final ImagePicker _picker = ImagePicker();
 
   String? _nidFrontFileName;
+  String? _nidFrontFilePath;
   String? _nidBackFileName;
+  String? _nidBackFilePath;
   String? _passportBioFileName;
+  String? _passportBioFilePath;
   String? _dlFrontFileName;
+  String? _dlFrontFilePath;
   String? _dlBackFileName;
+  String? _dlBackFilePath;
 
   bool _isConfirmed = false;
   bool _isSubmitting = false;
@@ -91,32 +100,35 @@ class KycVerificationProvider extends ChangeNotifier {
       );
 
       if (image != null) {
-        final name = image.name;
-        _assignFileName(docKey, name);
+        _assignFile(docKey, image.name, image.path);
       }
     } catch (e) {
-      // Fallback sample file name if picking fails or simulator does not provide file
-      _assignFileName(docKey, '${docKey}_document.png');
+      _assignFile(docKey, '${docKey}_document.png', null);
     }
     notifyListeners();
   }
 
-  void _assignFileName(String docKey, String name) {
+  void _assignFile(String docKey, String name, String? path) {
     switch (docKey) {
       case 'nidFront':
         _nidFrontFileName = name;
+        _nidFrontFilePath = path;
         break;
       case 'nidBack':
         _nidBackFileName = name;
+        _nidBackFilePath = path;
         break;
       case 'passportBio':
         _passportBioFileName = name;
+        _passportBioFilePath = path;
         break;
       case 'dlFront':
         _dlFrontFileName = name;
+        _dlFrontFilePath = path;
         break;
       case 'dlBack':
         _dlBackFileName = name;
+        _dlBackFilePath = path;
         break;
     }
   }
@@ -132,19 +144,69 @@ class KycVerificationProvider extends ChangeNotifier {
     _isSubmitting = true;
     notifyListeners();
 
-    await Future.delayed(const Duration(milliseconds: 1200));
+    try {
+      if (_nidFrontFileName != null) {
+        await kycRxObj.submitDoc(
+          documentType: 'national_id_front',
+          fileBytesOrPath: _nidFrontFilePath,
+          fileName: _nidFrontFileName,
+        ).waitingForSucess();
+      }
+      if (_nidBackFileName != null) {
+        await kycRxObj.submitDoc(
+          documentType: 'national_id_back',
+          fileBytesOrPath: _nidBackFilePath,
+          fileName: _nidBackFileName,
+        ).waitingForSucess();
+      }
+      if (_passportBioFileName != null) {
+        await kycRxObj.submitDoc(
+          documentType: 'passport',
+          fileBytesOrPath: _passportBioFilePath,
+          fileName: _passportBioFileName,
+        ).waitingForSucess();
+      }
+      if (_dlFrontFileName != null) {
+        await kycRxObj.submitDoc(
+          documentType: 'driving_license_front',
+          fileBytesOrPath: _dlFrontFilePath,
+          fileName: _dlFrontFileName,
+        ).waitingForSucess();
+      }
+      if (_dlBackFileName != null) {
+        await kycRxObj.submitDoc(
+          documentType: 'driving_license_back',
+          fileBytesOrPath: _dlBackFilePath,
+          fileName: _dlBackFileName,
+        ).waitingForSucess();
+      }
 
-    _isSubmitting = false;
-    _isSubmitted = true;
-    notifyListeners();
+      _isSubmitting = false;
+      _isSubmitted = true;
+      notifyListeners();
+      ToastUtil.showSuccessMessage('KYC documents submitted successfully!');
+    } catch (e) {
+      _isSubmitting = false;
+      notifyListeners();
+      String errorMsg = e.toString().replaceAll('Exception: ', '');
+      if (errorMsg.contains('Failure')) {
+        errorMsg = 'Failed to submit KYC documents. Please try again.';
+      }
+      ToastUtil.showErrorMessage(errorMsg);
+    }
   }
 
   void resetKycForm() {
     _nidFrontFileName = null;
+    _nidFrontFilePath = null;
     _nidBackFileName = null;
+    _nidBackFilePath = null;
     _passportBioFileName = null;
+    _passportBioFilePath = null;
     _dlFrontFileName = null;
+    _dlFrontFilePath = null;
     _dlBackFileName = null;
+    _dlBackFilePath = null;
     _isConfirmed = false;
     _isSubmitting = false;
     _isSubmitted = false;

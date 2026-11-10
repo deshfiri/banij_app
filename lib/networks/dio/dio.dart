@@ -65,22 +65,22 @@ final class DioSingleton {
 Future<Response> postHttp(String path, [dynamic data]) => DioSingleton
     .instance
     .dio
-    .post(path, data: data, cancelToken: DioSingleton.cancelToken);
+    .post(path, data: data, options: Options(followRedirects: false), cancelToken: DioSingleton.cancelToken);
 
 Future<Response> patchHttp(String path, [dynamic data]) => DioSingleton
     .instance
     .dio
-    .patch(path, data: data, cancelToken: DioSingleton.cancelToken);
+    .patch(path, data: data, options: Options(followRedirects: false), cancelToken: DioSingleton.cancelToken);
 
 Future<Response> putHttp(String path, [dynamic data]) => DioSingleton
     .instance
     .dio
-    .put(path, data: data, cancelToken: DioSingleton.cancelToken);
+    .put(path, data: data, options: Options(followRedirects: false), cancelToken: DioSingleton.cancelToken);
 
 Future<Response> getHttp(String path, [dynamic data]) =>
-    DioSingleton.instance.dio.get(path, cancelToken: DioSingleton.cancelToken);
+    DioSingleton.instance.dio.get(path, options: Options(followRedirects: false), cancelToken: DioSingleton.cancelToken);
 
 Future<Response> deleteHttp(String path, [dynamic data]) => DioSingleton
     .instance
     .dio
-    .delete(path, data: data, cancelToken: DioSingleton.cancelToken);
+    .delete(path, data: data, options: Options(followRedirects: false), cancelToken: DioSingleton.cancelToken);

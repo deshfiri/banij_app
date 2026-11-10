@@ -28,8 +28,10 @@ final class EndPoints {
   static String profile()=>"/profile";
   static String package()=>"/packages";
   static String dashborad()=>"/dashboard";
+  static String submitDocKyc()=>"/kyc/documents";
   static String notification()=>"/notifications";
   static String accountDelete()=>"/account-deletion";
+  static String myProduct()=>"/my-products";
   static String requestRevierw() => "/finance/finance_requisition_list.php";
   static String allRequestReview() =>
       "/finance/finance_requisition_crn_list.php";
