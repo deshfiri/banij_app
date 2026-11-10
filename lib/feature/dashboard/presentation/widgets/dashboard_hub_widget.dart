@@ -143,7 +143,8 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
           : 'Invoices';
       InvoicesReceiptsSheet.show(context, initialTab: initialTab);
     } else {
-      ProductCategoryDetailSheet.show(context, item.titleKey.tr);
+      final isCatalog = item.category == 'catalog' || item.titleKey == 'hub_products';
+      ProductCategoryDetailSheet.show(context, item.titleKey.tr, isCatalog: isCatalog);
     }
   }
 
@@ -463,7 +464,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                             value: '12 Active',
                             icon: Icons.shopping_bag_outlined,
                             color: primaryOrange,
-                            onTap: () => ProductCategoryDetailSheet.show(context, 'hub_products'.tr),
+                            onTap: () => ProductCategoryDetailSheet.show(context, 'hub_products'.tr, isCatalog: true),
                           ),
                         ),
                         UIHelper.horizontalSpace(10.w),

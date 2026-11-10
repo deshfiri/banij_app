@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 
 import '../../../networks/dio/dio.dart';
-import '../../../networks/endpoints.dart';
 import '../../../networks/exception_handler/data_source.dart';
 import '../model/my_product_model.dart';
 
@@ -11,9 +10,9 @@ final class MyProductApi {
   MyProductApi._internal();
   static MyProductApi get instance => _singleton;
 
-  Future<MyProductResponseModel> getMyProducts() async {
+  Future<MyProductResponseModel> getProducts(String endpoint) async {
     try {
-      Response response = await getHttp(EndPoints.myProduct());
+      Response response = await getHttp(endpoint);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (response.data is Map<String, dynamic> || response.data is List) {

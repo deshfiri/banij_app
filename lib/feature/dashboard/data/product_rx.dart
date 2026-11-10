@@ -15,9 +15,9 @@ final class MyProductRx extends RxResponseInt<MyProductResponseModel> {
 
   ValueStream get getMyProductData => dataFetcher.stream;
 
-  Future<MyProductResponseModel> fetchProducts() async {
+  Future<MyProductResponseModel> fetchProducts(String endpoint) async {
     try {
-      MyProductResponseModel data = await _api.getMyProducts();
+      MyProductResponseModel data = await _api.getProducts(endpoint);
       return handleSuccessWithReturn(data);
     } catch (error) {
       return handleErrorWithReturn(error);

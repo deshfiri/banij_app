@@ -13,18 +13,23 @@ import '../../model/my_product_model.dart';
 
 class ProductCategoryDetailSheet extends StatefulWidget {
   final String categoryTitle;
+  final bool isCatalog;
 
   const ProductCategoryDetailSheet({
     super.key,
     required this.categoryTitle,
+    this.isCatalog = false,
   });
 
-  static void show(BuildContext context, String categoryTitle) {
+  static void show(BuildContext context, String categoryTitle, {bool isCatalog = false}) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => ProductCategoryDetailSheet(categoryTitle: categoryTitle),
+      builder: (context) => ProductCategoryDetailSheet(
+        categoryTitle: categoryTitle,
+        isCatalog: isCatalog,
+      ),
     );
   }
 
@@ -93,7 +98,11 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       try {
-        context.read<DashboardProvider>().fetchMyProducts();
+        if (widget.isCatalog) {
+          context.read<DashboardProvider>().fetchCatalogProducts();
+        } else {
+          context.read<DashboardProvider>().fetchMyProducts();
+        }
       } catch (_) {}
     });
   }
@@ -108,8 +117,12 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final dashboardProvider = context.watch<DashboardProvider>();
-    final rawApiProducts = dashboardProvider.myProductResponse?.data ?? [];
-    final apiCategories = dashboardProvider.myProductResponse?.options?.categories ?? [];
+    final rawApiProducts = widget.isCatalog
+        ? (dashboardProvider.catalogProductResponse?.data ?? [])
+        : (dashboardProvider.myProductResponse?.data ?? []);
+    final apiCategories = widget.isCatalog
+        ? (dashboardProvider.catalogProductResponse?.options?.categories ?? [])
+        : (dashboardProvider.myProductResponse?.options?.categories ?? []);
     final displayProducts = rawApiProducts.isNotEmpty ? rawApiProducts : _dummyProducts;
 
     final filteredList = displayProducts.where((product) {

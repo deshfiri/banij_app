@@ -6,6 +6,7 @@ import '../feature/dashboard/model/my_product_model.dart';
 import '../feature/package/model/package_model.dart';
 import '../helpers/toast.dart';
 import '../networks/api_access.dart';
+import '../networks/endpoints.dart';
 
 class DashboardProvider extends ChangeNotifier {
   int _currentIndex = 0;
@@ -15,6 +16,7 @@ class DashboardProvider extends ChangeNotifier {
   DashboardModel? _dashboardModel;
   PackageResponseModel? packageResponse;
   MyProductResponseModel? myProductResponse;
+  MyProductResponseModel? catalogProductResponse;
   AccountModel? accountModel;
 
   int get currentIndex => _currentIndex;
@@ -50,11 +52,29 @@ class DashboardProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      myProductResponse = await myProductRxObj.fetchProducts();
+      myProductResponse = await myProductRxObj.fetchProducts(EndPoints.myProduct());
     } catch (e) {
       myProductResponse = MyProductResponseModel(data: []);
       String err = e.toString().replaceAll('Exception: ', '');
       if (err.contains('account_not_activated') || err.contains('Finish setting up')) {
+        ToastUtil.showErrorMessage(err);
+      }
+    } finally {
+      _isLoadingProducts = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchCatalogProducts() async {
+    _isLoadingProducts = true;
+    notifyListeners();
+
+    try {
+      catalogProductResponse = await myProductRxObj.fetchProducts(EndPoints.catalog());
+    } catch (e) {
+      catalogProductResponse = MyProductResponseModel(data: []);
+      String err = e.toString().replaceAll('Exception: ', '');
+      if (err.isNotEmpty) {
         ToastUtil.showErrorMessage(err);
       }
     } finally {
