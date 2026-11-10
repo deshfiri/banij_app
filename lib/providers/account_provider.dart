@@ -42,6 +42,22 @@ class AccountProvider extends ChangeNotifier {
   Future<void> fetchDeletionInfo() async {
     try {
       deletionInfo = await accountRxObj.fetchAccountDeletionInfo();
+
+      final status = deletionInfo?.deletionRequest?.status?.toLowerCase() ?? '';
+      final msg = deletionInfo?.message?.toLowerCase() ?? '';
+
+      if (status == 'accepted' || msg.contains('accepted')) {
+        await appData.remove(kKeyAccessToken);
+        await appData.write(kKeyIsLoggedIn, false);
+        await appData.remove(KkName);
+        await appData.remove(KkUserEmail);
+        await appData.remove(KkID);
+
+        ToastUtil.showSuccessMessage('Your account deletion request has been accepted.');
+        NavigationService.navigateToReplacementUntil(Routes.onboardingScreen);
+        return;
+      }
+
       notifyListeners();
     } catch (_) {}
   }
@@ -49,6 +65,21 @@ class AccountProvider extends ChangeNotifier {
   Future<void> fetchUserProfile() async {
     try {
       final accountModel = await accountRxObj.fetchProfile();
+      if (accountModel.deletionRequest != null) {
+        final status = accountModel.deletionRequest!.status?.toLowerCase() ?? '';
+        if (status == 'accepted') {
+          await appData.remove(kKeyAccessToken);
+          await appData.write(kKeyIsLoggedIn, false);
+          await appData.remove(KkName);
+          await appData.remove(KkUserEmail);
+          await appData.remove(KkID);
+
+          ToastUtil.showSuccessMessage('Your account deletion request has been accepted.');
+          NavigationService.navigateToReplacementUntil(Routes.onboardingScreen);
+          return;
+        }
+      }
+
       if (accountModel.data != null) {
         if (accountModel.data!.name != null) {
           nameController.text = accountModel.data!.name!;

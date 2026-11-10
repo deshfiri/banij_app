@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:dio/dio.dart';
 
 import '../../../networks/dio/dio.dart';
@@ -14,14 +13,29 @@ final class DashboardApi {
 
   Future<DashboardModel> getDashboardStats() async {
     try {
-      Response response = await getHttp(EndPoints.profileInfo());
+      Response response = await getHttp(EndPoints.dashborad());
 
-      if (response.statusCode == 200) {
-        final data = DashboardModel.fromRawJson(json.encode(response.data));
-        return data;
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        if (response.data is Map<String, dynamic> || response.data is List) {
+          return DashboardModel.fromJson(response.data);
+        } else if (response.data is String) {
+          return DashboardModel.fromRawJson(response.data);
+        } else {
+          return DashboardModel.fromRawJson(json.encode(response.data));
+        }
       } else {
         throw DataSource.DEFAULT.getFailure();
       }
+    } on DioException catch (dioError) {
+      if (dioError.response?.data != null) {
+        final data = dioError.response?.data;
+        if (data is Map && data.containsKey('message')) {
+          throw Exception(data['message'].toString());
+        } else if (data is Map && data.containsKey('error')) {
+          throw Exception(data['error'].toString());
+        }
+      }
+      rethrow;
     } catch (error) {
       rethrow;
     }

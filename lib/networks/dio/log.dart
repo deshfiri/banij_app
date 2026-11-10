@@ -2,9 +2,13 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
-
 import 'package:dio/dio.dart';
 
+import '../../constants/app_constants.dart';
+import '../../helpers/all_routes.dart';
+import '../../helpers/di.dart';
+import '../../helpers/navigation_service.dart';
+import '../../helpers/toast.dart';
 import '../exception_handler/data_source.dart';
 
 final class Logger extends Interceptor {
@@ -42,6 +46,22 @@ final class Logger extends Interceptor {
       log('Error: ${err.error}');
       log('Error Req option: ${err.requestOptions}');
     }
+
+    if (err.response?.statusCode == 401 ||
+        (err.response?.data != null &&
+            err.response?.data.toString().contains('Unauthenticated') == true)) {
+      try {
+        appData.remove(kKeyAccessToken);
+        appData.write(kKeyIsLoggedIn, false);
+        appData.remove(KkName);
+        appData.remove(KkUserEmail);
+        appData.remove(KkID);
+
+        ToastUtil.showErrorMessage('Session expired. Please log in again.');
+        NavigationService.navigateToReplacementUntil(Routes.onboardingScreen);
+      } catch (_) {}
+    }
+
     ErrorHandler.handle(err).failure;
     return super.onError(err, handler);
   }
