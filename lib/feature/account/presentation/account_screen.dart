@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../common_widget/custom_button.dart';
 import '../../../common_widget/custom_field_label.dart';
@@ -289,12 +290,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
             ),
             UIHelper.verticalSpace(20.h),
             if (packages.isEmpty)
-              Center(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 40.h),
-                  child: CircularProgressIndicator(color: primaryOrange),
-                ),
-              )
+              _buildAccountPackageShimmer(context)
             else
               ...packages.map((pkg) {
                 final isSelected = pkg.slug == selectedSlug;
@@ -958,6 +954,36 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildAccountPackageShimmer(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[300]!;
+    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
+
+    return Column(
+      children: List.generate(2, (index) {
+        return Padding(
+          padding: EdgeInsets.only(bottom: 16.h),
+          child: Shimmer.fromColors(
+            baseColor: baseColor,
+            highlightColor: highlightColor,
+            child: Container(
+              width: double.infinity,
+              height: 120.h,
+              decoration: BoxDecoration(
+                color: AppColorsTheme.cardBg(context),
+                borderRadius: BorderRadius.circular(16.r),
+                border: Border.all(
+                  color: AppColorsTheme.borderColor(context),
+                  width: 1.w,
+                ),
+              ),
+            ),
+          ),
+        );
+      }),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../../constants/color.dart';
 import '../../../../helpers/ui_helpers.dart';
@@ -204,9 +205,7 @@ class _OrderCategoryDetailSheetState extends State<OrderCategoryDetailSheet> {
           // Scrollable Order List Cards
           Expanded(
             child: dashboardProvider.isLoadingOrders
-                ? Center(
-                    child: CircularProgressIndicator(color: primaryOrange),
-                  )
+                ? _buildOrderShimmer(context)
                 : rawOrders.isEmpty
                     ? Center(
                         child: Column(
@@ -343,6 +342,71 @@ class _OrderCategoryDetailSheetState extends State<OrderCategoryDetailSheet> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildOrderShimmer(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[300]!;
+    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
+
+    return ListView.builder(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
+      itemCount: 4,
+      itemBuilder: (context, index) {
+        return Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Container(
+            margin: EdgeInsets.only(bottom: 14.h),
+            padding: EdgeInsets.all(16.w),
+            decoration: BoxDecoration(
+              color: AppColorsTheme.cardBg(context),
+              borderRadius: BorderRadius.circular(18.r),
+              border: Border.all(
+                color: AppColorsTheme.borderColor(context),
+                width: 1.w,
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 48.w,
+                      height: 48.h,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14.r),
+                      ),
+                    ),
+                    UIHelper.horizontalSpace(12.w),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(width: 120.w, height: 14.h, color: Colors.white),
+                        UIHelper.verticalSpace(6.h),
+                        Container(width: 80.w, height: 12.h, color: Colors.white),
+                        UIHelper.verticalSpace(8.h),
+                        Container(
+                          width: 60.w,
+                          height: 16.h,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Container(width: 70.w, height: 20.h, color: Colors.white),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

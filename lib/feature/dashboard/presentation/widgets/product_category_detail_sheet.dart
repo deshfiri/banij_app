@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../../constants/color.dart';
 import '../../../../helpers/all_routes.dart';
@@ -406,9 +407,7 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
           // Scrollable Product List Cards
           Expanded(
             child: dashboardProvider.isLoadingProducts
-                ? Center(
-                    child: CircularProgressIndicator(color: primaryOrange),
-                  )
+                ? _buildProductShimmer(context)
                 : rawApiProducts.isEmpty
                     ? Center(
                         child: Column(
@@ -640,6 +639,106 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildProductShimmer(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[300]!;
+    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
+
+    return ListView.builder(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
+      itemCount: 4,
+      itemBuilder: (context, index) {
+        return Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Container(
+            margin: EdgeInsets.only(bottom: 16.h),
+            padding: EdgeInsets.all(16.w),
+            decoration: BoxDecoration(
+              color: AppColorsTheme.cardBg(context),
+              borderRadius: BorderRadius.circular(18.r),
+              border: Border.all(
+                color: AppColorsTheme.borderColor(context),
+                width: 1.w,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 64.w,
+                      height: 64.h,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(14.r),
+                      ),
+                    ),
+                    UIHelper.horizontalSpace(12.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: double.infinity,
+                            height: 14.h,
+                            color: Colors.white,
+                          ),
+                          UIHelper.verticalSpace(6.h),
+                          Container(
+                            width: 140.w,
+                            height: 12.h,
+                            color: Colors.white,
+                          ),
+                          UIHelper.verticalSpace(8.h),
+                          Container(
+                            width: 70.w,
+                            height: 16.h,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                UIHelper.verticalSpace(12.h),
+                Container(
+                  width: double.infinity,
+                  height: 1.h,
+                  color: Colors.white,
+                ),
+                UIHelper.verticalSpace(10.h),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      width: 90.w,
+                      height: 20.h,
+                      color: Colors.white,
+                    ),
+                    Container(
+                      width: 80.w,
+                      height: 32.h,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10.r),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

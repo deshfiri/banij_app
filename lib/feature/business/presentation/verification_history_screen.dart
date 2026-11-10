@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:get/get.dart';
 
 import '../../../constants/color.dart';
@@ -89,9 +90,7 @@ class _VerificationHistoryScreenState extends State<VerificationHistoryScreen> {
             // Content Body
             Expanded(
               child: _isLoading
-                  ? Center(
-                      child: CircularProgressIndicator(color: primaryOrange),
-                    )
+                  ? _buildVerificationShimmer(context)
                   : records.isEmpty
                       ? Center(
                           child: Column(
@@ -266,6 +265,58 @@ class _VerificationHistoryScreenState extends State<VerificationHistoryScreen> {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildVerificationShimmer(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[300]!;
+    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
+
+    return ListView.builder(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+      itemCount: 2,
+      itemBuilder: (context, index) {
+        return Shimmer.fromColors(
+          baseColor: baseColor,
+          highlightColor: highlightColor,
+          child: Container(
+            margin: EdgeInsets.only(bottom: 16.h),
+            padding: EdgeInsets.all(16.w),
+            decoration: BoxDecoration(
+              color: AppColorsTheme.cardBg(context),
+              borderRadius: BorderRadius.circular(16.r),
+              border: Border.all(
+                color: AppColorsTheme.borderColor(context),
+                width: 1.w,
+              ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(width: 140.w, height: 16.h, color: Colors.white),
+                    Container(width: 70.w, height: 12.h, color: Colors.white),
+                  ],
+                ),
+                UIHelper.verticalSpace(10.h),
+                Container(width: 180.w, height: 12.h, color: Colors.white),
+                UIHelper.verticalSpace(14.h),
+                Container(
+                  width: 90.w,
+                  height: 22.h,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20.r),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }
