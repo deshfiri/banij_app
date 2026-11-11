@@ -5,11 +5,12 @@ import 'package:provider/provider.dart';
 
 import '../../../common_widget/custom_button.dart';
 import '../../../common_widget/custom_field_label.dart';
-import '../../../common_widget/custom_form_field.dart';
 import '../../../common_widget/custom_password_field.dart';
 import '../../../constants/color.dart';
 import '../../../helpers/ui_helpers.dart';
+import '../../../networks/api_access.dart';
 import '../../../providers/change_pass_provider.dart';
+import '../model/security_model.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -20,6 +21,7 @@ class ChangePasswordScreen extends StatefulWidget {
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  SecurityModel? _securityModel;
 
   @override
   void initState() {
@@ -28,7 +30,19 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
       try {
         context.read<ChangePassProvider>().resetForm();
       } catch (_) {}
+      _fetchSecurityRules();
     });
+  }
+
+  Future<void> _fetchSecurityRules() async {
+    try {
+      final res = await securityRxObj.fetchSecurityRules();
+      if (mounted) {
+        setState(() {
+          _securityModel = res;
+        });
+      }
+    } catch (_) {}
   }
 
   @override
@@ -91,20 +105,47 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           color: AppColorsTheme.textMutedColor(context),
                         ),
                       ),
-                      UIHelper.verticalSpace(24.h),
+                      UIHelper.verticalSpace(16.h),
 
-                      // Email Field
-                      CustomFieldLabel(label: 'current Password'.tr, isRequired: true),
-                      CustomFormField(
+                      // Password Rules Notice Card (from GET /security)
+                      if (_securityModel?.data?.passwordRules != null &&
+                          _securityModel!.data!.passwordRules!.isNotEmpty) ...[
+                        Container(
+                          padding: EdgeInsets.all(12.w),
+                          decoration: BoxDecoration(
+                            color: primaryOrange.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(10.r),
+                            border: Border.all(color: primaryOrange.withValues(alpha: 0.3)),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.info_outline_rounded, color: primaryOrange, size: 20.sp),
+                              UIHelper.horizontalSpace(10.w),
+                              Expanded(
+                                child: Text(
+                                  _securityModel!.data!.passwordRules!,
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: AppColorsTheme.textMainColor(context),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        UIHelper.verticalSpace(20.h),
+                      ],
+
+                      // Current Password Field
+                      CustomFieldLabel(label: 'current_password'.tr, isRequired: true),
+                      CustomPasswordField(
                         controller: provider.currentPasswordController,
-                        inputType: TextInputType.emailAddress,
-                        hintText: 'current Password'.tr,
+                        hintText: 'enter_password'.tr,
+                        isObscure: provider.isCurrentPassVisible,
+                        onToggleObscure: provider.toggleCurrentPassword,
                         validator: (val) {
                           if (val == null || val.isEmpty) {
-                            return 'err_enter_new_password'.tr;
-                          }
-                          if (val.length < 6) {
-                            return 'err_password_length'.tr;
+                            return 'err_enter_current_password'.tr;
                           }
                           return null;
                         },

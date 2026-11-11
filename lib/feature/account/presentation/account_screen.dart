@@ -13,9 +13,11 @@ import '../../../constants/image_const.dart';
 import '../../../helpers/all_routes.dart';
 import '../../../helpers/di.dart';
 import '../../../helpers/ui_helpers.dart';
+import '../../../networks/api_access.dart';
 import '../../../providers/account_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../finance/presentation/widgets/invoice_receipt_preview_modal.dart';
+import '../model/security_model.dart';
 
 class AccountScreenBody extends StatefulWidget {
   final String? initialTab;
@@ -43,12 +45,36 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
   ];
 
   late bool _isBengali;
+  SecurityModel? _securityModel;
+  bool _isLoadingSecurity = false;
 
   @override
   void initState() {
     super.initState();
     _selectedTab = widget.initialTab == 'supplier' ? 'Profile' : (widget.initialTab ?? 'Profile');
     _isBengali = appData.read('isBengali') ?? false;
+    _fetchSecurityData();
+  }
+
+  Future<void> _fetchSecurityData() async {
+    setState(() {
+      _isLoadingSecurity = true;
+    });
+    try {
+      final res = await securityRxObj.fetchSecurityRules();
+      if (mounted) {
+        setState(() {
+          _securityModel = res;
+          _isLoadingSecurity = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isLoadingSecurity = false;
+        });
+      }
+    }
   }
 
   @override
@@ -254,6 +280,78 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
               ),
             ),
             UIHelper.verticalSpace(20.h),
+
+            // 2FA / Security Status Card
+            if (_isLoadingSecurity)
+              Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20.h),
+                  child: CircularProgressIndicator(color: primaryOrange),
+                ),
+              )
+            else if (_securityModel?.data != null) ...[
+              Container(
+                padding: EdgeInsets.all(16.w),
+                decoration: BoxDecoration(
+                  color: AppColorsTheme.cardBg(context),
+                  borderRadius: BorderRadius.circular(14.r),
+                  border: Border.all(color: AppColorsTheme.borderColor(context)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Text(
+                            'Two-Factor Authentication (2FA)',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColorsTheme.textMainColor(context),
+                            ),
+                          ),
+                        ),
+                        UIHelper.horizontalSpace(8.w),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                          decoration: BoxDecoration(
+                            color: (_securityModel!.data!.twoFactorEnabled ?? false)
+                                ? Colors.green.withValues(alpha: 0.1)
+                                : Colors.orange.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(20.r),
+                          ),
+                          child: Text(
+                            (_securityModel!.data!.twoFactorEnabled ?? false) ? 'Enabled' : 'Disabled',
+                            style: TextStyle(
+                              fontSize: 11.sp,
+                              fontWeight: FontWeight.bold,
+                              color: (_securityModel!.data!.twoFactorEnabled ?? false)
+                                  ? Colors.green
+                                  : Colors.orange,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (_securityModel!.data!.passwordRules != null &&
+                        _securityModel!.data!.passwordRules!.isNotEmpty) ...[
+                      UIHelper.verticalSpace(12.h),
+                      Text(
+                        'Password Rules: ${_securityModel!.data!.passwordRules}',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          color: AppColorsTheme.textMutedColor(context),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              UIHelper.verticalSpace(16.h),
+            ],
+
             FinanceCardWidget(
               title: 'change_password'.tr,
               subtitle: 'change_password_sub'.tr,

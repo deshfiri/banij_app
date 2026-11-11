@@ -1,7 +1,5 @@
 import 'dart:convert';
 
-import 'package:bbnij/constants/app_constants.dart';
-import 'package:bbnij/helpers/di.dart';
 import 'package:dio/dio.dart';
 
 import '../../../networks/dio/dio.dart';
@@ -136,7 +134,6 @@ final class AccountApi {
     required String passwordConfirmation,
   }) async {
     try {
-      final token = appData.read(kKeyAccessToken) ?? '';
       Map<String, dynamic> data = {
         "current_password": currentPassword,
         "password": password,

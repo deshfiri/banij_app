@@ -8,8 +8,10 @@ import '../../../../constants/color.dart';
 import '../../../../constants/image_const.dart';
 import '../../../../helpers/all_routes.dart';
 import '../../../../helpers/ui_helpers.dart';
+import '../../../../networks/api_access.dart';
 import '../../../../providers/dashboard_provider.dart';
 import '../../../finance/presentation/widgets/invoices_receipts_sheet.dart';
+import '../../model/current_user_model.dart';
 import 'order_category_detail_sheet.dart';
 import 'product_category_detail_sheet.dart';
 import 'website_sheet.dart';
@@ -44,6 +46,32 @@ class DashboardHubWidget extends StatefulWidget {
 
 class _DashboardHubWidgetState extends State<DashboardHubWidget> {
   String _selectedFilter = 'All';
+  CurrentUserModel? _currentUserModel;
+  bool _isLoadingUser = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCurrentUser();
+  }
+
+  Future<void> _fetchCurrentUser() async {
+    try {
+      final res = await currentUserRxObj.fetchCurrentUser();
+      if (mounted) {
+        setState(() {
+          _currentUserModel = res;
+          _isLoadingUser = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isLoadingUser = false;
+        });
+      }
+    }
+  }
 
   final List<String> _filters = ['All', 'Products', 'Sales & Orders', 'Finance'];
 
@@ -220,7 +248,9 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'considine_group'.tr,
+                      _currentUserModel?.data?.businessAccount?.name ??
+                          _currentUserModel?.data?.name ??
+                          'considine_group'.tr,
                       style: TextStyle(
                         fontSize: 15.sp,
                         fontWeight: FontWeight.w800,

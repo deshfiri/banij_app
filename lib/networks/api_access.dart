@@ -1,4 +1,5 @@
 import '../feature/account/data/account_rx.dart';
+import '../feature/account/data/security_rx.dart';
 import '../feature/auth/data/forgot_password_rx.dart';
 import '../feature/auth/data/login_rx.dart';
 import '../feature/auth/data/logout_rx.dart';
@@ -7,6 +8,7 @@ import '../feature/business/data/business_rx.dart';
 import '../feature/business/data/kyc_rx.dart';
 import '../feature/business/data/verification_history_rx.dart';
 import '../feature/dashboard/data/address_rx.dart';
+import '../feature/dashboard/data/current_user_rx.dart';
 import '../feature/dashboard/data/dashboard_rx.dart';
 import '../feature/dashboard/data/order_rx.dart';
 import '../feature/dashboard/data/payment_rx.dart';
@@ -25,6 +27,8 @@ ForgotPasswordRx forgotPasswordRxObj = ForgotPasswordRx();
 
 AccountRx accountRxObj = AccountRx();
 
+SecurityRx securityRxObj = SecurityRx();
+
 DashboardRx dashboardRxObj = DashboardRx();
 
 BusinessRx businessRxObj = BusinessRx();
@@ -40,4 +44,5 @@ MyProductRx myProductRxObj = MyProductRx();
 OrderRx orderRxObj = OrderRx();
 PaymentRx paymentRxObj = PaymentRx();
 AddressRx addressRxObj = AddressRx();
+CurrentUserRx currentUserRxObj = CurrentUserRx();
 WebsiteRx websiteRxObj = WebsiteRx();

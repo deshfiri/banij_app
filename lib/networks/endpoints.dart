@@ -28,6 +28,7 @@ final class EndPoints {
   static String profile()=>"/profile";
   static String package()=>"/packages";
   static String dashborad()=>"/dashboard";
+  static String currentUser()=>"/auth/me";
   static String submitDocKyc()=>"/kyc/documents";
   static String notification()=>"/notifications";
   static String accountDelete()=>"/account-deletion";
@@ -54,6 +55,7 @@ final class EndPoints {
   static String taskAccept(int id) => "/finance/finance_requisition_list.php";
   static String requistioanlCanel() =>
       "/finance/finance_requisition_cancel.php";
+  static String securityRules()=>"/security";
 
   static String forgetPass() => "/password/forgot";
   static String otpVerify() => "/verify-otp";

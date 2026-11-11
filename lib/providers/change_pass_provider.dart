@@ -5,18 +5,25 @@ import '../feature/account/data/account_api.dart';
 import '../helpers/toast.dart';
 
 class ChangePassProvider extends ChangeNotifier {
-  final TextEditingController currentPasswordController=TextEditingController();
+  final TextEditingController currentPasswordController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController newPasswordController = TextEditingController();
   final TextEditingController confirmPasswordController = TextEditingController();
 
+  bool _isCurrentPassVisible = true;
   bool _isNewPassVisible = true;
   bool _isConfirmPassVisible = true;
   bool _isLoading = false;
 
+  bool get isCurrentPassVisible => _isCurrentPassVisible;
   bool get isNewPassVisible => _isNewPassVisible;
   bool get isConfirmPassVisible => _isConfirmPassVisible;
   bool get isLoading => _isLoading;
+
+  void toggleCurrentPassword() {
+    _isCurrentPassVisible = !_isCurrentPassVisible;
+    notifyListeners();
+  }
 
   void toggleNewPassword() {
     _isNewPassVisible = !_isNewPassVisible;
@@ -56,7 +63,7 @@ class ChangePassProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
       String err = e.toString().replaceAll('Exception: ', '');
-      ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Failed to reset password');
+      ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Failed to change password');
       return false;
     }
   }
@@ -66,6 +73,7 @@ class ChangePassProvider extends ChangeNotifier {
     emailController.clear();
     newPasswordController.clear();
     confirmPasswordController.clear();
+    _isCurrentPassVisible = true;
     _isNewPassVisible = true;
     _isConfirmPassVisible = true;
     _isLoading = false;
@@ -73,6 +81,7 @@ class ChangePassProvider extends ChangeNotifier {
 
   @override
   void dispose() {
+    currentPasswordController.dispose();
     emailController.dispose();
     newPasswordController.dispose();
     confirmPasswordController.dispose();
