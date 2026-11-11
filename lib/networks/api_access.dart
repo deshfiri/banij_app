@@ -6,8 +6,10 @@ import '../feature/auth/data/register_rx.dart';
 import '../feature/business/data/business_rx.dart';
 import '../feature/business/data/kyc_rx.dart';
 import '../feature/business/data/verification_history_rx.dart';
+import '../feature/dashboard/data/address_rx.dart';
 import '../feature/dashboard/data/dashboard_rx.dart';
 import '../feature/dashboard/data/order_rx.dart';
+import '../feature/dashboard/data/payment_rx.dart';
 import '../feature/dashboard/data/product_rx.dart';
 import '../feature/notification/data/notification_rx.dart';
 import '../feature/package/data/package_rx.dart';
@@ -35,3 +37,5 @@ VerificationHistoryRx verificationHistoryRxObj = VerificationHistoryRx();
 
 MyProductRx myProductRxObj = MyProductRx();
 OrderRx orderRxObj = OrderRx();
+PaymentRx paymentRxObj = PaymentRx();
+AddressRx addressRxObj = AddressRx();

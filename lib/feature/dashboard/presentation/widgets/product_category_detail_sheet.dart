@@ -10,7 +10,6 @@ import '../../../../helpers/toast.dart';
 import '../../../../helpers/ui_helpers.dart';
 import '../../../../providers/cart_provider.dart';
 import '../../../../providers/dashboard_provider.dart';
-import '../../model/my_product_model.dart';
 
 class ProductCategoryDetailSheet extends StatefulWidget {
   final String categoryTitle;
@@ -43,57 +42,6 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
   String _searchQuery = '';
   String _selectedCategory = 'All';
 
-  static final List<ProductItemModel> _dummyProducts = [
-    ProductItemModel(
-      slug: 'P01',
-      name: 'Banij Premium Wholesale Cotton Pack',
-      category: 'IN STOCK',
-      image: ProductImageModel(
-        url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500',
-      ),
-      wholesale: WholesaleModel(
-        price: PriceModel(formatted: '৳ 2,450'),
-        inStock: '120',
-      ),
-    ),
-    ProductItemModel(
-      slug: 'P02',
-      name: 'Banij Enterprise Smart Logistics Hub',
-      category: 'POPULAR',
-      image: ProductImageModel(
-        url: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500',
-      ),
-      wholesale: WholesaleModel(
-        price: PriceModel(formatted: '৳ 8,900'),
-        inStock: '45',
-      ),
-    ),
-    ProductItemModel(
-      slug: 'P03',
-      name: 'Industrial Heavy Duty Storage Crate',
-      category: 'FEATURED',
-      image: ProductImageModel(
-        url: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?w=500',
-      ),
-      wholesale: WholesaleModel(
-        price: PriceModel(formatted: '৳ 4,120'),
-        inStock: '85',
-      ),
-    ),
-    ProductItemModel(
-      slug: 'P04',
-      name: 'Organic Tea & Beverage Bulk Container',
-      category: 'BESTSELLER',
-      image: ProductImageModel(
-        url: 'https://images.unsplash.com/photo-1576092768241-dec231879fc3?w=500',
-      ),
-      wholesale: WholesaleModel(
-        price: PriceModel(formatted: '৳ 1,850'),
-        inStock: '210',
-      ),
-    ),
-  ];
-
   @override
   void initState() {
     super.initState();
@@ -124,7 +72,7 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
     final apiCategories = widget.isCatalog
         ? (dashboardProvider.catalogProductResponse?.options?.categories ?? [])
         : (dashboardProvider.myProductResponse?.options?.categories ?? []);
-    final displayProducts = rawApiProducts.isNotEmpty ? rawApiProducts : _dummyProducts;
+    final displayProducts = rawApiProducts;
 
     final filteredList = displayProducts.where((product) {
       final name = product.name ?? '';

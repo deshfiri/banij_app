@@ -32,6 +32,8 @@ final class EndPoints {
   static String notification()=>"/notifications";
   static String accountDelete()=>"/account-deletion";
   static String myProduct()=>"/my-products";
+  static String payments() => "/payout-methods";
+  static String address()=>"/addresses";
   static String verificationHistory()=>"/kyc/history";
   static String order()=>"/orders";
   static String productCatalog()=>"/catalog";
