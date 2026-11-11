@@ -12,6 +12,7 @@ import '../../../../providers/dashboard_provider.dart';
 import '../../../finance/presentation/widgets/invoices_receipts_sheet.dart';
 import 'order_category_detail_sheet.dart';
 import 'product_category_detail_sheet.dart';
+import 'website_sheet.dart';
 
 class HubItem {
   final String titleKey;
@@ -143,6 +144,8 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
           ? 'Receipts'
           : 'Invoices';
       InvoicesReceiptsSheet.show(context, initialTab: initialTab);
+    } else if (item.titleKey == 'hub_my_websites') {
+      WebsiteSheet.show(context);
     } else if (item.category == 'Sales & Orders' ||
         item.titleKey == 'hub_orders' ||
         item.titleKey == 'hub_all_orders' ||
