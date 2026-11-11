@@ -52,24 +52,43 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
   }
 
   Future<void> _loadLocations() async {
-    try {
-      final jsonString = await rootBundle.loadString('assets/json/bd_locations.json');
-      final data = json.decode(jsonString);
-      if (data is Map && data.containsKey('divisions')) {
-        final divs = data['divisions'] as List? ?? [];
-        if (divs.isNotEmpty) {
+    List<String> pathsToTry = [
+      'assets/json/bd_locations.json',
+      'json/bd_locations.json',
+      'bd_locations.json',
+    ];
+
+    for (final path in pathsToTry) {
+      try {
+        final jsonString = await rootBundle.loadString(path);
+        final data = json.decode(jsonString);
+
+        List<dynamic>? divs;
+        if (data is Map) {
+          if (data.containsKey('divisions') && data['divisions'] is List) {
+            divs = data['divisions'] as List;
+          } else if (data.containsKey('data') && data['data'] is List) {
+            divs = data['data'] as List;
+          }
+        } else if (data is List) {
+          divs = data;
+        }
+
+        if (divs != null && divs.isNotEmpty) {
           setState(() {
-            _divisions = divs;
+            _divisions = divs!;
             _isLoadingLocations = false;
           });
+          debugPrint('Successfully loaded ${_divisions.length} divisions from $path');
           return;
         }
+      } catch (e) {
+        debugPrint('Failed to load locations from $path: $e');
       }
-    } catch (e) {
-      debugPrint('Error loading bd_locations.json: $e');
     }
 
-    // Fallback default divisions if asset loading fails
+    // Fallback default divisions if asset loading fails across all paths
+    debugPrint('Warning: Falling back to default divisions');
     setState(() {
       _divisions = [
         {"id": 1, "name_en": "Barisal", "name_bn": "বরিশাল", "districts": []},

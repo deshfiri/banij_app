@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 
 import '../../../common_widget/custom_button.dart';
 import '../../../common_widget/custom_field_label.dart';
+import '../../../common_widget/custom_form_field.dart';
 import '../../../common_widget/custom_password_field.dart';
 import '../../../constants/color.dart';
 import '../../../helpers/ui_helpers.dart';
@@ -19,6 +20,16 @@ class ChangePasswordScreen extends StatefulWidget {
 
 class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      try {
+        context.read<ChangePassProvider>().resetForm();
+      } catch (_) {}
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,16 +93,18 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       ),
                       UIHelper.verticalSpace(24.h),
 
-                      // Current Password Field
-                      CustomFieldLabel(label: 'current_password'.tr, isRequired: true),
-                      CustomPasswordField(
+                      // Email Field
+                      CustomFieldLabel(label: 'current Password'.tr, isRequired: true),
+                      CustomFormField(
                         controller: provider.currentPasswordController,
-                        hintText: 'enter_password'.tr,
-                        isObscure: provider.isCurrentPassVisible,
-                        onToggleObscure: provider.toggleCurrentPassword,
+                        inputType: TextInputType.emailAddress,
+                        hintText: 'current Password'.tr,
                         validator: (val) {
                           if (val == null || val.isEmpty) {
-                            return 'err_enter_current_password'.tr;
+                            return 'err_enter_new_password'.tr;
+                          }
+                          if (val.length < 6) {
+                            return 'err_password_length'.tr;
                           }
                           return null;
                         },

@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:bbnij/constants/app_constants.dart';
+import 'package:bbnij/helpers/di.dart';
 import 'package:dio/dio.dart';
 
 import '../../../networks/dio/dio.dart';
@@ -120,6 +122,40 @@ final class AccountApi {
           throw Exception(data['message'].toString());
         } else if (data is Map && data.containsKey('error')) {
           throw Exception(data['error'].toString());
+        }
+      }
+      rethrow;
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  Future<void> changePasswordApi({
+    required String currentPassword,
+    required String password,
+    required String passwordConfirmation,
+  }) async {
+    try {
+      final token = appData.read(kKeyAccessToken) ?? '';
+      Map<String, dynamic> data = {
+        "current_password": currentPassword,
+        "password": password,
+        "password_confirmation": passwordConfirmation,
+      };
+      Response response = await putHttp(EndPoints.changepassword(), data);
+
+      if (response.statusCode == 200 || response.statusCode == 201 || response.statusCode==204) {
+        return;
+      } else {
+        throw DataSource.DEFAULT.getFailure();
+      }
+    } on DioException catch (dioError) {
+      if (dioError.response?.data != null) {
+        final resData = dioError.response?.data;
+        if (resData is Map && resData.containsKey('message')) {
+          throw Exception(resData['message'].toString());
+        } else if (resData is Map && resData.containsKey('error')) {
+          throw Exception(resData['error'].toString());
         }
       }
       rethrow;

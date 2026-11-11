@@ -58,7 +58,8 @@ final class EndPoints {
   static String forgetPass() => "/password/forgot";
   static String otpVerify() => "/verify-otp";
   static String resendOtp() => "/resend-otp";
-  static String resetPassword() => "/reset-password";
+  static String resetPassword() => "/password/reset";
+  static String changepassword()=>"/security/password";
   static String userProfile() => "/profile";
   static String editProfile() => "/update-profile";
   static String updateProfile() => "/update-profile";
@@ -78,5 +79,4 @@ final class EndPoints {
   static String specialDay() => "/partner/special-days/26";
   static String deletePartner() => "/partner/remove";
   static String deleteAccount() => "/delete-profile";
-  static String changePassword() => "/update-password";
 }
