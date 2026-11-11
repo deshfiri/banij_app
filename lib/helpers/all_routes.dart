@@ -20,6 +20,7 @@ import '../feature/dashboard/presentation/product_detail_screen.dart';
 import '../feature/dashboard/presentation/cart_screen.dart';
 import '../feature/dashboard/presentation/order_now_screen.dart';
 import '../feature/dashboard/presentation/add_website_screen.dart';
+import '../feature/dashboard/presentation/add_address_screen.dart';
 
 final class Routes {
   static final Routes _routes = Routes._internal();
@@ -43,6 +44,7 @@ final class Routes {
   static const String cartScreen = '/cartScreen';
   static const String orderNowScreen = '/orderNowScreen';
   static const String addWebsiteScreen = '/addWebsiteScreen';
+  static const String addAddressScreen = '/addAddressScreen';
 }
 
 final class RouteGenerator {
@@ -123,6 +125,10 @@ final class RouteGenerator {
         return Platform.isAndroid
             ? _LightningFastTransitionRoute(widget: const AddWebsiteScreen(), settings: settings)
             : CupertinoPageRoute(builder: (context) => const AddWebsiteScreen(), settings: settings);
+      case Routes.addAddressScreen:
+        return Platform.isAndroid
+            ? _LightningFastTransitionRoute(widget: const AddAddressScreen(), settings: settings)
+            : CupertinoPageRoute(builder: (context) => const AddAddressScreen(), settings: settings);
     }
 
     return null;

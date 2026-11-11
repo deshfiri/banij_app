@@ -1,0 +1,2258 @@
+{
+    "description": "Bangladesh administrative directory used by the Address module. Every \"id\" is bd_locations.id: send it as division_id, district_id, upazila_id and union_id when saving an address. union_id is optional; the chain division > district > upazila (> union) must be valid.",
+    "source": "bd_locations table (bundled directory imported by `php artisan bd-locations:import`), active rows only",
+    "generated_at": "2026-11-11T11:17:18+06:00",
+    "counts": {
+        "divisions": 8,
+        "districts": 64,
+        "upazilas": 504,
+        "unions": 4964
+    },
+    "divisions": [
+        {
+            "id": 1,
+            "name_en": "Barisal",
+            "name_bn": "বরিশাল",
+            "districts": [
+                {
+                    "id": 9,
+                    "name_en": "Barguna",
+                    "name_bn": "বরগুনা",
+                    "upazilas": [
+                        {
+                            "id": 73,
+                            "name_en": "Amtali",
+                            "name_bn": "আমতলী",
+                            "unions": [
+                                {
+                                    "id": 2568,
+                                    "name_en": "Amtali",
+                                    "name_bn": "আমতলী"
+                                },
+                                {
+                                    "id": 2576,
+                                    "name_en": "Amtali Municipality",
+                                    "name_bn": "আমতলী পৌরসভা"
+                                },
+                                {
+                                    "id": 2574,
+                                    "name_en": "Arpangasia",
+                                    "name_bn": "আড়পাঙ্গাশিয়া"
+                                },
+                                {
+                                    "id": 2570,
+                                    "name_en": "Athrogasia",
+                                    "name_bn": "আঠারগাছিয়া"
+                                },
+                                {
+                                    "id": 2573,
+                                    "name_en": "Chotobogi",
+                                    "name_bn": "ছোটবগী"
+                                },
+                                {
+                                    "id": 2575,
+                                    "name_en": "Chowra",
+                                    "name_bn": "চাওড়া"
+                                },
+                                {
+                                    "id": 2569,
+                                    "name_en": "Gulishakhali",
+                                    "name_bn": "গুলিশাখালী"
+                                },
+                                {
+                                    "id": 2572,
+                                    "name_en": "Haldia",
+                                    "name_bn": "হলদিয়া"
+                                },
+                                {
+                                    "id": 2571,
+                                    "name_en": "Kukua",
+                                    "name_bn": "কুকুয়া"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 76,
+                            "name_en": "Bamna",
+                            "name_bn": "বামনা",
+                            "unions": [
+                                {
+                                    "id": 2597,
+                                    "name_en": "Bamna",
+                                    "name_bn": "বামনা"
+                                },
+                                {
+                                    "id": 2596,
+                                    "name_en": "Bukabunia",
+                                    "name_bn": "বুকাবুনিয়া"
+                                },
+                                {
+                                    "id": 2599,
+                                    "name_en": "Doutola",
+                                    "name_bn": "ডৌয়াতলা"
+                                },
+                                {
+                                    "id": 2598,
+                                    "name_en": "Ramna",
+                                    "name_bn": "রামনা"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 74,
+                            "name_en": "Barguna Sadar",
+                            "name_bn": "বরগুনা সদর",
+                            "unions": [
+                                {
+                                    "id": 2583,
+                                    "name_en": "Ayla Patakata",
+                                    "name_bn": "আয়লা পাতাকাটা"
+                                },
+                                {
+                                    "id": 2586,
+                                    "name_en": "Barguna",
+                                    "name_bn": "বরগুনা"
+                                },
+                                {
+                                    "id": 2587,
+                                    "name_en": "Barguna Municipality",
+                                    "name_bn": "বরগুনা পৌরসভা"
+                                },
+                                {
+                                    "id": 2579,
+                                    "name_en": "Bodorkhali",
+                                    "name_bn": "বদরখালী"
+                                },
+                                {
+                                    "id": 2584,
+                                    "name_en": "Burirchor",
+                                    "name_bn": "বুড়িরচর"
+                                },
+                                {
+                                    "id": 2585,
+                                    "name_en": "Dhalua",
+                                    "name_bn": "ঢলুয়া"
+                                },
+                                {
+                                    "id": 2581,
+                                    "name_en": "Fuljhuri",
+                                    "name_bn": "ফুলঝুড়ি"
+                                },
+                                {
+                                    "id": 2580,
+                                    "name_en": "Gowrichanna",
+                                    "name_bn": "গৌরিচন্না"
+                                },
+                                {
+                                    "id": 2582,
+                                    "name_en": "Keorabunia",
+                                    "name_bn": "কেওড়াবুনিয়া"
+                                },
+                                {
+                                    "id": 2577,
+                                    "name_en": "M. Baliatali",
+                                    "name_bn": "এম. বালিয়াতলী"
+                                },
+                                {
+                                    "id": 2578,
+                                    "name_en": "Noltona",
+                                    "name_bn": "নলটোনা"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 75,
+                            "name_en": "Betagi",
+                            "name_bn": "বেতাগী",
+                            "unions": [
+                                {
+                                    "id": 2589,
+                                    "name_en": "Betagi",
+                                    "name_bn": "বেতাগী"
+                                },
+                                {
+                                    "id": 2595,
+                                    "name_en": "Betagi Municipality",
+                                    "name_bn": "বেতাগী পৌরসভা"
+                                },
+                                {
+                                    "id": 2588,
+                                    "name_en": "Bibichini",
+                                    "name_bn": "বিবিচিন"
+                                },
+                                {
+                                    "id": 2592,
+                                    "name_en": "Buramajumder",
+                                    "name_bn": "বুড়ামজুমদার"
+                                },
+                                {
+                                    "id": 2590,
+                                    "name_en": "Hosnabad",
+                                    "name_bn": "হোসনাবাদ"
+                                },
+                                {
+                                    "id": 2593,
+                                    "name_en": "Kazirabad",
+                                    "name_bn": "কাজীরাবাদ"
+                                },
+                                {
+                                    "id": 2591,
+                                    "name_en": "Mokamia",
+                                    "name_bn": "মোকামিয়া"
+                                },
+                                {
+                                    "id": 2594,
+                                    "name_en": "Sarisamuri",
+                                    "name_bn": "সরিষামুড়ী"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 77,
+                            "name_en": "Pathorghata",
+                            "name_bn": "পাথরঘাটা",
+                            "unions": [
+                                {
+                                    "id": 2602,
+                                    "name_en": "Charduany",
+                                    "name_bn": "চরদুয়ানী"
+                                },
+                                {
+                                    "id": 2605,
+                                    "name_en": "Kakchira",
+                                    "name_bn": "কাকচিঢ়া"
+                                },
+                                {
+                                    "id": 2604,
+                                    "name_en": "Kalmegha",
+                                    "name_bn": "কালমেঘা"
+                                },
+                                {
+                                    "id": 2606,
+                                    "name_en": "Kathaltali",
+                                    "name_bn": "কাঠালতলী"
+                                },
+                                {
+                                    "id": 2601,
+                                    "name_en": "Nachnapara",
+                                    "name_bn": "নাচনাপাড়া"
+                                },
+                                {
+                                    "id": 2603,
+                                    "name_en": "Patharghata",
+                                    "name_bn": "পাথরঘাটা"
+                                },
+                                {
+                                    "id": 2607,
+                                    "name_en": "Patharghata Municipality",
+                                    "name_bn": "পাথরঘাটা পৌরসভা"
+                                },
+                                {
+                                    "id": 2600,
+                                    "name_en": "Raihanpur",
+                                    "name_bn": "রায়হানপুর"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 78,
+                            "name_en": "Taltali",
+                            "name_bn": "তালতলি",
+                            "unions": [
+                                {
+                                    "id": 2610,
+                                    "name_en": "Barabagi",
+                                    "name_bn": "বড়বগি"
+                                },
+                                {
+                                    "id": 2611,
+                                    "name_en": "Chhotabagi",
+                                    "name_bn": "ছোটবগি"
+                                },
+                                {
+                                    "id": 2608,
+                                    "name_en": "Karibaria",
+                                    "name_bn": "কড়ইবাড়ীয়া"
+                                },
+                                {
+                                    "id": 2612,
+                                    "name_en": "Nishanbaria",
+                                    "name_bn": "নিশানবাড়ীয়া"
+                                },
+                                {
+                                    "id": 2609,
+                                    "name_en": "Panchakoralia",
+                                    "name_bn": "পচাকোড়ালিয়া"
+                                },
+                                {
+                                    "id": 2613,
+                                    "name_en": "Sarikkhali",
+                                    "name_bn": "শারিকখালি"
+                                },
+                                {
+                                    "id": 2614,
+                                    "name_en": "Sonakata",
+                                    "name_bn": "সোনাকাটা"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": 10,
+                    "name_en": "Barisal",
+                    "name_bn": "বরিশাল",
+                    "upazilas": [
+                        {
+                            "id": 85,
+                            "name_en": "Agailjhara",
+                            "name_bn": "আগৈলঝাড়া",
+                            "unions": [
+                                {
+                                    "id": 2786,
+                                    "name_en": "Bagdha",
+                                    "name_bn": "বাগধা"
+                                },
+                                {
+                                    "id": 2785,
+                                    "name_en": "Bakal",
+                                    "name_bn": "বাকাল"
+                                },
+                                {
+                                    "id": 2787,
+                                    "name_en": "Goila",
+                                    "name_bn": "গৈলা"
+                                },
+                                {
+                                    "id": 2784,
+                                    "name_en": "Rajihar",
+                                    "name_bn": "রাজিহার"
+                                },
+                                {
+                                    "id": 2788,
+                                    "name_en": "Ratnapur",
+                                    "name_bn": "রত্নপুর"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 81,
+                            "name_en": "Babuganj",
+                            "name_bn": "বাবুগঞ্জ",
+                            "unions": [
+                                {
+                                    "id": 2754,
+                                    "name_en": "Chandpasha",
+                                    "name_bn": "চাঁদপাশা"
+                                },
+                                {
+                                    "id": 2753,
+                                    "name_en": "Deherhoti",
+                                    "name_bn": "দেহেরগতি"
+                                },
+                                {
+                                    "id": 2751,
+                                    "name_en": "Jahangir Nagar",
+                                    "name_bn": "জাহাঙ্গীর নগর"
+                                },
+                                {
+                                    "id": 2752,
+                                    "name_en": "Kaderpur",
+                                    "name_bn": "কেদারপুর"
+                                },
+                                {
+                                    "id": 2756,
+                                    "name_en": "Madhbpasha",
+                                    "name_bn": "মাধবপাশা"
+                                },
+                                {
+                                    "id": 2755,
+                                    "name_en": "Rahamtpur",
+                                    "name_bn": "রহমতপুর"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 80,
+                            "name_en": "Bakerganj",
+                            "name_bn": "বাকেরগঞ্জ",
+                            "unions": [
+                                {
+                                    "id": 2750,
+                                    "name_en": "Bakerganj Municipality",
+                                    "name_bn": "বাকেরগঞ্জ পৌরসভা"
+                                },
+                                {
+                                    "id": 2746,
+                                    "name_en": "Bharpasha",
+                                    "name_bn": "ভরপাশা"
+                                },
+                                {
+                                    "id": 2737,
+                                    "name_en": "Charade",
+                                    "name_bn": "চরাদি"
+                                },
+                                {
+                                    "id": 2736,
+                                    "name_en": "Charamaddi",
+                                    "name_bn": "চরামদ্দি"
+                                },
+                                {
+                                    "id": 2738,
+                                    "name_en": "Darial",
+                                    "name_bn": "দাড়িয়াল"
+                                },
+                                {
+                                    "id": 2739,
+                                    "name_en": "Dudhal",
+                                    "name_bn": "দুধল"
+                                },
+                                {
+                                    "id": 2740,
+                                    "name_en": "Durgapasha",
+                                    "name_bn": "দুর্গাপাশা"
+                                },
+                                {
+                                    "id": 2741,
+                                    "name_en": "Faridpur",
+                                    "name_bn": "ফরিদপুর"
+                                },
+                                {
+                                    "id": 2745,
+                                    "name_en": "Garuria",
+                                    "name_bn": "গারুরিয়া"
+                                },
+                                {
+                                    "id": 2742,
+                                    "name_en": "Kabai",
+                                    "name_bn": "কবাই"
+                                },
+                                {
+                                    "id": 2744,
+                                    "name_en": "Kalashkathi",
+                                    "name_bn": "কলসকাঠী"
+                                },
+                                {
+                                    "id": 2743,
+                                    "name_en": "Nalua",
+                                    "name_bn": "নলুয়া"
+                                },
+                                {
+                                    "id": 2749,
+                                    "name_en": "Niamoti",
+                                    "name_bn": "নিয়ামতি"
+                                },
+                                {
+                                    "id": 2748,
+                                    "name_en": "Padreeshibpur",
+                                    "name_bn": "পাদ্রিশিবপুর"
+                                },
+                                {
+                                    "id": 2747,
+                                    "name_en": "Rangasree",
+                                    "name_bn": "রঙ্গশ্রী"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 83,
+                            "name_en": "Banaripara",
+                            "name_bn": "বানারীপাড়া",
+                            "unions": [
+                                {
+                                    "id": 2772,
+                                    "name_en": "Baishari",
+                                    "name_bn": "বাইশারী"
+                                },
+                                {
+                                    "id": 2773,
+                                    "name_en": "Banaripara",
+                                    "name_bn": "বানারিপাড়া"
+                                },
+                                {
+                                    "id": 2775,
+                                    "name_en": "Banaripara Municipality",
+                                    "name_bn": "বানারীপাড়া পৌরসভা"
+                                },
+                                {
+                                    "id": 2767,
+                                    "name_en": "Bisharkandi",
+                                    "name_bn": "বিশারকান্দি"
+                                },
+                                {
+                                    "id": 2770,
+                                    "name_en": "Chakhar",
+                                    "name_bn": "চাখার"
+                                },
+                                {
+                                    "id": 2768,
+                                    "name_en": "Illuhar",
+                                    "name_bn": "ইলুহার"
+                                },
+                                {
+                                    "id": 2771,
+                                    "name_en": "Saliabakpur",
+                                    "name_bn": "সলিয়াবাকপুর"
+                                },
+                                {
+                                    "id": 2769,
+                                    "name_en": "Sayedkathi",
+                                    "name_bn": "সৈয়দকাঠী"
+                                },
+                                {
+                                    "id": 2774,
+                                    "name_en": "Udykhati",
+                                    "name_bn": "উদয়কাঠী"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 79,
+                            "name_en": "Barisal Sadar",
+                            "name_bn": "বরিশাল সদর",
+                            "unions": [
+                                {
+                                    "id": 2733,
+                                    "name_en": "Chandpura",
+                                    "name_bn": "চাঁদপুরা"
+                                },
+                                {
+                                    "id": 2735,
+                                    "name_en": "Chandramohan",
+                                    "name_bn": "চন্দ্রমোহন"
+                                },
+                                {
+                                    "id": 2728,
+                                    "name_en": "Charbaria",
+                                    "name_bn": "চরবাড়িয়া"
+                                },
+                                {
+                                    "id": 2732,
+                                    "name_en": "Charcowa",
+                                    "name_bn": "চরকাউয়া"
+                                },
+                                {
+                                    "id": 2730,
+                                    "name_en": "Charmonai",
+                                    "name_bn": "চরমোনাই"
+                                },
+                                {
+                                    "id": 2727,
+                                    "name_en": "Kashipur",
+                                    "name_bn": "কাশীপুর"
+                                },
+                                {
+                                    "id": 2726,
+                                    "name_en": "Raipasha Karapur",
+                                    "name_bn": "রায়পাশা কড়াপুর"
+                                },
+                                {
+                                    "id": 2729,
+                                    "name_en": "Shyastabad",
+                                    "name_bn": "সায়েস্তাবাদ"
+                                },
+                                {
+                                    "id": 2734,
+                                    "name_en": "Tungibaria",
+                                    "name_bn": "টুঙ্গীবাড়িয়া"
+                                },
+                                {
+                                    "id": 2731,
+                                    "name_en": "Zagua",
+                                    "name_bn": "জাগুয়া"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 89,
+                            "name_en": "Barishal City Corporation",
+                            "name_bn": "বরিশাল সিটি কর্পোরেশন",
+                            "unions": [
+                                {
+                                    "id": 2817,
+                                    "name_en": "barishal sadar",
+                                    "name_bn": "বরিশাল সদর"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 84,
+                            "name_en": "Gournadi",
+                            "name_bn": "গৌরনদী",
+                            "unions": [
+                                {
+                                    "id": 2777,
+                                    "name_en": "Barthi",
+                                    "name_bn": "বার্থী"
+                                },
+                                {
+                                    "id": 2781,
+                                    "name_en": "Batajore",
+                                    "name_bn": "বাটাজোর"
+                                },
+                                {
+                                    "id": 2778,
+                                    "name_en": "Chandshi",
+                                    "name_bn": "চাঁদশী"
+                                },
+                                {
+                                    "id": 2783,
+                                    "name_en": "Gournadi Municipality",
+                                    "name_bn": "গৌরনদী পৌরসভা"
+                                },
+                                {
+                                    "id": 2776,
+                                    "name_en": "Khanjapur",
+                                    "name_bn": "খাঞ্জাপুর"
+                                },
+                                {
+                                    "id": 2779,
+                                    "name_en": "Mahilara",
+                                    "name_bn": "মাহিলারা"
+                                },
+                                {
+                                    "id": 2780,
+                                    "name_en": "Nalchira",
+                                    "name_bn": "নলচিড়া"
+                                },
+                                {
+                                    "id": 2782,
+                                    "name_en": "Sarikal",
+                                    "name_bn": "সরিকল"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 88,
+                            "name_en": "Hizla",
+                            "name_bn": "হিজলা",
+                            "unions": [
+                                {
+                                    "id": 2814,
+                                    "name_en": "Barjalia",
+                                    "name_bn": "বড়জালিয়া"
+                                },
+                                {
+                                    "id": 2816,
+                                    "name_en": "Dhulkhola",
+                                    "name_bn": "ধুলখোলা"
+                                },
+                                {
+                                    "id": 2813,
+                                    "name_en": "Guabaria",
+                                    "name_bn": "গুয়াবাড়িয়া"
+                                },
+                                {
+                                    "id": 2811,
+                                    "name_en": "Harinathpur",
+                                    "name_bn": "হরিনাথপুর"
+                                },
+                                {
+                                    "id": 2815,
+                                    "name_en": "Hizla Gourabdi",
+                                    "name_bn": "হিজলা গৌরাব্দি"
+                                },
+                                {
+                                    "id": 2812,
+                                    "name_en": "Memania",
+                                    "name_bn": "মেমানিয়া"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 86,
+                            "name_en": "Mehendiganj",
+                            "name_bn": "মেহেন্দিগঞ্জ",
+                            "unions": [
+                                {
+                                    "id": 2797,
+                                    "name_en": "Alimabad",
+                                    "name_bn": "আলিমাবাদ"
+                                },
+                                {
+                                    "id": 2789,
+                                    "name_en": "Andarmanik",
+                                    "name_bn": "আন্দারমানিক"
+                                },
+                                {
+                                    "id": 2795,
+                                    "name_en": "Bhashanchar",
+                                    "name_bn": "ভাষানচর"
+                                },
+                                {
+                                    "id": 2794,
+                                    "name_en": "Biddanandapur",
+                                    "name_bn": "বিদ্যানন্দনপুর"
+                                },
+                                {
+                                    "id": 2798,
+                                    "name_en": "Chandpur",
+                                    "name_bn": "চানপুর"
+                                },
+                                {
+                                    "id": 2791,
+                                    "name_en": "Charakkorea",
+                                    "name_bn": "চরএককরিয়া"
+                                },
+                                {
+                                    "id": 2801,
+                                    "name_en": "Chargopalpur",
+                                    "name_bn": "চরগোপালপুর"
+                                },
+                                {
+                                    "id": 2799,
+                                    "name_en": "Darirchar Khajuria",
+                                    "name_bn": "দড়িরচর খাজুরিয়া"
+                                },
+                                {
+                                    "id": 2800,
+                                    "name_en": "Gobindapur",
+                                    "name_bn": "গোবিন্দপুর"
+                                },
+                                {
+                                    "id": 2796,
+                                    "name_en": "Jangalia",
+                                    "name_bn": "জাঙ্গালিয়া"
+                                },
+                                {
+                                    "id": 2790,
+                                    "name_en": "Lata",
+                                    "name_bn": "লতা"
+                                },
+                                {
+                                    "id": 2802,
+                                    "name_en": "Mehendiganj Municipality",
+                                    "name_bn": "মেহেন্দিগঞ্জ পৌরসভা"
+                                },
+                                {
+                                    "id": 2793,
+                                    "name_en": "Mehendigong",
+                                    "name_bn": "মেহেন্দিগঞ্জ"
+                                },
+                                {
+                                    "id": 2792,
+                                    "name_en": "Ulania",
+                                    "name_bn": "উলানিয়া"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 87,
+                            "name_en": "Muladi",
+                            "name_bn": "মুলাদী",
+                            "unions": [
+                                {
+                                    "id": 2803,
+                                    "name_en": "Batamara",
+                                    "name_bn": "বাটামারা"
+                                },
+                                {
+                                    "id": 2807,
+                                    "name_en": "Charkalekha",
+                                    "name_bn": "চরকালেখা"
+                                },
+                                {
+                                    "id": 2806,
+                                    "name_en": "Gaschua",
+                                    "name_bn": "গাছুয়া"
+                                },
+                                {
+                                    "id": 2809,
+                                    "name_en": "Kazirchar",
+                                    "name_bn": "কাজিরচর"
+                                },
+                                {
+                                    "id": 2808,
+                                    "name_en": "Muladi",
+                                    "name_bn": "মুলাদী"
+                                },
+                                {
+                                    "id": 2810,
+                                    "name_en": "Muladi Municipality",
+                                    "name_bn": "মুলাদী পৌরসভা"
+                                },
+                                {
+                                    "id": 2804,
+                                    "name_en": "Nazirpur",
+                                    "name_bn": "নাজিরপুর"
+                                },
+                                {
+                                    "id": 2805,
+                                    "name_en": "Safipur",
+                                    "name_bn": "সফিপুর"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 82,
+                            "name_en": "Wazirpur",
+                            "name_bn": "উজিরপুর",
+                            "unions": [
+                                {
+                                    "id": 2763,
+                                    "name_en": "Bamrail",
+                                    "name_bn": "বামরাইল"
+                                },
+                                {
+                                    "id": 2762,
+                                    "name_en": "Barakhota",
+                                    "name_bn": "বরাকোঠা"
+                                },
+                                {
+                                    "id": 2765,
+                                    "name_en": "Gouthia",
+                                    "name_bn": "গুঠিয়া"
+                                },
+                                {
+                                    "id": 2758,
+                                    "name_en": "Harta",
+                                    "name_bn": "হারতা"
+                                },
+                                {
+                                    "id": 2759,
+                                    "name_en": "Jalla",
+                                    "name_bn": "জল্লা"
+                                },
+                                {
+                                    "id": 2760,
+                                    "name_en": "Otra",
+                                    "name_bn": "ওটরা"
+                                },
+                                {
+                                    "id": 2757,
+                                    "name_en": "Shatla",
+                                    "name_bn": "সাতলা"
+                                },
+                                {
+                                    "id": 2764,
+                                    "name_en": "Shikerpur Wazirpur",
+                                    "name_bn": "শিকারপুর উজিরপুর"
+                                },
+                                {
+                                    "id": 2761,
+                                    "name_en": "Sholok",
+                                    "name_bn": "শোলক"
+                                },
+                                {
+                                    "id": 2766,
+                                    "name_en": "Wazirpur Municipality",
+                                    "name_bn": "উজিরপুর পৌরসভা"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": 11,
+                    "name_en": "Bhola",
+                    "name_bn": "ভোলা",
+                    "upazilas": [
+                        {
+                            "id": 90,
+                            "name_en": "Bhola Sadar",
+                            "name_bn": "ভোলা সদর",
+                            "unions": [
+                                {
+                                    "id": 2881,
+                                    "name_en": "Alinagor",
+                                    "name_bn": "আলীনগর"
+                                },
+                                {
+                                    "id": 2878,
+                                    "name_en": "Bapta",
+                                    "name_bn": "বাপ্তা"
+                                },
+                                {
+                                    "id": 2887,
+                                    "name_en": "Bhola Municipality",
+                                    "name_bn": "ভোলা পৌরসভা"
+                                },
+                                {
+                                    "id": 2882,
+                                    "name_en": "Charshamya",
+                                    "name_bn": "চরসামাইয়া"
+                                },
+                                {
+                                    "id": 2879,
+                                    "name_en": "Dhania",
+                                    "name_bn": "ধনিয়া"
+                                },
+                                {
+                                    "id": 2875,
+                                    "name_en": "Ilisha",
+                                    "name_bn": "ইলিশা"
+                                },
+                                {
+                                    "id": 2877,
+                                    "name_en": "Kachia",
+                                    "name_bn": "কাচিয়া"
+                                },
+                                {
+                                    "id": 2885,
+                                    "name_en": "North Digholdi",
+                                    "name_bn": "উত্তর দিঘলদী"
+                                },
+                                {
+                                    "id": 2874,
+                                    "name_en": "Razapur",
+                                    "name_bn": "রাজাপুর"
+                                },
+                                {
+                                    "id": 2880,
+                                    "name_en": "Shibpur",
+                                    "name_bn": "শিবপুর"
+                                },
+                                {
+                                    "id": 2886,
+                                    "name_en": "South Digholdi",
+                                    "name_bn": "দক্ষিণ দিঘলদী"
+                                },
+                                {
+                                    "id": 2884,
+                                    "name_en": "Vheduria",
+                                    "name_bn": "ভেদুরিয়া"
+                                },
+                                {
+                                    "id": 2883,
+                                    "name_en": "Vhelumia",
+                                    "name_bn": " ভেলুমিয়া"
+                                },
+                                {
+                                    "id": 2876,
+                                    "name_en": "Westilisa",
+                                    "name_bn": "পশ্চিম ইলিশা"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 91,
+                            "name_en": "Borhan Sddin",
+                            "name_bn": "বোরহান উদ্দিন",
+                            "unions": [
+                                {
+                                    "id": 2893,
+                                    "name_en": "Borhanuddin Municipality",
+                                    "name_bn": "বোরহানউদ্দিন পৌরসভা"
+                                },
+                                {
+                                    "id": 2888,
+                                    "name_en": "Boromanika",
+                                    "name_bn": "বড় মানিকা"
+                                },
+                                {
+                                    "id": 2889,
+                                    "name_en": "Deula",
+                                    "name_bn": "দেউলা"
+                                },
+                                {
+                                    "id": 2895,
+                                    "name_en": "Gongapur",
+                                    "name_bn": "গঙ্গাপুর "
+                                },
+                                {
+                                    "id": 2897,
+                                    "name_en": "Hasannogor",
+                                    "name_bn": "হাসাননগর "
+                                },
+                                {
+                                    "id": 2892,
+                                    "name_en": "Kachia",
+                                    "name_bn": "কাচিয়া"
+                                },
+                                {
+                                    "id": 2890,
+                                    "name_en": "Kutuba",
+                                    "name_bn": "কুতুবা"
+                                },
+                                {
+                                    "id": 2891,
+                                    "name_en": "Pakshia",
+                                    "name_bn": "পক্ষিয়া"
+                                },
+                                {
+                                    "id": 2894,
+                                    "name_en": "Sachra",
+                                    "name_bn": "সাচড়া"
+                                },
+                                {
+                                    "id": 2896,
+                                    "name_en": "Tobgi",
+                                    "name_bn": "টবগী"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 92,
+                            "name_en": "Charfesson",
+                            "name_bn": "চরফ্যাশন",
+                            "unions": [
+                                {
+                                    "id": 2913,
+                                    "name_en": "Abdullahpur",
+                                    "name_bn": "আবদুল্লাহ"
+                                },
+                                {
+                                    "id": 2912,
+                                    "name_en": "Abubakarpur",
+                                    "name_bn": "আবুবকরপুর"
+                                },
+                                {
+                                    "id": 2901,
+                                    "name_en": "Aminabad",
+                                    "name_bn": "আমিনাবাদ"
+                                },
+                                {
+                                    "id": 2899,
+                                    "name_en": "Aslampur",
+                                    "name_bn": "আছলামপুর"
+                                },
+                                {
+                                    "id": 2904,
+                                    "name_en": "Awajpur",
+                                    "name_bn": "আওয়াজপুর"
+                                },
+                                {
+                                    "id": 2917,
+                                    "name_en": "Char Fashion Municipality",
+                                    "name_bn": "চরফ্যাশন পৌরসভা"
+                                },
+                                {
+                                    "id": 2905,
+                                    "name_en": "Charkolmi",
+                                    "name_bn": "চরকলমী"
+                                },
+                                {
+                                    "id": 2903,
+                                    "name_en": "Charmadraj",
+                                    "name_bn": "চরমাদ্রাজ"
+                                },
+                                {
+                                    "id": 2906,
+                                    "name_en": "Charmanika",
+                                    "name_bn": "চরমানিকা"
+                                },
+                                {
+                                    "id": 2916,
+                                    "name_en": "Dalchar",
+                                    "name_bn": "ঢালচর"
+                                },
+                                {
+                                    "id": 2907,
+                                    "name_en": "Hazarigonj",
+                                    "name_bn": "হাজারীগঞ্জ"
+                                },
+                                {
+                                    "id": 2908,
+                                    "name_en": "Jahanpur",
+                                    "name_bn": "জাহানপুর"
+                                },
+                                {
+                                    "id": 2911,
+                                    "name_en": "Kukrimukri",
+                                    "name_bn": "কুকরীমূকরী"
+                                },
+                                {
+                                    "id": 2915,
+                                    "name_en": "Mujibnagar",
+                                    "name_bn": "মুজিব নগর"
+                                },
+                                {
+                                    "id": 2914,
+                                    "name_en": "Nazrulnagar",
+                                    "name_bn": "নজরুল নগর"
+                                },
+                                {
+                                    "id": 2902,
+                                    "name_en": "Nilkomol",
+                                    "name_bn": "নীলকমল"
+                                },
+                                {
+                                    "id": 2909,
+                                    "name_en": "Nurabad",
+                                    "name_bn": "নুরাবাদ"
+                                },
+                                {
+                                    "id": 2898,
+                                    "name_en": "Osmangonj",
+                                    "name_bn": "ওসমানগঞ্জ"
+                                },
+                                {
+                                    "id": 2910,
+                                    "name_en": "Rasulpur",
+                                    "name_bn": "রসুলপুর"
+                                },
+                                {
+                                    "id": 2900,
+                                    "name_en": "Zinnagor",
+                                    "name_bn": "জিন্নাগড়"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 93,
+                            "name_en": "Doulatkhan",
+                            "name_bn": "দৌলতখান",
+                            "unions": [
+                                {
+                                    "id": 2923,
+                                    "name_en": "Char Khalipa",
+                                    "name_bn": "চর খলিফা"
+                                },
+                                {
+                                    "id": 2920,
+                                    "name_en": "Charpata",
+                                    "name_bn": "চরপাতা"
+                                },
+                                {
+                                    "id": 2927,
+                                    "name_en": "Daulatkhan Municipality",
+                                    "name_bn": "দৌলতখান পৌরসভা"
+                                },
+                                {
+                                    "id": 2925,
+                                    "name_en": "Hazipur",
+                                    "name_bn": "হাজীপুর"
+                                },
+                                {
+                                    "id": 2918,
+                                    "name_en": "Madanpur",
+                                    "name_bn": "মদনপুর"
+                                },
+                                {
+                                    "id": 2919,
+                                    "name_en": "Madua",
+                                    "name_bn": "মেদুয়া"
+                                },
+                                {
+                                    "id": 2921,
+                                    "name_en": "North Joy Nagar",
+                                    "name_bn": "উত্তর জয়নগর"
+                                },
+                                {
+                                    "id": 2924,
+                                    "name_en": "Sayedpur",
+                                    "name_bn": "সৈয়দপুর"
+                                },
+                                {
+                                    "id": 2922,
+                                    "name_en": "South Joy Nagar",
+                                    "name_bn": "দক্ষিন জয়নগর"
+                                },
+                                {
+                                    "id": 2926,
+                                    "name_en": "Vhovanipur",
+                                    "name_bn": "ভবানীপুর"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 96,
+                            "name_en": "Lalmohan",
+                            "name_bn": "লালমোহন",
+                            "unions": [
+                                {
+                                    "id": 2937,
+                                    "name_en": "Badarpur",
+                                    "name_bn": "বদরপুর"
+                                },
+                                {
+                                    "id": 2938,
+                                    "name_en": "Charbhuta",
+                                    "name_bn": "চরভূতা"
+                                },
+                                {
+                                    "id": 2940,
+                                    "name_en": "Dholigour Nagar",
+                                    "name_bn": "ধলীগৌর নগর"
+                                },
+                                {
+                                    "id": 2945,
+                                    "name_en": "Farajgonj",
+                                    "name_bn": "ফরাজগঞ্জ"
+                                },
+                                {
+                                    "id": 2939,
+                                    "name_en": "Kalma",
+                                    "name_bn": " কালমা"
+                                },
+                                {
+                                    "id": 2941,
+                                    "name_en": "Lalmohan",
+                                    "name_bn": "লালমোহন"
+                                },
+                                {
+                                    "id": 2946,
+                                    "name_en": "Lalmohan Municipality",
+                                    "name_bn": "লালমোহন পৌরসভা"
+                                },
+                                {
+                                    "id": 2942,
+                                    "name_en": "Lord Hardinge",
+                                    "name_bn": "লর্ড হার্ডিঞ্জ"
+                                },
+                                {
+                                    "id": 2944,
+                                    "name_en": "Paschim Char Umed",
+                                    "name_bn": "পশ্চিম চর উমেদ"
+                                },
+                                {
+                                    "id": 2943,
+                                    "name_en": "Ramagonj",
+                                    "name_bn": "রমাগঞ্জ"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 94,
+                            "name_en": "Monpura",
+                            "name_bn": "মনপুরা",
+                            "unions": [
+                                {
+                                    "id": 2928,
+                                    "name_en": "Hazirhat",
+                                    "name_bn": "হাজীর হাট"
+                                },
+                                {
+                                    "id": 2929,
+                                    "name_en": "Monpura",
+                                    "name_bn": "মনপুরা"
+                                },
+                                {
+                                    "id": 2930,
+                                    "name_en": "North Sakuchia",
+                                    "name_bn": "উত্তর সাকুচিয়া"
+                                },
+                                {
+                                    "id": 2931,
+                                    "name_en": "South Sakuchia",
+                                    "name_bn": "দক্ষিন সাকুচিয়া"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 95,
+                            "name_en": "Tazumuddin",
+                            "name_bn": "তজুমদ্দিন",
+                            "unions": [
+                                {
+                                    "id": 2936,
+                                    "name_en": "Baro Molongchora",
+                                    "name_bn": "বড় মলংচড়া"
+                                },
+                                {
+                                    "id": 2935,
+                                    "name_en": "Chadpur",
+                                    "name_bn": "চাঁদপুর"
+                                },
+                                {
+                                    "id": 2932,
+                                    "name_en": "Chanchra",
+                                    "name_bn": "চাচঁড়া"
+                                },
+                                {
+                                    "id": 2933,
+                                    "name_en": "Shambupur",
+                                    "name_bn": "শম্ভুপুর"
+                                },
+                                {
+                                    "id": 2934,
+                                    "name_en": "Sonapur",
+                                    "name_bn": "সোনাপুর"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": 12,
+                    "name_en": "Jhalakathi",
+                    "name_bn": "ঝালকাঠি",
+                    "upazilas": [
+                        {
+                            "id": 97,
+                            "name_en": "Jhalakathi Sadar",
+                            "name_bn": "ঝালকাঠি সদর",
+                            "unions": [
+                                {
+                                    "id": 2692,
+                                    "name_en": "Basanda",
+                                    "name_bn": "বাসন্ডা"
+                                },
+                                {
+                                    "id": 2693,
+                                    "name_en": "Binoykati",
+                                    "name_bn": "বিনয়কাঠী"
+                                },
+                                {
+                                    "id": 2694,
+                                    "name_en": "Gabharamchandrapur",
+                                    "name_bn": "গাভারামচন্দ্রপুর"
+                                },
+                                {
+                                    "id": 2701,
+                                    "name_en": "Gabkhandhansiri",
+                                    "name_bn": "গাবখান ধানসিঁড়ি"
+                                },
+                                {
+                                    "id": 2702,
+                                    "name_en": "Jhalokati Municipality",
+                                    "name_bn": "ঝালকাঠি পৌরসভা"
+                                },
+                                {
+                                    "id": 2695,
+                                    "name_en": "Keora",
+                                    "name_bn": "কেওড়া"
+                                },
+                                {
+                                    "id": 2696,
+                                    "name_en": "Kirtipasha",
+                                    "name_bn": "কীর্তিপাশা"
+                                },
+                                {
+                                    "id": 2697,
+                                    "name_en": "Nabagram",
+                                    "name_bn": "নবগ্রাম"
+                                },
+                                {
+                                    "id": 2698,
+                                    "name_en": "Nathullabad",
+                                    "name_bn": "নথুলল্লাবাদ"
+                                },
+                                {
+                                    "id": 2699,
+                                    "name_en": "Ponabalia",
+                                    "name_bn": "পোনাবালিয়া"
+                                },
+                                {
+                                    "id": 2700,
+                                    "name_en": "Sekherhat",
+                                    "name_bn": "শেখেরহাট"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 98,
+                            "name_en": "Kathalia",
+                            "name_bn": "কাঠালিয়া",
+                            "unions": [
+                                {
+                                    "id": 2703,
+                                    "name_en": "Amua",
+                                    "name_bn": "আমুয়া"
+                                },
+                                {
+                                    "id": 2704,
+                                    "name_en": "Awrabunia",
+                                    "name_bn": "আওরাবুনিয়া"
+                                },
+                                {
+                                    "id": 2705,
+                                    "name_en": "Chenchrirampur",
+                                    "name_bn": "চেঁচরীরামপুর"
+                                },
+                                {
+                                    "id": 2706,
+                                    "name_en": "Kanthalia",
+                                    "name_bn": "কাঠালিয়া"
+                                },
+                                {
+                                    "id": 2707,
+                                    "name_en": "Patikhalghata",
+                                    "name_bn": "পাটিখালঘাটা"
+                                },
+                                {
+                                    "id": 2708,
+                                    "name_en": "Shaulajalia",
+                                    "name_bn": "শৌলজালিয়া"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 99,
+                            "name_en": "Nalchity",
+                            "name_bn": "নলছিটি",
+                            "unions": [
+                                {
+                                    "id": 2718,
+                                    "name_en": "Bharabpasha",
+                                    "name_bn": "ভৈরবপাশা"
+                                },
+                                {
+                                    "id": 2717,
+                                    "name_en": "Dapdapia",
+                                    "name_bn": "দপদপিয়া"
+                                },
+                                {
+                                    "id": 2716,
+                                    "name_en": "Kulkathi",
+                                    "name_bn": "কুলকাঠী"
+                                },
+                                {
+                                    "id": 2715,
+                                    "name_en": "Kusanghal",
+                                    "name_bn": "কুশঙ্গল"
+                                },
+                                {
+                                    "id": 2714,
+                                    "name_en": "Magar",
+                                    "name_bn": "মগর"
+                                },
+                                {
+                                    "id": 2713,
+                                    "name_en": "Mollahat",
+                                    "name_bn": "মোল্লারহাট"
+                                },
+                                {
+                                    "id": 2712,
+                                    "name_en": "Nachanmohal",
+                                    "name_bn": "নাচনমহল"
+                                },
+                                {
+                                    "id": 2719,
+                                    "name_en": "Nalchiti Municipality",
+                                    "name_bn": "নলছিটি পৌরসভা"
+                                },
+                                {
+                                    "id": 2711,
+                                    "name_en": "Ranapasha",
+                                    "name_bn": "রানাপাশা"
+                                },
+                                {
+                                    "id": 2710,
+                                    "name_en": "Siddhakati",
+                                    "name_bn": "সিদ্ধকাঠী"
+                                },
+                                {
+                                    "id": 2709,
+                                    "name_en": "Subidpur",
+                                    "name_bn": "সুবিদপুর"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 100,
+                            "name_en": "Rajapur",
+                            "name_bn": "রাজাপুর",
+                            "unions": [
+                                {
+                                    "id": 2724,
+                                    "name_en": "Baraia",
+                                    "name_bn": "বড়ইয়া"
+                                },
+                                {
+                                    "id": 2723,
+                                    "name_en": "Galua",
+                                    "name_bn": "গালুয়া"
+                                },
+                                {
+                                    "id": 2722,
+                                    "name_en": "Mathbari",
+                                    "name_bn": "মঠবাড়ী"
+                                },
+                                {
+                                    "id": 2725,
+                                    "name_en": "Rajapur",
+                                    "name_bn": "রাজাপুর"
+                                },
+                                {
+                                    "id": 2721,
+                                    "name_en": "Saturia",
+                                    "name_bn": "সাতুরিয়া"
+                                },
+                                {
+                                    "id": 2720,
+                                    "name_en": "Suktagarh",
+                                    "name_bn": "শুক্তাগড়"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": 13,
+                    "name_en": "Patuakhali",
+                    "name_bn": "পটুয়াখালী",
+                    "upazilas": [
+                        {
+                            "id": 101,
+                            "name_en": "Bauphal",
+                            "name_bn": "বাউফল",
+                            "unions": [
+                                {
+                                    "id": 2615,
+                                    "name_en": "Adabaria",
+                                    "name_bn": "আদাবারিয়া"
+                                },
+                                {
+                                    "id": 2629,
+                                    "name_en": "Baufal Municipality",
+                                    "name_bn": "বাউফল পৌরসভা"
+                                },
+                                {
+                                    "id": 2616,
+                                    "name_en": "Bauphal",
+                                    "name_bn": "বাউফল"
+                                },
+                                {
+                                    "id": 2622,
+                                    "name_en": "Boga",
+                                    "name_bn": "বগা"
+                                },
+                                {
+                                    "id": 2617,
+                                    "name_en": "Daspara",
+                                    "name_bn": "দাস পাড়া"
+                                },
+                                {
+                                    "id": 2626,
+                                    "name_en": "Dhulia",
+                                    "name_bn": "ধুলিয়া"
+                                },
+                                {
+                                    "id": 2628,
+                                    "name_en": "Kachipara",
+                                    "name_bn": "কাছিপাড়া"
+                                },
+                                {
+                                    "id": 2618,
+                                    "name_en": "Kalaiya",
+                                    "name_bn": "কালাইয়া"
+                                },
+                                {
+                                    "id": 2627,
+                                    "name_en": "Kalisuri",
+                                    "name_bn": "কালিশুরী"
+                                },
+                                {
+                                    "id": 2623,
+                                    "name_en": "Kanakdia",
+                                    "name_bn": "কনকদিয়া"
+                                },
+                                {
+                                    "id": 2625,
+                                    "name_en": "Keshabpur",
+                                    "name_bn": "কেশবপুর"
+                                },
+                                {
+                                    "id": 2621,
+                                    "name_en": "Madanpura",
+                                    "name_bn": "মদনপুরা"
+                                },
+                                {
+                                    "id": 2620,
+                                    "name_en": "Najirpur",
+                                    "name_bn": "নাজিরপুর"
+                                },
+                                {
+                                    "id": 2619,
+                                    "name_en": "Nawmala",
+                                    "name_bn": "নওমালা"
+                                },
+                                {
+                                    "id": 2624,
+                                    "name_en": "Shurjamoni",
+                                    "name_bn": "সূর্য্যমনি"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 104,
+                            "name_en": "Dashmina",
+                            "name_bn": "দশমিনা",
+                            "unions": [
+                                {
+                                    "id": 2650,
+                                    "name_en": "Alipur",
+                                    "name_bn": "আলীপুর"
+                                },
+                                {
+                                    "id": 2653,
+                                    "name_en": "Baharampur",
+                                    "name_bn": "বহরমপুর"
+                                },
+                                {
+                                    "id": 2648,
+                                    "name_en": "Bashbaria",
+                                    "name_bn": "বাঁশবাড়ীয়া"
+                                },
+                                {
+                                    "id": 2651,
+                                    "name_en": "Betagi Shankipur",
+                                    "name_bn": "বেতাগী সানকিপুর"
+                                },
+                                {
+                                    "id": 2652,
+                                    "name_en": "Dashmina",
+                                    "name_bn": "দশমিনা"
+                                },
+                                {
+                                    "id": 2649,
+                                    "name_en": "Rangopaldi",
+                                    "name_bn": "রণগোপালদী"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 103,
+                            "name_en": "Dumki",
+                            "name_bn": "দুমকি",
+                            "unions": [
+                                {
+                                    "id": 2646,
+                                    "name_en": "Angaria",
+                                    "name_bn": "আংগারিয়া"
+                                },
+                                {
+                                    "id": 2645,
+                                    "name_en": "Labukhali",
+                                    "name_bn": "লেবুখালী"
+                                },
+                                {
+                                    "id": 2644,
+                                    "name_en": "Muradia",
+                                    "name_bn": "মুরাদিয়া"
+                                },
+                                {
+                                    "id": 2643,
+                                    "name_en": "Pangasia",
+                                    "name_bn": "পাংগাশিয়া"
+                                },
+                                {
+                                    "id": 2647,
+                                    "name_en": "Sreerampur",
+                                    "name_bn": "শ্রীরামপুর"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 107,
+                            "name_en": "Galachipa",
+                            "name_bn": "গলাচিপা",
+                            "unions": [
+                                {
+                                    "id": 2674,
+                                    "name_en": "Amkhola",
+                                    "name_bn": "আমখোলা"
+                                },
+                                {
+                                    "id": 2684,
+                                    "name_en": "Bakulbaria",
+                                    "name_bn": "বকুলবাড়ীয়া"
+                                },
+                                {
+                                    "id": 2683,
+                                    "name_en": "Charbiswas",
+                                    "name_bn": "চরবিশ্বাস"
+                                },
+                                {
+                                    "id": 2682,
+                                    "name_en": "Charkajol",
+                                    "name_bn": "চরকাজল"
+                                },
+                                {
+                                    "id": 2680,
+                                    "name_en": "Chiknikandi",
+                                    "name_bn": "চিকনিকান্দী"
+                                },
+                                {
+                                    "id": 2679,
+                                    "name_en": "Dakua",
+                                    "name_bn": "ডাকুয়া"
+                                },
+                                {
+                                    "id": 2676,
+                                    "name_en": "Galachipa",
+                                    "name_bn": "গলাচিপা"
+                                },
+                                {
+                                    "id": 2686,
+                                    "name_en": "Galachipa Municipality",
+                                    "name_bn": "গলাচিপা পৌরসভা"
+                                },
+                                {
+                                    "id": 2681,
+                                    "name_en": "Gazalia",
+                                    "name_bn": "গজালিয়া"
+                                },
+                                {
+                                    "id": 2675,
+                                    "name_en": "Golkhali",
+                                    "name_bn": "গোলখালী"
+                                },
+                                {
+                                    "id": 2685,
+                                    "name_en": "Kalagachhia",
+                                    "name_bn": "কলাগাছিয়া"
+                                },
+                                {
+                                    "id": 2677,
+                                    "name_en": "Panpatty",
+                                    "name_bn": "পানপট্টি"
+                                },
+                                {
+                                    "id": 2678,
+                                    "name_en": "Ratandi Taltali",
+                                    "name_bn": "রতনদী তালতলী"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 105,
+                            "name_en": "Kalapara",
+                            "name_bn": "কলাপাড়া",
+                            "unions": [
+                                {
+                                    "id": 2664,
+                                    "name_en": "Baliatali",
+                                    "name_bn": "বালিয়াতলী"
+                                },
+                                {
+                                    "id": 2654,
+                                    "name_en": "Chakamaia",
+                                    "name_bn": "চাকামইয়া"
+                                },
+                                {
+                                    "id": 2665,
+                                    "name_en": "Champapur",
+                                    "name_bn": "চম্পাপুর"
+                                },
+                                {
+                                    "id": 2663,
+                                    "name_en": "Dalbugonj",
+                                    "name_bn": "ডালবুগঞ্জ"
+                                },
+                                {
+                                    "id": 2657,
+                                    "name_en": "Dhankhali",
+                                    "name_bn": "ধানখালী"
+                                },
+                                {
+                                    "id": 2660,
+                                    "name_en": "Dulaser",
+                                    "name_bn": "ধুলাসার"
+                                },
+                                {
+                                    "id": 2666,
+                                    "name_en": "Kalapara Municipality",
+                                    "name_bn": "কলাপাড়া পৌরসভা"
+                                },
+                                {
+                                    "id": 2667,
+                                    "name_en": "Kuakata Municipality",
+                                    "name_bn": "কুয়াকাটা পৌরসভা"
+                                },
+                                {
+                                    "id": 2656,
+                                    "name_en": "Lalua",
+                                    "name_bn": "লালুয়া"
+                                },
+                                {
+                                    "id": 2661,
+                                    "name_en": "Latachapli",
+                                    "name_bn": "লতাচাপলী"
+                                },
+                                {
+                                    "id": 2662,
+                                    "name_en": "Mahipur",
+                                    "name_bn": "মহিপুর"
+                                },
+                                {
+                                    "id": 2658,
+                                    "name_en": "Mithagonj",
+                                    "name_bn": "মিঠাগঞ্জ"
+                                },
+                                {
+                                    "id": 2659,
+                                    "name_en": "Nilgonj",
+                                    "name_bn": "নীলগঞ্জ"
+                                },
+                                {
+                                    "id": 2655,
+                                    "name_en": "Tiakhali",
+                                    "name_bn": "টিয়াখালী"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 106,
+                            "name_en": "Mirzaganj",
+                            "name_bn": "মির্জাগঞ্জ",
+                            "unions": [
+                                {
+                                    "id": 2670,
+                                    "name_en": "Amragachia",
+                                    "name_bn": "আমড়াগাছিয়া"
+                                },
+                                {
+                                    "id": 2671,
+                                    "name_en": "Deuli Subidkhali",
+                                    "name_bn": "দেউলী সুবিদখালী"
+                                },
+                                {
+                                    "id": 2672,
+                                    "name_en": "Kakrabunia",
+                                    "name_bn": "কাকড়াবুনিয়া"
+                                },
+                                {
+                                    "id": 2668,
+                                    "name_en": "Madhabkhali",
+                                    "name_bn": "মাধবখালী"
+                                },
+                                {
+                                    "id": 2673,
+                                    "name_en": "Majidbaria",
+                                    "name_bn": "মজিদবাড়িয়া"
+                                },
+                                {
+                                    "id": 2669,
+                                    "name_en": "Mirzaganj",
+                                    "name_bn": "মির্জাগঞ্জ"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 102,
+                            "name_en": "Patuakhali Sadar",
+                            "name_bn": "পটুয়াখালী সদর",
+                            "unions": [
+                                {
+                                    "id": 2638,
+                                    "name_en": "Auliapur",
+                                    "name_bn": "আউলিয়াপুর"
+                                },
+                                {
+                                    "id": 2635,
+                                    "name_en": "Badarpur",
+                                    "name_bn": "বদরপুর"
+                                },
+                                {
+                                    "id": 2640,
+                                    "name_en": "Borobighai",
+                                    "name_bn": "বড় বিঘাই"
+                                },
+                                {
+                                    "id": 2639,
+                                    "name_en": "Chotobighai",
+                                    "name_bn": "ছোট বিঘাই"
+                                },
+                                {
+                                    "id": 2636,
+                                    "name_en": "Itbaria",
+                                    "name_bn": "ইটবাড়ীয়া"
+                                },
+                                {
+                                    "id": 2633,
+                                    "name_en": "Jainkathi",
+                                    "name_bn": "জৈনকাঠী"
+                                },
+                                {
+                                    "id": 2634,
+                                    "name_en": "Kalikapur",
+                                    "name_bn": "কালিকাপুর"
+                                },
+                                {
+                                    "id": 2632,
+                                    "name_en": "Kamalapur",
+                                    "name_bn": "কমলাপুর"
+                                },
+                                {
+                                    "id": 2630,
+                                    "name_en": "Laukathi",
+                                    "name_bn": "লাউকাঠী"
+                                },
+                                {
+                                    "id": 2631,
+                                    "name_en": "Lohalia",
+                                    "name_bn": "লোহালিয়া"
+                                },
+                                {
+                                    "id": 2641,
+                                    "name_en": "Madarbunia",
+                                    "name_bn": "মাদারবুনিয়া"
+                                },
+                                {
+                                    "id": 2637,
+                                    "name_en": "Marichbunia",
+                                    "name_bn": "মরিচবুনিয়া"
+                                },
+                                {
+                                    "id": 2642,
+                                    "name_en": "Patuakhali Municipality",
+                                    "name_bn": "পটুয়াখালী পৌরসভা"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 108,
+                            "name_en": "Rangabali",
+                            "name_bn": "রাঙ্গাবালী",
+                            "unions": [
+                                {
+                                    "id": 2688,
+                                    "name_en": "Barobaisdia",
+                                    "name_bn": "বড়বাইশদিয়া"
+                                },
+                                {
+                                    "id": 2691,
+                                    "name_en": "Chalitabunia",
+                                    "name_bn": "চালিতাবুনিয়া"
+                                },
+                                {
+                                    "id": 2690,
+                                    "name_en": "Charmontaz",
+                                    "name_bn": "চরমোন্তাজ"
+                                },
+                                {
+                                    "id": 2689,
+                                    "name_en": "Chattobaisdia",
+                                    "name_bn": "ছোটবাইশদিয়া"
+                                },
+                                {
+                                    "id": 2687,
+                                    "name_en": "Rangabali",
+                                    "name_bn": "রাঙ্গাবালী"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "id": 14,
+                    "name_en": "Pirojpur",
+                    "name_bn": "পিরোজপুর",
+                    "upazilas": [
+                        {
+                            "id": 113,
+                            "name_en": "Bhandaria",
+                            "name_bn": "ভান্ডারিয়া",
+                            "unions": [
+                                {
+                                    "id": 2850,
+                                    "name_en": "Bhandaria Municipality",
+                                    "name_bn": "ভাণ্ডারিয়া পৌরসভা"
+                                },
+                                {
+                                    "id": 2847,
+                                    "name_en": "Dhaoa",
+                                    "name_bn": "ধাওয়া"
+                                },
+                                {
+                                    "id": 2846,
+                                    "name_en": "Ekree",
+                                    "name_bn": "ইকড়ী"
+                                },
+                                {
+                                    "id": 2849,
+                                    "name_en": "Gouripur",
+                                    "name_bn": "গৌরীপুর"
+                                },
+                                {
+                                    "id": 2844,
+                                    "name_en": "Nodmulla",
+                                    "name_bn": "নদমূলা শিয়ালকাঠী"
+                                },
+                                {
+                                    "id": 2845,
+                                    "name_en": "Telikhali",
+                                    "name_bn": "তেলিখালী"
+                                },
+                                {
+                                    "id": 2848,
+                                    "name_en": "Vandaria Sadar",
+                                    "name_bn": "ভান্ডারিয়া সদর"
+                                },
+                                {
+                                    "id": 2843,
+                                    "name_en": "Vitabaria",
+                                    "name_bn": "ভিটাবাড়িয়া"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 111,
+                            "name_en": "Kawkhali",
+                            "name_bn": "কাউখালী",
+                            "unions": [
+                                {
+                                    "id": 2836,
+                                    "name_en": "Amrazuri",
+                                    "name_bn": "আমড়াজুড়ি"
+                                },
+                                {
+                                    "id": 2838,
+                                    "name_en": "Chirapara",
+                                    "name_bn": "চিরাপাড়া"
+                                },
+                                {
+                                    "id": 2837,
+                                    "name_en": "Kawkhali Sadar",
+                                    "name_bn": "কাউখালি সদর"
+                                },
+                                {
+                                    "id": 2835,
+                                    "name_en": "Sayna Rogunathpur",
+                                    "name_bn": "সয়না রঘুনাথপুর"
+                                },
+                                {
+                                    "id": 2839,
+                                    "name_en": "Shialkhathi",
+                                    "name_bn": "শিয়ালকাঠী"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 114,
+                            "name_en": "Mathbaria",
+                            "name_bn": "মঠবাড়ীয়া",
+                            "unions": [
+                                {
+                                    "id": 2856,
+                                    "name_en": "Amragachia",
+                                    "name_bn": "আমড়াগাছিয়া"
+                                },
+                                {
+                                    "id": 2860,
+                                    "name_en": "Baramasua",
+                                    "name_bn": "বড়মাছুয়া"
+                                },
+                                {
+                                    "id": 2855,
+                                    "name_en": "Betmor Rajpara",
+                                    "name_bn": "বেতমোর রাজপাড়া"
+                                },
+                                {
+                                    "id": 2858,
+                                    "name_en": "Daudkhali",
+                                    "name_bn": "দাউদখালী"
+                                },
+                                {
+                                    "id": 2852,
+                                    "name_en": "Dhanisafa",
+                                    "name_bn": "ধানীসাফা"
+                                },
+                                {
+                                    "id": 2861,
+                                    "name_en": "Haltagulishakhali",
+                                    "name_bn": "হলতাগুলিশাখালী"
+                                },
+                                {
+                                    "id": 2859,
+                                    "name_en": "Mathbaria",
+                                    "name_bn": "মঠবাড়িয়া"
+                                },
+                                {
+                                    "id": 2862,
+                                    "name_en": "Mathbaria Municipality",
+                                    "name_bn": "মঠবাড়িয়া পৌরসভা"
+                                },
+                                {
+                                    "id": 2853,
+                                    "name_en": "Mirukhali",
+                                    "name_bn": "মিরুখালী"
+                                },
+                                {
+                                    "id": 2857,
+                                    "name_en": "Shapleza",
+                                    "name_bn": "শাপলেজা"
+                                },
+                                {
+                                    "id": 2854,
+                                    "name_en": "Tikikata",
+                                    "name_bn": "টিকিকাটা"
+                                },
+                                {
+                                    "id": 2851,
+                                    "name_en": "Tuskhali",
+                                    "name_bn": "তুষখালী"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 110,
+                            "name_en": "Nazirpur",
+                            "name_bn": "নাজিরপুর",
+                            "unions": [
+                                {
+                                    "id": 2828,
+                                    "name_en": "Daulbari Dobra",
+                                    "name_bn": "দেউলবাড়ী দোবড়া"
+                                },
+                                {
+                                    "id": 2829,
+                                    "name_en": "Dirgha",
+                                    "name_bn": "দীর্ঘা"
+                                },
+                                {
+                                    "id": 2830,
+                                    "name_en": "Kolardoania",
+                                    "name_bn": "কলারদোয়ানিয়া"
+                                },
+                                {
+                                    "id": 2827,
+                                    "name_en": "Malikhali",
+                                    "name_bn": "মালিখালী"
+                                },
+                                {
+                                    "id": 2826,
+                                    "name_en": "Mativangga",
+                                    "name_bn": "মাটিভাংগা"
+                                },
+                                {
+                                    "id": 2833,
+                                    "name_en": "Nazirpur Sadar",
+                                    "name_bn": "নাজিরপুর সদর"
+                                },
+                                {
+                                    "id": 2834,
+                                    "name_en": "Shakharikathi",
+                                    "name_bn": "শাখারীকাঠী"
+                                },
+                                {
+                                    "id": 2832,
+                                    "name_en": "Shakhmatia",
+                                    "name_bn": "সেখমাটিয়া"
+                                },
+                                {
+                                    "id": 2831,
+                                    "name_en": "Sriramkathi",
+                                    "name_bn": "শ্রীরামকাঠী"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 115,
+                            "name_en": "Nesarabad",
+                            "name_bn": "নেছারাবাদ",
+                            "unions": [
+                                {
+                                    "id": 2865,
+                                    "name_en": "Atghorkuriana",
+                                    "name_bn": "আটঘর কুড়িয়ানা"
+                                },
+                                {
+                                    "id": 2863,
+                                    "name_en": "Boldia",
+                                    "name_bn": "বলদিয়া"
+                                },
+                                {
+                                    "id": 2867,
+                                    "name_en": "Doyhary",
+                                    "name_bn": "দৈহারী"
+                                },
+                                {
+                                    "id": 2868,
+                                    "name_en": "Guarekha",
+                                    "name_bn": "গুয়ারেখা"
+                                },
+                                {
+                                    "id": 2866,
+                                    "name_en": "Jolabari",
+                                    "name_bn": "জলাবাড়ী"
+                                },
+                                {
+                                    "id": 2871,
+                                    "name_en": "Sarengkathi",
+                                    "name_bn": "সারেংকাঠী"
+                                },
+                                {
+                                    "id": 2872,
+                                    "name_en": "Shorupkathi",
+                                    "name_bn": "স্বরুপকাঠী"
+                                },
+                                {
+                                    "id": 2864,
+                                    "name_en": "Sohagdal",
+                                    "name_bn": "সোহাগদল"
+                                },
+                                {
+                                    "id": 2869,
+                                    "name_en": "Somudoykathi",
+                                    "name_bn": "সমুদয়কাঠী"
+                                },
+                                {
+                                    "id": 2870,
+                                    "name_en": "Sutiakathi",
+                                    "name_bn": "সুটিয়াকাঠী"
+                                },
+                                {
+                                    "id": 2873,
+                                    "name_en": "Swarupkathi Municipality",
+                                    "name_bn": "স্বরূপকাঠী পৌরসভা"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 109,
+                            "name_en": "Pirojpur Sadar",
+                            "name_bn": "পিরোজপুর সদর",
+                            "unions": [
+                                {
+                                    "id": 2820,
+                                    "name_en": "Durgapur",
+                                    "name_bn": "দূর্গাপুর"
+                                },
+                                {
+                                    "id": 2819,
+                                    "name_en": "Kodomtala",
+                                    "name_bn": "কদমতলা"
+                                },
+                                {
+                                    "id": 2821,
+                                    "name_en": "Kolakhali",
+                                    "name_bn": "কলাখালী"
+                                },
+                                {
+                                    "id": 2825,
+                                    "name_en": "Pirojpur Municipality",
+                                    "name_bn": "পিরোজপুর পৌরসভা"
+                                },
+                                {
+                                    "id": 2824,
+                                    "name_en": "Shankorpasa",
+                                    "name_bn": "শংকরপাশা"
+                                },
+                                {
+                                    "id": 2823,
+                                    "name_en": "Shariktola",
+                                    "name_bn": "শরিকতলা"
+                                },
+                                {
+                                    "id": 2818,
+                                    "name_en": "Shikder Mallik",
+                                    "name_bn": "শিকদার মল্লিক"
+                                },
+                                {
+                                    "id": 2822,
+                                    "name_en": "Tona",
+                                    "name_bn": "টোনা"
+                                }
+                            ]
+                        },
+                        {
+                            "id": 112,
+                            "name_en": "Zianagar",
+                            "name_bn": "জিয়ানগর",
+                            "unions": [
+                                {
+                                    "id": 2840,
+                                    "name_en": "Balipara",
+                                    "name_bn": "বালিপাড়া"
+                                },
+                                {
+                                    "id": 2842,
+                                    "name_en": "Parerhat",
+                                    "name_bn": "পাড়েরহাট"
+                                },
+                                {
+                                    "id": 2841,
+                                    "name_en": "Pattashi",
+                                    "name_bn": "পত্তাশি"
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

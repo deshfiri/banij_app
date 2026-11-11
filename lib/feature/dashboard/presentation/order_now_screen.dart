@@ -75,9 +75,12 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
           (a) => a.isDefault == true,
           orElse: () => addresses.first,
         );
+      } else {
+        _selectedAddress = null;
       }
     } catch (_) {
       _addressResponseModel = AddressResponseModel(data: []);
+      _selectedAddress = null;
     } finally {
       if (mounted) {
         setState(() {
@@ -102,11 +105,6 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
   }
 
   void _placeOrder(CartProvider cartProvider) {
-    if (_selectedAddress == null) {
-      ToastUtil.showErrorMessage('Please add a shipping address first');
-      return;
-    }
-
     setState(() {
       _isLoading = true;
     });
@@ -122,92 +120,141 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
     });
   }
 
-  void _showAddressSelectionSheet(BuildContext context) {
+  Future<void> _showAddressSelectionSheet(BuildContext context) async {
+    try {
+      _addressResponseModel = await addressRxObj.fetchAddresses();
+    } catch (_) {}
+
+    if (!mounted) return;
+
     final addresses = _addressResponseModel?.data ?? [];
+
+    if (!mounted) return;
+
     showModalBottomSheet(
-      context: context,
-      backgroundColor: AppColorsTheme.cardBg(context),
+      context: this.context,
+      backgroundColor: AppColorsTheme.cardBg(this.context),
+      isScrollControlled: true,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(20.r),
-          topRight: Radius.circular(20.r),
+          topLeft: Radius.circular(24.r),
+          topRight: Radius.circular(24.r),
         ),
       ),
       builder: (ctx) => Padding(
-        padding: EdgeInsets.all(20.w),
+        padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 30.h),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Select Shipping Address',
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.bold,
-                color: AppColorsTheme.textMainColor(context),
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Select Address',
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColorsTheme.textMainColor(context),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.close_rounded, color: AppColorsTheme.textMainColor(context)),
+                  onPressed: () => Navigator.pop(ctx),
+                ),
+              ],
             ),
-            UIHelper.verticalSpace(14.h),
+            UIHelper.verticalSpace(12.h),
             if (addresses.isEmpty)
               Padding(
-                padding: EdgeInsets.symmetric(vertical: 20.h),
+                padding: EdgeInsets.symmetric(vertical: 24.h),
                 child: Center(
-                  child: Text(
-                    'No saved addresses',
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      color: AppColorsTheme.textMutedColor(context),
-                    ),
+                  child: Column(
+                    children: [
+                      Icon(Icons.location_off_outlined, size: 40.sp, color: AppColorsTheme.textMutedColor(context)),
+                      UIHelper.verticalSpace(8.h),
+                      Text(
+                        'Address is not found',
+                        style: TextStyle(
+                          fontSize: 13.5.sp,
+                          color: AppColorsTheme.textMutedColor(context),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               )
             else
-              ...addresses.map((addr) {
-                final isSelected = _selectedAddress?.id == addr.id;
-                return ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  leading: Icon(
-                    isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                    color: isSelected ? primaryOrange : AppColorsTheme.textMutedColor(context),
-                  ),
-                  title: Text(
-                    addr.recipientName ?? 'Address',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColorsTheme.textMainColor(context),
-                    ),
-                  ),
-                  subtitle: Text(
-                    addr.fullAddressFormatted,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: AppColorsTheme.textMutedColor(context),
-                    ),
-                  ),
-                  onTap: () {
-                    setState(() {
-                      _selectedAddress = addr;
-                    });
-                    Navigator.pop(ctx);
+              ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: 300.h),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: addresses.length,
+                  itemBuilder: (context, index) {
+                    final addr = addresses[index];
+                    final isSelected = _selectedAddress?.id == addr.id;
+                    return Container(
+                      margin: EdgeInsets.only(bottom: 10.h),
+                      decoration: BoxDecoration(
+                        color: AppColorsTheme.background(context),
+                        borderRadius: BorderRadius.circular(12.r),
+                        border: Border.all(
+                          color: isSelected ? primaryOrange : AppColorsTheme.borderColor(context),
+                          width: isSelected ? 1.5.w : 1.w,
+                        ),
+                      ),
+                      child: ListTile(
+                        leading: Icon(
+                          isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
+                          color: isSelected ? primaryOrange : AppColorsTheme.textMutedColor(context),
+                        ),
+                        title: Text(
+                          addr.recipientName ?? 'Address ${index + 1}',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.bold,
+                            color: AppColorsTheme.textMainColor(context),
+                          ),
+                        ),
+                        subtitle: Text(
+                          addr.fullAddressFormatted.isNotEmpty ? addr.fullAddressFormatted : 'No address details',
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            color: AppColorsTheme.textMutedColor(context),
+                          ),
+                        ),
+                        onTap: () {
+                          setState(() {
+                            _selectedAddress = addr;
+                          });
+                          Navigator.pop(ctx);
+                        },
+                      ),
+                    );
                   },
-                );
-              }),
-            UIHelper.verticalSpace(14.h),
+                ),
+              ),
+            UIHelper.verticalSpace(16.h),
             SizedBox(
               width: double.infinity,
-              child: OutlinedButton.icon(
+              child: ElevatedButton.icon(
                 onPressed: () {
                   Navigator.pop(ctx);
-                  ToastUtil.showSuccessMessage('Opening Add Address dialog...');
+                  Navigator.pushNamed(context, Routes.addAddressScreen).then((_) {
+                    _fetchAddresses();
+                  });
                 },
                 icon: Icon(Icons.add, size: 18.sp),
-                label: const Text('Add New Address'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: primaryOrange,
-                  side: BorderSide(color: primaryOrange),
-                  padding: EdgeInsets.symmetric(vertical: 12.h),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                label: Text(
+                  'Add New Address',
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primaryOrange,
+                  foregroundColor: Colors.white,
+                  padding: EdgeInsets.symmetric(vertical: 14.h),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                  elevation: 0,
                 ),
               ),
             ),
@@ -398,135 +445,71 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 1. Address Section (API Data or Add Address Prompt)
+              // 1. Address Card Banner (Tapping fetches GET API address list & opens sheet or Add Address screen)
               _isLoadingAddresses
                   ? _buildAddressShimmer(context)
-                  : _selectedAddress != null
-                      ? Container(
-                          padding: EdgeInsets.all(16.w),
-                          decoration: BoxDecoration(
-                            color: AppColorsTheme.cardBg(context),
-                            borderRadius: BorderRadius.circular(16.r),
-                            border: Border.all(color: AppColorsTheme.borderColor(context)),
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
+                  : GestureDetector(
+                      onTap: () {
+                        if (_selectedAddress == null) {
+                          Navigator.pushNamed(context, Routes.addAddressScreen).then((_) {
+                            _fetchAddresses();
+                          });
+                        } else {
+                          _showAddressSelectionSheet(context);
+                        }
+                      },
+                      child: Container(
+                        padding: EdgeInsets.all(16.w),
+                        decoration: BoxDecoration(
+                          color: AppColorsTheme.cardBg(context),
+                          borderRadius: BorderRadius.circular(16.r),
+                          border: Border.all(color: AppColorsTheme.borderColor(context)),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(10.w),
+                              decoration: BoxDecoration(
+                                color: primaryOrange.withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(Icons.location_on_outlined, color: primaryOrange, size: 22.sp),
+                            ),
+                            UIHelper.horizontalSpace(12.w),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Icon(Icons.location_on_rounded, color: primaryOrange, size: 20.sp),
-                                  UIHelper.horizontalSpace(8.w),
-                                  Expanded(
-                                    child: Text(
-                                      _selectedAddress!.recipientName ?? 'Shipping Address',
-                                      style: TextStyle(
-                                        fontSize: 15.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColorsTheme.textMainColor(context),
-                                      ),
+                                  Text(
+                                    _selectedAddress != null
+                                        ? (_selectedAddress!.recipientName ?? 'Selected Address')
+                                        : 'Address is not found',
+                                    style: TextStyle(
+                                      fontSize: 15.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColorsTheme.textMainColor(context),
                                     ),
                                   ),
-                                  if (_selectedAddress!.isDefault == true) ...[
-                                    Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                                      decoration: BoxDecoration(
-                                        color: primaryOrange.withValues(alpha: 0.15),
-                                        borderRadius: BorderRadius.circular(6.r),
-                                      ),
-                                      child: Text(
-                                        'DEFAULT',
-                                        style: TextStyle(
-                                          fontSize: 8.5.sp,
-                                          fontWeight: FontWeight.bold,
-                                          color: primaryOrange,
-                                        ),
-                                      ),
+                                  UIHelper.verticalSpace(2.h),
+                                  Text(
+                                    _selectedAddress != null
+                                        ? _selectedAddress!.fullAddressFormatted
+                                        : 'Add your address for shipping options and more accurate costs.',
+                                    style: TextStyle(
+                                      fontSize: 11.5.sp,
+                                      color: AppColorsTheme.textMutedColor(context),
                                     ),
-                                    UIHelper.horizontalSpace(8.w),
-                                  ],
-                                  GestureDetector(
-                                    onTap: () => _showAddressSelectionSheet(context),
-                                    child: Text(
-                                      'Change',
-                                      style: TextStyle(
-                                        fontSize: 12.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: primaryOrange,
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
                               ),
-                              UIHelper.verticalSpace(6.h),
-                              if (_selectedAddress!.phone != null)
-                                Text(
-                                  _selectedAddress!.phone!,
-                                  style: TextStyle(
-                                    fontSize: 12.sp,
-                                    color: AppColorsTheme.textMutedColor(context),
-                                  ),
-                                ),
-                              UIHelper.verticalSpace(4.h),
-                              Text(
-                                _selectedAddress!.fullAddressFormatted,
-                                style: TextStyle(
-                                  fontSize: 12.5.sp,
-                                  color: AppColorsTheme.textMainColor(context),
-                                  height: 1.3,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )
-                      : GestureDetector(
-                          onTap: () => _showAddressSelectionSheet(context),
-                          child: Container(
-                            padding: EdgeInsets.all(16.w),
-                            decoration: BoxDecoration(
-                              color: AppColorsTheme.cardBg(context),
-                              borderRadius: BorderRadius.circular(16.r),
-                              border: Border.all(color: AppColorsTheme.borderColor(context)),
                             ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.all(10.w),
-                                  decoration: BoxDecoration(
-                                    color: primaryOrange.withValues(alpha: 0.1),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(Icons.location_on_outlined, color: primaryOrange, size: 22.sp),
-                                ),
-                                UIHelper.horizontalSpace(12.w),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        'Add address',
-                                        style: TextStyle(
-                                          fontSize: 15.sp,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColorsTheme.textMainColor(context),
-                                        ),
-                                      ),
-                                      UIHelper.verticalSpace(2.h),
-                                      Text(
-                                        'Add your address for shipping options and more accurate costs.',
-                                        style: TextStyle(
-                                          fontSize: 11.5.sp,
-                                          color: AppColorsTheme.textMutedColor(context),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Icon(Icons.arrow_forward_ios_rounded, size: 16.sp, color: AppColorsTheme.textMutedColor(context)),
-                              ],
-                            ),
-                          ),
+                            Icon(Icons.arrow_forward_ios_rounded, size: 16.sp, color: AppColorsTheme.textMutedColor(context)),
+                          ],
                         ),
+                      ),
+                    ),
               UIHelper.verticalSpace(16.h),
 
               // 2. Guaranteed Delivery & Shipping Section
@@ -854,7 +837,17 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _isLoading ? null : () => _placeOrder(context.read<CartProvider>()),
+                onPressed: _isLoading
+                    ? null
+                    : () {
+                        if (_selectedAddress == null) {
+                          Navigator.pushNamed(context, Routes.addAddressScreen).then((_) {
+                            _fetchAddresses();
+                          });
+                        } else {
+                          _placeOrder(context.read<CartProvider>());
+                        }
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryOrange,
                   foregroundColor: Colors.white,
@@ -926,6 +919,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                 ? 'Fields: ${type.fields!.join(", ")}'
                 : null,
             icon: _getPaymentIcon(val),
+            iconColor: _getPaymentColor(val),
             value: val,
           ),
         );
@@ -944,6 +938,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
             title: name,
             subtitleText: desc,
             icon: _getPaymentIcon(val),
+            iconColor: _getPaymentColor(val),
             value: val,
           ),
         );
@@ -952,18 +947,29 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
       list.addAll([
         _buildPaymentOption(
           context: context,
-          title: 'PayPal',
-          subtitleText: null,
-          icon: Icons.payment_rounded,
-          value: 'PayPal',
+          title: 'bKash',
+          subtitleText: 'Pay securely with bKash mobile banking',
+          icon: Icons.account_balance_wallet_rounded,
+          iconColor: const Color(0xFFE2136E),
+          value: 'bKash',
         ),
         Divider(height: 1, color: AppColorsTheme.borderColor(context)),
         _buildPaymentOption(
           context: context,
-          title: 'Google Pay',
+          title: 'Nagad',
+          subtitleText: 'Pay securely with Nagad mobile financial service',
+          icon: Icons.mobile_friendly_rounded,
+          iconColor: const Color(0xFFED1C24),
+          value: 'Nagad',
+        ),
+        Divider(height: 1, color: AppColorsTheme.borderColor(context)),
+        _buildPaymentOption(
+          context: context,
+          title: 'PayPal',
           subtitleText: null,
-          icon: Icons.g_mobiledata_rounded,
-          value: 'Google Pay',
+          icon: Icons.payment_rounded,
+          iconColor: primaryOrange,
+          value: 'PayPal',
         ),
         Divider(height: 1, color: AppColorsTheme.borderColor(context)),
         _buildPaymentOption(
@@ -971,12 +977,26 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
           title: 'Other payment methods',
           subtitleText: 'T/T\nPlace order first, pay with your preferred method later.',
           icon: Icons.account_balance_outlined,
+          iconColor: AppColorsTheme.textMutedColor(context),
           value: 'Other payment methods',
         ),
       ]);
     }
 
     return list;
+  }
+
+  Color _getPaymentColor(String val) {
+    final lower = val.toLowerCase();
+    if (lower.contains('bkash')) {
+      return const Color(0xFFE2136E);
+    } else if (lower.contains('nagad')) {
+      return const Color(0xFFED1C24);
+    } else if (lower.contains('card') || lower.contains('visa')) {
+      return const Color(0xFF0284C7);
+    } else {
+      return primaryOrange;
+    }
   }
 
   IconData _getPaymentIcon(String val) {
@@ -1045,12 +1065,99 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
     );
   }
 
+  Widget _buildPaymentLogo(String title, Color brandColor) {
+    final lower = title.toLowerCase();
+    bool isBkash = lower.contains('bkash');
+    bool isNagad = lower.contains('nagad');
+
+    if (isBkash) {
+      return Container(
+        width: 52.w,
+        height: 32.h,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8.r),
+          border: Border.all(color: AppColorsTheme.borderColor(context)),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8.r),
+          child: Image.network(
+            'https://static.vecteezy.com/system/resources/previews/039/340/798/non_2x/bkash-logo-free-vector.jpg',
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => Container(
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE2136E),
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: Center(
+                child: Text(
+                  'bKash',
+                  style: TextStyle(
+                    fontSize: 10.5.sp,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    } else if (isNagad) {
+      return Container(
+        width: 52.w,
+        height: 32.h,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(8.r),
+          border: Border.all(color: AppColorsTheme.borderColor(context)),
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(8.r),
+          child: Image.network(
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrBk93RWS1sEp0YhxzsCPXVxu5ldNjhyHOdbfi9sEbEw&s',
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => Container(
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+              decoration: BoxDecoration(
+                color: const Color(0xFFED1C24),
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: Center(
+                child: Text(
+                  'Nagad',
+                  style: TextStyle(
+                    fontSize: 10.5.sp,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Container(
+      padding: EdgeInsets.all(7.w),
+      decoration: BoxDecoration(
+        color: brandColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8.r),
+        border: Border.all(color: AppColorsTheme.borderColor(context)),
+      ),
+      child: Icon(Icons.payment_rounded, size: 20.sp, color: brandColor),
+    );
+  }
+
   Widget _buildPaymentOption({
     required BuildContext context,
     required String title,
     String? subtitleText,
     Widget? subtitleWidget,
     required IconData icon,
+    Color? iconColor,
     required String value,
     bool showArrow = false,
   }) {
@@ -1077,15 +1184,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
               },
             ),
             UIHelper.horizontalSpace(4.w),
-            Container(
-              padding: EdgeInsets.all(7.w),
-              decoration: BoxDecoration(
-                color: AppColorsTheme.background(context),
-                borderRadius: BorderRadius.circular(8.r),
-                border: Border.all(color: AppColorsTheme.borderColor(context)),
-              ),
-              child: Icon(icon, size: 20.sp, color: primaryOrange),
-            ),
+            _buildPaymentLogo(title, iconColor ?? primaryOrange),
             UIHelper.horizontalSpace(12.w),
             Expanded(
               child: Column(

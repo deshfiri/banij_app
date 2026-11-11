@@ -5,26 +5,23 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:bbnij/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  TestWidgetsFlutterBinding.ensureInitialized();
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
-
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
-
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testWidgets('Load bd_locations.json test', (WidgetTester tester) async {
+    final jsonString = await rootBundle.loadString('assets/json/bd_locations.json');
+    final data = json.decode(jsonString);
+    expect(data, isA<Map>());
+    expect(data['divisions'], isA<List>());
+    expect((data['divisions'] as List).isNotEmpty, true);
+    debugPrint('Successfully loaded ${ (data['divisions'] as List).length } divisions from bd_locations.json');
   });
 }
+
