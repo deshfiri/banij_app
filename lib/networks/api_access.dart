@@ -18,6 +18,7 @@ import '../feature/dashboard/data/payment_rx.dart';
 import '../feature/dashboard/data/product_rx.dart';
 import '../feature/dashboard/data/website_rx.dart';
 import '../feature/dashboard/data/wholesale_cart_rx.dart';
+import '../feature/finance/data/bank_rx.dart';
 import '../feature/notification/data/notification_rx.dart';
 import '../feature/package/data/package_rx.dart';
 
@@ -54,3 +55,4 @@ LocationDivisionRx locationDivisionRxObj = LocationDivisionRx();
 WebsiteRx websiteRxObj = WebsiteRx();
 WholesaleCartRx wholesaleCartRxObj = WholesaleCartRx();
 CheckoutRx checkoutRxObj = CheckoutRx();
+BankRx bankRxObj = BankRx.instance;

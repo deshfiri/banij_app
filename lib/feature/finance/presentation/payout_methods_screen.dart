@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../constants/color.dart';
 import '../../../helpers/toast.dart';
 import '../../../helpers/ui_helpers.dart';
+import '../../../networks/api_access.dart';
+import '../model/bank_model.dart';
 
 class PayoutMethodsScreen extends StatefulWidget {
   const PayoutMethodsScreen({super.key});
@@ -13,6 +15,8 @@ class PayoutMethodsScreen extends StatefulWidget {
 }
 
 class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
+  List<BankItemModel> _loadedBanks = [];
+
   final List<Map<String, dynamic>> _payoutMethods = [
     {
       'title': 'bKash Personal',
@@ -27,6 +31,138 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
       'icon': Icons.account_balance_rounded,
     },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchBanks();
+  }
+
+  Future<void> _fetchBanks() async {
+    try {
+      final res = await bankRxObj.fetchBankList();
+      if (res.data != null && res.data!.isNotEmpty) {
+        if (mounted) {
+          setState(() {
+            _loadedBanks = res.data!;
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
+  void _showBankSearchSheet(
+    BuildContext context,
+    List<String> bankList,
+    ValueChanged<String> onSelectBank,
+  ) {
+    String searchQuery = '';
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColorsTheme.cardBg(context),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+      ),
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setSheetState) {
+          final filteredList = searchQuery.isEmpty
+              ? bankList
+              : bankList.where((b) => b.toLowerCase().contains(searchQuery.toLowerCase())).toList();
+
+          return SizedBox(
+            height: MediaQuery.of(context).size.height * 0.75,
+            child: Column(
+              children: [
+                // Sheet Top Bar
+                Padding(
+                  padding: EdgeInsets.fromLTRB(20.w, 16.h, 16.w, 12.h),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Select Bank',
+                        style: TextStyle(
+                          fontSize: 18.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColorsTheme.textMainColor(context),
+                        ),
+                      ),
+                      IconButton(
+                        icon: Icon(Icons.close_rounded, color: AppColorsTheme.textMainColor(context)),
+                        onPressed: () => Navigator.pop(ctx),
+                      ),
+                    ],
+                  ),
+                ),
+                // Search Input Field
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
+                  child: TextField(
+                    autofocus: true,
+                    onChanged: (val) => setSheetState(() => searchQuery = val),
+                    style: TextStyle(fontSize: 13.5.sp, color: AppColorsTheme.textMainColor(context)),
+                    decoration: InputDecoration(
+                      hintText: 'Search bank name...',
+                      hintStyle: TextStyle(fontSize: 12.5.sp, color: AppColorsTheme.textMutedColor(context)),
+                      prefixIcon: Icon(Icons.search_rounded, color: primaryOrange, size: 20.sp),
+                      contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                      filled: true,
+                      fillColor: AppColorsTheme.background(context),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(color: AppColorsTheme.borderColor(context)),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.r),
+                        borderSide: BorderSide(color: primaryOrange, width: 1.5.w),
+                      ),
+                    ),
+                  ),
+                ),
+                UIHelper.verticalSpace(8.h),
+                Divider(color: AppColorsTheme.borderColor(context), height: 1),
+
+                // Filtered Bank List
+                Expanded(
+                  child: filteredList.isEmpty
+                      ? Center(
+                          child: Text(
+                            'No bank found',
+                            style: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMutedColor(context)),
+                          ),
+                        )
+                      : ListView.separated(
+                          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                          itemCount: filteredList.length,
+                          separatorBuilder: (c, i) => Divider(color: AppColorsTheme.borderColor(context).withValues(alpha: 0.5), height: 1),
+                          itemBuilder: (context, index) {
+                            final bankName = filteredList[index];
+                            return ListTile(
+                              leading: Icon(Icons.account_balance_rounded, color: primaryOrange, size: 20.sp),
+                              title: Text(
+                                bankName,
+                                style: TextStyle(
+                                  fontSize: 13.5.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColorsTheme.textMainColor(context),
+                                ),
+                              ),
+                              onTap: () {
+                                onSelectBank(bankName);
+                                Navigator.pop(ctx);
+                              },
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
 
   void _showAddMethodModal(BuildContext context) {
     String selectedType = 'Bank account';
@@ -44,7 +180,9 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
     final TextEditingController passwordController = TextEditingController();
 
     final List<String> typeOptions = ['Bank account', 'bKash', 'Nagad'];
-    final List<String> bankOptions = ['City Bank', 'Dutch-Bangla Bank', 'BRAC Bank', 'Islami Bank', 'Eastern Bank', 'Sonali Bank', 'Pubali Bank'];
+    final List<String> bankOptions = _loadedBanks.isNotEmpty
+        ? _loadedBanks.map((b) => b.name ?? '').where((n) => n.isNotEmpty).toList()
+        : ['AB BANK LIMITED', 'AGRANI BANK LIMITED', 'BRAC BANK LIMITED', 'DUTCH-BANGLA BANK LIMITED', 'ISLAMI BANK BANGLADESH LIMITED', 'SONALI BANK LIMITED', 'THE CITY BANK LIMITED'];
     final List<String> divisionOptions = ['Dhaka', 'Chittagong', 'Rajshahi', 'Khulna', 'Barisal', 'Sylhet', 'Rangpur', 'Mymensingh'];
     final List<String> districtOptions = ['Dhaka', 'Gazipur', 'Narayanganj', 'Chittagong', 'Sylhet', 'Bogura'];
     final List<String> branchOptions = ['Principal Branch', 'Gulshan Branch', 'Banani Branch', 'Agrabad Branch', 'Dhanmondi Branch'];
@@ -132,14 +270,42 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                         UIHelper.verticalSpace(14.h),
 
                         if (selectedType == 'Bank account') ...[
-                          // 3. Bank
+                          // 3. Bank (Searchable)
                           _buildFieldLabel(context, 'Bank'),
-                          _buildDropdownField(
-                            context,
-                            value: selectedBank,
-                            hintText: 'Select...',
-                            items: bankOptions,
-                            onChanged: (val) => setModalState(() => selectedBank = val),
+                          GestureDetector(
+                            onTap: () {
+                              _showBankSearchSheet(context, bankOptions, (selected) {
+                                setModalState(() {
+                                  selectedBank = selected;
+                                });
+                              });
+                            },
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                              decoration: BoxDecoration(
+                                color: AppColorsTheme.background(context),
+                                borderRadius: BorderRadius.circular(12.r),
+                                border: Border.all(color: AppColorsTheme.borderColor(context)),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      selectedBank ?? 'Select...',
+                                      style: TextStyle(
+                                        fontSize: 13.5.sp,
+                                        color: selectedBank != null
+                                            ? AppColorsTheme.textMainColor(context)
+                                            : AppColorsTheme.textMutedColor(context),
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                  Icon(Icons.arrow_drop_down_rounded, color: AppColorsTheme.textMutedColor(context)),
+                                ],
+                              ),
+                            ),
                           ),
                           UIHelper.verticalSpace(14.h),
 
