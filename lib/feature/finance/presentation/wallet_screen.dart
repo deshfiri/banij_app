@@ -5,6 +5,7 @@ import '../../../constants/color.dart';
 import '../../../helpers/toast.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../../networks/api_access.dart';
+import '../../dashboard/model/payment_model.dart';
 import '../model/wallet_balance_model.dart';
 import '../model/wallet_transaction_model.dart';
 
@@ -58,7 +59,10 @@ class _WalletScreenState extends State<WalletScreen> {
 
   void _showTopUpModal(BuildContext context) {
     final TextEditingController amountController = TextEditingController();
-    String selectedGateway = 'bKash';
+    PaymentMethodResponseModel? paymentModel;
+    bool isLoadingGateways = true;
+    String selectedGatewayCode = 'bkash';
+    bool isTopUpLoading = false;
 
     showModalBottomSheet(
       context: context,
@@ -67,118 +71,218 @@ class _WalletScreenState extends State<WalletScreen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, MediaQuery.of(ctx).viewInsets.bottom + 30.h),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setModalState) {
+          if (isLoadingGateways && paymentModel == null) {
+            paymentRxObj.fetchPaymentMethods().then((res) {
+              if (ctx.mounted) {
+                setModalState(() {
+                  paymentModel = res;
+                  isLoadingGateways = false;
+                  if (res.data != null && res.data!.isNotEmpty) {
+                    selectedGatewayCode = res.data!.first.code ?? res.data!.first.id ?? 'bkash';
+                  } else if (res.types != null && res.types!.isNotEmpty) {
+                    selectedGatewayCode = res.types!.first.value ?? 'bkash';
+                  }
+                });
+              }
+            }).catchError((_) {
+              if (ctx.mounted) {
+                setModalState(() {
+                  isLoadingGateways = false;
+                });
+              }
+            });
+          }
+
+          final apiMethods = paymentModel?.data ?? [];
+          final apiTypes = paymentModel?.types ?? [];
+
+          return Padding(
+            padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, MediaQuery.of(ctx).viewInsets.bottom + 30.h),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Top up your wallet',
+                      style: TextStyle(
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColorsTheme.textMainColor(context),
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close_rounded, color: AppColorsTheme.textMainColor(context)),
+                      onPressed: () => Navigator.pop(ctx),
+                    ),
+                  ],
+                ),
+                UIHelper.verticalSpace(16.h),
                 Text(
-                  'Top up your wallet',
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold,
-                    color: AppColorsTheme.textMainColor(context),
+                  'Enter Top-up Amount (BDT)',
+                  style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
+                ),
+                UIHelper.verticalSpace(6.h),
+                TextField(
+                  controller: amountController,
+                  keyboardType: TextInputType.number,
+                  style: TextStyle(fontSize: 14.sp, color: AppColorsTheme.textMainColor(context)),
+                  decoration: InputDecoration(
+                    hintText: 'e.g. 5000',
+                    hintStyle: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMutedColor(context)),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r),
+                      borderSide: BorderSide(color: AppColorsTheme.borderColor(context)),
+                    ),
                   ),
                 ),
-                IconButton(
-                  icon: Icon(Icons.close_rounded, color: AppColorsTheme.textMainColor(context)),
-                  onPressed: () => Navigator.pop(ctx),
+                UIHelper.verticalSpace(16.h),
+                Text(
+                  'Select Payment Gateway',
+                  style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
+                ),
+                UIHelper.verticalSpace(8.h),
+                isLoadingGateways
+                    ? Center(child: Padding(padding: EdgeInsets.all(12.h), child: CircularProgressIndicator(color: primaryOrange, strokeWidth: 2)))
+                    : Wrap(
+                        spacing: 8.w,
+                        runSpacing: 8.h,
+                        children: apiMethods.isNotEmpty
+                            ? apiMethods.map((m) {
+                                final code = (m.code ?? m.id ?? 'bkash').toLowerCase();
+                                final name = m.name ?? code;
+                                final isSelected = selectedGatewayCode.toLowerCase() == code;
+                                return ChoiceChip(
+                                  label: Text(name),
+                                  selected: isSelected,
+                                  selectedColor: primaryOrange,
+                                  backgroundColor: AppColorsTheme.background(context),
+                                  labelStyle: TextStyle(
+                                    fontSize: 12.sp,
+                                    color: isSelected ? Colors.white : AppColorsTheme.textMainColor(context),
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                  ),
+                                  onSelected: (val) {
+                                    setModalState(() {
+                                      selectedGatewayCode = code;
+                                    });
+                                  },
+                                );
+                              }).toList()
+                            : apiTypes.isNotEmpty
+                                ? apiTypes.map((t) {
+                                    final val = (t.value ?? 'bkash').toLowerCase();
+                                    final label = t.label ?? val;
+                                    final isSelected = selectedGatewayCode.toLowerCase() == val;
+                                    return ChoiceChip(
+                                      label: Text(label),
+                                      selected: isSelected,
+                                      selectedColor: primaryOrange,
+                                      backgroundColor: AppColorsTheme.background(context),
+                                      labelStyle: TextStyle(
+                                        fontSize: 12.sp,
+                                        color: isSelected ? Colors.white : AppColorsTheme.textMainColor(context),
+                                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                      ),
+                                      onSelected: (valSel) {
+                                        setModalState(() {
+                                          selectedGatewayCode = val;
+                                        });
+                                      },
+                                    );
+                                  }).toList()
+                                : [
+                                    {'label': 'bKash', 'code': 'bkash'},
+                                    {'label': 'Nagad', 'code': 'nagad'},
+                                    {'label': 'SSLCommerz', 'code': 'sslcommerz'},
+                                  ].map((item) {
+                                    final code = item['code']!;
+                                    final label = item['label']!;
+                                    final isSelected = selectedGatewayCode == code;
+                                    return ChoiceChip(
+                                      label: Text(label),
+                                      selected: isSelected,
+                                      selectedColor: primaryOrange,
+                                      backgroundColor: AppColorsTheme.background(context),
+                                      labelStyle: TextStyle(
+                                        fontSize: 12.sp,
+                                        color: isSelected ? Colors.white : AppColorsTheme.textMainColor(context),
+                                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                      ),
+                                      onSelected: (val) {
+                                        setModalState(() {
+                                          selectedGatewayCode = code;
+                                        });
+                                      },
+                                    );
+                                  }).toList(),
+                      ),
+                UIHelper.verticalSpace(24.h),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: isTopUpLoading
+                        ? null
+                        : () async {
+                            final amtStr = amountController.text.trim();
+                            final amountNum = double.tryParse(amtStr) ?? 0;
+                            if (amtStr.isEmpty || amountNum <= 0) {
+                              ToastUtil.showErrorMessage('Please enter a valid amount');
+                              return;
+                            }
+
+                            setModalState(() {
+                              isTopUpLoading = true;
+                            });
+
+                            try {
+                              final body = {
+                                "amount": amountNum.toStringAsFixed(2),
+                                "gateway": selectedGatewayCode,
+                              };
+                              final res = await walletTopUpRxObj.topUpWallet(body);
+                              if (!ctx.mounted) return;
+                              Navigator.pop(ctx);
+                              if (res.redirectUrl != null && res.redirectUrl!.isNotEmpty) {
+                                ToastUtil.showSuccessMessage('Top-up session created! Redirecting...');
+                              } else {
+                                ToastUtil.showSuccessMessage(res.message ?? 'Top-up initiated successfully!');
+                              }
+                              _fetchWalletBalance();
+                              _fetchWalletTransactions();
+                            } catch (e) {
+                              setModalState(() {
+                                isTopUpLoading = false;
+                              });
+                              String err = e.toString().replaceAll('Exception: ', '');
+                              ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Top-up failed');
+                            }
+                          },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryOrange,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(vertical: 14.h),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                      elevation: 0,
+                    ),
+                    child: isTopUpLoading
+                        ? SizedBox(
+                            width: 20.w,
+                            height: 20.h,
+                            child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                          )
+                        : Text('Proceed to Payment', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold)),
+                  ),
                 ),
               ],
             ),
-            UIHelper.verticalSpace(16.h),
-            Text(
-              'Enter Top-up Amount (BDT)',
-              style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
-            ),
-            UIHelper.verticalSpace(6.h),
-            TextField(
-              controller: amountController,
-              keyboardType: TextInputType.number,
-              style: TextStyle(fontSize: 14.sp, color: AppColorsTheme.textMainColor(context)),
-              decoration: InputDecoration(
-                hintText: 'e.g. 5000',
-                hintStyle: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMutedColor(context)),
-                contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: AppColorsTheme.borderColor(context)),
-                ),
-              ),
-            ),
-            UIHelper.verticalSpace(16.h),
-            Text(
-              'Select Payment Gateway',
-              style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
-            ),
-            UIHelper.verticalSpace(8.h),
-            StatefulBuilder(
-              builder: (context, setModalState) => Row(
-                children: ['bKash', 'Nagad', 'Card'].map((gw) {
-                  final isSelected = selectedGateway == gw;
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () {
-                        setModalState(() {
-                          selectedGateway = gw;
-                        });
-                      },
-                      child: Container(
-                        margin: EdgeInsets.only(right: 8.w),
-                        padding: EdgeInsets.symmetric(vertical: 10.h),
-                        decoration: BoxDecoration(
-                          color: isSelected ? primaryOrange.withValues(alpha: 0.15) : AppColorsTheme.background(context),
-                          borderRadius: BorderRadius.circular(10.r),
-                          border: Border.all(
-                            color: isSelected ? primaryOrange : AppColorsTheme.borderColor(context),
-                            width: isSelected ? 1.5.w : 1.w,
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            gw,
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.bold,
-                              color: isSelected ? primaryOrange : AppColorsTheme.textMainColor(context),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
-              ),
-            ),
-            UIHelper.verticalSpace(24.h),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  final amt = amountController.text.trim();
-                  if (amt.isEmpty || (double.tryParse(amt) ?? 0) <= 0) {
-                    ToastUtil.showErrorMessage('Please enter a valid amount');
-                    return;
-                  }
-                  Navigator.pop(ctx);
-                  ToastUtil.showSuccessMessage('Successfully topped up ৳$amt via $selectedGateway!');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryOrange,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                  elevation: 0,
-                ),
-                child: Text('Proceed to Payment', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold)),
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
