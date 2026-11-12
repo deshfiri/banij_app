@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
-import '../../../common_widget/finance_card_widget.dart';
 import '../../../constants/color.dart';
 import '../../../constants/image_const.dart';
 import '../../../helpers/all_routes.dart';
@@ -19,14 +18,6 @@ class FinanceScreenBody extends StatelessWidget {
     super.key,
     this.onOpenDrawer,
   });
-
-  void _handleInvoiceTap(BuildContext context) {
-    InvoicesReceiptsSheet.show(context, initialTab: 'Invoices');
-  }
-
-  void _handleReceiptsTap(BuildContext context) {
-    InvoicesReceiptsSheet.show(context, initialTab: 'Receipts');
-  }
 
   void _handleProfileTap(BuildContext context) {
     try {
@@ -45,6 +36,39 @@ class FinanceScreenBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final List<Map<String, dynamic>> financeItems = [
+      {
+        'title': 'Wallet',
+        'subtitle': 'View balance & manage funds',
+        'icon': Icons.account_balance_wallet_rounded,
+        'onTap': (BuildContext ctx) => Navigator.pushNamed(ctx, Routes.walletScreen),
+      },
+      {
+        'title': 'Withdrawals',
+        'subtitle': 'Track payout withdrawals',
+        'icon': Icons.payments_rounded,
+        'onTap': (BuildContext ctx) => Navigator.pushNamed(ctx, Routes.withdrawalsScreen),
+      },
+      {
+        'title': 'Payout methods',
+        'subtitle': 'Manage bank accounts & gateways',
+        'icon': Icons.credit_card_rounded,
+        'onTap': (BuildContext ctx) => Navigator.pushNamed(ctx, Routes.payoutMethodsScreen),
+      },
+      {
+        'title': 'Invoice',
+        'subtitle': 'Manage, create & view invoices',
+        'icon': Icons.receipt_long_outlined,
+        'onTap': (BuildContext ctx) => InvoicesReceiptsSheet.show(ctx, initialTab: 'Invoices'),
+      },
+      {
+        'title': 'Receipts',
+        'subtitle': 'Track payment receipts & transactions',
+        'icon': Icons.receipt_rounded,
+        'onTap': (BuildContext ctx) => InvoicesReceiptsSheet.show(ctx, initialTab: 'Receipts'),
+      },
+    ];
 
     return Container(
       color: AppColorsTheme.background(context),
@@ -135,7 +159,7 @@ class FinanceScreenBody extends StatelessWidget {
             ),
           ),
 
-          // Body Content with Cards
+          // Body Content with Grid Cards
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 100.h),
@@ -188,21 +212,82 @@ class FinanceScreenBody extends StatelessWidget {
                   ),
                   UIHelper.verticalSpace(20.h),
 
-                  // Card 1: Invoice
-                  FinanceCardWidget(
-                    title: 'invoice'.tr,
-                    subtitle: 'invoice_subtitle'.tr,
-                    iconData: Icons.receipt_long_outlined,
-                    onTap: () => _handleInvoiceTap(context),
-                  ),
-                  UIHelper.verticalSpace(16.h),
-
-                  // Card 2: Receipts
-                  FinanceCardWidget(
-                    title: 'receipts'.tr,
-                    subtitle: 'receipts_subtitle'.tr,
-                    iconData: Icons.payments_outlined,
-                    onTap: () => _handleReceiptsTap(context),
+                  // GridView of Finance Cards (Wallet, Withdrawals, Payout methods, Invoices, Receipts)
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 14.w,
+                      mainAxisSpacing: 14.h,
+                      childAspectRatio: 1.15,
+                    ),
+                    itemCount: financeItems.length,
+                    itemBuilder: (context, index) {
+                      final item = financeItems[index];
+                      return GestureDetector(
+                        onTap: () => item['onTap'](context),
+                        child: Container(
+                          padding: EdgeInsets.all(16.w),
+                          decoration: BoxDecoration(
+                            color: AppColorsTheme.cardBg(context),
+                            borderRadius: BorderRadius.circular(18.r),
+                            border: Border.all(color: AppColorsTheme.borderColor(context), width: 1.w),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
+                                blurRadius: 10.r,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Container(
+                                padding: EdgeInsets.all(10.w),
+                                decoration: BoxDecoration(
+                                  color: primaryOrange.withValues(alpha: 0.12),
+                                  borderRadius: BorderRadius.circular(12.r),
+                                ),
+                                child: Icon(
+                                  item['icon'],
+                                  color: primaryOrange,
+                                  size: 22.sp,
+                                ),
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item['title'],
+                                    style: TextStyle(
+                                      fontSize: 15.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColorsTheme.textMainColor(context),
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  UIHelper.verticalSpace(2.h),
+                                  Text(
+                                    item['subtitle'],
+                                    style: TextStyle(
+                                      fontSize: 11.sp,
+                                      color: AppColorsTheme.textMutedColor(context),
+                                      height: 1.2,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 ],
               ),

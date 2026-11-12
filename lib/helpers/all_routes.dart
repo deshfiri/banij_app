@@ -21,6 +21,9 @@ import '../feature/dashboard/presentation/cart_screen.dart';
 import '../feature/dashboard/presentation/order_now_screen.dart';
 import '../feature/dashboard/presentation/add_website_screen.dart';
 import '../feature/dashboard/presentation/add_address_screen.dart';
+import '../feature/finance/presentation/wallet_screen.dart';
+import '../feature/finance/presentation/withdrawals_screen.dart';
+import '../feature/finance/presentation/payout_methods_screen.dart';
 
 final class Routes {
   static final Routes _routes = Routes._internal();
@@ -45,6 +48,9 @@ final class Routes {
   static const String orderNowScreen = '/orderNowScreen';
   static const String addWebsiteScreen = '/addWebsiteScreen';
   static const String addAddressScreen = '/addAddressScreen';
+  static const String walletScreen = '/walletScreen';
+  static const String withdrawalsScreen = '/withdrawalsScreen';
+  static const String payoutMethodsScreen = '/payoutMethodsScreen';
 }
 
 final class RouteGenerator {
@@ -129,6 +135,18 @@ final class RouteGenerator {
         return Platform.isAndroid
             ? _LightningFastTransitionRoute(widget: const AddAddressScreen(), settings: settings)
             : CupertinoPageRoute(builder: (context) => const AddAddressScreen(), settings: settings);
+      case Routes.walletScreen:
+        return Platform.isAndroid
+            ? _LightningFastTransitionRoute(widget: const WalletScreen(), settings: settings)
+            : CupertinoPageRoute(builder: (context) => const WalletScreen(), settings: settings);
+      case Routes.withdrawalsScreen:
+        return Platform.isAndroid
+            ? _LightningFastTransitionRoute(widget: const WithdrawalsScreen(), settings: settings)
+            : CupertinoPageRoute(builder: (context) => const WithdrawalsScreen(), settings: settings);
+      case Routes.payoutMethodsScreen:
+        return Platform.isAndroid
+            ? _LightningFastTransitionRoute(widget: const PayoutMethodsScreen(), settings: settings)
+            : CupertinoPageRoute(builder: (context) => const PayoutMethodsScreen(), settings: settings);
     }
 
     return null;
