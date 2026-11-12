@@ -5,6 +5,7 @@ import '../../../constants/color.dart';
 import '../../../helpers/toast.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../../networks/api_access.dart';
+import '../../dashboard/model/payment_model.dart';
 import '../model/bank_model.dart';
 
 class PayoutMethodsScreen extends StatefulWidget {
@@ -16,6 +17,7 @@ class PayoutMethodsScreen extends StatefulWidget {
 
 class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
   List<BankItemModel> _loadedBanks = [];
+  PaymentMethodResponseModel? _paymentResponseModel;
 
   final List<Map<String, dynamic>> _payoutMethods = [
     {
@@ -36,6 +38,7 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
   void initState() {
     super.initState();
     _fetchBanks();
+    _fetchPaymentMethods();
   }
 
   Future<void> _fetchBanks() async {
@@ -47,6 +50,17 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
             _loadedBanks = res.data!;
           });
         }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _fetchPaymentMethods() async {
+    try {
+      final res = await paymentRxObj.fetchPaymentMethods();
+      if (mounted) {
+        setState(() {
+          _paymentResponseModel = res;
+        });
       }
     } catch (_) {}
   }
@@ -583,6 +597,10 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final apiMethods = _paymentResponseModel?.data ?? [];
+    final apiTypes = _paymentResponseModel?.types ?? [];
+    final hasApiMethods = apiMethods.isNotEmpty || apiTypes.isNotEmpty;
+
     return Scaffold(
       backgroundColor: AppColorsTheme.background(context),
       appBar: AppBar(
@@ -638,32 +656,90 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
               ),
             ),
             UIHelper.verticalSpace(20.h),
-            _payoutMethods.isEmpty
-                ? Container(
-                    padding: EdgeInsets.all(36.w),
-                    decoration: BoxDecoration(
-                      color: AppColorsTheme.cardBg(context),
-                      borderRadius: BorderRadius.circular(16.r),
-                      border: Border.all(color: AppColorsTheme.borderColor(context)),
-                    ),
-                    child: Center(
-                      child: Column(
-                        children: [
-                          Icon(Icons.credit_card_rounded, size: 48.sp, color: AppColorsTheme.textMutedColor(context)),
-                          UIHelper.verticalSpace(12.h),
-                          Text(
-                            'No payout method yet',
-                            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
-                          ),
-                          UIHelper.verticalSpace(4.h),
-                          Text(
-                            'Add a bank account, bKash or Nagad number before requesting a withdrawal.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 12.5.sp, color: AppColorsTheme.textMutedColor(context)),
-                          ),
-                        ],
-                      ),
-                    ),
+            hasApiMethods
+                ? ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: apiMethods.isNotEmpty ? apiMethods.length : apiTypes.length,
+                    itemBuilder: (context, index) {
+                      final title = apiMethods.isNotEmpty
+                          ? (apiMethods[index].name ?? 'Payout Method')
+                          : (apiTypes[index].label ?? apiTypes[index].value ?? 'Payout Method');
+                      final subtitle = apiMethods.isNotEmpty
+                          ? (apiMethods[index].description ?? 'Configured account')
+                          : 'Fields: ${apiTypes[index].fields?.join(", ") ?? ""}';
+
+                      return Container(
+                        margin: EdgeInsets.only(bottom: 10.h),
+                        padding: EdgeInsets.all(14.w),
+                        decoration: BoxDecoration(
+                          color: AppColorsTheme.cardBg(context),
+                          borderRadius: BorderRadius.circular(14.r),
+                          border: Border.all(color: AppColorsTheme.borderColor(context)),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(10.w),
+                              decoration: BoxDecoration(
+                                color: primaryOrange.withValues(alpha: 0.12),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(Icons.account_balance_wallet_rounded, color: primaryOrange, size: 20.sp),
+                            ),
+                            UIHelper.horizontalSpace(12.w),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    title,
+                                    style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
+                                  ),
+                                  UIHelper.verticalSpace(2.h),
+                                  Text(
+                                    subtitle,
+                                    style: TextStyle(fontSize: 11.5.sp, color: AppColorsTheme.textMutedColor(context)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            PopupMenuButton<String>(
+                              icon: Icon(Icons.more_vert_rounded, size: 18.sp, color: AppColorsTheme.textMutedColor(context)),
+                              onSelected: (value) {
+                                if (value == 'edit') {
+                                  ToastUtil.showSuccessMessage('Edit payout method');
+                                } else if (value == 'archive') {
+                                  ToastUtil.showSuccessMessage('Payout method archived');
+                                }
+                              },
+                              itemBuilder: (context) => [
+                                PopupMenuItem(
+                                  value: 'edit',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.edit_outlined, size: 16.sp, color: primaryOrange),
+                                      UIHelper.horizontalSpace(8.w),
+                                      Text('Edit', style: TextStyle(fontSize: 12.5.sp)),
+                                    ],
+                                  ),
+                                ),
+                                PopupMenuItem(
+                                  value: 'archive',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.archive_outlined, size: 16.sp, color: Colors.redAccent),
+                                      UIHelper.horizontalSpace(8.w),
+                                      Text('Archive', style: TextStyle(fontSize: 12.5.sp, color: Colors.redAccent)),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   )
                 : ListView.builder(
                     shrinkWrap: true,
@@ -722,14 +798,40 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                                 ],
                               ),
                             ),
-                            IconButton(
-                              icon: Icon(Icons.delete_outline_rounded, size: 18.sp, color: Colors.redAccent),
-                              onPressed: () {
-                                setState(() {
-                                  _payoutMethods.removeAt(index);
-                                });
-                                ToastUtil.showSuccessMessage('Payout method removed');
+                            PopupMenuButton<String>(
+                              icon: Icon(Icons.more_vert_rounded, size: 18.sp, color: AppColorsTheme.textMutedColor(context)),
+                              onSelected: (value) {
+                                if (value == 'edit') {
+                                  ToastUtil.showSuccessMessage('Edit payout method');
+                                } else if (value == 'archive') {
+                                  setState(() {
+                                    _payoutMethods.removeAt(index);
+                                  });
+                                  ToastUtil.showSuccessMessage('Payout method archived');
+                                }
                               },
+                              itemBuilder: (context) => [
+                                PopupMenuItem(
+                                  value: 'edit',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.edit_outlined, size: 16.sp, color: primaryOrange),
+                                      UIHelper.horizontalSpace(8.w),
+                                      Text('Edit', style: TextStyle(fontSize: 12.5.sp)),
+                                    ],
+                                  ),
+                                ),
+                                PopupMenuItem(
+                                  value: 'archive',
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.archive_outlined, size: 16.sp, color: Colors.redAccent),
+                                      UIHelper.horizontalSpace(8.w),
+                                      Text('Archive', style: TextStyle(fontSize: 12.5.sp, color: Colors.redAccent)),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
