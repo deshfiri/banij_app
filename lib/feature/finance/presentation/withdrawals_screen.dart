@@ -4,6 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../constants/color.dart';
 import '../../../helpers/toast.dart';
 import '../../../helpers/ui_helpers.dart';
+import '../../../networks/api_access.dart';
+import '../model/withdrawal_list_model.dart';
+import '../model/withdrawal_options_model.dart';
 
 class WithdrawalsScreen extends StatefulWidget {
   const WithdrawalsScreen({super.key});
@@ -13,7 +16,10 @@ class WithdrawalsScreen extends StatefulWidget {
 }
 
 class _WithdrawalsScreenState extends State<WithdrawalsScreen> {
-  final List<Map<String, dynamic>> _withdrawals = [
+  WithdrawalOptionsModel? _withdrawalOptionsModel;
+  WithdrawalListResponseModel? _withdrawalListModel;
+
+  final List<Map<String, dynamic>> _dummyWithdrawals = [
     {
       'id': 'WD-2026-001',
       'amount': '৳10,000.00',
@@ -29,6 +35,35 @@ class _WithdrawalsScreenState extends State<WithdrawalsScreen> {
       'status': 'Pending',
     },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchWithdrawalOptions();
+    _fetchWithdrawals();
+  }
+
+  Future<void> _fetchWithdrawalOptions() async {
+    try {
+      final res = await withdrawalOptionsRxObj.fetchWithdrawalOptions();
+      if (mounted) {
+        setState(() {
+          _withdrawalOptionsModel = res;
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _fetchWithdrawals() async {
+    try {
+      final res = await withdrawalListRxObj.fetchWithdrawalList();
+      if (mounted) {
+        setState(() {
+          _withdrawalListModel = res;
+        });
+      }
+    } catch (_) {}
+  }
 
   void _showRequestModal(BuildContext context) {
     final TextEditingController amountController = TextEditingController();
@@ -65,9 +100,18 @@ class _WithdrawalsScreenState extends State<WithdrawalsScreen> {
               ],
             ),
             UIHelper.verticalSpace(16.h),
-            Text(
-              'Withdrawal Amount (BDT)',
-              style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Withdrawal Amount (BDT)',
+                  style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
+                ),
+                Text(
+                  'Min: ${_withdrawalOptionsModel?.minimum?.formatted ?? '৳500.00'}',
+                  style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: primaryOrange),
+                ),
+              ],
             ),
             UIHelper.verticalSpace(6.h),
             TextField(
@@ -122,7 +166,7 @@ class _WithdrawalsScreenState extends State<WithdrawalsScreen> {
                   }
                   Navigator.pop(ctx);
                   setState(() {
-                    _withdrawals.insert(0, {
+                    _dummyWithdrawals.insert(0, {
                       'id': 'WD-2026-003',
                       'amount': '৳$amt',
                       'method': selectedMethod,
@@ -150,6 +194,9 @@ class _WithdrawalsScreenState extends State<WithdrawalsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final apiItems = _withdrawalListModel?.data ?? [];
+    final hasApiItems = apiItems.isNotEmpty;
+
     return Scaffold(
       backgroundColor: AppColorsTheme.background(context),
       appBar: AppBar(
@@ -205,39 +252,78 @@ class _WithdrawalsScreenState extends State<WithdrawalsScreen> {
               ),
             ),
             UIHelper.verticalSpace(20.h),
-            _withdrawals.isEmpty
-                ? Container(
-                    padding: EdgeInsets.all(36.w),
-                    decoration: BoxDecoration(
-                      color: AppColorsTheme.cardBg(context),
-                      borderRadius: BorderRadius.circular(16.r),
-                      border: Border.all(color: AppColorsTheme.borderColor(context)),
-                    ),
-                    child: Center(
-                      child: Column(
-                        children: [
-                          Icon(Icons.payments_outlined, size: 48.sp, color: AppColorsTheme.textMutedColor(context)),
-                          UIHelper.verticalSpace(12.h),
-                          Text(
-                            'No withdrawals yet',
-                            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
-                          ),
-                          UIHelper.verticalSpace(4.h),
-                          Text(
-                            'Request a withdrawal from your wallet once you have a payout method saved.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 12.5.sp, color: AppColorsTheme.textMutedColor(context)),
-                          ),
-                        ],
-                      ),
-                    ),
+            hasApiItems
+                ? ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: apiItems.length,
+                    itemBuilder: (context, index) {
+                      final item = apiItems[index];
+                      final isCompleted = item.status == 'paid' || item.status == 'approved' || item.statusTone == 'success';
+                      return Container(
+                        margin: EdgeInsets.only(bottom: 10.h),
+                        padding: EdgeInsets.all(14.w),
+                        decoration: BoxDecoration(
+                          color: AppColorsTheme.cardBg(context),
+                          borderRadius: BorderRadius.circular(14.r),
+                          border: Border.all(color: AppColorsTheme.borderColor(context)),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(10.w),
+                              decoration: BoxDecoration(
+                                color: (isCompleted ? Colors.green : Colors.orange).withValues(alpha: 0.12),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(Icons.account_balance_wallet_outlined, color: isCompleted ? Colors.green : Colors.orange, size: 20.sp),
+                            ),
+                            UIHelper.horizontalSpace(12.w),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item.reference ?? item.id ?? 'WD-REQUEST',
+                                    style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
+                                  ),
+                                  UIHelper.verticalSpace(2.h),
+                                  Text(
+                                    '${item.payout?.typeLabel ?? item.payout?.label ?? 'Payout'} (${item.payout?.maskedNumber ?? ''})',
+                                    style: TextStyle(fontSize: 11.5.sp, color: AppColorsTheme.textMutedColor(context)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  item.amount?.formatted ?? '৳0.00',
+                                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: primaryOrange),
+                                ),
+                                UIHelper.verticalSpace(2.h),
+                                Text(
+                                  item.statusLabel ?? item.status ?? 'Pending',
+                                  style: TextStyle(
+                                    fontSize: 10.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: isCompleted ? Colors.green : Colors.orange,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   )
                 : ListView.builder(
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _withdrawals.length,
+                    itemCount: _dummyWithdrawals.length,
                     itemBuilder: (context, index) {
-                      final item = _withdrawals[index];
+                      final item = _dummyWithdrawals[index];
                       final isCompleted = item['status'] == 'Completed';
                       return Container(
                         margin: EdgeInsets.only(bottom: 10.h),

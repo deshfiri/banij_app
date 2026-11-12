@@ -19,6 +19,10 @@ import '../feature/dashboard/data/product_rx.dart';
 import '../feature/dashboard/data/website_rx.dart';
 import '../feature/dashboard/data/wholesale_cart_rx.dart';
 import '../feature/finance/data/bank_rx.dart';
+import '../feature/finance/data/withdrawal_list_rx.dart';
+import '../feature/finance/data/withdrawal_options_rx.dart';
+import '../feature/finance/data/wallet_transaction_rx.dart';
+import '../feature/finance/data/wallet_balance_rx.dart';
 import '../feature/notification/data/notification_rx.dart';
 import '../feature/package/data/package_rx.dart';
 
@@ -56,3 +60,7 @@ WebsiteRx websiteRxObj = WebsiteRx();
 WholesaleCartRx wholesaleCartRxObj = WholesaleCartRx();
 CheckoutRx checkoutRxObj = CheckoutRx();
 BankRx bankRxObj = BankRx.instance;
+WithdrawalOptionsRx withdrawalOptionsRxObj = WithdrawalOptionsRx.instance;
+WithdrawalListRx withdrawalListRxObj = WithdrawalListRx.instance;
+WalletTransactionRx walletTransactionRxObj = WalletTransactionRx.instance;
+WalletBalanceRx walletBalanceRxObj = WalletBalanceRx.instance;

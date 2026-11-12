@@ -4,6 +4,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../constants/color.dart';
 import '../../../helpers/toast.dart';
 import '../../../helpers/ui_helpers.dart';
+import '../../../networks/api_access.dart';
+import '../model/wallet_balance_model.dart';
+import '../model/wallet_transaction_model.dart';
 
 class WalletScreen extends StatefulWidget {
   const WalletScreen({super.key});
@@ -15,45 +18,37 @@ class WalletScreen extends StatefulWidget {
 class _WalletScreenState extends State<WalletScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _selectedFilter = 'All';
+  WalletBalanceResponseModel? _walletBalanceModel;
+  WalletTransactionListModel? _walletTransactionListModel;
 
-  final List<Map<String, dynamic>> _dummyTransactions = [
-    {
-      'title': 'Wallet Top-up via bKash',
-      'type': 'Credit',
-      'amount': '+৳5,000.00',
-      'date': 'Nov 12, 2026 - 10:45 AM',
-      'status': 'Success',
-      'icon': Icons.arrow_downward_rounded,
-      'color': Colors.green,
-    },
-    {
-      'title': 'Wholesale Order Payment #ORD-9821',
-      'type': 'Debit',
-      'amount': '-৳2,450.00',
-      'date': 'Nov 10, 2026 - 02:15 PM',
-      'status': 'Completed',
-      'icon': Icons.arrow_upward_rounded,
-      'color': Colors.redAccent,
-    },
-    {
-      'title': 'Affiliate Commission Bonus',
-      'type': 'Credit',
-      'amount': '+৳1,200.00',
-      'date': 'Nov 08, 2026 - 11:30 AM',
-      'status': 'Success',
-      'icon': Icons.card_giftcard_rounded,
-      'color': Colors.green,
-    },
-    {
-      'title': 'Bank Withdrawal WD-2026-001',
-      'type': 'Debit',
-      'amount': '-৳10,000.00',
-      'date': 'Nov 05, 2026 - 09:20 AM',
-      'status': 'Processed',
-      'icon': Icons.account_balance_rounded,
-      'color': Colors.redAccent,
-    },
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _fetchWalletBalance();
+    _fetchWalletTransactions();
+  }
+
+  Future<void> _fetchWalletBalance() async {
+    try {
+      final res = await walletBalanceRxObj.fetchWalletBalance();
+      if (mounted) {
+        setState(() {
+          _walletBalanceModel = res;
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _fetchWalletTransactions() async {
+    try {
+      final res = await walletTransactionRxObj.fetchWalletTransactions();
+      if (mounted) {
+        setState(() {
+          _walletTransactionListModel = res;
+        });
+      }
+    } catch (_) {}
+  }
 
   @override
   void dispose() {
@@ -190,9 +185,8 @@ class _WalletScreenState extends State<WalletScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final filteredTransactions = _selectedFilter == 'All'
-        ? _dummyTransactions
-        : _dummyTransactions.where((t) => t['type'] == _selectedFilter).toList();
+    final balanceData = _walletBalanceModel?.data;
+    final apiTransactions = _walletTransactionListModel?.data ?? [];
 
     return Scaffold(
       backgroundColor: AppColorsTheme.background(context),
@@ -240,15 +234,15 @@ class _WalletScreenState extends State<WalletScreen> {
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                   decoration: BoxDecoration(
-                    color: Colors.green.withValues(alpha: 0.12),
+                    color: (balanceData?.stateTone == 'success' ? Colors.green : primaryOrange).withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12.r),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.check_circle_rounded, size: 12.sp, color: Colors.green),
+                      Icon(Icons.check_circle_rounded, size: 12.sp, color: balanceData?.stateTone == 'success' ? Colors.green : primaryOrange),
                       UIHelper.horizontalSpace(4.w),
-                      Text('Healthy', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: Colors.green)),
+                      Text(balanceData?.stateLabel ?? 'Healthy', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: balanceData?.stateTone == 'success' ? Colors.green : primaryOrange)),
                     ],
                   ),
                 ),
@@ -317,7 +311,7 @@ class _WalletScreenState extends State<WalletScreen> {
             ),
             UIHelper.verticalSpace(20.h),
 
-            // 3 Balance Cards (Responsive 2-column Grid with Icons)
+            // 3 Balance Cards (Dynamic from GET /wallet)
             GridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -326,9 +320,9 @@ class _WalletScreenState extends State<WalletScreen> {
               mainAxisSpacing: 12.h,
               childAspectRatio: 1.25,
               children: [
-                _buildBalanceCard(context, 'Total Balance', '৳24,500.00', 'Your total wallet balance.', Icons.account_balance_wallet_rounded),
-                _buildBalanceCard(context, 'Available Balance', '৳18,200.00', 'Available for orders.', Icons.account_balance_rounded),
-                _buildBalanceCard(context, 'Withdrawable', '৳12,000.00', 'Ready to withdraw.', Icons.payments_rounded),
+                _buildBalanceCard(context, 'Total Balance', balanceData?.total?.formatted ?? '৳0.00', 'Your total wallet balance.', Icons.account_balance_wallet_rounded),
+                _buildBalanceCard(context, 'Available Balance', balanceData?.usable?.formatted ?? '৳0.00', 'Available for orders.', Icons.account_balance_rounded),
+                _buildBalanceCard(context, 'Withdrawable', balanceData?.withdrawable?.formatted ?? '৳0.00', 'Ready to withdraw.', Icons.payments_rounded),
               ],
             ),
             UIHelper.verticalSpace(24.h),
@@ -353,13 +347,13 @@ class _WalletScreenState extends State<WalletScreen> {
               ),
               child: Column(
                 children: [
-                  _buildDetailRow(context, 'Platform credit', '৳1,500.00', 'Withdrawable', '৳12,000.00'),
+                  _buildDetailRow(context, 'Platform credit', balanceData?.platformCredit?.formatted ?? '৳0.00', 'Withdrawable', balanceData?.withdrawable?.formatted ?? '৳0.00'),
                   UIHelper.verticalSpace(10.h),
-                  _buildDetailRow(context, 'Pending', '৳500.00', 'On hold', '৳0.00'),
+                  _buildDetailRow(context, 'Pending', balanceData?.pending?.formatted ?? '৳0.00', 'On hold', balanceData?.hold?.formatted ?? '৳0.00'),
                   UIHelper.verticalSpace(10.h),
-                  _buildDetailRow(context, 'Minimum balance', '৳1,000.00', 'COD Settlement', '৳4,700.00'),
+                  _buildDetailRow(context, 'Minimum balance', balanceData?.minimumBalance?.formatted ?? '৳0.00', 'COD Settlement', balanceData?.codReceivable?.formatted ?? '৳0.00'),
                   UIHelper.verticalSpace(10.h),
-                  _buildDetailRow(context, 'Reserved', '৳0.00', 'Required deposit', '৳0.00'),
+                  _buildDetailRow(context, 'Reserved', balanceData?.reserved?.formatted ?? '৳0.00', 'Required deposit', balanceData?.requiredDeposit?.formatted ?? '৳0.00'),
                 ],
               ),
             ),
@@ -401,67 +395,100 @@ class _WalletScreenState extends State<WalletScreen> {
             ),
             UIHelper.verticalSpace(12.h),
 
-            // Transactions ListView
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: filteredTransactions.length,
-              itemBuilder: (context, index) {
-                final tx = filteredTransactions[index];
-                return Container(
-                  margin: EdgeInsets.only(bottom: 10.h),
-                  padding: EdgeInsets.all(14.w),
-                  decoration: BoxDecoration(
-                    color: AppColorsTheme.cardBg(context),
-                    borderRadius: BorderRadius.circular(14.r),
-                    border: Border.all(color: AppColorsTheme.borderColor(context)),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(10.w),
-                        decoration: BoxDecoration(
-                          color: (tx['color'] as Color).withValues(alpha: 0.12),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(tx['icon'], color: tx['color'], size: 20.sp),
-                      ),
-                      UIHelper.horizontalSpace(12.w),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              tx['title'],
-                              style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
-                            ),
-                            UIHelper.verticalSpace(2.h),
-                            Text(
-                              tx['date'],
-                              style: TextStyle(fontSize: 11.sp, color: AppColorsTheme.textMutedColor(context)),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
+            // Transactions ListView (API data or empty state)
+            apiTransactions.isEmpty
+                ? Container(
+                    padding: EdgeInsets.all(28.w),
+                    decoration: BoxDecoration(
+                      color: AppColorsTheme.cardBg(context),
+                      borderRadius: BorderRadius.circular(16.r),
+                      border: Border.all(color: AppColorsTheme.borderColor(context)),
+                    ),
+                    child: Center(
+                      child: Column(
                         children: [
+                          Icon(Icons.receipt_long_outlined, size: 48.sp, color: AppColorsTheme.textMutedColor(context)),
+                          UIHelper.verticalSpace(12.h),
                           Text(
-                            tx['amount'],
-                            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: tx['color']),
+                            'No transactions yet',
+                            style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
                           ),
-                          UIHelper.verticalSpace(2.h),
+                          UIHelper.verticalSpace(4.h),
                           Text(
-                            tx['status'],
-                            style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.green),
+                            'Top-ups, charges and earnings appear here as they happen.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(fontSize: 12.5.sp, color: AppColorsTheme.textMutedColor(context)),
                           ),
                         ],
                       ),
-                    ],
+                    ),
+                  )
+                : ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: apiTransactions.length,
+                    itemBuilder: (context, index) {
+                      final tx = apiTransactions[index];
+                      final isCredit = tx.direction == 'credit';
+                      final txColor = isCredit ? Colors.green : Colors.redAccent;
+                      return Container(
+                        margin: EdgeInsets.only(bottom: 10.h),
+                        padding: EdgeInsets.all(14.w),
+                        decoration: BoxDecoration(
+                          color: AppColorsTheme.cardBg(context),
+                          borderRadius: BorderRadius.circular(14.r),
+                          border: Border.all(color: AppColorsTheme.borderColor(context)),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(10.w),
+                              decoration: BoxDecoration(
+                                color: txColor.withValues(alpha: 0.12),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                isCredit ? Icons.arrow_downward_rounded : Icons.arrow_upward_rounded,
+                                color: txColor,
+                                size: 20.sp,
+                              ),
+                            ),
+                            UIHelper.horizontalSpace(12.w),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    tx.typeLabel ?? tx.description ?? 'Transaction',
+                                    style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
+                                  ),
+                                  UIHelper.verticalSpace(2.h),
+                                  Text(
+                                    tx.at ?? 'Today',
+                                    style: TextStyle(fontSize: 11.sp, color: AppColorsTheme.textMutedColor(context)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  tx.amount?.formatted ?? (isCredit ? '+${tx.credit?.formatted ?? '৳0.00'}' : '-${tx.debit?.formatted ?? '৳0.00'}'),
+                                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: txColor),
+                                ),
+                                UIHelper.verticalSpace(2.h),
+                                Text(
+                                  tx.statusLabel ?? tx.status ?? 'Success',
+                                  style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold, color: Colors.green),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ],
         ),
       ),

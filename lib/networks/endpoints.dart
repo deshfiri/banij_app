@@ -33,6 +33,8 @@ final class EndPoints {
   static String notification()=>"/notifications";
   static String locationDivisions()=>"/locations/divisions";
   static String bankList()=>"/banks";
+  static String walletBalnce()=>"/wallet";
+  static String walletList()=>"/wallet/transactions";
   static String accountDelete()=>"/account-deletion";
   static String locationChild(String type,String sourceId)=>"/locations/$type/$sourceId/children";
   static String myProduct()=>"/my-products";
