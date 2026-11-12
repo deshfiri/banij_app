@@ -389,15 +389,13 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
                         itemCount: filteredList.length,
                         itemBuilder: (context, index) {
                           final product = filteredList[index];
-                          final imageUrl = (product.image?.url != null && product.image!.url!.isNotEmpty)
-                              ? product.image!.url!
-                              : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500';
-                          final title = product.name ?? 'Product';
-                          final category = product.category ?? 'IN STOCK';
-                          final price = product.wholesale?.price?.formatted ?? '৳ 2,450';
+                          final imageUrl = product.image?.url ?? '';
+                          final title = product.name ?? '';
+                          final category = product.category ?? '';
+                          final price = product.wholesale?.price?.formatted ?? '';
                           final stock = product.wholesale?.inStock != null
                               ? '${product.wholesale!.inStock} Units in Stock'
-                              : '120 Units in Stock';
+                              : '';
 
                           return Container(
                             margin: EdgeInsets.only(bottom: 16.h),

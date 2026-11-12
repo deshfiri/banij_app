@@ -191,11 +191,9 @@ class _CartScreenState extends State<CartScreen> {
                           if (cartLines.isNotEmpty) {
                             final line = cartLines[index];
                             final product = line.product;
-                            final imageUrl = (product?.image?.url != null && product!.image!.url!.isNotEmpty)
-                                ? product.image!.url!
-                                : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500';
-                            final title = product?.name ?? 'Product Item';
-                            final priceText = line.lineTotal?.formatted ?? line.unitPrice?.formatted ?? '৳ 150.00';
+                            final imageUrl = product?.image?.url ?? '';
+                            final title = product?.name ?? '';
+                            final priceText = line.lineTotal?.formatted ?? line.unitPrice?.formatted ?? '';
                             final quantity = line.quantity ?? 1;
 
                             return Container(

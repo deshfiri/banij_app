@@ -48,6 +48,10 @@ final class EndPoints {
   static String wholesaleCartItems() => "/wholesale/cart/items";
   static String wholesaleCartItemDetail(String item) => "/wholesale/cart/items/$item";
   static String wholesaleCartPrices() => "/wholesale/cart/prices";
+  static String checkout() => "/checkout";
+  static String checkoutCoupon() => "/checkout/coupon";
+  static String checkoutPayment() => "/checkout/payment";
+  static String checkoutPaymentVerify() => "/checkout/payment/verify";
   static String allocatedStock() => "/allocated-stock";
   static String requestRevierw() => "/finance/finance_requisition_list.php";
   static String allRequestReview() =>

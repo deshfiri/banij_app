@@ -11,6 +11,7 @@ import '../../../helpers/ui_helpers.dart';
 import '../../../networks/api_access.dart';
 import '../../../providers/cart_provider.dart';
 import '../model/address_model.dart';
+import '../model/checkout_response_model.dart';
 import '../model/my_product_model.dart';
 import '../model/payment_model.dart';
 
@@ -28,9 +29,12 @@ class OrderNowScreen extends StatefulWidget {
 
 class _OrderNowScreenState extends State<OrderNowScreen> {
   int _quantity = 1;
-  String _selectedPaymentMethod = 'PayPal';
+  String _selectedPaymentMethod = 'bKash';
   bool _isLoading = false;
   bool _isSummaryExpanded = false;
+  bool _isApplyingCoupon = false;
+
+  final TextEditingController _couponController = TextEditingController();
 
   bool _isLoadingPaymentMethods = true;
   PaymentMethodResponseModel? _paymentResponseModel;
@@ -38,12 +42,32 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
   bool _isLoadingAddresses = true;
   AddressResponseModel? _addressResponseModel;
   AddressItemModel? _selectedAddress;
+  CheckoutResponseModel? _checkoutResponseModel;
 
   @override
   void initState() {
     super.initState();
     _fetchPaymentMethods();
     _fetchAddresses();
+    _fetchCheckoutDetails();
+  }
+
+  @override
+  void dispose() {
+    _couponController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _fetchCheckoutDetails() async {
+    try {
+      _checkoutResponseModel = await checkoutRxObj.fetchCheckoutDetails();
+      if (_checkoutResponseModel?.data?.coupon != null) {
+        _couponController.text = _checkoutResponseModel!.data!.coupon!;
+      }
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (_) {}
   }
 
   Future<void> _fetchPaymentMethods() async {
@@ -104,12 +128,42 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
     }
   }
 
-  void _placeOrder(CartProvider cartProvider) {
+  Future<void> _applyCoupon() async {
+    final code = _couponController.text.trim();
+    if (code.isEmpty) {
+      ToastUtil.showErrorMessage('Please enter a coupon code');
+      return;
+    }
+    setState(() {
+      _isApplyingCoupon = true;
+    });
+    try {
+      await checkoutRxObj.coupon({"code": code});
+      ToastUtil.showSuccessMessage('Coupon applied successfully!');
+    } catch (e) {
+      String err = e.toString().replaceAll('Exception: ', '');
+      ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Failed to apply coupon');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isApplyingCoupon = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _placeOrder(CartProvider cartProvider) async {
     setState(() {
       _isLoading = true;
     });
 
-    Future.delayed(const Duration(seconds: 1), () {
+    try {
+      final body = {
+        "payment_method": _selectedPaymentMethod,
+        if (_selectedAddress != null) "address_id": _selectedAddress!.id,
+      };
+      await checkoutRxObj.pay(body);
+
       if (mounted) {
         setState(() {
           _isLoading = false;
@@ -117,7 +171,15 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
         cartProvider.clearCart();
         _showSuccessDialog(context);
       }
-    });
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      String err = e.toString().replaceAll('Exception: ', '');
+      ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Payment failed. Please try again.');
+    }
   }
 
   Future<void> _showAddressSelectionSheet(BuildContext context) async {
@@ -268,44 +330,43 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => Dialog(
+      builder: (ctx) => Dialog(
         backgroundColor: AppColorsTheme.cardBg(context),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
         child: Padding(
           padding: EdgeInsets.all(24.w),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                padding: EdgeInsets.all(20.w),
+                width: 80.w,
+                height: 80.h,
                 decoration: BoxDecoration(
                   color: const Color(0xFF10B981).withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(
                   Icons.check_rounded,
-                  size: 54.sp,
+                  size: 48.sp,
                   color: const Color(0xFF10B981),
                 ),
               ),
               UIHelper.verticalSpace(20.h),
               Text(
-                'Order Placed Successfully!',
-                textAlign: TextAlign.center,
+                'Payment Successful',
                 style: TextStyle(
                   fontSize: 20.sp,
-                  fontWeight: FontWeight.w900,
+                  fontWeight: FontWeight.bold,
                   color: AppColorsTheme.textMainColor(context),
                 ),
               ),
-              UIHelper.verticalSpace(8.h),
+              UIHelper.verticalSpace(6.h),
               Text(
-                'Your Trade Assurance order has been placed successfully.',
+                'Congratulation! Your order has been placed successfully.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13.sp,
                   color: AppColorsTheme.textMutedColor(context),
-                  height: 1.4,
                 ),
               ),
               UIHelper.verticalSpace(24.h),
@@ -313,28 +374,39 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pop(context);
-                    Navigator.pushNamedAndRemoveUntil(
-                      context,
-                      Routes.dashboardScreen,
-                      (route) => false,
-                    );
+                    Navigator.pop(ctx);
+                    Navigator.pushNamedAndRemoveUntil(context, Routes.dashboardScreen, (route) => false);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryOrange,
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(vertical: 14.h),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14.r),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
                     elevation: 0,
                   ),
                   child: Text(
-                    'Back to Dashboard',
-                    style: TextStyle(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    'Download your booking task',
+                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+              UIHelper.verticalSpace(10.h),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    Navigator.pushNamedAndRemoveUntil(context, Routes.dashboardScreen, (route) => false);
+                  },
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColorsTheme.textMainColor(context),
+                    padding: EdgeInsets.symmetric(vertical: 14.h),
+                    side: BorderSide(color: AppColorsTheme.borderColor(context)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                  ),
+                  child: Text(
+                    'Cancel',
+                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
@@ -445,6 +517,50 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Package Info Banner from GET /checkout
+              if (_checkoutResponseModel?.data?.package != null) ...[
+                Container(
+                  padding: EdgeInsets.all(14.w),
+                  decoration: BoxDecoration(
+                    color: primaryOrange.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(16.r),
+                    border: Border.all(color: primaryOrange.withValues(alpha: 0.3)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.workspace_premium_rounded, color: primaryOrange, size: 24.sp),
+                      UIHelper.horizontalSpace(12.w),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _checkoutResponseModel!.data!.package!.name ?? 'Package',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.bold,
+                                color: AppColorsTheme.textMainColor(context),
+                              ),
+                            ),
+                            if (_checkoutResponseModel!.data!.package!.validityDays != null) ...[
+                              UIHelper.verticalSpace(2.h),
+                              Text(
+                                'Validity: ${_checkoutResponseModel!.data!.package!.validityDays} days',
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  color: AppColorsTheme.textMutedColor(context),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                UIHelper.verticalSpace(16.h),
+              ],
+
               // 1. Address Card Banner (Tapping fetches GET API address list & opens sheet or Add Address screen)
               _isLoadingAddresses
                   ? _buildAddressShimmer(context)
@@ -575,58 +691,42 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
               ),
               UIHelper.verticalSpace(16.h),
 
-              // 3. Product Preview Card
-              Container(
-                padding: EdgeInsets.all(16.w),
-                decoration: BoxDecoration(
-                  color: AppColorsTheme.cardBg(context),
-                  borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(color: AppColorsTheme.borderColor(context)),
+              // 3. Order Items Section (Dynamic from Cart / Checkout quote lines)
+              Text(
+                'Order items',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColorsTheme.textMainColor(context),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+              ),
+              UIHelper.verticalSpace(10.h),
+              if (cartProvider.cartLines.isNotEmpty)
+                ...cartProvider.cartLines.map((line) {
+                  return Container(
+                    margin: EdgeInsets.only(bottom: 12.h),
+                    padding: EdgeInsets.all(14.w),
+                    decoration: BoxDecoration(
+                      color: AppColorsTheme.cardBg(context),
+                      borderRadius: BorderRadius.circular(16.r),
+                      border: Border.all(color: AppColorsTheme.borderColor(context)),
+                    ),
+                    child: Row(
                       children: [
-                        // Image with variant tag
-                        Stack(
-                          children: [
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(12.r),
-                              child: Container(
-                                width: 72.w,
-                                height: 72.h,
-                                color: primaryOrange.withValues(alpha: 0.1),
-                                child: Image.network(
-                                  imageUrl,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) => Center(
-                                    child: Icon(Icons.inventory_2_outlined, color: primaryOrange, size: 28.sp),
-                                  ),
-                                ),
-                              ),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10.r),
+                          child: Image.network(
+                            line.product?.image?.url ?? '',
+                            width: 54.w,
+                            height: 54.h,
+                            fit: BoxFit.cover,
+                            errorBuilder: (c, e, s) => Container(
+                              width: 54.w,
+                              height: 54.h,
+                              color: primaryOrange.withValues(alpha: 0.1),
+                              child: Icon(Icons.inventory_2_outlined, color: primaryOrange, size: 22.sp),
                             ),
-                            Positioned(
-                              bottom: 4.h,
-                              left: 4.w,
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withValues(alpha: 0.7),
-                                  borderRadius: BorderRadius.circular(6.r),
-                                ),
-                                child: Text(
-                                  categoryVariant.toUpperCase(),
-                                  style: TextStyle(
-                                    fontSize: 8.5.sp,
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                         UIHelper.horizontalSpace(12.w),
                         Expanded(
@@ -634,10 +734,10 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                productTitle,
+                                line.product?.name ?? 'Product Item',
                                 style: TextStyle(
                                   fontSize: 13.5.sp,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.bold,
                                   color: AppColorsTheme.textMainColor(context),
                                 ),
                                 maxLines: 2,
@@ -645,87 +745,234 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                               ),
                               UIHelper.verticalSpace(2.h),
                               Text(
-                                'Min. order: $minOrder piece${minOrder > 1 ? "s" : ""}',
+                                '${line.quantity ?? 1} × ${line.unitPrice?.formatted ?? ''}',
                                 style: TextStyle(
-                                  fontSize: 11.sp,
+                                  fontSize: 11.5.sp,
                                   color: AppColorsTheme.textMutedColor(context),
                                 ),
                               ),
-                              UIHelper.verticalSpace(8.h),
-                              Text(
-                                productPrice,
-                                style: TextStyle(
-                                  fontSize: 15.sp,
-                                  fontWeight: FontWeight.w900,
-                                  color: AppColorsTheme.textMainColor(context),
-                                ),
-                              ),
                             ],
+                          ),
+                        ),
+                        Text(
+                          line.lineTotal?.formatted ?? '',
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w900,
+                            color: primaryOrange,
                           ),
                         ),
                       ],
                     ),
-                    UIHelper.verticalSpace(14.h),
-
-                    // Quantity Stepper Row
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(color: AppColorsTheme.borderColor(context)),
-                            borderRadius: BorderRadius.circular(8.r),
-                          ),
-                          child: Row(
+                  );
+                })
+              else
+                Container(
+                  padding: EdgeInsets.all(16.w),
+                  decoration: BoxDecoration(
+                    color: AppColorsTheme.cardBg(context),
+                    borderRadius: BorderRadius.circular(16.r),
+                    border: Border.all(color: AppColorsTheme.borderColor(context)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Image with variant tag
+                          Stack(
                             children: [
-                              InkWell(
-                                onTap: _decrementQuantity,
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                                  child: Icon(Icons.remove, size: 14.sp, color: AppColorsTheme.textMainColor(context)),
-                                ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 8.w),
-                                child: Text(
-                                  '$_quantity',
-                                  style: TextStyle(
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColorsTheme.textMainColor(context),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12.r),
+                                child: Container(
+                                  width: 72.w,
+                                  height: 72.h,
+                                  color: primaryOrange.withValues(alpha: 0.1),
+                                  child: Image.network(
+                                    imageUrl,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) => Center(
+                                      child: Icon(Icons.inventory_2_outlined, color: primaryOrange, size: 28.sp),
+                                    ),
                                   ),
                                 ),
                               ),
-                              InkWell(
-                                onTap: _incrementQuantity,
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                                  child: Icon(Icons.add, size: 14.sp, color: AppColorsTheme.textMainColor(context)),
+                              Positioned(
+                                bottom: 4.h,
+                                left: 4.w,
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                                  decoration: BoxDecoration(
+                                    color: Colors.black.withValues(alpha: 0.7),
+                                    borderRadius: BorderRadius.circular(6.r),
+                                  ),
+                                  child: Text(
+                                    categoryVariant.toUpperCase(),
+                                    style: TextStyle(
+                                      fontSize: 8.5.sp,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                      ],
-                    ),
-                    UIHelper.verticalSpace(10.h),
-                    Divider(color: AppColorsTheme.borderColor(context)),
-                    UIHelper.verticalSpace(8.h),
+                          UIHelper.horizontalSpace(12.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  productTitle,
+                                  style: TextStyle(
+                                    fontSize: 13.5.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColorsTheme.textMainColor(context),
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                UIHelper.verticalSpace(2.h),
+                                Text(
+                                  'Min. order: $minOrder piece${minOrder > 1 ? "s" : ""}',
+                                  style: TextStyle(
+                                    fontSize: 11.sp,
+                                    color: AppColorsTheme.textMutedColor(context),
+                                  ),
+                                ),
+                                UIHelper.verticalSpace(8.h),
+                                Text(
+                                  productPrice,
+                                  style: TextStyle(
+                                    fontSize: 15.sp,
+                                    fontWeight: FontWeight.w900,
+                                    color: AppColorsTheme.textMainColor(context),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      UIHelper.verticalSpace(14.h),
 
-                    // Add note to supplier link
-                    GestureDetector(
-                      onTap: () {
-                        ToastUtil.showSuccessMessage('Note dialog opened');
-                      },
-                      child: Text(
-                        'Add note to supplier',
-                        style: TextStyle(
-                          fontSize: 12.5.sp,
-                          fontWeight: FontWeight.w600,
-                          color: AppColorsTheme.textMainColor(context),
-                          decoration: TextDecoration.underline,
+                      // Quantity Stepper Row
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Container(
+                            decoration: BoxDecoration(
+                              border: Border.all(color: AppColorsTheme.borderColor(context)),
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                            child: Row(
+                              children: [
+                                InkWell(
+                                  onTap: _decrementQuantity,
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                                    child: Icon(Icons.remove, size: 14.sp, color: AppColorsTheme.textMainColor(context)),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 8.w),
+                                  child: Text(
+                                    '$_quantity',
+                                    style: TextStyle(
+                                      fontSize: 13.sp,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppColorsTheme.textMainColor(context),
+                                    ),
+                                  ),
+                                ),
+                                InkWell(
+                                  onTap: _incrementQuantity,
+                                  child: Padding(
+                                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                                    child: Icon(Icons.add, size: 14.sp, color: AppColorsTheme.textMainColor(context)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      UIHelper.verticalSpace(10.h),
+                      Divider(color: AppColorsTheme.borderColor(context)),
+                      UIHelper.verticalSpace(8.h),
+
+                      // Add note to supplier link
+                      GestureDetector(
+                        onTap: () {
+                          ToastUtil.showSuccessMessage('Note dialog opened');
+                        },
+                        child: Text(
+                          'Add note to supplier',
+                          style: TextStyle(
+                            fontSize: 12.5.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColorsTheme.textMainColor(context),
+                            decoration: TextDecoration.underline,
+                          ),
                         ),
                       ),
+                    ],
+                  ),
+                ),
+              UIHelper.verticalSpace(20.h),
+
+              // Apply Voucher / Coupon Section
+              Text(
+                'Apply Voucher',
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColorsTheme.textMainColor(context),
+                ),
+              ),
+              UIHelper.verticalSpace(10.h),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+                decoration: BoxDecoration(
+                  color: AppColorsTheme.cardBg(context),
+                  borderRadius: BorderRadius.circular(16.r),
+                  border: Border.all(color: AppColorsTheme.borderColor(context)),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: _couponController,
+                        style: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMainColor(context)),
+                        decoration: InputDecoration(
+                          hintText: 'Enter coupon code',
+                          hintStyle: TextStyle(fontSize: 12.5.sp, color: AppColorsTheme.textMutedColor(context)),
+                          border: InputBorder.none,
+                          isDense: true,
+                        ),
+                      ),
+                    ),
+                    ElevatedButton(
+                      onPressed: _isApplyingCoupon ? null : _applyCoupon,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryOrange,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                        elevation: 0,
+                      ),
+                      child: _isApplyingCoupon
+                          ? SizedBox(
+                              width: 16.w,
+                              height: 16.h,
+                              child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                            )
+                          : Text(
+                              'Apply',
+                              style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.bold),
+                            ),
                     ),
                   ],
                 ),
@@ -797,7 +1044,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                       ),
                       UIHelper.horizontalSpace(8.w),
                       Text(
-                        'USD ${grandTotalUsd.toStringAsFixed(2)}',
+                        _checkoutResponseModel?.data?.quote?.total?.formatted ?? 'USD ${grandTotalUsd.toStringAsFixed(2)}',
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w900,
@@ -821,7 +1068,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('Items Subtotal', style: TextStyle(fontSize: 12.sp, color: AppColorsTheme.textMutedColor(context))),
-                  Text('BDT ${itemSubtotal.toStringAsFixed(2)}', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context))),
+                  Text(_checkoutResponseModel?.data?.quote?.subtotal?.formatted ?? 'BDT ${itemSubtotal.toStringAsFixed(2)}', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context))),
                 ],
               ),
               UIHelper.verticalSpace(4.h),
