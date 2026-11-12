@@ -23,7 +23,7 @@ class ProductDetailScreen extends StatefulWidget {
 }
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
-  final TextEditingController _quantityController = TextEditingController(text: '10');
+  final TextEditingController _quantityController = TextEditingController(text: '1');
   bool _isFavorite = false;
 
   @override
@@ -33,17 +33,15 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   }
 
   void _incrementQuantity() {
-    int current = int.tryParse(_quantityController.text) ?? 10;
-    if (current < 28) {
-      setState(() {
-        _quantityController.text = (current + 1).toString();
-      });
-    }
+    int current = int.tryParse(_quantityController.text) ?? 1;
+    setState(() {
+      _quantityController.text = (current + 1).toString();
+    });
   }
 
   void _decrementQuantity() {
-    int current = int.tryParse(_quantityController.text) ?? 10;
-    if (current > 10) {
+    int current = int.tryParse(_quantityController.text) ?? 1;
+    if (current > 1) {
       setState(() {
         _quantityController.text = (current - 1).toString();
       });
@@ -544,7 +542,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                         ),
                         OutlinedButton.icon(
                           onPressed: () {
-                            final qty = int.tryParse(_quantityController.text) ?? 10;
+                            final qty = int.tryParse(_quantityController.text) ?? 1;
                             final effectiveProduct = product ?? ProductItemModel(
                               slug: 'default-prod',
                               name: titleText,

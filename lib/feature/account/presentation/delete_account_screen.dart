@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 import '../../../common_widget/custom_button.dart';
@@ -9,7 +8,6 @@ import '../../../common_widget/custom_form_field.dart';
 import '../../../common_widget/custom_password_field.dart';
 import '../../../constants/color.dart';
 import '../../../constants/image_const.dart';
-import '../../../helpers/di.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../../providers/delete_account_provider.dart';
 import '../../../providers/theme_provider.dart';
@@ -23,12 +21,10 @@ class DeleteAccountScreen extends StatefulWidget {
 
 class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  late bool _isBengali;
 
   @override
   void initState() {
     super.initState();
-    _isBengali = appData.read('isBengali') ?? false;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       try {
         context.read<DeleteAccountProvider>().resetForm();

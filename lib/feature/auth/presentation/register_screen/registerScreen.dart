@@ -11,7 +11,6 @@ import '../../../../common_widget/custom_dropdown_field.dart';
 import '../../../../common_widget/custom_field_label.dart';
 import '../../../../common_widget/custom_form_field.dart';
 import '../../../../common_widget/custom_password_field.dart';
-import '../../../../constants/app_constants.dart';
 import '../../../../constants/color.dart';
 import '../../../../constants/image_const.dart';
 import '../../../../helpers/all_routes.dart';

@@ -532,8 +532,8 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
                                       children: [
                                         OutlinedButton(
                                           onPressed: () {
-                                            context.read<CartProvider>().addToCart(product, quantity: 10);
-                                            ToastUtil.showSuccessMessage('Added to cart (10 units)');
+                                            context.read<CartProvider>().addToCart(product, quantity: 1);
+                                            ToastUtil.showSuccessMessage('Added to cart');
                                           },
                                           style: OutlinedButton.styleFrom(
                                             foregroundColor: AppColorsTheme.textMainColor(context),

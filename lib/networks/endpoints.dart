@@ -44,6 +44,10 @@ final class EndPoints {
   static String catalog() => "/catalog";
   static String catalogWholesale() => "/catalog/wholesale";
   static String catalogDropshipping() => "/catalog/dropshipping";
+  static String wholesaleCart() => "/wholesale/cart";
+  static String wholesaleCartItems() => "/wholesale/cart/items";
+  static String wholesaleCartItemDetail(String item) => "/wholesale/cart/items/$item";
+  static String wholesaleCartPrices() => "/wholesale/cart/prices";
   static String allocatedStock() => "/allocated-stock";
   static String requestRevierw() => "/finance/finance_requisition_list.php";
   static String allRequestReview() =>
