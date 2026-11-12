@@ -47,7 +47,6 @@ class DashboardHubWidget extends StatefulWidget {
 class _DashboardHubWidgetState extends State<DashboardHubWidget> {
   String _selectedFilter = 'All';
   CurrentUserModel? _currentUserModel;
-  bool _isLoadingUser = true;
 
   @override
   void initState() {
@@ -61,16 +60,9 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
       if (mounted) {
         setState(() {
           _currentUserModel = res;
-          _isLoadingUser = false;
         });
       }
-    } catch (_) {
-      if (mounted) {
-        setState(() {
-          _isLoadingUser = false;
-        });
-      }
-    }
+    } catch (_) {}
   }
 
   final List<String> _filters = ['All', 'Products', 'Sales & Orders', 'Finance'];

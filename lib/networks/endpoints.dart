@@ -31,7 +31,9 @@ final class EndPoints {
   static String currentUser()=>"/auth/me";
   static String submitDocKyc()=>"/kyc/documents";
   static String notification()=>"/notifications";
+  static String locationDivisions()=>"/locations/divisions";
   static String accountDelete()=>"/account-deletion";
+  static String locationChild(String type,String sourceId)=>"/locations/$type/$sourceId/children";
   static String myProduct()=>"/my-products";
   static String websites() => "/websites";
   static String payments() => "/payout-methods";

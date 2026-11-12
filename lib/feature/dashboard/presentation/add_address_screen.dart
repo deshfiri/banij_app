@@ -52,6 +52,25 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
   }
 
   Future<void> _loadLocations() async {
+    // 1. Try fetching divisions from API (GET /locations/divisions)
+    try {
+      final res = await locationDivisionRxObj.fetchDivisions();
+      if (res.data != null && res.data!.isNotEmpty) {
+        final divsFromApi = res.data!.map((item) => item.toJson()).toList();
+        await _tryMergeLocalDistricts(divsFromApi);
+
+        setState(() {
+          _divisions = divsFromApi;
+          _isLoadingLocations = false;
+        });
+        debugPrint('Successfully loaded ${divsFromApi.length} divisions from API');
+        return;
+      }
+    } catch (e) {
+      debugPrint('Failed to load divisions from API: $e');
+    }
+
+    // 2. Fallback to local JSON assets if API is unavailable
     List<String> pathsToTry = [
       'assets/json/bd_locations.json',
       'json/bd_locations.json',
@@ -87,7 +106,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
       }
     }
 
-    // Fallback default divisions if asset loading fails across all paths
+    // 3. Fallback default divisions
     debugPrint('Warning: Falling back to default divisions');
     setState(() {
       _divisions = [
@@ -104,34 +123,134 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
     });
   }
 
-  void _onDivisionChanged(dynamic division) {
+  Future<void> _tryMergeLocalDistricts(List<dynamic> apiDivs) async {
+    try {
+      final jsonString = await rootBundle.loadString('assets/json/bd_locations.json');
+      final data = json.decode(jsonString);
+      if (data is Map && data.containsKey('divisions') && data['divisions'] is List) {
+        final localDivs = data['divisions'] as List;
+        for (var apiDiv in apiDivs) {
+          final match = localDivs.firstWhere(
+            (local) =>
+                local['id'] == apiDiv['id'] ||
+                (local['name_en'] != null &&
+                    apiDiv['name_en'] != null &&
+                    local['name_en'].toString().toLowerCase() ==
+                        apiDiv['name_en'].toString().toLowerCase()),
+            orElse: () => null,
+          );
+          if (match != null && match['districts'] is List) {
+            apiDiv['districts'] = match['districts'];
+          } else {
+            apiDiv['districts'] = [];
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error merging local districts: $e');
+    }
+  }
+
+  Future<void> _onDivisionChanged(dynamic division) async {
     setState(() {
       _selectedDivision = division;
-      _districts = division != null && division['districts'] is List ? division['districts'] : [];
+      _districts = [];
       _selectedDistrict = null;
       _upazilas = [];
       _selectedUpazila = null;
       _unions = [];
       _selectedUnion = null;
     });
+
+    if (division == null) return;
+
+    final sourceId = division['source_id']?.toString() ?? division['id']?.toString();
+    if (sourceId != null && sourceId.isNotEmpty) {
+      try {
+        final res = await locationChildRxObj.fetchChildren('divisions', sourceId);
+        if (res.data != null && res.data!.isNotEmpty) {
+          final districtsFromApi = res.data!.map((item) => item.toJson()).toList();
+          setState(() {
+            _districts = districtsFromApi;
+          });
+          return;
+        }
+      } catch (e) {
+        debugPrint('Failed to fetch districts from API: $e');
+      }
+    }
+
+    if (division['districts'] is List && (division['districts'] as List).isNotEmpty) {
+      setState(() {
+        _districts = division['districts'];
+      });
+    }
   }
 
-  void _onDistrictChanged(dynamic district) {
+  Future<void> _onDistrictChanged(dynamic district) async {
     setState(() {
       _selectedDistrict = district;
-      _upazilas = district != null && district['upazilas'] is List ? district['upazilas'] : [];
+      _upazilas = [];
       _selectedUpazila = null;
       _unions = [];
       _selectedUnion = null;
     });
+
+    if (district == null) return;
+
+    final sourceId = district['source_id']?.toString() ?? district['id']?.toString();
+    if (sourceId != null && sourceId.isNotEmpty) {
+      try {
+        final res = await locationChildRxObj.fetchChildren('districts', sourceId);
+        if (res.data != null && res.data!.isNotEmpty) {
+          final upazilasFromApi = res.data!.map((item) => item.toJson()).toList();
+          setState(() {
+            _upazilas = upazilasFromApi;
+          });
+          return;
+        }
+      } catch (e) {
+        debugPrint('Failed to fetch upazilas from API: $e');
+      }
+    }
+
+    if (district['upazilas'] is List && (district['upazilas'] as List).isNotEmpty) {
+      setState(() {
+        _upazilas = district['upazilas'];
+      });
+    }
   }
 
-  void _onUpazilaChanged(dynamic upazila) {
+  Future<void> _onUpazilaChanged(dynamic upazila) async {
     setState(() {
       _selectedUpazila = upazila;
-      _unions = upazila != null && upazila['unions'] is List ? upazila['unions'] : [];
+      _unions = [];
       _selectedUnion = null;
     });
+
+    if (upazila == null) return;
+
+    final sourceId = upazila['source_id']?.toString() ?? upazila['id']?.toString();
+    if (sourceId != null && sourceId.isNotEmpty) {
+      try {
+        final res = await locationChildRxObj.fetchChildren('upazilas', sourceId);
+        if (res.data != null && res.data!.isNotEmpty) {
+          final unionsFromApi = res.data!.map((item) => item.toJson()).toList();
+          setState(() {
+            _unions = unionsFromApi;
+          });
+          return;
+        }
+      } catch (e) {
+        debugPrint('Failed to fetch unions from API: $e');
+      }
+    }
+
+    if (upazila['unions'] is List && (upazila['unions'] as List).isNotEmpty) {
+      setState(() {
+        _unions = upazila['unions'];
+      });
+    }
   }
 
   void _onUnionChanged(dynamic union) {
