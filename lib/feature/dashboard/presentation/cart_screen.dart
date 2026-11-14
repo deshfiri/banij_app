@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../constants/color.dart';
 import '../../../helpers/all_routes.dart';
@@ -117,7 +118,7 @@ class _CartScreenState extends State<CartScreen> {
         ],
       ),
       body: cartProvider.isLoading
-          ? Center(child: CircularProgressIndicator(color: primaryOrange))
+          ? _buildCartShimmer(context)
           : isCartEmpty
               ? Center(
                   child: Padding(
@@ -487,6 +488,47 @@ class _CartScreenState extends State<CartScreen> {
                     ),
                   ],
                 ),
+    );
+  }
+
+  Widget _buildCartShimmer(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[300]!;
+    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
+
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: ListView.builder(
+        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+        itemCount: 4,
+        itemBuilder: (context, index) {
+          return Container(
+            margin: EdgeInsets.only(bottom: 14.h),
+            padding: EdgeInsets.all(14.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16.r),
+            ),
+            child: Row(
+              children: [
+                Container(width: 64.w, height: 64.h, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12.r))),
+                UIHelper.horizontalSpace(12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(width: 140.w, height: 14.h, color: Colors.white),
+                      UIHelper.verticalSpace(8.h),
+                      Container(width: 80.w, height: 12.h, color: Colors.white),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }

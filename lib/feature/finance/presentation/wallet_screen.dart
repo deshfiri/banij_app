@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shimmer/shimmer.dart';
 
 import '../../../constants/color.dart';
 import '../../../helpers/toast.dart';
@@ -21,12 +22,23 @@ class _WalletScreenState extends State<WalletScreen> {
   String _selectedFilter = 'All';
   WalletBalanceResponseModel? _walletBalanceModel;
   WalletTransactionListModel? _walletTransactionListModel;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _fetchWalletBalance();
-    _fetchWalletTransactions();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    setState(() => _isLoading = true);
+    await Future.wait([
+      _fetchWalletBalance(),
+      _fetchWalletTransactions(),
+    ]);
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _fetchWalletBalance() async {
@@ -253,8 +265,7 @@ class _WalletScreenState extends State<WalletScreen> {
                               } else {
                                 ToastUtil.showSuccessMessage(res.message ?? 'Top-up initiated successfully!');
                               }
-                              _fetchWalletBalance();
-                              _fetchWalletTransactions();
+                              _loadData();
                             } catch (e) {
                               setModalState(() {
                                 isTopUpLoading = false;
@@ -289,6 +300,29 @@ class _WalletScreenState extends State<WalletScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: AppColorsTheme.background(context),
+        appBar: AppBar(
+          backgroundColor: AppColorsTheme.cardBg(context),
+          elevation: 1,
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back_rounded, color: AppColorsTheme.textMainColor(context)),
+            onPressed: () => Navigator.pop(context),
+          ),
+          title: Text(
+            'Wallet',
+            style: TextStyle(
+              fontSize: 18.sp,
+              fontWeight: FontWeight.bold,
+              color: AppColorsTheme.textMainColor(context),
+            ),
+          ),
+        ),
+        body: _buildWalletShimmer(context),
+      );
+    }
+
     final balanceData = _walletBalanceModel?.data;
     final apiTransactions = _walletTransactionListModel?.data ?? [];
 
@@ -593,6 +627,40 @@ class _WalletScreenState extends State<WalletScreen> {
                       );
                     },
                   ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWalletShimmer(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[300]!;
+    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
+
+    return Shimmer.fromColors(
+      baseColor: baseColor,
+      highlightColor: highlightColor,
+      child: SingleChildScrollView(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(width: 240.w, height: 14.h, color: Colors.white),
+            UIHelper.verticalSpace(16.h),
+            Container(width: double.infinity, height: 80.h, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(18.r))),
+            UIHelper.verticalSpace(20.h),
+            Row(
+              children: [
+                Expanded(child: Container(height: 90.h, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16.r)))),
+                UIHelper.horizontalSpace(12.w),
+                Expanded(child: Container(height: 90.h, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16.r)))),
+              ],
+            ),
+            UIHelper.verticalSpace(24.h),
+            Container(width: 140.w, height: 16.h, color: Colors.white),
+            UIHelper.verticalSpace(12.h),
+            Container(width: double.infinity, height: 120.h, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16.r))),
           ],
         ),
       ),
