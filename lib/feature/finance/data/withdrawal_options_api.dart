@@ -13,7 +13,7 @@ final class WithdrawalOptionsApi {
 
   Future<WithdrawalOptionsModel> getWithdrawalOptions() async {
     try {
-      Response response = await getHttp(EndPoints.walletBalnce());
+      Response response = await getHttp(EndPoints.withdrawaloption());
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (response.data is Map<String, dynamic>) {

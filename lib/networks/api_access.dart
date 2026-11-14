@@ -24,6 +24,7 @@ import '../feature/finance/data/withdrawal_options_rx.dart';
 import '../feature/finance/data/wallet_transaction_rx.dart';
 import '../feature/finance/data/wallet_balance_rx.dart';
 import '../feature/finance/data/wallet_top_up_rx.dart';
+import '../feature/finance/data/request_withdrawal_rx.dart';
 import '../feature/notification/data/notification_rx.dart';
 import '../feature/package/data/package_rx.dart';
 
@@ -66,3 +67,4 @@ WithdrawalListRx withdrawalListRxObj = WithdrawalListRx.instance;
 WalletTransactionRx walletTransactionRxObj = WalletTransactionRx.instance;
 WalletBalanceRx walletBalanceRxObj = WalletBalanceRx.instance;
 WalletTopUpRx walletTopUpRxObj = WalletTopUpRx.instance;
+RequestWithdrawalRx requestWithdrawalRxObj = RequestWithdrawalRx.instance;

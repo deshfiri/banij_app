@@ -49,6 +49,7 @@ final class EndPoints {
   static String catalog() => "/catalog";
   static String catalogWholesale() => "/catalog/wholesale";
   static String catalogDropshipping() => "/catalog/dropshipping";
+  static String withdrawaloption()=>"/withdrawals/options";
   static String wholesaleCart() => "/wholesale/cart";
   static String wholesaleCartItems() => "/wholesale/cart/items";
   static String wholesaleCartItemDetail(String item) => "/wholesale/cart/items/$item";

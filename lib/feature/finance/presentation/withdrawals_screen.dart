@@ -50,7 +50,11 @@ class _WithdrawalsScreenState extends State<WithdrawalsScreen> {
 
   void _showRequestModal(BuildContext context) {
     final TextEditingController amountController = TextEditingController();
-    String selectedMethod = 'bKash (****5832)';
+    final methods = _withdrawalOptionsModel?.methods ?? [];
+    WithdrawalMethodItemModel? selectedMethod = methods.isNotEmpty
+        ? methods.firstWhere((m) => m.isDefault == true, orElse: () => methods.first)
+        : null;
+    bool isSubmitting = false;
 
     showModalBottomSheet(
       context: context,
@@ -59,109 +63,173 @@ class _WithdrawalsScreenState extends State<WithdrawalsScreen> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, MediaQuery.of(ctx).viewInsets.bottom + 30.h),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Request Withdrawal',
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold,
-                    color: AppColorsTheme.textMainColor(context),
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.close_rounded, color: AppColorsTheme.textMainColor(context)),
-                  onPressed: () => Navigator.pop(ctx),
-                ),
-              ],
-            ),
-            UIHelper.verticalSpace(16.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Withdrawal Amount (BDT)',
-                  style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
-                ),
-                Text(
-                  'Min: ${_withdrawalOptionsModel?.minimum?.formatted ?? '৳500.00'}',
-                  style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: primaryOrange),
-                ),
-              ],
-            ),
-            UIHelper.verticalSpace(6.h),
-            TextField(
-              controller: amountController,
-              keyboardType: TextInputType.number,
-              style: TextStyle(fontSize: 14.sp, color: AppColorsTheme.textMainColor(context)),
-              decoration: InputDecoration(
-                hintText: 'e.g. 5000',
-                hintStyle: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMutedColor(context)),
-                contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.r),
-                  borderSide: BorderSide(color: AppColorsTheme.borderColor(context)),
-                ),
-              ),
-            ),
-            UIHelper.verticalSpace(16.h),
-            Text(
-              'Payout Destination',
-              style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
-            ),
-            UIHelper.verticalSpace(8.h),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-              decoration: BoxDecoration(
-                color: AppColorsTheme.background(context),
-                borderRadius: BorderRadius.circular(12.r),
-                border: Border.all(color: AppColorsTheme.borderColor(context)),
-              ),
-              child: Row(
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setModalState) => Padding(
+          padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, MediaQuery.of(ctx).viewInsets.bottom + 30.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(Icons.credit_card_rounded, color: primaryOrange, size: 20.sp),
-                  UIHelper.horizontalSpace(10.w),
-                  Expanded(
-                    child: Text(
-                      selectedMethod,
-                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
+                  Text(
+                    'Request Withdrawal',
+                    style: TextStyle(
+                      fontSize: 18.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColorsTheme.textMainColor(context),
                     ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close_rounded, color: AppColorsTheme.textMainColor(context)),
+                    onPressed: () => Navigator.pop(ctx),
                   ),
                 ],
               ),
-            ),
-            UIHelper.verticalSpace(24.h),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  final amt = amountController.text.trim();
-                  if (amt.isEmpty || (double.tryParse(amt) ?? 0) <= 0) {
-                    ToastUtil.showErrorMessage('Please enter a valid withdrawal amount');
-                    return;
-                  }
-                  Navigator.pop(ctx);
-                  _fetchWithdrawals();
-                  ToastUtil.showSuccessMessage('Withdrawal request of ৳$amt submitted successfully!');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryOrange,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                  elevation: 0,
-                ),
-                child: Text('Submit Request', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold)),
+              UIHelper.verticalSpace(16.h),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Withdrawal Amount (BDT)',
+                    style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
+                  ),
+                  Text(
+                    'Min: ${_withdrawalOptionsModel?.minimum?.formatted ?? '৳500.00'}',
+                    style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold, color: primaryOrange),
+                  ),
+                ],
               ),
-            ),
-          ],
+              UIHelper.verticalSpace(6.h),
+              TextField(
+                controller: amountController,
+                keyboardType: TextInputType.number,
+                style: TextStyle(fontSize: 14.sp, color: AppColorsTheme.textMainColor(context)),
+                decoration: InputDecoration(
+                  hintText: 'e.g. 5000',
+                  hintStyle: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMutedColor(context)),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12.r),
+                    borderSide: BorderSide(color: AppColorsTheme.borderColor(context)),
+                  ),
+                ),
+              ),
+              UIHelper.verticalSpace(16.h),
+              Text(
+                'Payout Destination',
+                style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
+              ),
+              UIHelper.verticalSpace(8.h),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                decoration: BoxDecoration(
+                  color: AppColorsTheme.background(context),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: AppColorsTheme.borderColor(context)),
+                ),
+                child: methods.isEmpty
+                    ? Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.h),
+                        child: Text(
+                          'No payout method saved',
+                          style: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMutedColor(context)),
+                        ),
+                      )
+                    : DropdownButtonHideUnderline(
+                        child: DropdownButton<WithdrawalMethodItemModel>(
+                          value: selectedMethod,
+                          isExpanded: true,
+                          dropdownColor: AppColorsTheme.cardBg(context),
+                          style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
+                          items: methods.map((m) {
+                            return DropdownMenuItem<WithdrawalMethodItemModel>(
+                              value: m,
+                              child: Row(
+                                children: [
+                                  Icon(Icons.credit_card_rounded, color: primaryOrange, size: 18.sp),
+                                  UIHelper.horizontalSpace(8.w),
+                                  Expanded(
+                                    child: Text(
+                                      '${m.typeLabel ?? m.label ?? 'Account'} (${m.maskedNumber ?? ''})',
+                                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            if (val != null) {
+                              setModalState(() {
+                                selectedMethod = val;
+                              });
+                            }
+                          },
+                        ),
+                      ),
+              ),
+              UIHelper.verticalSpace(24.h),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: isSubmitting
+                      ? null
+                      : () async {
+                          final amtStr = amountController.text.trim();
+                          final amountNum = double.tryParse(amtStr) ?? 0;
+                          if (amtStr.isEmpty || amountNum <= 0) {
+                            ToastUtil.showErrorMessage('Please enter a valid withdrawal amount');
+                            return;
+                          }
+                          if (methods.isEmpty || selectedMethod == null) {
+                            ToastUtil.showErrorMessage('Please select a payout method');
+                            return;
+                          }
+
+                          setModalState(() {
+                            isSubmitting = true;
+                          });
+
+                          try {
+                            final body = {
+                              "payout_method_id": selectedMethod!.id,
+                              "amount": amountNum.toStringAsFixed(2),
+                            };
+                            await requestWithdrawalRxObj.requestWithdrawal(body);
+                            if (!ctx.mounted) return;
+                            Navigator.pop(ctx);
+                            ToastUtil.showSuccessMessage('Withdrawal request submitted successfully!');
+                            _fetchWithdrawals();
+                            _fetchWithdrawalOptions();
+                          } catch (e) {
+                            setModalState(() {
+                              isSubmitting = false;
+                            });
+                            String err = e.toString().replaceAll('Exception: ', '');
+                            ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Failed to submit withdrawal request');
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryOrange,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 14.h),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                    elevation: 0,
+                  ),
+                  child: isSubmitting
+                      ? SizedBox(
+                          width: 20.w,
+                          height: 20.h,
+                          child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                        )
+                      : Text('Submit Request', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold)),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

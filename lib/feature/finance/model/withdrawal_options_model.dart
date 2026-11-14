@@ -6,7 +6,7 @@ class WithdrawalOptionsModel {
   final WholesalePrice? minimum;
   final WholesalePrice? maximum;
   final String? currency;
-  final List<dynamic>? methods;
+  final List<WithdrawalMethodItemModel>? methods;
 
   WithdrawalOptionsModel({
     this.availableBalance,
@@ -31,7 +31,9 @@ class WithdrawalOptionsModel {
             ? WholesalePrice.fromJson(json["maximum"])
             : null,
         currency: json["currency"]?.toString(),
-        methods: json["methods"] as List<dynamic>?,
+        methods: json["methods"] != null && json["methods"] is List
+            ? List<WithdrawalMethodItemModel>.from((json["methods"] as List).map((x) => WithdrawalMethodItemModel.fromJson(x)))
+            : null,
       );
 
   Map<String, dynamic> toJson() => {
@@ -39,6 +41,42 @@ class WithdrawalOptionsModel {
         "minimum": minimum?.toJson(),
         "maximum": maximum?.toJson(),
         "currency": currency,
-        "methods": methods,
+        "methods": methods != null ? List<dynamic>.from(methods!.map((x) => x.toJson())) : null,
+      };
+}
+
+class WithdrawalMethodItemModel {
+  final String? id;
+  final String? label;
+  final String? type;
+  final String? typeLabel;
+  final String? maskedNumber;
+  final bool? isDefault;
+
+  WithdrawalMethodItemModel({
+    this.id,
+    this.label,
+    this.type,
+    this.typeLabel,
+    this.maskedNumber,
+    this.isDefault,
+  });
+
+  factory WithdrawalMethodItemModel.fromJson(Map<String, dynamic> json) => WithdrawalMethodItemModel(
+        id: json["id"]?.toString(),
+        label: json["label"]?.toString(),
+        type: json["type"]?.toString(),
+        typeLabel: json["type_label"]?.toString(),
+        maskedNumber: json["masked_number"]?.toString(),
+        isDefault: json["is_default"] as bool?,
+      );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "label": label,
+        "type": type,
+        "type_label": typeLabel,
+        "masked_number": maskedNumber,
+        "is_default": isDefault,
       };
 }
