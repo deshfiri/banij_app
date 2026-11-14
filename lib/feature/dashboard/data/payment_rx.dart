@@ -23,4 +23,13 @@ final class PaymentRx extends RxResponseInt<PaymentMethodResponseModel> {
       return handleErrorWithReturn(error);
     }
   }
+
+  Future<dynamic> addPayoutMethod(Map<String, dynamic> body) async {
+    try {
+      var data = await _api.addPayoutMethod(body);
+      return data;
+    } catch (error) {
+      rethrow;
+    }
+  }
 }

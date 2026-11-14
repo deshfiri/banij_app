@@ -245,6 +245,7 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
     String? selectedBranch;
     String? selectedAccountType;
     bool isMakeDefault = false;
+    bool isSubmitting = false;
 
     final TextEditingController labelController = TextEditingController();
     final TextEditingController holderNameController = TextEditingController();
@@ -527,58 +528,93 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
-                            onPressed: () {
-                              final label = labelController.text.trim();
-                              final holderName = holderNameController.text.trim();
-                              final accNum = accountNumberController.text.trim();
-                              final confirmAccNum = confirmAccountNumberController.text.trim();
-                              final password = passwordController.text.trim();
+                            onPressed: isSubmitting
+                                ? null
+                                : () async {
+                                    final label = labelController.text.trim();
+                                    final holderName = holderNameController.text.trim();
+                                    final accNum = accountNumberController.text.trim();
+                                    final confirmAccNum = confirmAccountNumberController.text.trim();
+                                    final password = passwordController.text.trim();
 
-                              if (holderName.isEmpty) {
-                                ToastUtil.showErrorMessage('Account holder name is required');
-                                return;
-                              }
-                              if (accNum.isEmpty) {
-                                ToastUtil.showErrorMessage('Account number is required');
-                                return;
-                              }
-                              if (accNum != confirmAccNum) {
-                                ToastUtil.showErrorMessage('Account numbers do not match');
-                                return;
-                              }
-                              if (selectedType == 'Bank account') {
-                                if (selectedBank == null) {
-                                  ToastUtil.showErrorMessage('Please select a Bank');
-                                  return;
-                                }
-                                if (selectedBranch == null) {
-                                  ToastUtil.showErrorMessage('Please select a Branch');
-                                  return;
-                                }
-                              }
-                              if (password.isEmpty) {
-                                ToastUtil.showErrorMessage('Current password is required');
-                                return;
-                              }
+                                    if (holderName.isEmpty) {
+                                      ToastUtil.showErrorMessage('Account holder name is required');
+                                      return;
+                                    }
+                                    if (accNum.isEmpty) {
+                                      ToastUtil.showErrorMessage('Account number is required');
+                                      return;
+                                    }
+                                    if (accNum != confirmAccNum) {
+                                      ToastUtil.showErrorMessage('Account numbers do not match');
+                                      return;
+                                    }
+                                    if (selectedType == 'Bank account') {
+                                      if (selectedBank == null) {
+                                        ToastUtil.showErrorMessage('Please select a Bank');
+                                        return;
+                                      }
+                                      if (selectedBranch == null) {
+                                        ToastUtil.showErrorMessage('Please select a Branch');
+                                        return;
+                                      }
+                                    }
+                                    if (password.isEmpty) {
+                                      ToastUtil.showErrorMessage('Current password is required');
+                                      return;
+                                    }
 
-                              Navigator.pop(ctx);
-                              setState(() {
-                                if (isMakeDefault) {
-                                  for (var m in _payoutMethods) {
-                                    m['isDefault'] = false;
-                                  }
-                                }
-                                final maskNum = accNum.length > 4 ? "****${accNum.substring(accNum.length - 4)}" : accNum;
-                                final displayBankName = selectedType == 'Bank account' ? (selectedBank ?? 'Bank Account') : selectedType;
-                                _payoutMethods.insert(0, {
-                                  'title': label.isNotEmpty ? label : displayBankName,
-                                  'detail': '$holderName ($maskNum)',
-                                  'isDefault': isMakeDefault,
-                                  'icon': selectedType == 'Bank account' ? Icons.account_balance_rounded : Icons.account_balance_wallet_rounded,
-                                });
-                              });
-                              ToastUtil.showSuccessMessage('Payout method saved successfully!');
-                            },
+                                    setModalState(() {
+                                      isSubmitting = true;
+                                    });
+
+                                    try {
+                                      final apiType = selectedType == 'Bank account' ? 'bank_account' : selectedType.toLowerCase();
+                                      
+                                      String? bankCode;
+                                      String? routingNumber;
+                                      if (selectedType == 'Bank account' && selectedBank != null) {
+                                        final matchedBank = _loadedBanks.firstWhere(
+                                          (b) => (b.name ?? '').toLowerCase().contains(selectedBank!.toLowerCase()),
+                                          orElse: () => BankItemModel(),
+                                        );
+                                        bankCode = matchedBank.bankCode;
+
+                                        if (selectedBranch != null) {
+                                          final matchedBranch = _loadedBranches.firstWhere(
+                                            (br) => (br.name ?? '').toLowerCase() == selectedBranch!.toLowerCase(),
+                                            orElse: () => BankBranchItemModel(),
+                                          );
+                                          routingNumber = matchedBranch.routingNumber;
+                                        }
+                                      }
+
+                                      final body = {
+                                        "current_password": password,
+                                        "type": apiType,
+                                        "label": label.isNotEmpty ? label : (selectedType == 'Bank account' ? (selectedBank ?? 'Bank Account') : selectedType),
+                                        "details": {
+                                          "account_holder_name": holderName,
+                                          "account_number": accNum,
+                                        },
+                                        if (bankCode != null && bankCode.isNotEmpty) "bank_code": bankCode,
+                                        if (routingNumber != null && routingNumber.isNotEmpty) "routing_number": routingNumber,
+                                        "is_default": isMakeDefault,
+                                      };
+
+                                      await paymentRxObj.addPayoutMethod(body);
+                                      if (!ctx.mounted) return;
+                                      Navigator.pop(ctx);
+                                      ToastUtil.showSuccessMessage('Payout method added successfully!');
+                                      _fetchPaymentMethods();
+                                    } catch (e) {
+                                      setModalState(() {
+                                        isSubmitting = false;
+                                      });
+                                      String err = e.toString().replaceAll('Exception: ', '');
+                                      ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Failed to add payout method');
+                                    }
+                                  },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: primaryOrange,
                               foregroundColor: Colors.white,
@@ -586,7 +622,13 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
                               elevation: 0,
                             ),
-                            child: Text('Save Payout Method', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold)),
+                            child: isSubmitting
+                                ? SizedBox(
+                                    width: 20.w,
+                                    height: 20.h,
+                                    child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                  )
+                                : Text('Save Payout Method', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold)),
                           ),
                         ),
                         UIHelper.verticalSpace(20.h),
