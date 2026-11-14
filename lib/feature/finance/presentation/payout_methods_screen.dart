@@ -26,12 +26,14 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
 
   final List<Map<String, dynamic>> _payoutMethods = [
     {
+      'id': '01M77QBDG2C1RCV76J97VCXNY8',
       'title': 'bKash Personal',
       'detail': 'Mohammad Ashraf (****5832)',
       'isDefault': true,
       'icon': Icons.account_balance_wallet_rounded,
     },
     {
+      'id': '01M77QBDG2C1RCV76J97VCXNY9',
       'title': 'City Bank Account',
       'detail': 'Mohammad Ashraf (****4912)',
       'isDefault': false,
@@ -237,17 +239,41 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
     );
   }
 
-  void _showAddMethodModal(BuildContext context) {
+  void _showAddMethodModal(BuildContext context, {dynamic existingMethod}) {
+    final bool isEditMode = existingMethod != null;
+    final String? methodId = isEditMode
+        ? (existingMethod is PaymentMethodModel ? existingMethod.id : (existingMethod is Map ? existingMethod['id']?.toString() : null))
+        : null;
+
     String selectedType = 'Bank account';
+    if (isEditMode) {
+      final nameStr = existingMethod is PaymentMethodModel
+          ? (existingMethod.code ?? existingMethod.name ?? '')
+          : (existingMethod is Map ? (existingMethod['title'] ?? '') : '');
+      if (nameStr.toLowerCase().contains('bkash')) {
+        selectedType = 'bKash';
+      } else if (nameStr.toLowerCase().contains('nagad')) {
+        selectedType = 'Nagad';
+      } else {
+        selectedType = 'Bank account';
+      }
+    }
+
     String? selectedBank;
     String? selectedDivision;
     String? selectedDistrict;
     String? selectedBranch;
     String? selectedAccountType;
-    bool isMakeDefault = false;
+    bool isMakeDefault = isEditMode
+        ? (existingMethod is Map ? (existingMethod['isDefault'] == true) : false)
+        : false;
     bool isSubmitting = false;
 
-    final TextEditingController labelController = TextEditingController();
+    final TextEditingController labelController = TextEditingController(
+      text: isEditMode
+          ? (existingMethod is PaymentMethodModel ? existingMethod.name : (existingMethod is Map ? existingMethod['title'] : ''))
+          : '',
+    );
     final TextEditingController holderNameController = TextEditingController();
     final TextEditingController accountNumberController = TextEditingController();
     final TextEditingController confirmAccountNumberController = TextEditingController();
@@ -289,7 +315,7 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Add payout method',
+                              isEditMode ? 'Edit payout method' : 'Add payout method',
                               style: TextStyle(
                                 fontSize: 18.sp,
                                 fontWeight: FontWeight.bold,
@@ -602,17 +628,24 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                                         "is_default": isMakeDefault,
                                       };
 
-                                      await paymentRxObj.addPayoutMethod(body);
+                                      if (isEditMode && methodId != null && methodId.isNotEmpty) {
+                                        await paymentRxObj.updatePayoutMethod(methodId, body);
+                                      } else {
+                                        await paymentRxObj.addPayoutMethod(body);
+                                      }
+
                                       if (!ctx.mounted) return;
                                       Navigator.pop(ctx);
-                                      ToastUtil.showSuccessMessage('Payout method added successfully!');
+                                      ToastUtil.showSuccessMessage(
+                                        isEditMode ? 'Payout method updated successfully!' : 'Payout method saved successfully!',
+                                      );
                                       _fetchPaymentMethods();
                                     } catch (e) {
                                       setModalState(() {
                                         isSubmitting = false;
                                       });
                                       String err = e.toString().replaceAll('Exception: ', '');
-                                      ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Failed to add payout method');
+                                      ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Failed to save payout method');
                                     }
                                   },
                             style: ElevatedButton.styleFrom(
@@ -628,7 +661,10 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                                     height: 20.h,
                                     child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                                   )
-                                : Text('Save Payout Method', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold)),
+                                : Text(
+                                    isEditMode ? 'Update Payout Method' : 'Save Payout Method',
+                                    style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
+                                  ),
                           ),
                         ),
                         UIHelper.verticalSpace(20.h),
@@ -792,6 +828,7 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: apiMethods.isNotEmpty ? apiMethods.length : apiTypes.length,
                     itemBuilder: (context, index) {
+                      final item = apiMethods.isNotEmpty ? apiMethods[index] : null;
                       final title = apiMethods.isNotEmpty
                           ? (apiMethods[index].name ?? 'Payout Method')
                           : (apiTypes[index].label ?? apiTypes[index].value ?? 'Payout Method');
@@ -838,7 +875,7 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                               icon: Icon(Icons.more_vert_rounded, size: 18.sp, color: AppColorsTheme.textMutedColor(context)),
                               onSelected: (value) {
                                 if (value == 'edit') {
-                                  ToastUtil.showSuccessMessage('Edit payout method');
+                                  _showAddMethodModal(context, existingMethod: item);
                                 } else if (value == 'archive') {
                                   ToastUtil.showSuccessMessage('Payout method archived');
                                 }
@@ -932,7 +969,7 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                               icon: Icon(Icons.more_vert_rounded, size: 18.sp, color: AppColorsTheme.textMutedColor(context)),
                               onSelected: (value) {
                                 if (value == 'edit') {
-                                  ToastUtil.showSuccessMessage('Edit payout method');
+                                  _showAddMethodModal(context, existingMethod: item);
                                 } else if (value == 'archive') {
                                   setState(() {
                                     _payoutMethods.removeAt(index);

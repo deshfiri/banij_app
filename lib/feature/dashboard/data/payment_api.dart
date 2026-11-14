@@ -77,4 +77,41 @@ final class PaymentApi {
       rethrow;
     }
   }
+
+  Future<dynamic> updatePayoutMethod(String methodId, Map<String, dynamic> body) async {
+    try {
+      Response response = await putHttp("${EndPoints.payments()}/$methodId", body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return response.data;
+      } else {
+        throw DataSource.DEFAULT.getFailure();
+      }
+    } on DioException catch (dioError) {
+      if (dioError.response?.data != null) {
+        final data = dioError.response?.data;
+        if (data is Map) {
+          if (data.containsKey('errors') && data['errors'] is Map) {
+            final errs = data['errors'] as Map;
+            if (errs.isNotEmpty) {
+              final firstVal = errs.values.first;
+              if (firstVal is List && firstVal.isNotEmpty) {
+                throw Exception(firstVal.first.toString());
+              } else if (firstVal is String) {
+                throw Exception(firstVal);
+              }
+            }
+          }
+          if (data.containsKey('message')) {
+            throw Exception(data['message'].toString());
+          } else if (data.containsKey('error')) {
+            throw Exception(data['error'].toString());
+          }
+        }
+      }
+      rethrow;
+    } catch (error) {
+      rethrow;
+    }
+  }
 }
