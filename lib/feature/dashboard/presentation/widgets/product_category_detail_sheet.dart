@@ -164,7 +164,7 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
                               border: Border.all(color: AppColorsTheme.borderColor(context)),
                             ),
                             child: Icon(
-                              Icons.shopping_basket_outlined,
+                              Icons.shopping_bag_outlined,
                               size: 20.sp,
                               color: AppColorsTheme.textMainColor(context),
                             ),

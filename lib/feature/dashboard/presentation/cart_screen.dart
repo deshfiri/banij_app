@@ -132,7 +132,7 @@ class _CartScreenState extends State<CartScreen> {
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
-                            Icons.shopping_basket_outlined,
+                            Icons.shopping_bag_outlined,
                             size: 64.sp,
                             color: primaryOrange,
                           ),

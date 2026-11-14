@@ -31,6 +31,7 @@ final class EndPoints {
   static String currentUser()=>"/auth/me";
   static String submitDocKyc()=>"/kyc/documents";
   static String notification()=>"/notifications";
+  static String withdrawals()=>"/withdrawals";
   static String locationDivisions()=>"/locations/divisions";
   static String bankList()=>"/banks";
   static String walletBalnce()=>"/wallet";
