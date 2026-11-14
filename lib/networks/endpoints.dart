@@ -22,6 +22,7 @@ final class NetworkConstants {
 final class EndPoints {
   EndPoints._();
   static String login() => "/auth/login";
+  static String twoFactorChallenge() => "/auth/two-factor-challenge";
   static String logout()=>"/auth/logout";
 
   static String signup() => "/register";
@@ -34,6 +35,7 @@ final class EndPoints {
   static String withdrawals()=>"/withdrawals";
   static String locationDivisions()=>"/locations/divisions";
   static String bankList()=>"/banks";
+  static String bankBranches(String bankCode) => "/banks/$bankCode/branches";
   static String walletBalnce()=>"/wallet";
   static String topWallet()=>"/wallet/top-up";
   static String walletList()=>"/wallet/transactions";

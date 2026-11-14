@@ -6,6 +6,7 @@ import '../feature/account/presentation/account_screen_wrapper.dart';
 import '../feature/account/presentation/change_password_screen.dart';
 import '../feature/account/presentation/delete_account_screen.dart';
 import '../feature/auth/presentation/forgot_password_screen/forgot_password_screen.dart';
+import '../feature/auth/presentation/two_factor_challenge_screen.dart';
 import '../feature/auth/presentation/login_screen/loginScreen.dart';
 import '../feature/auth/presentation/onboarding_screen/onboarding_screen.dart';
 import '../feature/auth/presentation/register_screen/registerScreen.dart';
@@ -51,6 +52,7 @@ final class Routes {
   static const String walletScreen = '/walletScreen';
   static const String withdrawalsScreen = '/withdrawalsScreen';
   static const String payoutMethodsScreen = '/payoutMethodsScreen';
+  static const String twoFactorChallengeScreen = '/twoFactorChallengeScreen';
 }
 
 final class RouteGenerator {
@@ -147,6 +149,11 @@ final class RouteGenerator {
         return Platform.isAndroid
             ? _LightningFastTransitionRoute(widget: const PayoutMethodsScreen(), settings: settings)
             : CupertinoPageRoute(builder: (context) => const PayoutMethodsScreen(), settings: settings);
+      case Routes.twoFactorChallengeScreen:
+        final challengeToken = settings.arguments as String? ?? '';
+        return Platform.isAndroid
+            ? _LightningFastTransitionRoute(widget: TwoFactorChallengeScreen(challengeToken: challengeToken), settings: settings)
+            : CupertinoPageRoute(builder: (context) => TwoFactorChallengeScreen(challengeToken: challengeToken), settings: settings);
     }
 
     return null;

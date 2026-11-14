@@ -5,7 +5,9 @@ import '../../../constants/color.dart';
 import '../../../helpers/toast.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../../networks/api_access.dart';
+import '../../dashboard/model/location_division_model.dart';
 import '../../dashboard/model/payment_model.dart';
+import '../model/bank_branch_model.dart';
 import '../model/bank_model.dart';
 
 class PayoutMethodsScreen extends StatefulWidget {
@@ -17,6 +19,9 @@ class PayoutMethodsScreen extends StatefulWidget {
 
 class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
   List<BankItemModel> _loadedBanks = [];
+  List<DivisionData> _loadedDivisions = [];
+  List<DivisionData> _loadedDistricts = [];
+  List<BankBranchItemModel> _loadedBranches = [];
   PaymentMethodResponseModel? _paymentResponseModel;
 
   final List<Map<String, dynamic>> _payoutMethods = [
@@ -39,6 +44,7 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
     super.initState();
     _fetchBanks();
     _fetchPaymentMethods();
+    _fetchDivisions();
   }
 
   Future<void> _fetchBanks() async {
@@ -65,6 +71,63 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
     } catch (_) {}
   }
 
+  Future<void> _fetchDivisions() async {
+    try {
+      final res = await locationDivisionRxObj.fetchDivisions();
+      if (res.data != null && res.data!.isNotEmpty) {
+        if (mounted) {
+          setState(() {
+            _loadedDivisions = res.data!;
+          });
+        }
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _fetchDistrictsForDivision(String divisionSourceId, StateSetter setModalState) async {
+    try {
+      final res = await locationChildRxObj.fetchChildren('divisions', divisionSourceId);
+      if (res.data != null && res.data!.isNotEmpty) {
+        setModalState(() {
+          _loadedDistricts = res.data!;
+        });
+      } else {
+        setModalState(() {
+          _loadedDistricts = [];
+        });
+      }
+    } catch (_) {
+      setModalState(() {
+        _loadedDistricts = [];
+      });
+    }
+  }
+
+  Future<void> _fetchBranchesForBank(String bankName, String? districtId, StateSetter setModalState) async {
+    final matchedBank = _loadedBanks.firstWhere(
+      (b) => (b.name ?? '').toLowerCase().contains(bankName.toLowerCase()) || bankName.toLowerCase().contains((b.name ?? '').toLowerCase()),
+      orElse: () => _loadedBanks.isNotEmpty ? _loadedBanks.first : BankItemModel(bankCode: '020', name: bankName),
+    );
+    final bankCode = matchedBank.bankCode ?? '020';
+
+    try {
+      final res = await bankBranchRxObj.fetchBranches(bankCode, districtId: districtId);
+      if (res.data != null && res.data!.isNotEmpty) {
+        setModalState(() {
+          _loadedBranches = res.data!;
+        });
+      } else {
+        setModalState(() {
+          _loadedBranches = [];
+        });
+      }
+    } catch (_) {
+      setModalState(() {
+        _loadedBranches = [];
+      });
+    }
+  }
+
   void _showBankSearchSheet(
     BuildContext context,
     List<String> bankList,
@@ -88,7 +151,6 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
             height: MediaQuery.of(context).size.height * 0.75,
             child: Column(
               children: [
-                // Sheet Top Bar
                 Padding(
                   padding: EdgeInsets.fromLTRB(20.w, 16.h, 16.w, 12.h),
                   child: Row(
@@ -109,7 +171,6 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                     ],
                   ),
                 ),
-                // Search Input Field
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
                   child: TextField(
@@ -136,8 +197,6 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                 ),
                 UIHelper.verticalSpace(8.h),
                 Divider(color: AppColorsTheme.borderColor(context), height: 1),
-
-                // Filtered Bank List
                 Expanded(
                   child: filteredList.isEmpty
                       ? Center(
@@ -197,9 +256,7 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
     final List<String> bankOptions = _loadedBanks.isNotEmpty
         ? _loadedBanks.map((b) => b.name ?? '').where((n) => n.isNotEmpty).toList()
         : ['AB BANK LIMITED', 'AGRANI BANK LIMITED', 'BRAC BANK LIMITED', 'DUTCH-BANGLA BANK LIMITED', 'ISLAMI BANK BANGLADESH LIMITED', 'SONALI BANK LIMITED', 'THE CITY BANK LIMITED'];
-    final List<String> divisionOptions = ['Dhaka', 'Chittagong', 'Rajshahi', 'Khulna', 'Barisal', 'Sylhet', 'Rangpur', 'Mymensingh'];
-    final List<String> districtOptions = ['Dhaka', 'Gazipur', 'Narayanganj', 'Chittagong', 'Sylhet', 'Bogura'];
-    final List<String> branchOptions = ['Principal Branch', 'Gulshan Branch', 'Banani Branch', 'Agrabad Branch', 'Dhanmondi Branch'];
+
     final List<String> accountTypeOptions = ['Savings account', 'Current account', 'Business account'];
 
     showModalBottomSheet(
@@ -211,11 +268,16 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
       ),
       builder: (ctx) => StatefulBuilder(
         builder: (context, setModalState) {
+          final divisionOptions = _loadedDivisions.map((d) => d.nameEn ?? d.nameBn ?? '').where((n) => n.isNotEmpty).toList();
+          final districtOptions = _loadedDistricts.map((d) => d.nameEn ?? d.nameBn ?? '').where((n) => n.isNotEmpty).toList();
+          final branchOptions = _loadedBranches.isNotEmpty
+              ? _loadedBranches.map((b) => b.name ?? '').where((n) => n.isNotEmpty).toList()
+              : ['Principal Branch', 'Gulshan Branch', 'Banani Branch', 'Agrabad Branch', 'Dhanmondi Branch'];
+
           return SizedBox(
             height: MediaQuery.of(context).size.height * 0.88,
             child: Column(
               children: [
-                // Modal Header
                 Padding(
                   padding: EdgeInsets.fromLTRB(20.w, 16.h, 16.w, 12.h),
                   child: Row(
@@ -254,15 +316,12 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                   ),
                 ),
                 Divider(color: AppColorsTheme.borderColor(context), height: 1),
-
-                // Form Fields Body
                 Expanded(
                   child: SingleChildScrollView(
                     padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // 1. Type
                         _buildFieldLabel(context, 'Type'),
                         _buildDropdownField(
                           context,
@@ -278,20 +337,25 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                         ),
                         UIHelper.verticalSpace(14.h),
 
-                        // 2. Label
                         _buildFieldLabel(context, 'Label'),
                         _buildTextField(context, controller: labelController, hintText: 'e.g. Primary Bank Account'),
                         UIHelper.verticalSpace(14.h),
 
                         if (selectedType == 'Bank account') ...[
-                          // 3. Bank (Searchable)
                           _buildFieldLabel(context, 'Bank'),
                           GestureDetector(
                             onTap: () {
                               _showBankSearchSheet(context, bankOptions, (selected) {
                                 setModalState(() {
                                   selectedBank = selected;
+                                  selectedBranch = null;
+                                  _loadedBranches = [];
                                 });
+                                final matchedDist = _loadedDistricts.firstWhere(
+                                  (d) => (d.nameEn ?? d.nameBn ?? '') == selectedDistrict,
+                                  orElse: () => DivisionData(),
+                                );
+                                _fetchBranchesForBank(selected, matchedDist.sourceId ?? matchedDist.id?.toString(), setModalState);
                               });
                             },
                             child: Container(
@@ -323,29 +387,61 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                           ),
                           UIHelper.verticalSpace(14.h),
 
-                          // 4. Division
+                          // Division
                           _buildFieldLabel(context, 'Division'),
                           _buildDropdownField(
                             context,
                             value: selectedDivision,
                             hintText: 'Select...',
                             items: divisionOptions,
-                            onChanged: (val) => setModalState(() => selectedDivision = val),
+                            onChanged: (val) {
+                              setModalState(() {
+                                selectedDivision = val;
+                                selectedDistrict = null;
+                                selectedBranch = null;
+                                _loadedDistricts = [];
+                                _loadedBranches = [];
+                              });
+                              if (val != null) {
+                                final matchedDiv = _loadedDivisions.firstWhere(
+                                  (d) => (d.nameEn ?? d.nameBn ?? '') == val,
+                                  orElse: () => DivisionData(),
+                                );
+                                final divSourceId = matchedDiv.sourceId ?? matchedDiv.id?.toString();
+                                if (divSourceId != null) {
+                                  _fetchDistrictsForDivision(divSourceId, setModalState);
+                                }
+                              }
+                            },
                           ),
                           UIHelper.verticalSpace(14.h),
 
-                          // 5. District
+                          // District
                           _buildFieldLabel(context, 'District'),
                           _buildDropdownField(
                             context,
                             value: selectedDistrict,
                             hintText: 'Select...',
                             items: districtOptions,
-                            onChanged: (val) => setModalState(() => selectedDistrict = val),
+                            onChanged: (val) {
+                              setModalState(() {
+                                selectedDistrict = val;
+                                selectedBranch = null;
+                                _loadedBranches = [];
+                              });
+                              if (selectedBank != null && val != null) {
+                                final matchedDist = _loadedDistricts.firstWhere(
+                                  (d) => (d.nameEn ?? d.nameBn ?? '') == val,
+                                  orElse: () => DivisionData(),
+                                );
+                                final distId = matchedDist.sourceId ?? matchedDist.id?.toString();
+                                _fetchBranchesForBank(selectedBank!, distId, setModalState);
+                              }
+                            },
                           ),
                           UIHelper.verticalSpace(14.h),
 
-                          // 6. Branch
+                          // Branch
                           _buildFieldLabel(context, 'Branch'),
                           _buildDropdownField(
                             context,
@@ -357,12 +453,10 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                           UIHelper.verticalSpace(14.h),
                         ],
 
-                        // 7. Account holder name
                         _buildFieldLabel(context, 'Account holder name'),
                         _buildTextField(context, controller: holderNameController, hintText: 'e.g. Mohammad Ashraf'),
                         UIHelper.verticalSpace(14.h),
 
-                        // 8. Account number
                         _buildFieldLabel(context, selectedType == 'Bank account' ? 'Account number' : 'Mobile number'),
                         _buildTextField(
                           context,
@@ -373,7 +467,6 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                         UIHelper.verticalSpace(14.h),
 
                         if (selectedType == 'Bank account') ...[
-                          // 9. Account type
                           _buildFieldLabel(context, 'Account type'),
                           _buildDropdownField(
                             context,
@@ -385,7 +478,6 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                           UIHelper.verticalSpace(14.h),
                         ],
 
-                        // 10. Confirm account number
                         _buildFieldLabel(context, 'Confirm account number'),
                         _buildTextField(
                           context,
@@ -395,7 +487,6 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                         ),
                         UIHelper.verticalSpace(14.h),
 
-                        // 11. Make default Checkbox
                         Row(
                           children: [
                             SizedBox(
@@ -424,7 +515,6 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                         ),
                         UIHelper.verticalSpace(14.h),
 
-                        // 12. Current password
                         _buildFieldLabel(context, 'Current password'),
                         _buildTextField(
                           context,
@@ -434,7 +524,6 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                         ),
                         UIHelper.verticalSpace(24.h),
 
-                        // Submit Button
                         SizedBox(
                           width: double.infinity,
                           child: ElevatedButton(
@@ -445,7 +534,6 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                               final confirmAccNum = confirmAccountNumberController.text.trim();
                               final password = passwordController.text.trim();
 
-                              // Validation checks
                               if (holderName.isEmpty) {
                                 ToastUtil.showErrorMessage('Account holder name is required');
                                 return;
@@ -827,7 +915,7 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
                                     children: [
                                       Icon(Icons.archive_outlined, size: 16.sp, color: Colors.redAccent),
                                       UIHelper.horizontalSpace(8.w),
-                                      Text('Archive', style: TextStyle(fontSize: 12.5.sp, color: Colors.redAccent)),
+                                      Text('Archive', style: TextStyle(fontSize: 12.5.sp)),
                                     ],
                                   ),
                                 ),
