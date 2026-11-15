@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../networks/rx_base.dart';
+import '../model/kyc_model.dart';
 import 'kyc_api.dart';
 
 final class KycRx extends RxResponseInt<Response> {
@@ -31,6 +32,15 @@ final class KycRx extends RxResponseInt<Response> {
       return handleSuccessWithReturn(data);
     } catch (error) {
       return handleErrorWithReturn(error);
+    }
+  }
+
+  Future<KycResponseModel> fetchKycRequirements() async {
+    try {
+      KycResponseModel data = await _api.getKycRequirements();
+      return data;
+    } catch (error) {
+      rethrow;
     }
   }
 }

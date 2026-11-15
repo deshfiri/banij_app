@@ -4,6 +4,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:get/get.dart';
 
 import '../../../constants/color.dart';
+import '../../../helpers/all_routes.dart';
 import '../../../networks/api_access.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../model/verification_history_model.dart';
@@ -88,6 +89,28 @@ class _VerificationHistoryScreenState extends State<VerificationHistoryScreen> {
             ),
 
             // Content Body
+            Padding(
+              padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 0),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pushNamed(context, Routes.kycVerificationScreen).then((_) {
+                      _fetchData();
+                    });
+                  },
+                  icon: Icon(Icons.verified_user_rounded, size: 18.sp),
+                  label: Text('Submit your KYC documents', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryOrange,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(vertical: 14.h),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                    elevation: 0,
+                  ),
+                ),
+              ),
+            ),
             Expanded(
               child: _isLoading
                   ? _buildVerificationShimmer(context)

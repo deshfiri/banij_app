@@ -20,7 +20,7 @@ class KycVerificationScreen extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Top Clean App Bar: Only Back Button & Title
+            // Top Clean App Bar
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
               decoration: BoxDecoration(
@@ -66,7 +66,6 @@ class KycVerificationScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Subtitle & Header Desc
                     Text(
                       'kyc_header_desc'.tr,
                       style: TextStyle(
@@ -131,18 +130,9 @@ class KycVerificationScreen extends StatelessWidget {
                         height: 1.4,
                       ),
                     ),
-                    UIHelper.verticalSpace(6.h),
-                    Text(
-                      '${kycProvider.completedGroupsCount} of 1 ${'required_groups_complete'.tr}',
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColorsTheme.textMutedColor(context),
-                      ),
-                    ),
                     UIHelper.verticalSpace(20.h),
 
-                    // Main Group Card: Personal Information Verification
+                    // Main Group Card: Personal & Business Information Verification
                     Container(
                       padding: EdgeInsets.all(18.w),
                       decoration: BoxDecoration(
@@ -163,7 +153,6 @@ class KycVerificationScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Card Title & Subtitle
                           Text(
                             'personal_info_verification'.tr,
                             style: TextStyle(
@@ -186,7 +175,6 @@ class KycVerificationScreen extends StatelessWidget {
                           // Badges Row
                           Row(
                             children: [
-                              // Required Badge
                               Container(
                                 padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                                 decoration: BoxDecoration(
@@ -217,8 +205,6 @@ class KycVerificationScreen extends StatelessWidget {
                                 ),
                               ),
                               UIHelper.horizontalSpace(8.w),
-
-                              // Overall Status Badge
                               _buildStatusBadge(context, kycProvider.overallStatusKey),
                             ],
                           ),
@@ -239,7 +225,7 @@ class KycVerificationScreen extends StatelessWidget {
                                 ),
                               ),
                               Text(
-                                '${kycProvider.completedGroupsCount} of 2 ${'completed'.tr}',
+                                '${kycProvider.uploadedRequiredCount} of 3 ${'completed'.tr}',
                                 style: TextStyle(
                                   fontSize: 12.sp,
                                   fontWeight: FontWeight.bold,
@@ -262,81 +248,95 @@ class KycVerificationScreen extends StatelessWidget {
                           ),
                           UIHelper.verticalSpace(24.h),
 
-                          // Document Box 1: NID Verification
+                          // Document 1: National ID (national_id)
                           _buildDocumentBox(
                             context: context,
-                            title: 'nid_verification'.tr,
-                            desc: 'nid_verification_desc'.tr,
-                            countText: '${kycProvider.nidCount} of 2 ${'provided'.tr}',
-                            isComplete: kycProvider.nidCount == 2,
-                            child: Column(
-                              children: [
-                                _buildFileSelector(
-                                  context: context,
-                                  label: 'front_side_verification'.tr,
-                                  desc: 'front_side_desc'.tr,
-                                  fileName: kycProvider.nidFrontFileName,
-                                  onPick: () => kycProvider.pickFile('nidFront'),
-                                ),
-                                Divider(
-                                  height: 28.h,
-                                  color: AppColorsTheme.borderColor(context),
-                                ),
-                                _buildFileSelector(
-                                  context: context,
-                                  label: 'back_side_verification'.tr,
-                                  desc: 'back_side_desc'.tr,
-                                  fileName: kycProvider.nidBackFileName,
-                                  onPick: () => kycProvider.pickFile('nidBack'),
-                                ),
-                              ],
-                            ),
-                          ),
-                          UIHelper.verticalSpace(18.h),
-
-                          // Document Box 2: Passport Verification
-                          _buildDocumentBox(
-                            context: context,
-                            title: 'passport_verification'.tr,
-                            desc: 'passport_verification_desc'.tr,
-                            countText: '${kycProvider.passportCount} of 1 ${'provided'.tr}',
-                            isComplete: kycProvider.passportCount == 1,
+                            title: 'National ID',
+                            desc: 'Both sides, in colour, with all four corners visible.',
+                            countText: kycProvider.nationalIdFileName != null ? '1 of 1 provided' : '0 of 1 provided',
+                            isComplete: kycProvider.nationalIdFileName != null,
                             child: _buildFileSelector(
                               context: context,
-                              label: 'passport_biodata_page'.tr,
-                              desc: 'passport_biodata_desc'.tr,
-                              fileName: kycProvider.passportBioFileName,
-                              onPick: () => kycProvider.pickFile('passportBio'),
+                              label: 'National ID Document',
+                              desc: 'Upload a clear photo or PDF of your National ID.',
+                              fileName: kycProvider.nationalIdFileName,
+                              onPick: () => kycProvider.pickFile('national_id'),
                             ),
                           ),
                           UIHelper.verticalSpace(18.h),
 
-                          // Document Box 3: Driving License Verification
+                          // Document 2: Proof of Address (proof_of_address)
                           _buildDocumentBox(
                             context: context,
-                            title: 'driving_license_verification'.tr,
-                            desc: 'driving_license_verification_desc'.tr,
-                            countText: '${kycProvider.licenseCount} of 2 ${'provided'.tr}',
-                            isComplete: kycProvider.licenseCount == 2,
+                            title: 'Proof of address',
+                            desc: 'A utility bill or bank statement from the last three months.',
+                            countText: kycProvider.proofOfAddressFileName != null ? '1 of 1 provided' : '0 of 1 provided',
+                            isComplete: kycProvider.proofOfAddressFileName != null,
+                            child: _buildFileSelector(
+                              context: context,
+                              label: 'Utility Bill or Bank Statement',
+                              desc: 'Upload a clear copy of your proof of address document.',
+                              fileName: kycProvider.proofOfAddressFileName,
+                              onPick: () => kycProvider.pickFile('proof_of_address'),
+                            ),
+                          ),
+                          UIHelper.verticalSpace(18.h),
+
+                          // Document 3: Trade Licence (trade_licence)
+                          _buildDocumentBox(
+                            context: context,
+                            title: 'Trade licence',
+                            desc: 'Current year, issued by your city corporation.',
+                            countText: kycProvider.tradeLicenceFileName != null ? '1 of 1 provided' : '0 of 1 provided',
+                            isComplete: kycProvider.tradeLicenceFileName != null,
+                            child: _buildFileSelector(
+                              context: context,
+                              label: 'Trade Licence Document',
+                              desc: 'Upload a clear photo or PDF of your Trade Licence.',
+                              fileName: kycProvider.tradeLicenceFileName,
+                              onPick: () => kycProvider.pickFile('trade_licence'),
+                            ),
+                          ),
+                          UIHelper.verticalSpace(18.h),
+
+                          // Document 4: TIN (tin)
+                          _buildDocumentBox(
+                            context: context,
+                            title: 'Tax identification number',
+                            desc: 'The TIN on your certificate, digits only.',
+                            countText: 'Optional',
+                            isComplete: kycProvider.tinController.text.trim().isNotEmpty,
                             child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                _buildFileSelector(
-                                  context: context,
-                                  label: 'license_front_side'.tr,
-                                  desc: 'license_front_desc'.tr,
-                                  fileName: kycProvider.dlFrontFileName,
-                                  onPick: () => kycProvider.pickFile('dlFront'),
+                                Text(
+                                  'TIN Number',
+                                  style: TextStyle(
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColorsTheme.textMainColor(context),
+                                  ),
                                 ),
-                                Divider(
-                                  height: 28.h,
-                                  color: AppColorsTheme.borderColor(context),
-                                ),
-                                _buildFileSelector(
-                                  context: context,
-                                  label: 'license_back_side'.tr,
-                                  desc: 'license_back_desc'.tr,
-                                  fileName: kycProvider.dlBackFileName,
-                                  onPick: () => kycProvider.pickFile('dlBack'),
+                                UIHelper.verticalSpace(6.h),
+                                TextField(
+                                  controller: kycProvider.tinController,
+                                  keyboardType: TextInputType.number,
+                                  style: TextStyle(fontSize: 13.5.sp, color: AppColorsTheme.textMainColor(context)),
+                                  decoration: InputDecoration(
+                                    hintText: 'Enter TIN digits',
+                                    hintStyle: TextStyle(fontSize: 12.5.sp, color: AppColorsTheme.textMutedColor(context)),
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+                                    filled: true,
+                                    fillColor: AppColorsTheme.cardBg(context),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12.r),
+                                      borderSide: BorderSide(color: AppColorsTheme.borderColor(context)),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12.r),
+                                      borderSide: BorderSide(color: primaryOrange, width: 1.5.w),
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
@@ -346,7 +346,7 @@ class KycVerificationScreen extends StatelessWidget {
                     ),
                     UIHelper.verticalSpace(24.h),
 
-                    // Bottom Submit Card Container
+                    // Submit & Confirmation Card
                     Container(
                       padding: EdgeInsets.all(18.w),
                       decoration: BoxDecoration(
@@ -372,14 +372,14 @@ class KycVerificationScreen extends StatelessWidget {
                           Text(
                             'submit_for_review_desc'.tr,
                             style: TextStyle(
-                              fontSize: 12.sp,
+                              fontSize: 12.5.sp,
                               color: AppColorsTheme.textMutedColor(context),
-                              height: 1.3,
+                              height: 1.35,
                             ),
                           ),
                           UIHelper.verticalSpace(16.h),
 
-                          // Still Needed Dynamic List
+                          // Still Needed Checklist List
                           if (kycProvider.stillNeededList.isNotEmpty) ...[
                             Text(
                               'still_needed'.tr,
@@ -390,76 +390,71 @@ class KycVerificationScreen extends StatelessWidget {
                               ),
                             ),
                             UIHelper.verticalSpace(8.h),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: kycProvider.stillNeededList.map((item) {
-                                return Padding(
-                                  padding: EdgeInsets.only(bottom: 6.h),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '• ',
+                            ...kycProvider.stillNeededList.map(
+                              (item) => Padding(
+                                padding: EdgeInsets.only(bottom: 6.h),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.cancel_outlined,
+                                      color: Colors.redAccent,
+                                      size: 15.sp,
+                                    ),
+                                    UIHelper.horizontalSpace(8.w),
+                                    Expanded(
+                                      child: Text(
+                                        item['text'] ?? '',
                                         style: TextStyle(
-                                          color: AppColorsTheme.textMutedColor(context),
                                           fontSize: 12.sp,
+                                          color: AppColorsTheme.textMutedColor(context),
                                         ),
                                       ),
-                                      Expanded(
-                                        child: Text(
-                                          item['text'] ?? '',
-                                          style: TextStyle(
-                                            color: AppColorsTheme.textMutedColor(context),
-                                            fontSize: 12.sp,
-                                            height: 1.3,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }).toList(),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                           ] else ...[
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.check_circle,
-                                  color: const Color(0xFF10B981),
-                                  size: 18.sp,
-                                ),
-                                UIHelper.horizontalSpace(8.w),
-                                Expanded(
-                                  child: Text(
-                                    'all_documents_provided'.tr,
-                                    style: TextStyle(
-                                      fontSize: 13.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xFF10B981),
+                            Container(
+                              padding: EdgeInsets.all(12.w),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF10B981).withValues(alpha: 0.12),
+                                borderRadius: BorderRadius.circular(10.r),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.check_circle,
+                                    color: const Color(0xFF10B981),
+                                    size: 20.sp,
+                                  ),
+                                  UIHelper.horizontalSpace(10.w),
+                                  Expanded(
+                                    child: Text(
+                                      'all_documents_provided'.tr,
+                                      style: TextStyle(
+                                        fontSize: 13.sp,
+                                        fontWeight: FontWeight.bold,
+                                        color: const Color(0xFF10B981),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ],
-                          UIHelper.verticalSpace(18.h),
+                          UIHelper.verticalSpace(16.h),
 
-                          // Confirmation Checkbox
+                          // Checkbox confirmation
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               SizedBox(
-                                width: 20.w,
-                                height: 20.h,
+                                width: 22.w,
+                                height: 22.h,
                                 child: Checkbox(
                                   value: kycProvider.isConfirmed,
                                   activeColor: primaryOrange,
-                                  side: BorderSide(
-                                    color: AppColorsTheme.borderColor(context),
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(4.r),
-                                  ),
                                   onChanged: kycProvider.toggleConfirmation,
                                 ),
                               ),
@@ -468,85 +463,57 @@ class KycVerificationScreen extends StatelessWidget {
                                 child: Text(
                                   'confirm_genuine'.tr,
                                   style: TextStyle(
-                                    fontSize: 12.sp,
+                                    fontSize: 12.5.sp,
                                     fontWeight: FontWeight.w500,
                                     color: AppColorsTheme.textMainColor(context),
-                                    height: 1.4,
+                                    height: 1.35,
                                   ),
                                 ),
                               ),
                             ],
                           ),
-                          UIHelper.verticalSpace(22.h),
+                          UIHelper.verticalSpace(20.h),
 
-                          // Submit Verification Button
+                          // Submit Button
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
-                              onPressed: kycProvider.isConfirmed && !kycProvider.isSubmitting
+                              onPressed: (kycProvider.isConfirmed && !kycProvider.isSubmitting && !kycProvider.isSubmitted)
                                   ? () => kycProvider.submitVerification(context)
                                   : null,
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: kycProvider.isSubmitted
-                                    ? const Color(0xFF047857)
-                                    : primaryOrange,
-                                disabledBackgroundColor: isDark
-                                    ? const Color(0xFF2A2A2D)
-                                    : const Color(0xFFE5E7EB),
+                                backgroundColor: primaryOrange,
                                 foregroundColor: Colors.white,
-                                disabledForegroundColor: AppColorsTheme.textMutedColor(context),
+                                disabledBackgroundColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE5E7EB),
+                                disabledForegroundColor: isDark ? const Color(0xFF636366) : const Color(0xFF9CA3AF),
                                 padding: EdgeInsets.symmetric(vertical: 14.h),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10.r),
+                                  borderRadius: BorderRadius.circular(12.r),
                                 ),
                                 elevation: 0,
                               ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  if (kycProvider.isSubmitting) ...[
-                                    SizedBox(
-                                      width: 16.w,
-                                      height: 16.h,
+                              child: kycProvider.isSubmitting
+                                  ? SizedBox(
+                                      width: 20.w,
+                                      height: 20.h,
                                       child: const CircularProgressIndicator(
-                                        strokeWidth: 2,
                                         color: Colors.white,
+                                        strokeWidth: 2,
                                       ),
-                                    ),
-                                    UIHelper.horizontalSpace(8.w),
-                                    Text(
-                                      'submitting'.tr,
+                                    )
+                                  : Text(
+                                      kycProvider.isSubmitted ? 'submitted_successfully'.tr : 'submit_verification'.tr,
                                       style: TextStyle(
                                         fontSize: 14.sp,
                                         fontWeight: FontWeight.bold,
                                       ),
                                     ),
-                                  ] else if (kycProvider.isSubmitted) ...[
-                                    Icon(Icons.check_circle_outline, size: 18.sp, color: Colors.white),
-                                    UIHelper.horizontalSpace(8.w),
-                                    Text(
-                                      'submitted_successfully'.tr,
-                                      style: TextStyle(
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ] else ...[
-                                    Text(
-                                      'submit_verification'.tr,
-                                      style: TextStyle(
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ],
-                              ),
                             ),
                           ),
                         ],
                       ),
                     ),
+                    UIHelper.verticalSpace(30.h),
                   ],
                 ),
               ),
@@ -558,79 +525,54 @@ class KycVerificationScreen extends StatelessWidget {
   }
 
   Widget _buildStatusBadge(BuildContext context, String statusKey) {
-    if (statusKey == 'complete') {
-      return Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-        decoration: BoxDecoration(
-          color: const Color(0xFF065F46).withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: const Color(0xFF047857)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.check_circle_outline, color: const Color(0xFF10B981), size: 12.sp),
-            UIHelper.horizontalSpace(4.w),
-            Text(
-              'complete'.tr,
-              style: TextStyle(
-                fontSize: 11.sp,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFF10B981),
-              ),
-            ),
-          ],
-        ),
-      );
-    } else if (statusKey == 'in_progress') {
-      return Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-        decoration: BoxDecoration(
-          color: const Color(0xFF78350F).withValues(alpha: 0.2),
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: const Color(0xFFB45309)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.access_time, color: const Color(0xFFFCD34D), size: 12.sp),
-            UIHelper.horizontalSpace(4.w),
-            Text(
-              'in_progress'.tr,
-              style: TextStyle(
-                fontSize: 11.sp,
-                fontWeight: FontWeight.bold,
-                color: const Color(0xFFFCD34D),
-              ),
-            ),
-          ],
-        ),
-      );
-    } else {
-      return Container(
-        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-        decoration: BoxDecoration(
-          color: AppColorsTheme.innerCardBg(context),
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: AppColorsTheme.borderColor(context)),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.circle_outlined, color: AppColorsTheme.textMutedColor(context), size: 12.sp),
-            UIHelper.horizontalSpace(4.w),
-            Text(
-              'not_started'.tr,
-              style: TextStyle(
-                fontSize: 11.sp,
-                fontWeight: FontWeight.w500,
-                color: AppColorsTheme.textMutedColor(context),
-              ),
-            ),
-          ],
-        ),
-      );
+    Color bg;
+    Color fg;
+    String text;
+    IconData icon;
+
+    switch (statusKey) {
+      case 'complete':
+        bg = const Color(0xFF10B981).withValues(alpha: 0.15);
+        fg = const Color(0xFF10B981);
+        text = 'complete'.tr;
+        icon = Icons.check_circle_outline;
+        break;
+      case 'in_progress':
+        bg = primaryOrange.withValues(alpha: 0.15);
+        fg = primaryOrange;
+        text = 'in_progress'.tr;
+        icon = Icons.hourglass_top_rounded;
+        break;
+      default:
+        bg = AppColorsTheme.textMutedColor(context).withValues(alpha: 0.12);
+        fg = AppColorsTheme.textMutedColor(context);
+        text = 'not_started'.tr;
+        icon = Icons.radio_button_unchecked;
+        break;
     }
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(20.r),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: fg, size: 12.sp),
+          UIHelper.horizontalSpace(4.w),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 11.sp,
+              fontWeight: FontWeight.bold,
+              color: fg,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildDocumentBox({
@@ -642,11 +584,13 @@ class KycVerificationScreen extends StatelessWidget {
     required Widget child,
   }) {
     return Container(
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: AppColorsTheme.innerCardBg(context),
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: AppColorsTheme.borderColor(context)),
+        color: AppColorsTheme.background(context),
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(
+          color: isComplete ? Colors.green.withValues(alpha: 0.5) : AppColorsTheme.borderColor(context),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -654,36 +598,28 @@ class KycVerificationScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Text(
-                  title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.bold,
-                    color: AppColorsTheme.textMainColor(context),
-                  ),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColorsTheme.textMainColor(context),
                 ),
               ),
-              UIHelper.horizontalSpace(8.w),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.h),
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                 decoration: BoxDecoration(
                   color: isComplete
-                      ? const Color(0xFF065F46).withValues(alpha: 0.2)
+                      ? Colors.green.withValues(alpha: 0.12)
                       : AppColorsTheme.cardBg(context),
-                  borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(
-                    color: isComplete ? const Color(0xFF047857) : AppColorsTheme.borderColor(context),
-                  ),
+                  borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: Text(
                   countText,
                   style: TextStyle(
-                    fontSize: 11.sp,
-                    color: isComplete ? const Color(0xFF10B981) : AppColorsTheme.textMutedColor(context),
+                    fontSize: 10.5.sp,
                     fontWeight: FontWeight.bold,
+                    color: isComplete ? Colors.green : AppColorsTheme.textMutedColor(context),
                   ),
                 ),
               ),
@@ -695,10 +631,10 @@ class KycVerificationScreen extends StatelessWidget {
             style: TextStyle(
               fontSize: 12.sp,
               color: AppColorsTheme.textMutedColor(context),
-              height: 1.35,
+              height: 1.3,
             ),
           ),
-          UIHelper.verticalSpace(16.h),
+          UIHelper.verticalSpace(14.h),
           child,
         ],
       ),
@@ -712,30 +648,28 @@ class KycVerificationScreen extends StatelessWidget {
     required String? fileName,
     required VoidCallback onPick,
   }) {
+    final isUploaded = fileName != null;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Expanded(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColorsTheme.textMainColor(context),
-                ),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColorsTheme.textMainColor(context),
               ),
             ),
-            UIHelper.horizontalSpace(8.w),
             Text(
               'required'.tr,
               style: TextStyle(
                 fontSize: 11.sp,
+                fontWeight: FontWeight.bold,
                 color: primaryOrange,
-                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -744,63 +678,49 @@ class KycVerificationScreen extends StatelessWidget {
         Text(
           desc,
           style: TextStyle(
-            fontSize: 12.sp,
+            fontSize: 11.5.sp,
             color: AppColorsTheme.textMutedColor(context),
-            height: 1.35,
+            height: 1.3,
           ),
         ),
-        UIHelper.verticalSpace(12.h),
-
+        UIHelper.verticalSpace(10.h),
         Row(
           children: [
-            OutlinedButton.icon(
+            ElevatedButton.icon(
               onPressed: onPick,
               icon: Icon(
-                Icons.upload_file,
+                isUploaded ? Icons.check_circle_outline : Icons.file_present_outlined,
                 size: 16.sp,
-                color: primaryOrange,
               ),
               label: Text(
-                'choose_file'.tr,
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppColorsTheme.textMainColor(context),
-                ),
+                isUploaded ? 'File selected' : 'choose_file'.tr,
+                style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold),
               ),
-              style: OutlinedButton.styleFrom(
-                backgroundColor: AppColorsTheme.cardBg(context),
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-                side: BorderSide(color: AppColorsTheme.borderColor(context)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: isUploaded ? Colors.green : AppColorsTheme.cardBg(context),
+                foregroundColor: isUploaded ? Colors.white : AppColorsTheme.textMainColor(context),
+                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8.r),
+                  borderRadius: BorderRadius.circular(10.r),
+                  side: BorderSide(
+                    color: isUploaded ? Colors.green : AppColorsTheme.borderColor(context),
+                  ),
                 ),
+                elevation: 0,
               ),
             ),
             if (fileName != null) ...[
-              UIHelper.horizontalSpace(12.w),
+              UIHelper.horizontalSpace(10.w),
               Expanded(
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.check_circle,
-                      color: const Color(0xFF10B981),
-                      size: 16.sp,
-                    ),
-                    UIHelper.horizontalSpace(6.w),
-                    Expanded(
-                      child: Text(
-                        fileName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.bold,
-                          color: const Color(0xFF10B981),
-                        ),
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  fileName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11.5.sp,
+                    color: Colors.green,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -810,7 +730,7 @@ class KycVerificationScreen extends StatelessWidget {
         Text(
           'accepted_file_types'.tr,
           style: TextStyle(
-            fontSize: 11.sp,
+            fontSize: 10.5.sp,
             color: AppColorsTheme.textMutedColor(context),
           ),
         ),

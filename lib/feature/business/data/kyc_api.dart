@@ -3,11 +3,51 @@ import 'package:dio/dio.dart';
 import '../../../networks/dio/dio.dart';
 import '../../../networks/endpoints.dart';
 import '../../../networks/exception_handler/data_source.dart';
+import '../model/kyc_model.dart';
 
 final class KycApi {
   static final KycApi _singleton = KycApi._internal();
   KycApi._internal();
   static KycApi get instance => _singleton;
+
+  Future<KycResponseModel> getKycRequirements() async {
+    return KycResponseModel(
+      data: KycDataModel(
+        submission: KycSubmissionModel(statusLabel: 'Draft', isEditable: true),
+        requirements: [
+          KycRequirementModel(
+            key: 'national_id',
+            name: 'National ID',
+            instructions: 'Both sides, in colour, with all four corners visible.',
+            isRequired: true,
+            requiresFile: true,
+          ),
+          KycRequirementModel(
+            key: 'proof_of_address',
+            name: 'Proof of address',
+            instructions: 'A utility bill or bank statement from the last three months.',
+            isRequired: true,
+            requiresFile: true,
+          ),
+          KycRequirementModel(
+            key: 'trade_licence',
+            name: 'Trade licence',
+            instructions: 'Current year, issued by your city corporation.',
+            isRequired: true,
+            requiresFile: true,
+          ),
+          KycRequirementModel(
+            key: 'tin',
+            name: 'Tax identification number',
+            instructions: 'The TIN on your certificate, digits only.',
+            isRequired: false,
+            requiresValue: true,
+            valueLabel: 'TIN',
+          ),
+        ],
+      ),
+    );
+  }
 
   Future<Response> submitDocument({
     required String documentType,

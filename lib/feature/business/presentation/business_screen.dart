@@ -41,7 +41,7 @@ class BusinessScreenBody extends StatelessWidget {
         'title': 'Verification',
         'subtitle': 'KYC & identity verification',
         'icon': Icons.verified_user_rounded,
-        'onTap': (BuildContext ctx) => Navigator.pushNamed(ctx, Routes.verificationHistoryScreen),
+        'onTap': (BuildContext ctx) => Navigator.pushNamed(ctx, Routes.kycVerificationScreen),
       },
       {
         'title': 'Subscription',

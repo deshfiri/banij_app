@@ -8,85 +8,57 @@ import '../networks/api_access.dart';
 class KycVerificationProvider extends ChangeNotifier {
   final ImagePicker _picker = ImagePicker();
 
-  String? _nidFrontFileName;
-  String? _nidFrontFilePath;
-  String? _nidBackFileName;
-  String? _nidBackFilePath;
-  String? _passportBioFileName;
-  String? _passportBioFilePath;
-  String? _dlFrontFileName;
-  String? _dlFrontFilePath;
-  String? _dlBackFileName;
-  String? _dlBackFilePath;
+  String? _nationalIdFileName;
+  String? _nationalIdFilePath;
+  String? _proofOfAddressFileName;
+  String? _proofOfAddressFilePath;
+  String? _tradeLicenceFileName;
+  String? _tradeLicenceFilePath;
+  final TextEditingController tinController = TextEditingController();
 
   bool _isConfirmed = false;
   bool _isSubmitting = false;
   bool _isSubmitted = false;
 
-  String? get nidFrontFileName => _nidFrontFileName;
-  String? get nidBackFileName => _nidBackFileName;
-  String? get passportBioFileName => _passportBioFileName;
-  String? get dlFrontFileName => _dlFrontFileName;
-  String? get dlBackFileName => _dlBackFileName;
+  String? get nationalIdFileName => _nationalIdFileName;
+  String? get proofOfAddressFileName => _proofOfAddressFileName;
+  String? get tradeLicenceFileName => _tradeLicenceFileName;
 
   bool get isConfirmed => _isConfirmed;
   bool get isSubmitting => _isSubmitting;
   bool get isSubmitted => _isSubmitted;
 
-  int get nidCount =>
-      (_nidFrontFileName != null ? 1 : 0) + (_nidBackFileName != null ? 1 : 0);
-  int get passportCount => _passportBioFileName != null ? 1 : 0;
-  int get licenseCount =>
-      (_dlFrontFileName != null ? 1 : 0) + (_dlBackFileName != null ? 1 : 0);
+  int get uploadedRequiredCount =>
+      (_nationalIdFileName != null ? 1 : 0) +
+      (_proofOfAddressFileName != null ? 1 : 0) +
+      (_tradeLicenceFileName != null ? 1 : 0);
 
-  int get totalUploadedItems => nidCount + passportCount + licenseCount;
-
-  int get completedGroupsCount {
-    int count = 0;
-    if (nidCount == 2) count++;
-    if (passportCount == 1) count++;
-    if (licenseCount == 2) count++;
-    return count > 2 ? 2 : count;
-  }
-
-  double get progressRatio => totalUploadedItems / 5.0;
+  double get progressRatio => uploadedRequiredCount / 3.0;
 
   String get overallStatusKey {
-    if (totalUploadedItems == 0) return 'not_started';
-    if (totalUploadedItems == 5) return 'complete';
+    if (uploadedRequiredCount == 0) return 'not_started';
+    if (uploadedRequiredCount == 3) return 'complete';
     return 'in_progress';
   }
 
   List<Map<String, String>> get stillNeededList {
     List<Map<String, String>> list = [];
-    if (_nidFrontFileName == null) {
+    if (_nationalIdFileName == null) {
       list.add({
-        'key': 'nidFront',
-        'text': 'Personal Information Verification — NID Verification: Front Side Verification'
+        'key': 'national_id',
+        'text': 'National ID — Upload both sides in color with four corners visible'
       });
     }
-    if (_nidBackFileName == null) {
+    if (_proofOfAddressFileName == null) {
       list.add({
-        'key': 'nidBack',
-        'text': 'Personal Information Verification — NID Verification: Back Side Verification'
+        'key': 'proof_of_address',
+        'text': 'Proof of address — Utility bill or bank statement from last 3 months'
       });
     }
-    if (_passportBioFileName == null) {
+    if (_tradeLicenceFileName == null) {
       list.add({
-        'key': 'passportBio',
-        'text': 'Personal Information Verification — Passport Verification: Passport Bio-data Page'
-      });
-    }
-    if (_dlFrontFileName == null) {
-      list.add({
-        'key': 'dlFront',
-        'text': 'Personal Information Verification — Driving License Verification: Driving License Front Side'
-      });
-    }
-    if (_dlBackFileName == null) {
-      list.add({
-        'key': 'dlBack',
-        'text': 'Personal Information Verification — Driving License Verification: Driving License Back Side'
+        'key': 'trade_licence',
+        'text': 'Trade licence — Current year trade licence issued by city corporation'
       });
     }
     return list;
@@ -110,25 +82,17 @@ class KycVerificationProvider extends ChangeNotifier {
 
   void _assignFile(String docKey, String name, String? path) {
     switch (docKey) {
-      case 'nidFront':
-        _nidFrontFileName = name;
-        _nidFrontFilePath = path;
+      case 'national_id':
+        _nationalIdFileName = name;
+        _nationalIdFilePath = path;
         break;
-      case 'nidBack':
-        _nidBackFileName = name;
-        _nidBackFilePath = path;
+      case 'proof_of_address':
+        _proofOfAddressFileName = name;
+        _proofOfAddressFilePath = path;
         break;
-      case 'passportBio':
-        _passportBioFileName = name;
-        _passportBioFilePath = path;
-        break;
-      case 'dlFront':
-        _dlFrontFileName = name;
-        _dlFrontFilePath = path;
-        break;
-      case 'dlBack':
-        _dlBackFileName = name;
-        _dlBackFilePath = path;
+      case 'trade_licence':
+        _tradeLicenceFileName = name;
+        _tradeLicenceFilePath = path;
         break;
     }
   }
@@ -141,43 +105,40 @@ class KycVerificationProvider extends ChangeNotifier {
   Future<void> submitVerification(BuildContext context) async {
     if (!_isConfirmed || _isSubmitting || _isSubmitted) return;
 
+    if (uploadedRequiredCount < 3) {
+      ToastUtil.showErrorMessage('Please upload all required KYC documents');
+      return;
+    }
+
     _isSubmitting = true;
     notifyListeners();
 
     try {
-      if (_nidFrontFileName != null) {
+      if (_nationalIdFileName != null) {
         await kycRxObj.submitDoc(
-          documentType: 'national_id_front',
-          fileBytesOrPath: _nidFrontFilePath,
-          fileName: _nidFrontFileName,
+          documentType: 'national_id',
+          fileBytesOrPath: _nationalIdFilePath,
+          fileName: _nationalIdFileName,
         ).waitingForSucess();
       }
-      if (_nidBackFileName != null) {
+      if (_proofOfAddressFileName != null) {
         await kycRxObj.submitDoc(
-          documentType: 'national_id_back',
-          fileBytesOrPath: _nidBackFilePath,
-          fileName: _nidBackFileName,
+          documentType: 'proof_of_address',
+          fileBytesOrPath: _proofOfAddressFilePath,
+          fileName: _proofOfAddressFileName,
         ).waitingForSucess();
       }
-      if (_passportBioFileName != null) {
+      if (_tradeLicenceFileName != null) {
         await kycRxObj.submitDoc(
-          documentType: 'passport',
-          fileBytesOrPath: _passportBioFilePath,
-          fileName: _passportBioFileName,
+          documentType: 'trade_licence',
+          fileBytesOrPath: _tradeLicenceFilePath,
+          fileName: _tradeLicenceFileName,
         ).waitingForSucess();
       }
-      if (_dlFrontFileName != null) {
+      if (tinController.text.trim().isNotEmpty) {
         await kycRxObj.submitDoc(
-          documentType: 'driving_license_front',
-          fileBytesOrPath: _dlFrontFilePath,
-          fileName: _dlFrontFileName,
-        ).waitingForSucess();
-      }
-      if (_dlBackFileName != null) {
-        await kycRxObj.submitDoc(
-          documentType: 'driving_license_back',
-          fileBytesOrPath: _dlBackFilePath,
-          fileName: _dlBackFileName,
+          documentType: 'tin',
+          value: tinController.text.trim(),
         ).waitingForSucess();
       }
 
@@ -185,31 +146,14 @@ class KycVerificationProvider extends ChangeNotifier {
       _isSubmitted = true;
       notifyListeners();
       ToastUtil.showSuccessMessage('KYC documents submitted successfully!');
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
     } catch (e) {
       _isSubmitting = false;
       notifyListeners();
       String errorMsg = e.toString().replaceAll('Exception: ', '');
-      if (errorMsg.contains('Failure')) {
-        errorMsg = 'Failed to submit KYC documents. Please try again.';
-      }
-      ToastUtil.showErrorMessage(errorMsg);
+      ToastUtil.showErrorMessage(errorMsg.isNotEmpty ? errorMsg : 'Failed to submit KYC documents');
     }
-  }
-
-  void resetKycForm() {
-    _nidFrontFileName = null;
-    _nidFrontFilePath = null;
-    _nidBackFileName = null;
-    _nidBackFilePath = null;
-    _passportBioFileName = null;
-    _passportBioFilePath = null;
-    _dlFrontFileName = null;
-    _dlFrontFilePath = null;
-    _dlBackFileName = null;
-    _dlBackFilePath = null;
-    _isConfirmed = false;
-    _isSubmitting = false;
-    _isSubmitted = false;
-    notifyListeners();
   }
 }
