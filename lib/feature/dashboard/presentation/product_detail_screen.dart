@@ -551,7 +551,6 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                               wholesale: WholesaleModel(price: PriceModel(formatted: wholesalePrice), inStock: availableStock),
                             );
                             context.read<CartProvider>().addToCart(effectiveProduct, quantity: qty);
-                            ToastUtil.showSuccessMessage('Added $qty units to cart!');
                           },
                           icon: Icon(Icons.shopping_bag_outlined, size: 16.sp),
                           label: Text(

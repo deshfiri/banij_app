@@ -29,10 +29,23 @@ final class WholesaleCartApi {
     } on DioException catch (dioError) {
       if (dioError.response?.data != null) {
         final data = dioError.response?.data;
-        if (data is Map && data.containsKey('message')) {
-          throw Exception(data['message'].toString());
-        } else if (data is Map && data.containsKey('error')) {
-          throw Exception(data['error'].toString());
+        if (data is Map) {
+          if (data.containsKey('errors') && data['errors'] is Map) {
+            final errs = data['errors'] as Map;
+            if (errs.isNotEmpty) {
+              final firstVal = errs.values.first;
+              if (firstVal is List && firstVal.isNotEmpty) {
+                throw Exception(firstVal.first.toString());
+              } else if (firstVal is String) {
+                throw Exception(firstVal);
+              }
+            }
+          }
+          if (data.containsKey('message')) {
+            throw Exception(data['message'].toString());
+          } else if (data.containsKey('error')) {
+            throw Exception(data['error'].toString());
+          }
         }
       }
       rethrow;
@@ -60,6 +73,17 @@ final class WholesaleCartApi {
       if (dioError.response?.data != null) {
         final data = dioError.response?.data;
         if (data is Map) {
+          if (data.containsKey('errors') && data['errors'] is Map) {
+            final errs = data['errors'] as Map;
+            if (errs.isNotEmpty) {
+              final firstVal = errs.values.first;
+              if (firstVal is List && firstVal.isNotEmpty) {
+                throw Exception(firstVal.first.toString());
+              } else if (firstVal is String) {
+                throw Exception(firstVal);
+              }
+            }
+          }
           if (data.containsKey('message')) {
             throw Exception(data['message'].toString());
           } else if (data.containsKey('error')) {
@@ -91,10 +115,23 @@ final class WholesaleCartApi {
     } on DioException catch (dioError) {
       if (dioError.response?.data != null) {
         final data = dioError.response?.data;
-        if (data is Map && data.containsKey('message')) {
-          throw Exception(data['message'].toString());
-        } else if (data is Map && data.containsKey('error')) {
-          throw Exception(data['error'].toString());
+        if (data is Map) {
+          if (data.containsKey('errors') && data['errors'] is Map) {
+            final errs = data['errors'] as Map;
+            if (errs.isNotEmpty) {
+              final firstVal = errs.values.first;
+              if (firstVal is List && firstVal.isNotEmpty) {
+                throw Exception(firstVal.first.toString());
+              } else if (firstVal is String) {
+                throw Exception(firstVal);
+              }
+            }
+          }
+          if (data.containsKey('message')) {
+            throw Exception(data['message'].toString());
+          } else if (data.containsKey('error')) {
+            throw Exception(data['error'].toString());
+          }
         }
       }
       rethrow;
@@ -121,10 +158,23 @@ final class WholesaleCartApi {
     } on DioException catch (dioError) {
       if (dioError.response?.data != null) {
         final data = dioError.response?.data;
-        if (data is Map && data.containsKey('message')) {
-          throw Exception(data['message'].toString());
-        } else if (data is Map && data.containsKey('error')) {
-          throw Exception(data['error'].toString());
+        if (data is Map) {
+          if (data.containsKey('errors') && data['errors'] is Map) {
+            final errs = data['errors'] as Map;
+            if (errs.isNotEmpty) {
+              final firstVal = errs.values.first;
+              if (firstVal is List && firstVal.isNotEmpty) {
+                throw Exception(firstVal.first.toString());
+              } else if (firstVal is String) {
+                throw Exception(firstVal);
+              }
+            }
+          }
+          if (data.containsKey('message')) {
+            throw Exception(data['message'].toString());
+          } else if (data.containsKey('error')) {
+            throw Exception(data['error'].toString());
+          }
         }
       }
       rethrow;
@@ -135,7 +185,7 @@ final class WholesaleCartApi {
 
   Future<WholesaleCartModel> acceptCartPrices() async {
     try {
-      Response response = await postHttp(EndPoints.wholesaleCartPrices(), {});
+      Response response = await postHttp("${EndPoints.wholesaleCart()}/accept-prices", {});
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (response.data is Map<String, dynamic>) {
@@ -151,10 +201,23 @@ final class WholesaleCartApi {
     } on DioException catch (dioError) {
       if (dioError.response?.data != null) {
         final data = dioError.response?.data;
-        if (data is Map && data.containsKey('message')) {
-          throw Exception(data['message'].toString());
-        } else if (data is Map && data.containsKey('error')) {
-          throw Exception(data['error'].toString());
+        if (data is Map) {
+          if (data.containsKey('errors') && data['errors'] is Map) {
+            final errs = data['errors'] as Map;
+            if (errs.isNotEmpty) {
+              final firstVal = errs.values.first;
+              if (firstVal is List && firstVal.isNotEmpty) {
+                throw Exception(firstVal.first.toString());
+              } else if (firstVal is String) {
+                throw Exception(firstVal);
+              }
+            }
+          }
+          if (data.containsKey('message')) {
+            throw Exception(data['message'].toString());
+          } else if (data.containsKey('error')) {
+            throw Exception(data['error'].toString());
+          }
         }
       }
       rethrow;

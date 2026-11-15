@@ -365,6 +365,7 @@ class _CartScreenState extends State<CartScreen> {
                               ? product.image!.url!
                               : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500';
                           final title = product.name ?? 'Product Item';
+                          final quantity = item.quantity;
 
                           return Container(
                             margin: EdgeInsets.only(bottom: 14.h),
@@ -376,20 +377,134 @@ class _CartScreenState extends State<CartScreen> {
                                 color: AppColorsTheme.borderColor(context),
                                 width: 1.w,
                               ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
+                                  blurRadius: 8.r,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
                             ),
                             child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(12.r),
-                                  child: Image.network(imageUrl, width: 64.w, height: 64.h, fit: BoxFit.cover),
+                                  child: Container(
+                                    width: 64.w,
+                                    height: 64.h,
+                                    color: primaryOrange.withValues(alpha: 0.1),
+                                    child: Image.network(
+                                      imageUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) => Center(
+                                        child: Icon(Icons.inventory_2_outlined, color: primaryOrange, size: 24.sp),
+                                      ),
+                                    ),
+                                  ),
                                 ),
                                 UIHelper.horizontalSpace(12.w),
                                 Expanded(
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text(title, style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.bold)),
-                                      Text('৳ ${item.totalPrice.toStringAsFixed(2)}', style: TextStyle(fontSize: 15.sp, color: primaryOrange)),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              title,
+                                              style: TextStyle(
+                                                fontSize: 13.5.sp,
+                                                fontWeight: FontWeight.w700,
+                                                color: AppColorsTheme.textMainColor(context),
+                                              ),
+                                              maxLines: 2,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          GestureDetector(
+                                            onTap: () {
+                                              cartProvider.removeFromLocalCart(index);
+                                              ToastUtil.showSuccessMessage('Item removed from cart');
+                                            },
+                                            child: Padding(
+                                              padding: EdgeInsets.only(left: 8.w),
+                                              child: Icon(
+                                                Icons.delete_outline_rounded,
+                                                size: 18.sp,
+                                                color: Colors.redAccent,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      UIHelper.verticalSpace(4.h),
+                                      Text(
+                                        'WHOLESALE',
+                                        style: TextStyle(
+                                          fontSize: 10.sp,
+                                          fontWeight: FontWeight.w800,
+                                          color: const Color(0xFF10B981),
+                                        ),
+                                      ),
+                                      UIHelper.verticalSpace(8.h),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            '৳ ${item.totalPrice.toStringAsFixed(2)}',
+                                            style: TextStyle(
+                                              fontSize: 15.sp,
+                                              fontWeight: FontWeight.w900,
+                                              color: primaryOrange,
+                                            ),
+                                          ),
+                                          Row(
+                                            children: [
+                                              GestureDetector(
+                                                onTap: () {
+                                                  cartProvider.updateLocalQuantity(index, quantity - 1);
+                                                },
+                                                child: Container(
+                                                  padding: EdgeInsets.all(5.w),
+                                                  decoration: BoxDecoration(
+                                                    color: AppColorsTheme.background(context),
+                                                    borderRadius: BorderRadius.circular(6.r),
+                                                    border: Border.all(color: AppColorsTheme.borderColor(context)),
+                                                  ),
+                                                  child: Icon(Icons.remove_rounded, size: 14.sp, color: AppColorsTheme.textMainColor(context)),
+                                                ),
+                                              ),
+                                              Padding(
+                                                padding: EdgeInsets.symmetric(horizontal: 10.w),
+                                                child: Text(
+                                                  '$quantity',
+                                                  style: TextStyle(
+                                                    fontSize: 14.sp,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: AppColorsTheme.textMainColor(context),
+                                                  ),
+                                                ),
+                                              ),
+                                              GestureDetector(
+                                                onTap: () {
+                                                  cartProvider.updateLocalQuantity(index, quantity + 1);
+                                                },
+                                                child: Container(
+                                                  padding: EdgeInsets.all(5.w),
+                                                  decoration: BoxDecoration(
+                                                    color: AppColorsTheme.background(context),
+                                                    borderRadius: BorderRadius.circular(6.r),
+                                                    border: Border.all(color: AppColorsTheme.borderColor(context)),
+                                                  ),
+                                                  child: Icon(Icons.add_rounded, size: 14.sp, color: AppColorsTheme.textMainColor(context)),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
                                     ],
                                   ),
                                 ),

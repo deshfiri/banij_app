@@ -4,18 +4,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
-import '../gen/colors.gen.dart';
-
 final class ToastUtil {
   ToastUtil._();
 
-  /// Error Toast
+  /// Error Toast (Red color background)
   static void showErrorMessage(String message) {
     Get.snackbar(
-      "Warning",
+      "Error",
       message,
       titleText: Text(
-        "Warning",
+        "Error",
         style: TextStyle(
           fontSize: 15.sp,
           fontWeight: FontWeight.w700,
@@ -31,13 +29,13 @@ final class ToastUtil {
           height: 1.4,
         ),
       ),
-      backgroundColor: AppColors.allPrimaryColor,
+      backgroundColor: const Color(0xFFEF4444),
       borderRadius: 14.r,
       margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
       snackPosition: SnackPosition.TOP,
       colorText: Colors.white,
-      icon: Icon(Icons.error_outline, color: Colors.white, size: 24.sp),
+      icon: Icon(Icons.error_outline_rounded, color: Colors.white, size: 24.sp),
       shouldIconPulse: false,
       duration: const Duration(seconds: 3),
       isDismissible: true,
@@ -103,7 +101,7 @@ final class ToastUtil {
           height: 1.4,
         ),
       ),
-      backgroundColor: AppColors.allPrimaryColor,
+      backgroundColor: Colors.blueAccent,
       borderRadius: 14.r,
       margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
@@ -113,8 +111,7 @@ final class ToastUtil {
       shouldIconPulse: false,
       duration: const Duration(seconds: 3),
       isDismissible: true,
+      forwardAnimationCurve: Curves.easeOutBack,
     );
   }
-
-  static void showShortToast(String message) {}
 }

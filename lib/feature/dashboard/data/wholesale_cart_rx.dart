@@ -29,7 +29,7 @@ final class WholesaleCartRx extends RxResponseInt<WholesaleCartModel> {
       WholesaleCartModel data = await _api.addCartItem(body);
       return handleSuccessWithReturn(data);
     } catch (error) {
-      return handleErrorWithReturn(error);
+      rethrow;
     }
   }
 
@@ -38,7 +38,7 @@ final class WholesaleCartRx extends RxResponseInt<WholesaleCartModel> {
       WholesaleCartModel data = await _api.updateCartItemQuantity(item, body);
       return handleSuccessWithReturn(data);
     } catch (error) {
-      return handleErrorWithReturn(error);
+      rethrow;
     }
   }
 

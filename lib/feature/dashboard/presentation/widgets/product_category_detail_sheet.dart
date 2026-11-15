@@ -6,7 +6,6 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../../constants/color.dart';
 import '../../../../helpers/all_routes.dart';
-import '../../../../helpers/toast.dart';
 import '../../../../helpers/ui_helpers.dart';
 import '../../../../providers/cart_provider.dart';
 import '../../../../providers/dashboard_provider.dart';
@@ -531,7 +530,6 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
                                         OutlinedButton(
                                           onPressed: () {
                                             context.read<CartProvider>().addToCart(product, quantity: 1);
-                                            ToastUtil.showSuccessMessage('Added to cart');
                                           },
                                           style: OutlinedButton.styleFrom(
                                             foregroundColor: AppColorsTheme.textMainColor(context),

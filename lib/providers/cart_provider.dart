@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../feature/dashboard/model/my_product_model.dart';
 import '../feature/dashboard/model/wholesale_cart_model.dart';
+import '../helpers/toast.dart';
 import '../networks/api_access.dart';
 
 class CartItemModel {
@@ -99,7 +100,7 @@ class CartProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addItemToCart({
+  Future<bool> addItemToCart({
     required String productSlug,
     String? variantSku,
     int quantity = 1,
@@ -113,7 +114,12 @@ class CartProvider extends ChangeNotifier {
       final model = await wholesaleCartRxObj.addCartItem(body);
       _cartModel = model;
       notifyListeners();
-    } catch (_) {}
+      return true;
+    } catch (e) {
+      String err = e.toString().replaceAll('Exception: ', '');
+      ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Failed to add item to cart');
+      return false;
+    }
   }
 
   Future<void> updateLineQuantity({
@@ -169,7 +175,11 @@ class CartProvider extends ChangeNotifier {
       final model = await wholesaleCartRxObj.updateCartItemQuantity(lineItemId, body);
       _cartModel = model;
       notifyListeners();
-    } catch (_) {}
+    } catch (e) {
+      String err = e.toString().replaceAll('Exception: ', '');
+      ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Failed to update quantity');
+      fetchCart();
+    }
   }
 
   Future<void> deleteLineItem(String lineItemId) async {
@@ -195,15 +205,19 @@ class CartProvider extends ChangeNotifier {
     } catch (_) {}
   }
 
-  void addToCart(ProductItemModel product, {int quantity = 1}) {
-    addToLocalCart(product, quantity: quantity);
-
+  Future<void> addToCart(ProductItemModel product, {int quantity = 1}) async {
     final slug = product.slug ?? product.name;
     if (slug != null && slug.isNotEmpty) {
-      addItemToCart(
+      final success = await addItemToCart(
         productSlug: slug,
         quantity: quantity,
       );
+      if (success) {
+        addToLocalCart(product, quantity: quantity);
+      }
+    } else {
+      addToLocalCart(product, quantity: quantity);
+      ToastUtil.showSuccessMessage('Added to cart!');
     }
   }
 
@@ -217,8 +231,11 @@ class CartProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateQuantity(int index, int newQuantity) {
-    updateLocalQuantity(index, newQuantity);
+  void removeFromLocalCart(int index) {
+    if (index >= 0 && index < _localCartItems.length) {
+      _localCartItems.removeAt(index);
+      notifyListeners();
+    }
   }
 
   void updateLocalQuantity(int index, int newQuantity) {
@@ -232,15 +249,12 @@ class CartProvider extends ChangeNotifier {
     }
   }
 
-  void removeFromCart(int index) {
-    removeFromLocalCart(index);
+  void updateQuantity(int index, int newQuantity) {
+    updateLocalQuantity(index, newQuantity);
   }
 
-  void removeFromLocalCart(int index) {
-    if (index >= 0 && index < _localCartItems.length) {
-      _localCartItems.removeAt(index);
-      notifyListeners();
-    }
+  void removeFromCart(int index) {
+    removeFromLocalCart(index);
   }
 
   void clearCart() {
