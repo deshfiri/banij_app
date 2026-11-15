@@ -13,10 +13,8 @@ import '../helpers/toast.dart';
 import '../networks/api_access.dart';
 
 class AccountProvider extends ChangeNotifier {
-  final TextEditingController nameController =
-      TextEditingController(text: 'Mohammad Hira Ashrafi');
-  final TextEditingController emailController =
-      TextEditingController(text: 'ashrafiashra038@gmail.com');
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
 
   PackageResponseModel? packageResponse;
   AccountDeletionInfoModel? deletionInfo;

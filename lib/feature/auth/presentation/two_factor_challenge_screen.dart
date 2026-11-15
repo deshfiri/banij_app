@@ -64,10 +64,15 @@ class _TwoFactorChallengeScreenState extends State<TwoFactorChallengeScreen> {
         "device_name": deviceName.isNotEmpty ? deviceName : 'Mobile Device',
       };
 
-      await twoFactorChallengeRxObj.verifyTwoFactor(body);
+      final res = await twoFactorChallengeRxObj.verifyTwoFactor(body);
       if (!mounted) return;
       ToastUtil.showSuccessMessage('Two-factor authentication successful!');
-      Navigator.pushNamedAndRemoveUntil(context, Routes.dashboardScreen, (route) => false);
+      final bool isActivated = res.user?.businessAccount?.isActivated ?? true;
+      if (isActivated) {
+        Navigator.pushNamedAndRemoveUntil(context, Routes.dashboardScreen, (route) => false);
+      } else {
+        Navigator.pushNamedAndRemoveUntil(context, Routes.kycVerificationScreen, (route) => false);
+      }
     } catch (e) {
       String err = e.toString().replaceAll('Exception: ', '');
       ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Invalid 2FA verification code');

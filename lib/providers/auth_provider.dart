@@ -137,7 +137,12 @@ class AuthProvider extends ChangeNotifier {
 
         ToastUtil.showSuccessMessage('Login successful!');
         if (context.mounted) {
-          NavigationService.navigateToReplacementUntil(Routes.dashboardScreen);
+          final bool isActivated = response.user?.businessAccount?.isActivated ?? true;
+          if (isActivated) {
+            NavigationService.navigateToReplacementUntil(Routes.dashboardScreen);
+          } else {
+            NavigationService.navigateToReplacementUntil(Routes.kycVerificationScreen);
+          }
         }
         return true;
       } else {

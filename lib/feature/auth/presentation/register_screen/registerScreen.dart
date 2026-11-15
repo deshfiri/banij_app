@@ -451,7 +451,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             onTap: () async {
                               final success = await provider.handleCreateAccount(context, _formKey);
                               if (success && context.mounted) {
-                                NavigationService.navigateToReplacementUntil(Routes.dashboardScreen);
+                                final isActivated = provider.lastRegisterResponse?.user?.businessAccount?.isActivated ?? true;
+                                if (isActivated) {
+                                  NavigationService.navigateToReplacementUntil(Routes.dashboardScreen);
+                                } else {
+                                  NavigationService.navigateToReplacementUntil(Routes.kycVerificationScreen);
+                                }
                               }
                             },
                             btnName: 'create_account'.tr,

@@ -24,6 +24,7 @@ class SignUpProvider extends ChangeNotifier {
   bool _acceptTerms = false;
   bool _acceptPrivacy = false;
   bool _isLoading = false;
+  RegisterResponse? lastRegisterResponse;
 
   String _selectedGender = 'Not specified';
   final List<String> genderOptions = [
@@ -187,6 +188,7 @@ class SignUpProvider extends ChangeNotifier {
         }
 
         ToastUtil.showSuccessMessage('Registration successful!');
+        lastRegisterResponse = response;
         resetSignUpForm();
         return true;
       } else {

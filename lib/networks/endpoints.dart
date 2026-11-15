@@ -102,4 +102,10 @@ final class EndPoints {
   static String specialDay() => "/partner/special-days/26";
   static String deletePartner() => "/partner/remove";
   static String deleteAccount() => "/delete-profile";
+
+
+
+
+
+  //ashrafi256@gmail.com
 }
