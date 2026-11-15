@@ -23,4 +23,13 @@ final class AddressRx extends RxResponseInt<AddressResponseModel> {
       return handleErrorWithReturn(error);
     }
   }
+
+  Future<dynamic> updateAddress(String addressId, Map<String, dynamic> body) async {
+    try {
+      var data = await _api.updateAddress(addressId, body);
+      return data;
+    } catch (error) {
+      rethrow;
+    }
+  }
 }

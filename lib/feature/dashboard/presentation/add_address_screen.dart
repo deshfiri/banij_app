@@ -10,9 +10,15 @@ import '../../../helpers/toast.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../../networks/api_access.dart';
 import '../data/address_api.dart';
+import '../model/address_model.dart';
 
 class AddAddressScreen extends StatefulWidget {
-  const AddAddressScreen({super.key});
+  final AddressItemModel? address;
+
+  const AddAddressScreen({
+    super.key,
+    this.address,
+  });
 
   @override
   State<AddAddressScreen> createState() => _AddAddressScreenState();
@@ -48,6 +54,17 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
   @override
   void initState() {
     super.initState();
+    if (widget.address != null) {
+      final addr = widget.address!;
+      _nameController.text = addr.contactName ?? addr.recipientName;
+      _mobileController.text = addr.contactMobile ?? addr.phone;
+      _detailedAddressController.text = addr.detailedAddress ?? '';
+      _landmarkController.text = addr.landmark ?? '';
+      _postcodeController.text = addr.postcode ?? '';
+      if (addr.type != null && addr.type!.isNotEmpty) {
+        _selectedType = addr.type!.toLowerCase();
+      }
+    }
     _loadLocations();
   }
 
@@ -324,11 +341,18 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
         'detailed_address': detailedAddress,
         'landmark': _landmarkController.text.trim(),
         'postcode': _postcodeController.text.trim(),
+        'is_default': widget.address?.isDefault ?? false,
       };
 
-      await AddressApi.instance.postAddress(body);
+      final bool isEditMode = widget.address != null && widget.address?.id != null;
+      if (isEditMode) {
+        await addressRxObj.updateAddress(widget.address!.id!.toString(), body);
+        ToastUtil.showSuccessMessage('Address updated successfully!');
+      } else {
+        await AddressApi.instance.postAddress(body);
+        ToastUtil.showSuccessMessage('Address added successfully!');
+      }
 
-      ToastUtil.showSuccessMessage('Address added successfully!');
       addressRxObj.fetchAddresses();
 
       if (mounted) {
@@ -361,7 +385,7 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
-          'Add New Address'.tr,
+          widget.address != null ? 'Edit Address'.tr : 'Add New Address'.tr,
           style: TextStyle(
             fontSize: 18.sp,
             fontWeight: FontWeight.bold,

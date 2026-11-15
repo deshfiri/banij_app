@@ -13,7 +13,7 @@ final class AddressApi {
 
   Future<AddressResponseModel> getAddresses() async {
     try {
-      Response response = await getHttp(EndPoints.address());
+      Response response = await getHttp(EndPoints.addressList());
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (response.data is Map<String, dynamic> || response.data is List) {
@@ -44,6 +44,46 @@ final class AddressApi {
   Future<Response> postAddress(Map<String, dynamic> body) async {
     try {
       Response response = await postHttp(EndPoints.address(), body);
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return response;
+      } else {
+        throw DataSource.DEFAULT.getFailure();
+      }
+    } on DioException catch (dioError) {
+      if (dioError.response?.data != null) {
+        final data = dioError.response?.data;
+        if (data is Map) {
+          if (data.containsKey('errors') && data['errors'] is Map) {
+            final errors = data['errors'] as Map;
+            List<String> errMsgs = [];
+            errors.forEach((key, value) {
+              if (value is List && value.isNotEmpty) {
+                errMsgs.add(value.first.toString());
+              } else if (value != null) {
+                errMsgs.add(value.toString());
+              }
+            });
+            if (errMsgs.isNotEmpty) {
+              throw Exception(errMsgs.join('\n'));
+            }
+          }
+          if (data.containsKey('message')) {
+            throw Exception(data['message'].toString());
+          } else if (data.containsKey('error')) {
+            throw Exception(data['error'].toString());
+          }
+        }
+      }
+      rethrow;
+    } catch (error) {
+      rethrow;
+    }
+  }
+
+  Future<Response> updateAddress(String addressId, Map<String, dynamic> body) async {
+    try {
+      Response response = await putHttp("${EndPoints.address()}/$addressId", body);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         return response;

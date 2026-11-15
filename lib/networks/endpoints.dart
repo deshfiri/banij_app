@@ -28,6 +28,7 @@ final class EndPoints {
   static String signup() => "/register";
   static String profile()=>"/profile";
   static String package()=>"/packages";
+  static String addressList()=>"/addresses";
   static String dashborad()=>"/dashboard";
   static String currentUser()=>"/auth/me";
   static String submitDocKyc()=>"/kyc/documents";

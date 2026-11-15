@@ -15,6 +15,7 @@ import '../feature/business/presentation/kyc_verification_screen.dart';
 import '../feature/business/presentation/notification_screen.dart';
 import '../feature/business/presentation/supplier_dashboard_screen.dart';
 import '../feature/business/presentation/verification_history_screen.dart';
+import '../feature/dashboard/model/address_model.dart';
 import '../feature/dashboard/model/my_product_model.dart';
 import '../feature/dashboard/presentation/dashboard_screen.dart';
 import '../feature/dashboard/presentation/product_detail_screen.dart';
@@ -22,6 +23,7 @@ import '../feature/dashboard/presentation/cart_screen.dart';
 import '../feature/dashboard/presentation/order_now_screen.dart';
 import '../feature/dashboard/presentation/add_website_screen.dart';
 import '../feature/dashboard/presentation/add_address_screen.dart';
+import '../feature/dashboard/presentation/addresses_screen.dart';
 import '../feature/finance/presentation/wallet_screen.dart';
 import '../feature/finance/presentation/withdrawals_screen.dart';
 import '../feature/finance/presentation/payout_methods_screen.dart';
@@ -53,6 +55,7 @@ final class Routes {
   static const String withdrawalsScreen = '/withdrawalsScreen';
   static const String payoutMethodsScreen = '/payoutMethodsScreen';
   static const String twoFactorChallengeScreen = '/twoFactorChallengeScreen';
+  static const String addressesScreen = '/addressesScreen';
 }
 
 final class RouteGenerator {
@@ -134,9 +137,10 @@ final class RouteGenerator {
             ? _LightningFastTransitionRoute(widget: const AddWebsiteScreen(), settings: settings)
             : CupertinoPageRoute(builder: (context) => const AddWebsiteScreen(), settings: settings);
       case Routes.addAddressScreen:
+        final address = settings.arguments as AddressItemModel?;
         return Platform.isAndroid
-            ? _LightningFastTransitionRoute(widget: const AddAddressScreen(), settings: settings)
-            : CupertinoPageRoute(builder: (context) => const AddAddressScreen(), settings: settings);
+            ? _LightningFastTransitionRoute(widget: AddAddressScreen(address: address), settings: settings)
+            : CupertinoPageRoute(builder: (context) => AddAddressScreen(address: address), settings: settings);
       case Routes.walletScreen:
         return Platform.isAndroid
             ? _LightningFastTransitionRoute(widget: const WalletScreen(), settings: settings)
@@ -154,6 +158,10 @@ final class RouteGenerator {
         return Platform.isAndroid
             ? _LightningFastTransitionRoute(widget: TwoFactorChallengeScreen(challengeToken: challengeToken), settings: settings)
             : CupertinoPageRoute(builder: (context) => TwoFactorChallengeScreen(challengeToken: challengeToken), settings: settings);
+      case Routes.addressesScreen:
+        return Platform.isAndroid
+            ? _LightningFastTransitionRoute(widget: const AddressesScreen(), settings: settings)
+            : CupertinoPageRoute(builder: (context) => const AddressesScreen(), settings: settings);
     }
 
     return null;

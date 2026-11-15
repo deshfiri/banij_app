@@ -60,7 +60,7 @@ class BusinessScreenBody extends StatelessWidget {
         'title': 'Addresses',
         'subtitle': 'Manage shipping & billing addresses',
         'icon': Icons.location_on_rounded,
-        'onTap': (BuildContext ctx) => Navigator.pushNamed(ctx, Routes.addAddressScreen),
+        'onTap': (BuildContext ctx) => Navigator.pushNamed(ctx, Routes.addressesScreen),
       },
     ];
 
