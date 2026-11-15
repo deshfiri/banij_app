@@ -6,7 +6,6 @@ import 'package:provider/provider.dart';
 import '../../../constants/color.dart';
 import '../../../constants/image_const.dart';
 import '../../../helpers/all_routes.dart';
-import '../../../helpers/toast.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../../providers/dashboard_provider.dart';
 import '../../../providers/supplier_dashboard_provider.dart';
@@ -54,7 +53,7 @@ class BusinessScreenBody extends StatelessWidget {
         'title': 'Partner Network',
         'subtitle': 'Referral rewards & partner network',
         'icon': Icons.share_rounded,
-        'onTap': (BuildContext ctx) => ToastUtil.showSuccessMessage('Partner Network module opened'),
+        'onTap': (BuildContext ctx) => Navigator.pushNamed(ctx, Routes.partnerNetworkScreen),
       },
       {
         'title': 'Addresses',

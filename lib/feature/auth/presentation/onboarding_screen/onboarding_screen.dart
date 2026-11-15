@@ -304,165 +304,168 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     },
                     itemBuilder: (context, index) {
                       final slide = slides[index];
-                      return Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 24.w),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            // High Definition Business Illustration Stage Card
-                            Container(
-                              width: double.infinity,
-                              height: 245.h,
-                              decoration: BoxDecoration(
-                                color: isDark
-                                    ? const Color(0xFF1E1E24)
-                                    : const Color(0xFFF4F6F9),
-                                borderRadius: BorderRadius.circular(24.r),
-                                border: Border.all(
-                                  color: AppColorsTheme.borderColor(context),
-                                  width: 1.w,
+                      return Center(
+                        child: SingleChildScrollView(
+                          physics: const ClampingScrollPhysics(),
+                          padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 12.h),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              // High Definition Business Illustration Stage Card
+                              Container(
+                                width: double.infinity,
+                                height: 190.h,
+                                decoration: BoxDecoration(
+                                  color: isDark
+                                      ? const Color(0xFF1E1E24)
+                                      : const Color(0xFFF4F6F9),
+                                  borderRadius: BorderRadius.circular(24.r),
+                                  border: Border.all(
+                                    color: AppColorsTheme.borderColor(context),
+                                    width: 1.w,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: primaryOrange.withValues(alpha: isDark ? 0.12 : 0.08),
+                                      blurRadius: 20.r,
+                                      offset: const Offset(0, 8),
+                                    ),
+                                  ],
                                 ),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: primaryOrange.withValues(alpha: isDark ? 0.12 : 0.08),
-                                    blurRadius: 20.r,
-                                    offset: const Offset(0, 8),
-                                  ),
-                                ],
-                              ),
-                              child: Stack(
-                                children: [
-                                  Center(
-                                    child: Container(
-                                      width: 170.w,
-                                      height: 170.h,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: isDark
-                                            ? primaryOrange.withValues(alpha: 0.1)
-                                            : const Color(0xFFFEEBE7),
-                                      ),
-                                    ),
-                                  ),
-
-                                  // High Resolution Business Feature Image
-                                  Center(
-                                    child: Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-                                      child: Image.asset(
-                                        slide['image'] ?? '',
-                                        fit: BoxFit.contain,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return Icon(
-                                            Icons.business_center_rounded,
-                                            size: 70.sp,
-                                            color: primaryOrange,
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                  ),
-
-                                  // Top Left Business Domain Tag Badge
-                                  Positioned(
-                                    top: 14.h,
-                                    left: 14.w,
-                                    child: Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
-                                      decoration: BoxDecoration(
-                                        color: isDark ? const Color(0xFF282830) : Colors.white,
-                                        borderRadius: BorderRadius.circular(16.r),
-                                        border: Border.all(
-                                          color: primaryOrange.withValues(alpha: 0.3),
+                                child: Stack(
+                                  children: [
+                                    Center(
+                                      child: Container(
+                                        width: 130.w,
+                                        height: 130.h,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: isDark
+                                              ? primaryOrange.withValues(alpha: 0.1)
+                                              : const Color(0xFFFEEBE7),
                                         ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(alpha: isDark ? 0.0 : 0.05),
-                                            blurRadius: 8.r,
-                                          ),
-                                        ],
                                       ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(
-                                            Icons.storefront_rounded,
-                                            size: 13.sp,
-                                            color: primaryOrange,
+                                    ),
+
+                                    // High Resolution Business Feature Image
+                                    Center(
+                                      child: Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+                                        child: Image.asset(
+                                          slide['image'] ?? '',
+                                          fit: BoxFit.contain,
+                                          errorBuilder: (context, error, stackTrace) {
+                                            return Icon(
+                                              Icons.business_center_rounded,
+                                              size: 60.sp,
+                                              color: primaryOrange,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ),
+
+                                    // Top Left Business Domain Tag Badge
+                                    Positioned(
+                                      top: 12.h,
+                                      left: 12.w,
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                                        decoration: BoxDecoration(
+                                          color: isDark ? const Color(0xFF282830) : Colors.white,
+                                          borderRadius: BorderRadius.circular(16.r),
+                                          border: Border.all(
+                                            color: primaryOrange.withValues(alpha: 0.3),
                                           ),
-                                          UIHelper.horizontalSpace(5.w),
-                                          Text(
-                                            slide['badge'] ?? '',
-                                            style: TextStyle(
-                                              fontSize: 11.sp,
-                                              fontWeight: FontWeight.bold,
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.black.withValues(alpha: isDark ? 0.0 : 0.05),
+                                              blurRadius: 8.r,
+                                            ),
+                                          ],
+                                        ),
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.storefront_rounded,
+                                              size: 12.sp,
                                               color: primaryOrange,
                                             ),
-                                          ),
-                                        ],
+                                            UIHelper.horizontalSpace(4.w),
+                                            Text(
+                                              slide['badge'] ?? '',
+                                              style: TextStyle(
+                                                fontSize: 10.5.sp,
+                                                fontWeight: FontWeight.bold,
+                                                color: primaryOrange,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            UIHelper.verticalSpace(28.h),
-
-                            // Centered Bold Uppercase Headline
-                            Text(
-                              slide['title'] ?? '',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 21.sp,
-                                fontWeight: FontWeight.w900,
-                                color: AppColorsTheme.textMainColor(context),
-                                letterSpacing: 0.8,
-                              ),
-                            ),
-
-                            UIHelper.verticalSpace(12.h),
-
-                            // Centered Subtitle Description Paragraph
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 10.w),
-                              child: Text(
-                                slide['subtitle'] ?? '',
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontSize: 13.5.sp,
-                                  fontWeight: FontWeight.w400,
-                                  color: AppColorsTheme.textMutedColor(context),
-                                  height: 1.45,
+                                  ],
                                 ),
                               ),
-                            ),
 
-                            UIHelper.verticalSpace(20.h),
+                              UIHelper.verticalSpace(18.h),
 
-                            // Centered Modern Capsule / Pill Cursor Slider Indicator
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: List.generate(3, (dotIndex) {
-                                final isSelected = _currentPage == dotIndex;
-                                return AnimatedContainer(
-                                  duration: const Duration(milliseconds: 350),
-                                  curve: Curves.easeInOut,
-                                  margin: EdgeInsets.symmetric(horizontal: 4.w),
-                                  height: 8.h,
-                                  width: isSelected ? 24.w : 8.w,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(4.r),
-                                    color: isSelected
-                                        ? primaryOrange
-                                        : (isDark
-                                            ? const Color(0xFF3F3F46)
-                                            : const Color(0xFFFED7AA)),
+                              // Centered Bold Uppercase Headline
+                              Text(
+                                slide['title'] ?? '',
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 20.sp,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColorsTheme.textMainColor(context),
+                                  letterSpacing: 0.8,
+                                ),
+                              ),
+
+                              UIHelper.verticalSpace(8.h),
+
+                              // Centered Subtitle Description Paragraph
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 8.w),
+                                child: Text(
+                                  slide['subtitle'] ?? '',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 13.sp,
+                                    fontWeight: FontWeight.w400,
+                                    color: AppColorsTheme.textMutedColor(context),
+                                    height: 1.4,
                                   ),
-                                );
-                              }),
-                            ),
-                          ],
+                                ),
+                              ),
+
+                              UIHelper.verticalSpace(16.h),
+
+                              // Centered Modern Capsule / Pill Cursor Slider Indicator
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: List.generate(3, (dotIndex) {
+                                  final isSelected = _currentPage == dotIndex;
+                                  return AnimatedContainer(
+                                    duration: const Duration(milliseconds: 350),
+                                    curve: Curves.easeInOut,
+                                    margin: EdgeInsets.symmetric(horizontal: 4.w),
+                                    height: 8.h,
+                                    width: isSelected ? 24.w : 8.w,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(4.r),
+                                      color: isSelected
+                                          ? primaryOrange
+                                          : (isDark
+                                              ? const Color(0xFF3F3F46)
+                                              : const Color(0xFFFED7AA)),
+                                    ),
+                                  );
+                                }),
+                              ),
+                            ],
+                          ),
                         ),
                       );
                     },

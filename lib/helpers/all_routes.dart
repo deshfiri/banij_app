@@ -15,6 +15,7 @@ import '../feature/business/presentation/kyc_verification_screen.dart';
 import '../feature/business/presentation/notification_screen.dart';
 import '../feature/business/presentation/supplier_dashboard_screen.dart';
 import '../feature/business/presentation/verification_history_screen.dart';
+import '../feature/business/presentation/partner_network_screen.dart';
 import '../feature/dashboard/model/address_model.dart';
 import '../feature/dashboard/model/my_product_model.dart';
 import '../feature/dashboard/presentation/dashboard_screen.dart';
@@ -56,6 +57,7 @@ final class Routes {
   static const String payoutMethodsScreen = '/payoutMethodsScreen';
   static const String twoFactorChallengeScreen = '/twoFactorChallengeScreen';
   static const String addressesScreen = '/addressesScreen';
+  static const String partnerNetworkScreen = '/partnerNetworkScreen';
 }
 
 final class RouteGenerator {
@@ -162,6 +164,10 @@ final class RouteGenerator {
         return Platform.isAndroid
             ? _LightningFastTransitionRoute(widget: const AddressesScreen(), settings: settings)
             : CupertinoPageRoute(builder: (context) => const AddressesScreen(), settings: settings);
+      case Routes.partnerNetworkScreen:
+        return Platform.isAndroid
+            ? _LightningFastTransitionRoute(widget: const PartnerNetworkScreen(), settings: settings)
+            : CupertinoPageRoute(builder: (context) => const PartnerNetworkScreen(), settings: settings);
     }
 
     return null;
