@@ -89,6 +89,7 @@ final class EndPoints {
   static String special() => "/partner-information/special-days";
   static String partnerInformation() => "/partner-information";
   static String profileInfo() => "/me";
+  static String language()=>"/locale";
   static String favouriteThingsGet() => "/partner-information/favourite-things";
   static String archives() => "/archives";
   static String upcomingEvents() => "/upcoming_events";

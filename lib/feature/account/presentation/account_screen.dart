@@ -17,6 +17,7 @@ import '../../../networks/api_access.dart';
 import '../../../providers/account_provider.dart';
 import '../../../providers/theme_provider.dart';
 import '../../finance/presentation/widgets/invoice_receipt_preview_modal.dart';
+import '../model/language_locale_model.dart';
 import '../model/security_model.dart';
 
 class AccountScreenBody extends StatefulWidget {
@@ -46,6 +47,7 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
 
   late bool _isBengali;
   SecurityModel? _securityModel;
+  LanguageLocaleResponseModel? _languageLocaleModel;
   bool _isLoadingSecurity = false;
 
   @override
@@ -54,6 +56,18 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
     _selectedTab = widget.initialTab == 'supplier' ? 'Profile' : (widget.initialTab ?? 'Profile');
     _isBengali = appData.read('isBengali') ?? false;
     _fetchSecurityData();
+    _fetchLanguageLocale();
+  }
+
+  Future<void> _fetchLanguageLocale() async {
+    try {
+      final res = await languageLocaleRxObj.fetchLanguageLocale();
+      if (mounted) {
+        setState(() {
+          _languageLocaleModel = res;
+        });
+      }
+    } catch (_) {}
   }
 
   Future<void> _fetchSecurityData() async {
@@ -688,10 +702,16 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
             // Language Switch Card
             AccountSwitchCardWidget(
               title: 'change_language'.tr,
-              subtitle: _isBengali ? 'lang_bn'.tr : 'lang_en'.tr,
+              subtitle: _languageLocaleModel?.data?.locale != null
+                  ? 'Locale: ${_languageLocaleModel!.data!.locale!.toUpperCase()} (${_isBengali ? 'lang_bn'.tr : 'lang_en'.tr})'
+                  : (_isBengali ? 'lang_bn'.tr : 'lang_en'.tr),
               iconData: Icons.language_outlined,
               value: _isBengali,
               onChanged: (val) async {
+                final targetLocale = val ? 'bn' : 'en';
+                try {
+                  await languageLocaleRxObj.updateLanguageLocale({"locale": targetLocale});
+                } catch (_) {}
                 await appData.write('isBengali', val);
                 if (!context.mounted) return;
                 setState(() {
@@ -968,6 +988,10 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
                           iconData: Icons.language_outlined,
                           value: _isBengali,
                           onChanged: (val) async {
+                            final targetLocale = val ? 'bn' : 'en';
+                            try {
+                              await languageLocaleRxObj.updateLanguageLocale({"locale": targetLocale});
+                            } catch (_) {}
                             await accountProvider.toggleLanguage(val);
                             if (!context.mounted) return;
                             setState(() {

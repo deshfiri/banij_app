@@ -1,5 +1,6 @@
 import '../feature/account/data/account_rx.dart';
 import '../feature/account/data/security_rx.dart';
+import '../feature/account/data/language_locale_rx.dart';
 import '../feature/auth/data/forgot_password_rx.dart';
 import '../feature/auth/data/login_rx.dart';
 import '../feature/auth/data/logout_rx.dart';
@@ -74,3 +75,4 @@ WalletTopUpRx walletTopUpRxObj = WalletTopUpRx.instance;
 TwoFactorChallengeRx twoFactorChallengeRxObj = TwoFactorChallengeRx.instance;
 RequestWithdrawalRx requestWithdrawalRxObj = RequestWithdrawalRx.instance;
 ReferralsRx referralsRxObj = ReferralsRx.instance;
+LanguageLocaleRx languageLocaleRxObj = LanguageLocaleRx.instance;
