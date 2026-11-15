@@ -83,13 +83,6 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
       categoryColor: primaryOrange,
     ),
     HubItem(
-      titleKey: 'hub_my_damages',
-      category: 'Products',
-      tagKey: 'tag_products',
-      iconData: Icons.warning_amber_rounded,
-      categoryColor: primaryOrange,
-    ),
-    HubItem(
       titleKey: 'hub_all_orders',
       category: 'Sales & Orders',
       tagKey: 'tag_sales_orders',
@@ -118,13 +111,6 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
       categoryColor: Color(0xFF0284C7),
     ),
     HubItem(
-      titleKey: 'hub_store_orders',
-      category: 'Sales & Orders',
-      tagKey: 'tag_sales_orders',
-      iconData: Icons.storefront_outlined,
-      categoryColor: Color(0xFF0284C7),
-    ),
-    HubItem(
       titleKey: 'hub_invoices',
       category: 'Finance',
       tagKey: 'tag_finance',
@@ -136,20 +122,6 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
       category: 'Finance',
       tagKey: 'tag_finance',
       iconData: Icons.payments_outlined,
-      categoryColor: Color(0xFF10B981),
-    ),
-    HubItem(
-      titleKey: 'hub_reports',
-      category: 'Finance',
-      tagKey: 'tag_finance',
-      iconData: Icons.bar_chart_rounded,
-      categoryColor: Color(0xFF8B5CF6),
-    ),
-    HubItem(
-      titleKey: 'hub_transactions',
-      category: 'Finance',
-      tagKey: 'tag_finance',
-      iconData: Icons.swap_horiz_rounded,
       categoryColor: Color(0xFF10B981),
     ),
   ];
@@ -189,114 +161,6 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
       default:
         return Icons.grid_view_rounded;
     }
-  }
-
-  Widget _buildWorkspaceHeaderCard(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-        decoration: BoxDecoration(
-          color: AppColorsTheme.cardBg(context),
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(
-            color: isDark
-                ? AppColorsTheme.borderColor(context)
-                : primaryOrange.withValues(alpha: 0.2),
-            width: 1.w,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
-              blurRadius: 10.r,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(8.w),
-                  decoration: BoxDecoration(
-                    color: primaryOrange.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(
-                      color: primaryOrange.withValues(alpha: 0.25),
-                    ),
-                  ),
-                  child: Icon(
-                    Icons.storefront_rounded,
-                    color: primaryOrange,
-                    size: 19.sp,
-                  ),
-                ),
-                UIHelper.horizontalSpace(10.w),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _currentUserModel?.data?.businessAccount?.name ??
-                          _currentUserModel?.data?.name ??
-                          'considine_group'.tr,
-                      style: TextStyle(
-                        fontSize: 15.sp,
-                        fontWeight: FontWeight.w800,
-                        color: AppColorsTheme.textMainColor(context),
-                      ),
-                    ),
-                    UIHelper.verticalSpace(1.h),
-                    Text(
-                      'Business Workspace',
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w500,
-                        color: AppColorsTheme.textMutedColor(context),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-              decoration: BoxDecoration(
-                color: primaryOrange.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(
-                  color: primaryOrange.withValues(alpha: 0.3),
-                  width: 1.w,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.verified_user_rounded,
-                    color: primaryOrange,
-                    size: 12.sp,
-                  ),
-                  UIHelper.horizontalSpace(4.w),
-                  Text(
-                    'owner'.tr.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 9.5.sp,
-                      fontWeight: FontWeight.w800,
-                      color: primaryOrange,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _buildMetricCard({
@@ -374,6 +238,87 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildWelcomeBanner(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final userName = _currentUserModel?.data?.name ?? 'Valued Partner';
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 4.h),
+      child: Container(
+        padding: EdgeInsets.all(18.w),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: isDark
+                ? [const Color(0xFF2C221E), const Color(0xFF1E1E24)]
+                : [primaryOrange.withValues(alpha: 0.12), primaryOrange.withValues(alpha: 0.04)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: primaryOrange.withValues(alpha: isDark ? 0.3 : 0.2),
+            width: 1.2.w,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: primaryOrange.withValues(alpha: isDark ? 0.1 : 0.05),
+              blurRadius: 14.r,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(12.w),
+              decoration: BoxDecoration(
+                color: primaryOrange,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryOrange.withValues(alpha: 0.4),
+                    blurRadius: 8.r,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Icon(Icons.waving_hand_rounded, color: Colors.white, size: 20.sp),
+            ),
+            UIHelper.horizontalSpace(14.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Welcome back, $userName!',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      fontWeight: FontWeight.w900,
+                      color: AppColorsTheme.textMainColor(context),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  UIHelper.verticalSpace(3.h),
+                  Text(
+                    'Manage your wholesale catalog & orders efficiently.',
+                    style: TextStyle(
+                      fontSize: 11.5.sp,
+                      fontWeight: FontWeight.w500,
+                      color: AppColorsTheme.textMutedColor(context),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -478,9 +423,9 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
         SliverToBoxAdapter(
           child: Column(
             children: [
-              // Considine Group Owner Header Card Banner
-              _buildWorkspaceHeaderCard(context),
-              UIHelper.verticalSpace(2.h),
+              // Welcome Gradient Banner
+              _buildWelcomeBanner(context),
+              UIHelper.verticalSpace(8.h),
 
               // Metrics Summary Grid Section
               Padding(

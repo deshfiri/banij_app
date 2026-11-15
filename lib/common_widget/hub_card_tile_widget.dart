@@ -29,30 +29,30 @@ class HubCardTileWidget extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16.r),
-        splashColor: accentColor.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(20.r),
+        splashColor: accentColor.withValues(alpha: 0.18),
         highlightColor: accentColor.withValues(alpha: 0.08),
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+          padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
             color: AppColorsTheme.cardBg(context),
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(20.r),
             border: Border.all(
               color: isDark
                   ? AppColorsTheme.borderColor(context)
-                  : accentColor.withValues(alpha: 0.18),
-              width: 1.w,
+                  : accentColor.withValues(alpha: 0.22),
+              width: 1.2.w,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.18 : 0.03),
-                blurRadius: 10.r,
-                offset: const Offset(0, 3),
+                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                blurRadius: 12.r,
+                offset: const Offset(0, 4),
               ),
               BoxShadow(
-                color: accentColor.withValues(alpha: isDark ? 0.04 : 0.02),
-                blurRadius: 6.r,
-                offset: const Offset(0, 1),
+                color: accentColor.withValues(alpha: isDark ? 0.05 : 0.03),
+                blurRadius: 8.r,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
@@ -60,47 +60,47 @@ class HubCardTileWidget extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Top row: Compact Color-Accented Icon Container & Chevron Arrow Circle
+              // Top row: Premium Accent Icon Container & Chevron Arrow Circle
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    padding: EdgeInsets.all(7.w),
+                    padding: EdgeInsets.all(10.w),
                     decoration: BoxDecoration(
-                      color: accentColor.withValues(alpha: isDark ? 0.22 : 0.12),
-                      borderRadius: BorderRadius.circular(11.r),
+                      color: accentColor.withValues(alpha: isDark ? 0.25 : 0.12),
+                      borderRadius: BorderRadius.circular(14.r),
                       border: Border.all(
-                        color: accentColor.withValues(alpha: 0.28),
-                        width: 0.8.w,
+                        color: accentColor.withValues(alpha: 0.35),
+                        width: 1.w,
                       ),
                     ),
                     child: Icon(
                       iconData,
                       color: accentColor,
-                      size: 17.sp,
+                      size: 20.sp,
                     ),
                   ),
                   Container(
-                    padding: EdgeInsets.all(4.5.w),
+                    padding: EdgeInsets.all(6.w),
                     decoration: BoxDecoration(
-                      color: accentColor.withValues(alpha: isDark ? 0.15 : 0.08),
+                      color: accentColor.withValues(alpha: isDark ? 0.18 : 0.08),
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: accentColor.withValues(alpha: 0.2),
-                        width: 0.8.w,
+                        color: accentColor.withValues(alpha: 0.25),
+                        width: 1.w,
                       ),
                     ),
                     child: Icon(
                       Icons.arrow_forward_ios_rounded,
                       color: accentColor,
-                      size: 9.sp,
+                      size: 10.sp,
                     ),
                   ),
                 ],
               ),
-              UIHelper.verticalSpace(4.h),
+              UIHelper.verticalSpace(12.h),
 
-              // Bottom text: Compact Bold Title & Uppercase Subtitle Tag
+              // Bottom text: Bold Title & Uppercase Tag
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
@@ -108,22 +108,22 @@ class HubCardTileWidget extends StatelessWidget {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 12.5.sp,
-                      fontWeight: FontWeight.w800,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w900,
                       color: AppColorsTheme.textMainColor(context),
-                      height: 1.15,
+                      height: 1.2,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  UIHelper.verticalSpace(2.h),
+                  UIHelper.verticalSpace(3.h),
                   Text(
                     subtitle.toUpperCase(),
                     style: TextStyle(
-                      fontSize: 8.5.sp,
-                      fontWeight: FontWeight.w700,
-                      color: AppColorsTheme.textMutedColor(context),
-                      letterSpacing: 0.6,
+                      fontSize: 9.5.sp,
+                      fontWeight: FontWeight.w800,
+                      color: accentColor,
+                      letterSpacing: 0.8,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
