@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../common_widget/hub_card_tile_widget.dart';
 import '../../../../constants/color.dart';
 import '../../../../constants/image_const.dart';
 import '../../../../helpers/all_routes.dart';
@@ -14,22 +13,18 @@ import '../../../finance/presentation/widgets/invoices_receipts_sheet.dart';
 import '../../model/current_user_model.dart';
 import 'order_category_detail_sheet.dart';
 import 'product_category_detail_sheet.dart';
-import 'website_sheet.dart';
+import 'all_hub_cards_sheet.dart';
 
-class HubItem {
-  final String titleKey;
-  final String category;
-  final String tagKey;
-  final IconData iconData;
-  final Color categoryColor;
-
-  const HubItem({
-    required this.titleKey,
-    required this.category,
-    required this.tagKey,
-    required this.iconData,
-    required this.categoryColor,
-  });
+class _BrandColors {
+  static const Color primaryOrange = Color(0xFFFF6900);
+  static const Color secondaryOrange = Color(0xFFFF8A3D);
+  static const Color background = Color(0xFFFFFAF7);
+  static const Color primaryText = Color(0xFF151D32);
+  static const Color secondaryText = Color(0xFF64748B);
+  static const Color border = Color(0xFFFFE1D0);
+  static const Color blue = Color(0xFF1595DC);
+  static const Color green = Color(0xFF10B981);
+  static const Color purple = Color(0xFF9257F6);
 }
 
 class DashboardHubWidget extends StatefulWidget {
@@ -45,7 +40,6 @@ class DashboardHubWidget extends StatefulWidget {
 }
 
 class _DashboardHubWidgetState extends State<DashboardHubWidget> {
-  String _selectedFilter = 'All';
   CurrentUserModel? _currentUserModel;
 
   @override
@@ -65,102 +59,124 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
     } catch (_) {}
   }
 
-  final List<String> _filters = ['All', 'Products', 'Sales & Orders', 'Finance'];
+  Widget _buildWelcomeBanner(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final userName = _currentUserModel?.data?.name ?? 'Mohammad Ashraf';
 
-  final List<HubItem> _allHubItems = const [
-    HubItem(
-      titleKey: 'hub_products',
-      category: 'catalog',
-      tagKey: 'catalog',
-      iconData: Icons.shopping_bag_outlined,
-      categoryColor: primaryOrange,
-    ),
-    HubItem(
-      titleKey: 'hub_my_products',
-      category: 'Products',
-      tagKey: 'tag_products',
-      iconData: Icons.grid_view_rounded,
-      categoryColor: primaryOrange,
-    ),
-    HubItem(
-      titleKey: 'hub_all_orders',
-      category: 'Sales & Orders',
-      tagKey: 'tag_sales_orders',
-      iconData: Icons.format_list_bulleted_rounded,
-      categoryColor: Color(0xFF0284C7),
-    ),
-    HubItem(
-      titleKey: 'hub_customers',
-      category: 'Sales & Orders',
-      tagKey: 'tag_sales_orders',
-      iconData: Icons.people_outline_rounded,
-      categoryColor: Color(0xFF0284C7),
-    ),
-    HubItem(
-      titleKey: 'hub_orders',
-      category: 'Sales & Orders',
-      tagKey: 'tag_sales_orders',
-      iconData: Icons.description_outlined,
-      categoryColor: Color(0xFF0284C7),
-    ),
-    HubItem(
-      titleKey: 'hub_my_websites',
-      category: 'Sales & Orders',
-      tagKey: 'tag_sales_orders',
-      iconData: Icons.language_outlined,
-      categoryColor: Color(0xFF0284C7),
-    ),
-    HubItem(
-      titleKey: 'hub_invoices',
-      category: 'Finance',
-      tagKey: 'tag_finance',
-      iconData: Icons.receipt_long_outlined,
-      categoryColor: Color(0xFF8B5CF6),
-    ),
-    HubItem(
-      titleKey: 'hub_receipts',
-      category: 'Finance',
-      tagKey: 'tag_finance',
-      iconData: Icons.payments_outlined,
-      categoryColor: Color(0xFF10B981),
-    ),
-  ];
-
-  void _handleCardTap(BuildContext context, HubItem item) {
-    if (item.category == 'Finance' ||
-        item.titleKey == 'hub_invoices' ||
-        item.titleKey == 'hub_receipts' ||
-        item.titleKey == 'hub_transactions' ||
-        item.titleKey == 'hub_reports') {
-      final initialTab = (item.titleKey == 'hub_receipts' || item.titleKey == 'hub_transactions')
-          ? 'Receipts'
-          : 'Invoices';
-      InvoicesReceiptsSheet.show(context, initialTab: initialTab);
-    } else if (item.titleKey == 'hub_my_websites') {
-      WebsiteSheet.show(context);
-    } else if (item.category == 'Sales & Orders' ||
-        item.titleKey == 'hub_orders' ||
-        item.titleKey == 'hub_all_orders' ||
-        item.titleKey == 'hub_store_orders' ||
-        item.titleKey == 'hub_customers') {
-      OrderCategoryDetailSheet.show(context, item.titleKey.tr);
-    } else {
-      final isCatalog = item.category == 'catalog' || item.titleKey == 'hub_products';
-      ProductCategoryDetailSheet.show(context, item.titleKey.tr, isCatalog: isCatalog);
-    }
-  }
-
-  IconData _getFilterIcon(String filter) {
-    switch (filter) {
-      case 'Products':
-        return Icons.shopping_bag_outlined;
-      case 'Sales & Orders':
-        return Icons.format_list_bulleted_rounded;
-      case 'Finance':
-        return Icons.account_balance_wallet_outlined;
-      default:
-        return Icons.grid_view_rounded;
-    }
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+      child: Container(
+        constraints: BoxConstraints(minHeight: 110.h),
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: isDark
+                ? [const Color(0xFF2E221E), const Color(0xFF1E1E24)]
+                : [_BrandColors.background, _BrandColors.secondaryOrange.withValues(alpha: 0.18)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(24.r),
+          border: Border.all(
+            color: isDark ? const Color(0xFF374151) : _BrandColors.border,
+            width: 1.w,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: _BrandColors.primaryOrange.withValues(alpha: isDark ? 0.12 : 0.06),
+              blurRadius: 14.r,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            Positioned.fill(
+              child: CustomPaint(
+                painter: _WelcomeBannerWavePainter(isDark: isDark),
+              ),
+            ),
+            // Right Side Emblem Card
+            Positioned(
+              right: 14.w,
+              top: 14.h,
+              bottom: 14.h,
+              child: Container(
+                width: 82.w,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(22.r),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.9),
+                    width: 1.5.w,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: _BrandColors.primaryOrange.withValues(alpha: 0.3),
+                      blurRadius: 14.r,
+                      offset: const Offset(0, 5),
+                    ),
+                  ],
+                ),
+                child: Center(
+                  child: Image.asset(
+                    banijIcon,
+                    width: 48.w,
+                    height: 48.h,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => Text(
+                      'B',
+                      style: TextStyle(
+                        fontSize: 38.sp,
+                        fontWeight: FontWeight.w900,
+                        color: _BrandColors.primaryOrange,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            // User Greeting Details
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Row(
+                    children: [
+                      Flexible(
+                        child: Text(
+                          userName,
+                          style: TextStyle(
+                            fontSize: 19.sp,
+                            fontWeight: FontWeight.w900,
+                            color: isDark ? Colors.white : _BrandColors.primaryText,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      UIHelper.horizontalSpace(4.w),
+                      Text('👏', style: TextStyle(fontSize: 17.sp)),
+                    ],
+                  ),
+                  UIHelper.verticalSpace(4.h),
+                  Text(
+                    'Manage your business with ease',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w500,
+                      color: isDark ? const Color(0xFF9CA3AF) : _BrandColors.secondaryText,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildMetricCard({
@@ -169,6 +185,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
     required String value,
     required IconData icon,
     required Color color,
+    required Color lightBg,
     VoidCallback? onTap,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -177,64 +194,85 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14.r),
+        borderRadius: BorderRadius.circular(22.r),
         child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 9.h),
+          constraints: BoxConstraints(minHeight: 78.h),
+          clipBehavior: Clip.antiAlias,
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
           decoration: BoxDecoration(
-            color: AppColorsTheme.cardBg(context),
-            borderRadius: BorderRadius.circular(14.r),
+            color: isDark ? AppColorsTheme.cardBg(context) : lightBg,
+            borderRadius: BorderRadius.circular(22.r),
             border: Border.all(
-              color: color.withValues(alpha: isDark ? 0.3 : 0.16),
+              color: color.withValues(alpha: isDark ? 0.3 : 0.18),
               width: 1.w,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.025),
-                blurRadius: 8.r,
-                offset: const Offset(0, 2),
+                color: color.withValues(alpha: isDark ? 0.08 : 0.05),
+                blurRadius: 10.r,
+                offset: const Offset(0, 3),
               ),
             ],
           ),
-          child: Row(
+          child: Stack(
             children: [
-              Container(
-                padding: EdgeInsets.all(7.5.w),
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.13),
-                  borderRadius: BorderRadius.circular(10.r),
-                  border: Border.all(
-                    color: color.withValues(alpha: 0.22),
-                  ),
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: _MetricCardWavePainter(color: color),
                 ),
-                child: Icon(icon, color: color, size: 17.sp),
               ),
-              UIHelper.horizontalSpace(8.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      value,
-                      style: TextStyle(
-                        fontSize: 13.5.sp,
-                        fontWeight: FontWeight.w800,
-                        color: AppColorsTheme.textMainColor(context),
-                      ),
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(9.w),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.18),
+                      borderRadius: BorderRadius.circular(15.r),
                     ),
-                    UIHelper.verticalSpace(1.h),
-                    Text(
-                      title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontSize: 10.5.sp,
-                        fontWeight: FontWeight.w600,
-                        color: AppColorsTheme.textMutedColor(context),
-                      ),
+                    child: Icon(icon, color: color, size: 20.sp),
+                  ),
+                  UIHelper.horizontalSpace(10.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          value,
+                          style: TextStyle(
+                            fontSize: 17.sp,
+                            fontWeight: FontWeight.w900,
+                            color: isDark ? Colors.white : _BrandColors.primaryText,
+                          ),
+                        ),
+                        UIHelper.verticalSpace(1.h),
+                        Text(
+                          title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11.5.sp,
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? const Color(0xFF9CA3AF) : _BrandColors.secondaryText,
+                            height: 1.15,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.all(5.w),
+                    decoration: BoxDecoration(
+                      color: color.withValues(alpha: 0.14),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.chevron_right_rounded,
+                      color: color,
+                      size: 16.sp,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -243,82 +281,277 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
     );
   }
 
-  Widget _buildWelcomeBanner(BuildContext context) {
+  Widget _buildQuickAccessSection(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final userName = _currentUserModel?.data?.name ?? 'Valued Partner';
+
+    final quickTiles = [
+      {
+        'title': 'Products',
+        'icon': Icons.shopping_bag_rounded,
+        'color': _BrandColors.primaryOrange,
+        'bg': const Color(0xFFFFF0E8),
+        'onTap': () => ProductCategoryDetailSheet.show(context, 'hub_products'.tr, isCatalog: true),
+      },
+      {
+        'title': 'Sales & Orders',
+        'icon': Icons.shopping_cart_rounded,
+        'color': _BrandColors.blue,
+        'bg': const Color(0xFFEDF6FF),
+        'onTap': () => OrderCategoryDetailSheet.show(context, 'hub_all_orders'.tr),
+      },
+      {
+        'title': 'Finance',
+        'icon': Icons.analytics_rounded,
+        'color': _BrandColors.green,
+        'bg': const Color(0xFFEFFFF6),
+        'onTap': () => InvoicesReceiptsSheet.show(context, initialTab: 'Invoices'),
+      },
+    ];
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 4.h),
-      child: Container(
-        padding: EdgeInsets.all(18.w),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: isDark
-                ? [const Color(0xFF2C221E), const Color(0xFF1E1E24)]
-                : [primaryOrange.withValues(alpha: 0.12), primaryOrange.withValues(alpha: 0.04)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(
-            color: primaryOrange.withValues(alpha: isDark ? 0.3 : 0.2),
-            width: 1.2.w,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: primaryOrange.withValues(alpha: isDark ? 0.1 : 0.05),
-              blurRadius: 14.r,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: EdgeInsets.all(12.w),
-              decoration: BoxDecoration(
-                color: primaryOrange,
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: primaryOrange.withValues(alpha: 0.4),
-                    blurRadius: 8.r,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
-              ),
-              child: Icon(Icons.waving_hand_rounded, color: Colors.white, size: 20.sp),
-            ),
-            UIHelper.horizontalSpace(14.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
                 children: [
+                  Container(
+                    width: 4.w,
+                    height: 17.h,
+                    decoration: BoxDecoration(
+                      color: _BrandColors.primaryOrange,
+                      borderRadius: BorderRadius.circular(2.r),
+                    ),
+                  ),
+                  UIHelper.horizontalSpace(8.w),
                   Text(
-                    'Welcome back, $userName!',
+                    'Quick Access',
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w900,
-                      color: AppColorsTheme.textMainColor(context),
+                      color: isDark ? Colors.white : _BrandColors.primaryText,
                     ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  UIHelper.verticalSpace(3.h),
-                  Text(
-                    'Manage your wholesale catalog & orders efficiently.',
-                    style: TextStyle(
-                      fontSize: 11.5.sp,
-                      fontWeight: FontWeight.w500,
-                      color: AppColorsTheme.textMutedColor(context),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
+              GestureDetector(
+                onTap: () => AllHubCardsSheet.show(context),
+                child: Row(
+                  children: [
+                    Text(
+                      'See All',
+                      style: TextStyle(
+                        fontSize: 12.5.sp,
+                        fontWeight: FontWeight.w800,
+                        color: _BrandColors.primaryOrange,
+                      ),
+                    ),
+                    UIHelper.horizontalSpace(2.w),
+                    Icon(Icons.arrow_forward_rounded, color: _BrandColors.primaryOrange, size: 14.sp),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          UIHelper.verticalSpace(12.h),
+          SizedBox(
+            height: 118.h,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: quickTiles.map((tile) {
+                final color = tile['color'] as Color;
+                final bg = tile['bg'] as Color;
+                final icon = tile['icon'] as IconData;
+                final title = tile['title'] as String;
+                final onTap = tile['onTap'] as VoidCallback;
+
+                return Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4.w),
+                    child: InkWell(
+                      onTap: onTap,
+                      borderRadius: BorderRadius.circular(22.r),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 6.w),
+                        decoration: BoxDecoration(
+                          color: isDark ? AppColorsTheme.cardBg(context) : bg,
+                          borderRadius: BorderRadius.circular(22.r),
+                          border: Border.all(
+                            color: isDark ? const Color(0xFF374151) : color.withValues(alpha: 0.2),
+                            width: 1.w,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: color.withValues(alpha: isDark ? 0.08 : 0.05),
+                              blurRadius: 10.r,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
+                        ),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(11.w),
+                              decoration: BoxDecoration(
+                                color: isDark ? color.withValues(alpha: 0.2) : Colors.white,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  if (!isDark)
+                                    BoxShadow(
+                                      color: color.withValues(alpha: 0.12),
+                                      blurRadius: 6.r,
+                                      offset: const Offset(0, 2),
+                                    ),
+                                ],
+                              ),
+                              child: Icon(icon, color: color, size: 23.sp),
+                            ),
+                            UIHelper.verticalSpace(10.h),
+                            Text(
+                              title,
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12.sp,
+                                fontWeight: FontWeight.w800,
+                                color: isDark ? Colors.white : _BrandColors.primaryText,
+                                height: 1.15,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
-          ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  // 4. Products & My Products Full-Width Stacked Tiles matching reference screenshot
+  Widget _buildFeaturedModulesList(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+      child: Column(
+        children: [
+          // Tile 1: Products
+          _buildFullWidthTileCard(
+            context: context,
+            title: 'Products',
+            subtitle: 'Manage your catalog',
+            iconData: Icons.inventory_2_rounded,
+            iconColor: _BrandColors.primaryOrange,
+            iconBg: const Color(0xFFFFF0E8),
+            isDark: isDark,
+            onTap: () => ProductCategoryDetailSheet.show(context, 'hub_products'.tr, isCatalog: true),
+          ),
+          UIHelper.verticalSpace(12.h),
+
+          // Tile 2: My Products
+          _buildFullWidthTileCard(
+            context: context,
+            title: 'My Products',
+            subtitle: 'Your uploaded products',
+            iconData: Icons.cloud_upload_rounded,
+            iconColor: _BrandColors.purple,
+            iconBg: const Color(0xFFF7F0FF),
+            isDark: isDark,
+            onTap: () => ProductCategoryDetailSheet.show(context, 'hub_my_products'.tr, isCatalog: false),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildFullWidthTileCard({
+    required BuildContext context,
+    required String title,
+    required String subtitle,
+    required IconData iconData,
+    required Color iconColor,
+    required Color iconBg,
+    required bool isDark,
+    required VoidCallback onTap,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(20.r),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+          decoration: BoxDecoration(
+            color: isDark ? AppColorsTheme.cardBg(context) : Colors.white,
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(
+              color: isDark ? const Color(0xFF374151) : const Color(0xFFE2E8F0),
+              width: 1.w,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
+                blurRadius: 10.r,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(12.w),
+                decoration: BoxDecoration(
+                  color: isDark ? iconColor.withValues(alpha: 0.15) : iconBg,
+                  borderRadius: BorderRadius.circular(16.r),
+                ),
+                child: Icon(
+                  iconData,
+                  color: iconColor,
+                  size: 24.sp,
+                ),
+              ),
+              UIHelper.horizontalSpace(14.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w900,
+                        color: isDark ? Colors.white : _BrandColors.primaryText,
+                      ),
+                    ),
+                    UIHelper.verticalSpace(2.h),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w500,
+                        color: isDark ? const Color(0xFF9CA3AF) : _BrandColors.secondaryText,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF64748B),
+                size: 22.sp,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -329,26 +562,21 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final dashboardProvider = context.watch<DashboardProvider>();
 
-    final filteredItems = _selectedFilter == 'All'
-        ? _allHubItems
-        : _allHubItems.where((item) => item.category == _selectedFilter).toList();
-
     return CustomScrollView(
       slivers: [
-        // 1. Pinned & Floating SliverAppBar with Centered Logo, Menu Drawer Button & Notification Badge
+        // App Bar
         SliverAppBar(
           pinned: true,
           floating: true,
           snap: true,
           elevation: 1,
-          backgroundColor: AppColorsTheme.cardBg(context),
+          backgroundColor: isDark ? const Color(0xFF1E1E24) : Colors.white,
           automaticallyImplyLeading: false,
           titleSpacing: 0,
           toolbarHeight: 52.h,
           title: Stack(
             alignment: Alignment.center,
             children: [
-              // 100% Dead-Centered Logo
               Center(
                 child: Image.asset(
                   isDark ? whiteLogo : logo,
@@ -357,19 +585,17 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                   fit: BoxFit.contain,
                 ),
               ),
-              // Left Drawer Menu Icon
               Positioned(
                 left: 0,
                 child: IconButton(
                   onPressed: widget.onOpenDrawer,
                   icon: Icon(
                     Icons.menu_rounded,
-                    color: AppColorsTheme.textMainColor(context),
+                    color: isDark ? Colors.white : _BrandColors.primaryText,
                     size: 23.sp,
                   ),
                 ),
               ),
-              // Right Action Icons: Notifications & Profile
               Positioned(
                 right: 0,
                 child: Row(
@@ -384,18 +610,25 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                         children: [
                           Icon(
                             Icons.notifications_none_rounded,
-                            color: AppColorsTheme.textMainColor(context),
-                            size: 21.sp,
+                            color: isDark ? Colors.white : _BrandColors.primaryText,
+                            size: 22.sp,
                           ),
                           Positioned(
                             top: -2.h,
                             right: -2.w,
                             child: Container(
-                              width: 7.w,
-                              height: 7.h,
+                              padding: EdgeInsets.all(3.w),
                               decoration: const BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: primaryOrange,
+                                color: Colors.redAccent,
+                              ),
+                              child: Text(
+                                '1',
+                                style: TextStyle(
+                                  fontSize: 8.5.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
                               ),
                             ),
                           ),
@@ -408,7 +641,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                       },
                       icon: Icon(
                         Icons.person_outline_rounded,
-                        color: AppColorsTheme.textMainColor(context),
+                        color: isDark ? Colors.white : _BrandColors.primaryText,
                         size: 21.sp,
                       ),
                     ),
@@ -419,15 +652,12 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
           ),
         ),
 
-        // 2. Considine Group Workspace & Metric Cards Section
+        // Main Dashboard Body Sections
         SliverToBoxAdapter(
           child: Column(
             children: [
-              // Welcome Gradient Banner
               _buildWelcomeBanner(context),
-              UIHelper.verticalSpace(8.h),
-
-              // Metrics Summary Grid Section
+              UIHelper.verticalSpace(4.h),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20.w),
                 child: Column(
@@ -437,10 +667,11 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                         Expanded(
                           child: _buildMetricCard(
                             context: context,
-                            title: 'Products',
-                            value: '12 Active',
-                            icon: Icons.shopping_bag_outlined,
-                            color: primaryOrange,
+                            title: 'Active Products',
+                            value: '12',
+                            icon: Icons.shopping_bag_rounded,
+                            color: _BrandColors.primaryOrange,
+                            lightBg: const Color(0xFFFFF0E8),
                             onTap: () => ProductCategoryDetailSheet.show(context, 'hub_products'.tr, isCatalog: true),
                           ),
                         ),
@@ -448,16 +679,17 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                         Expanded(
                           child: _buildMetricCard(
                             context: context,
-                            title: 'Active Orders',
-                            value: '4 Pending',
+                            title: 'Pending Orders',
+                            value: '4',
                             icon: Icons.format_list_bulleted_rounded,
-                            color: const Color(0xFF0284C7),
+                            color: _BrandColors.blue,
+                            lightBg: const Color(0xFFEDF6FF),
                             onTap: () => OrderCategoryDetailSheet.show(context, 'hub_orders'.tr),
                           ),
                         ),
                       ],
                     ),
-                    UIHelper.verticalSpace(8.h),
+                    UIHelper.verticalSpace(10.h),
                     Row(
                       children: [
                         Expanded(
@@ -465,8 +697,9 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                             context: context,
                             title: 'Revenue',
                             value: '৳ 45,800',
-                            icon: Icons.account_balance_wallet_outlined,
-                            color: const Color(0xFF10B981),
+                            icon: Icons.account_balance_wallet_rounded,
+                            color: _BrandColors.green,
+                            lightBg: const Color(0xFFEFFFF6),
                             onTap: () => InvoicesReceiptsSheet.show(context, initialTab: 'Receipts'),
                           ),
                         ),
@@ -474,10 +707,11 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                         Expanded(
                           child: _buildMetricCard(
                             context: context,
-                            title: 'Invoices',
-                            value: '8 Issued',
-                            icon: Icons.receipt_long_outlined,
-                            color: const Color(0xFF8B5CF6),
+                            title: 'Issued Invoices',
+                            value: '8',
+                            icon: Icons.receipt_long_rounded,
+                            color: _BrandColors.purple,
+                            lightBg: const Color(0xFFF7F0FF),
                             onTap: () => InvoicesReceiptsSheet.show(context, initialTab: 'Invoices'),
                           ),
                         ),
@@ -487,114 +721,15 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                 ),
               ),
               UIHelper.verticalSpace(12.h),
+
+              // Quick Access Section (3 Cards)
+              _buildQuickAccessSection(context),
+
+              // Products & My Products Full-Width Stacked List Tiles
+              _buildFeaturedModulesList(context),
+
+              UIHelper.verticalSpace(90.h),
             ],
-          ),
-        ),
-
-        // 3. Sticky Fixed Filter Chips Header (Pinned on Scrolling)
-        SliverPersistentHeader(
-          pinned: true,
-          delegate: _StickyFilterDelegate(
-            child: Container(
-              color: AppColorsTheme.background(context),
-              padding: EdgeInsets.symmetric(vertical: 4.h),
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                itemCount: _filters.length,
-                itemBuilder: (context, index) {
-                  final filter = _filters[index];
-                  final isSelected = _selectedFilter == filter;
-
-                  String filterLabel = filter;
-                  if (filter == 'All') filterLabel = 'filter_all'.tr;
-                  if (filter == 'Products') filterLabel = 'filter_products'.tr;
-                  if (filter == 'Sales & Orders') filterLabel = 'filter_sales_orders'.tr;
-                  if (filter == 'Finance') filterLabel = 'filter_finance'.tr;
-
-                  return Padding(
-                    padding: EdgeInsets.only(right: 8.w),
-                    child: GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          _selectedFilter = filter;
-                        });
-                      },
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 180),
-                        padding: EdgeInsets.symmetric(horizontal: 13.w, vertical: 6.h),
-                        decoration: BoxDecoration(
-                          color: isSelected ? primaryOrange : AppColorsTheme.cardBg(context),
-                          borderRadius: BorderRadius.circular(18.r),
-                          border: Border.all(
-                            color: isSelected ? primaryOrange : AppColorsTheme.borderColor(context),
-                            width: 1.w,
-                          ),
-                          boxShadow: [
-                            if (isSelected)
-                              BoxShadow(
-                                color: primaryOrange.withValues(alpha: 0.3),
-                                blurRadius: 6.r,
-                                offset: const Offset(0, 2),
-                              )
-                            else
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: isDark ? 0.08 : 0.02),
-                                blurRadius: 4.r,
-                              ),
-                          ],
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Icon(
-                              _getFilterIcon(filter),
-                              size: 13.sp,
-                              color: isSelected ? Colors.white : AppColorsTheme.textMutedColor(context),
-                            ),
-                            UIHelper.horizontalSpace(5.w),
-                            Text(
-                              filterLabel,
-                              style: TextStyle(
-                                fontSize: 11.5.sp,
-                                fontWeight: isSelected ? FontWeight.w800 : FontWeight.w600,
-                                color: isSelected ? Colors.white : AppColorsTheme.textMainColor(context),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-        ),
-
-        // 4. Ultra-Sleek Compact 2-Column Cards Grid with Category Colors
-        SliverPadding(
-          padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 100.h),
-          sliver: SliverGrid(
-            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              crossAxisSpacing: 10.w,
-              mainAxisSpacing: 10.h,
-              childAspectRatio: 1.3,
-            ),
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final item = filteredItems[index];
-                return HubCardTileWidget(
-                  title: item.titleKey.tr,
-                  subtitle: item.tagKey.tr,
-                  iconData: item.iconData,
-                  categoryColor: item.categoryColor,
-                  onTap: () => _handleCardTap(context, item),
-                );
-              },
-              childCount: filteredItems.length,
-            ),
           ),
         ),
       ],
@@ -602,24 +737,97 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
   }
 }
 
-class _StickyFilterDelegate extends SliverPersistentHeaderDelegate {
-  final Widget child;
+class _WelcomeBannerWavePainter extends CustomPainter {
+  final bool isDark;
 
-  _StickyFilterDelegate({required this.child});
+  _WelcomeBannerWavePainter({required this.isDark});
 
   @override
-  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
-    return child;
+  void paint(Canvas canvas, Size size) {
+    if (isDark) return;
+
+    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+
+    final paint1 = Paint()
+      ..shader = LinearGradient(
+        colors: [
+          const Color(0xFFFCC6BB).withValues(alpha: 0.5),
+          const Color(0xFFFF8533).withValues(alpha: 0.85),
+        ],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ).createShader(rect)
+      ..style = PaintingStyle.fill;
+
+    final path1 = Path()
+      ..moveTo(size.width * 0.42, 0)
+      ..cubicTo(
+        size.width * 0.58,
+        size.height * 0.15,
+        size.width * 0.46,
+        size.height * 0.85,
+        size.width * 0.7,
+        size.height,
+      )
+      ..lineTo(size.width, size.height)
+      ..lineTo(size.width, 0)
+      ..close();
+
+    canvas.drawPath(path1, paint1);
+
+    final paint2 = Paint()
+      ..shader = const LinearGradient(
+        colors: [Color(0xFFFF7A00), Color(0xFFFF5500)],
+        begin: Alignment.topCenter,
+        end: Alignment.bottomRight,
+      ).createShader(rect)
+      ..style = PaintingStyle.fill;
+
+    final path2 = Path()
+      ..moveTo(size.width * 0.65, size.height)
+      ..cubicTo(
+        size.width * 0.72,
+        size.height * 0.35,
+        size.width * 0.84,
+        size.height * 0.88,
+        size.width,
+        size.height * 0.5,
+      )
+      ..lineTo(size.width, size.height)
+      ..close();
+
+    canvas.drawPath(path2, paint2);
   }
 
   @override
-  double get maxExtent => 44.h;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+
+class _MetricCardWavePainter extends CustomPainter {
+  final Color color;
+
+  _MetricCardWavePainter({required this.color});
 
   @override
-  double get minExtent => 44.h;
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color.withValues(alpha: 0.18)
+      ..style = PaintingStyle.fill;
 
-  @override
-  bool shouldRebuild(covariant _StickyFilterDelegate oldDelegate) {
-    return true;
+    final path = Path()
+      ..moveTo(size.width * 0.4, size.height)
+      ..quadraticBezierTo(
+        size.width * 0.65,
+        size.height * 0.55,
+        size.width,
+        size.height * 0.65,
+      )
+      ..lineTo(size.width, size.height)
+      ..close();
+
+    canvas.drawPath(path, paint);
   }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

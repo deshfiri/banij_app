@@ -271,7 +271,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                           color: isSelected ? primaryOrange : AppColorsTheme.textMutedColor(context),
                         ),
                         title: Text(
-                          addr.recipientName ?? 'Address ${index + 1}',
+                          addr.recipientName,
                           style: TextStyle(
                             fontSize: 14.sp,
                             fontWeight: FontWeight.bold,
@@ -598,7 +598,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                                 children: [
                                   Text(
                                     _selectedAddress != null
-                                        ? (_selectedAddress!.recipientName ?? 'Selected Address')
+                                        ? _selectedAddress!.recipientName
                                         : 'Address is not found',
                                     style: TextStyle(
                                       fontSize: 15.sp,
