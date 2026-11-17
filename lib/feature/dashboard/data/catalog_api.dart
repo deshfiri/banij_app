@@ -10,9 +10,19 @@ final class CatalogApi {
   CatalogApi._internal();
   static CatalogApi get instance => _singleton;
 
-  Future<CatalogResponseModel> getCatalogProducts(String endpoint) async {
+  Future<CatalogResponseModel> getCatalogProducts(
+      String endpoint, {Map<String, dynamic>? queryParameters}) async {
     try {
-      Response response = await getHttp(endpoint);
+      String finalEndpoint = endpoint;
+      if (queryParameters != null && queryParameters.isNotEmpty) {
+        // Construct query parameters cleanly
+        final queryString = queryParameters.entries
+            .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value.toString())}')
+            .join('&');
+        finalEndpoint = '$endpoint?$queryString';
+      }
+
+      Response response = await getHttp(finalEndpoint);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (response.data is Map<String, dynamic>) {

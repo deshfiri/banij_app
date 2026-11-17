@@ -91,7 +91,17 @@ class DashboardProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchCatalogProducts({String? type}) async {
+  Future<void> fetchCatalogProducts({
+    String? type,
+    String? search,
+    String? category,
+    String? brand,
+    String? stock,
+    String? priceMin,
+    String? priceMax,
+    String? scope,
+    int? page,
+  }) async {
     _isLoadingProducts = true;
     notifyListeners();
 
@@ -102,9 +112,25 @@ class DashboardProvider extends ChangeNotifier {
       } else if (type == 'dropshipping') {
         endpoint = EndPoints.catalogDropshipping();
       }
-      catalogResponseModel = await catalogRxObj.fetchCatalogProducts(endpoint);
-      catalogProductResponse = await myProductRxObj.fetchProducts(endpoint);
-    } catch (_) {
+
+      final Map<String, dynamic> queryParams = {};
+      if (search != null && search.isNotEmpty) queryParams['search'] = search;
+      if (category != null && category.isNotEmpty && category != 'All') queryParams['category'] = category;
+      if (brand != null && brand.isNotEmpty && brand != 'All') queryParams['brand'] = brand;
+      if (stock != null && stock.isNotEmpty) queryParams['stock'] = stock;
+      if (priceMin != null && priceMin.isNotEmpty) queryParams['price_min'] = priceMin;
+      if (priceMax != null && priceMax.isNotEmpty) queryParams['price_max'] = priceMax;
+      if (scope != null && scope.isNotEmpty) queryParams['scope'] = scope;
+      if (page != null) queryParams['page'] = page;
+
+      catalogResponseModel = await catalogRxObj.fetchCatalogProducts(
+        endpoint,
+        queryParameters: queryParams.isNotEmpty ? queryParams : null,
+      );
+    } catch (e) {
+      String err = e.toString().replaceAll('Exception: ', '');
+      ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Failed to fetch filtered products');
+      catalogResponseModel = CatalogResponseModel(data: []);
     } finally {
       _isLoadingProducts = false;
       notifyListeners();

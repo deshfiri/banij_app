@@ -15,9 +15,13 @@ final class CatalogRx extends RxResponseInt<CatalogResponseModel> {
 
   ValueStream<CatalogResponseModel> get getCatalogData => dataFetcher.stream;
 
-  Future<CatalogResponseModel> fetchCatalogProducts(String endpoint) async {
+  Future<CatalogResponseModel> fetchCatalogProducts(
+      String endpoint, {Map<String, dynamic>? queryParameters}) async {
     try {
-      CatalogResponseModel data = await _api.getCatalogProducts(endpoint);
+      CatalogResponseModel data = await _api.getCatalogProducts(
+          endpoint,
+          queryParameters: queryParameters,
+      );
       return handleSuccessWithReturn(data);
     } catch (error) {
       return handleErrorWithReturn(error);
