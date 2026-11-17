@@ -9,6 +9,7 @@ class HubCardTileWidget extends StatelessWidget {
   final String subtitle;
   final IconData iconData;
   final Color? categoryColor;
+  final Color? backgroundColor;
   final VoidCallback? onTap;
 
   const HubCardTileWidget({
@@ -17,6 +18,7 @@ class HubCardTileWidget extends StatelessWidget {
     required this.subtitle,
     required this.iconData,
     this.categoryColor,
+    this.backgroundColor,
     this.onTap,
   });
 
@@ -24,6 +26,7 @@ class HubCardTileWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final accentColor = categoryColor ?? primaryOrange;
+    final cardBgColor = backgroundColor ?? accentColor.withValues(alpha: isDark ? 0.18 : 0.12);
 
     return Material(
       color: Colors.transparent,
@@ -33,102 +36,62 @@ class HubCardTileWidget extends StatelessWidget {
         splashColor: accentColor.withValues(alpha: 0.18),
         highlightColor: accentColor.withValues(alpha: 0.08),
         child: Container(
-          padding: EdgeInsets.all(14.w),
+          padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 8.w),
           decoration: BoxDecoration(
-            color: AppColorsTheme.cardBg(context),
+            color: isDark ? AppColorsTheme.cardBg(context) : cardBgColor,
             borderRadius: BorderRadius.circular(22.r),
             border: Border.all(
               color: isDark
-                  ? AppColorsTheme.borderColor(context)
-                  : accentColor.withValues(alpha: 0.28),
+                  ? const Color(0xFF374151)
+                  : accentColor.withValues(alpha: 0.2),
               width: 1.w,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+                color: accentColor.withValues(alpha: isDark ? 0.08 : 0.04),
                 blurRadius: 10.r,
                 offset: const Offset(0, 3),
-              ),
-              BoxShadow(
-                color: accentColor.withValues(alpha: isDark ? 0.05 : 0.03),
-                blurRadius: 6.r,
-                offset: const Offset(0, 2),
               ),
             ],
           ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Top Row: Circular Icon Avatar & Action Chevron Circle
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(10.w),
-                    decoration: BoxDecoration(
-                      color: accentColor.withValues(alpha: isDark ? 0.25 : 0.12),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: accentColor.withValues(alpha: 0.3),
-                        width: 1.w,
+              // Circular White Icon Container matching Quick Access tiles
+              Container(
+                padding: EdgeInsets.all(11.w),
+                decoration: BoxDecoration(
+                  color: isDark ? accentColor.withValues(alpha: 0.2) : Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    if (!isDark)
+                      BoxShadow(
+                        color: accentColor.withValues(alpha: 0.14),
+                        blurRadius: 6.r,
+                        offset: const Offset(0, 2),
                       ),
-                    ),
-                    child: Icon(
-                      iconData,
-                      color: accentColor,
-                      size: 20.sp,
-                    ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.all(5.w),
-                    decoration: BoxDecoration(
-                      color: accentColor.withValues(alpha: isDark ? 0.2 : 0.1),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: accentColor.withValues(alpha: 0.25),
-                        width: 1.w,
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.chevron_right_rounded,
-                      color: accentColor,
-                      size: 14.sp,
-                    ),
-                  ),
-                ],
+                  ],
+                ),
+                child: Icon(
+                  iconData,
+                  color: accentColor,
+                  size: 23.sp,
+                ),
               ),
               UIHelper.verticalSpace(10.h),
 
-              // Bottom Info: Title & Uppercase Tag
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w900,
-                      color: AppColorsTheme.textMainColor(context),
-                      height: 1.2,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  UIHelper.verticalSpace(3.h),
-                  Text(
-                    subtitle.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 9.sp,
-                      fontWeight: FontWeight.w900,
-                      color: accentColor,
-                      letterSpacing: 0.8,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+              // Title Centered Text
+              Text(
+                title,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w800,
+                  color: AppColorsTheme.textMainColor(context),
+                  height: 1.15,
+                ),
               ),
             ],
           ),

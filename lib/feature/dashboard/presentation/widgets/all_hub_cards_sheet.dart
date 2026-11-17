@@ -16,6 +16,7 @@ class HubItem {
   final String tagKey;
   final IconData iconData;
   final Color categoryColor;
+  final Color backgroundColor;
 
   const HubItem({
     required this.titleKey,
@@ -23,6 +24,7 @@ class HubItem {
     required this.tagKey,
     required this.iconData,
     required this.categoryColor,
+    required this.backgroundColor,
   });
 }
 
@@ -54,6 +56,7 @@ class _AllHubCardsSheetState extends State<AllHubCardsSheet> {
       tagKey: 'catalog',
       iconData: Icons.shopping_bag_rounded,
       categoryColor: primaryOrange,
+      backgroundColor: Color(0xFFFFF0E8),
     ),
     HubItem(
       titleKey: 'hub_my_products',
@@ -61,6 +64,7 @@ class _AllHubCardsSheetState extends State<AllHubCardsSheet> {
       tagKey: 'tag_products',
       iconData: Icons.grid_view_rounded,
       categoryColor: primaryOrange,
+      backgroundColor: Color(0xFFFFF0E8),
     ),
     HubItem(
       titleKey: 'hub_all_orders',
@@ -68,6 +72,7 @@ class _AllHubCardsSheetState extends State<AllHubCardsSheet> {
       tagKey: 'tag_sales_orders',
       iconData: Icons.format_list_bulleted_rounded,
       categoryColor: Color(0xFF0284C7),
+      backgroundColor: Color(0xFFEDF6FF),
     ),
     HubItem(
       titleKey: 'hub_customers',
@@ -75,6 +80,7 @@ class _AllHubCardsSheetState extends State<AllHubCardsSheet> {
       tagKey: 'tag_sales_orders',
       iconData: Icons.people_outline_rounded,
       categoryColor: Color(0xFF0284C7),
+      backgroundColor: Color(0xFFEDF6FF),
     ),
     HubItem(
       titleKey: 'hub_orders',
@@ -82,6 +88,7 @@ class _AllHubCardsSheetState extends State<AllHubCardsSheet> {
       tagKey: 'tag_sales_orders',
       iconData: Icons.description_outlined,
       categoryColor: Color(0xFF0284C7),
+      backgroundColor: Color(0xFFEDF6FF),
     ),
     HubItem(
       titleKey: 'hub_my_websites',
@@ -89,6 +96,7 @@ class _AllHubCardsSheetState extends State<AllHubCardsSheet> {
       tagKey: 'tag_sales_orders',
       iconData: Icons.language_outlined,
       categoryColor: Color(0xFF0284C7),
+      backgroundColor: Color(0xFFEDF6FF),
     ),
     HubItem(
       titleKey: 'hub_invoices',
@@ -96,6 +104,7 @@ class _AllHubCardsSheetState extends State<AllHubCardsSheet> {
       tagKey: 'tag_finance',
       iconData: Icons.receipt_long_outlined,
       categoryColor: Color(0xFF8B5CF6),
+      backgroundColor: Color(0xFFF7F0FF),
     ),
     HubItem(
       titleKey: 'hub_receipts',
@@ -103,6 +112,7 @@ class _AllHubCardsSheetState extends State<AllHubCardsSheet> {
       tagKey: 'tag_finance',
       iconData: Icons.payments_outlined,
       categoryColor: Color(0xFF10B981),
+      backgroundColor: Color(0xFFEFFFF6),
     ),
   ];
 
@@ -292,7 +302,7 @@ class _AllHubCardsSheetState extends State<AllHubCardsSheet> {
             ),
           ),
 
-          // 2-Column Grid of Hub Cards Matching Reference Screenshot
+          // 2-Column Grid of Hub Cards Matching Quick Access Tile Design
           Expanded(
             child: GridView.builder(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
@@ -300,7 +310,7 @@ class _AllHubCardsSheetState extends State<AllHubCardsSheet> {
                 crossAxisCount: 2,
                 crossAxisSpacing: 12.w,
                 mainAxisSpacing: 12.h,
-                childAspectRatio: 1.25,
+                childAspectRatio: 1.35,
               ),
               itemCount: filteredItems.length,
               itemBuilder: (context, index) {
@@ -310,6 +320,7 @@ class _AllHubCardsSheetState extends State<AllHubCardsSheet> {
                   subtitle: item.tagKey.tr,
                   iconData: item.iconData,
                   categoryColor: item.categoryColor,
+                  backgroundColor: item.backgroundColor,
                   onTap: () => _handleCardTap(context, item),
                 );
               },
