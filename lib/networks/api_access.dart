@@ -32,6 +32,7 @@ import '../feature/finance/data/withdrawal_list_rx.dart';
 import '../feature/finance/data/withdrawal_options_rx.dart';
 import '../feature/notification/data/notification_rx.dart';
 import '../feature/package/data/package_rx.dart';
+import '../feature/package/data/subscription_rx.dart';
 
 LoginRx loginRxObj = LoginRx();
 
@@ -80,3 +81,4 @@ WalletTransactionRx walletTransactionRxObj = WalletTransactionRx.instance;
 WalletTopUpRx walletTopUpRxObj = WalletTopUpRx.instance;
 RequestWithdrawalRx requestWithdrawalRxObj = RequestWithdrawalRx.instance;
 TwoFactorChallengeRx twoFactorChallengeRxObj = TwoFactorChallengeRx.instance;
+SubscriptionRx subscriptionRxObj = SubscriptionRx();

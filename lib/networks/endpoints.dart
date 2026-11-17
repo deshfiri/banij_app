@@ -28,6 +28,11 @@ final class EndPoints {
   static String signup() => "/register";
   static String profile()=>"/profile";
   static String package()=>"/packages";
+  static String selectPackage(String slug) => "/packages/$slug/select";
+  static String subscription() => "/subscription";
+  static String subscriptionCancel() => "/subscription/cancel";
+  static String subscriptionChange() => "/subscription/change";
+  static String subscriptionRenew() => "/subscription/renew";
   static String addressList()=>"/addresses";
   static String referrals()=>"/referrals";
   static String dashborad()=>"/dashboard";
