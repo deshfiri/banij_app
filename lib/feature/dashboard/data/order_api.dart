@@ -11,9 +11,18 @@ final class OrderApi {
   OrderApi._internal();
   static OrderApi get instance => _singleton;
 
-  Future<OrderResponseModel> getOrders() async {
+  Future<OrderResponseModel> getOrders([String? endpoint, Map<String, dynamic>? queryParameters]) async {
     try {
-      Response response = await getHttp(EndPoints.order());
+      String base = endpoint ?? EndPoints.order();
+      String finalEndpoint = base;
+      if (queryParameters != null && queryParameters.isNotEmpty) {
+        final queryString = queryParameters.entries
+            .map((e) => '${Uri.encodeComponent(e.key)}=${Uri.encodeComponent(e.value.toString())}')
+            .join('&');
+        finalEndpoint = '$base?$queryString';
+      }
+
+      Response response = await getHttp(finalEndpoint);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (response.data is Map<String, dynamic> || response.data is List) {
@@ -38,6 +47,27 @@ final class OrderApi {
       rethrow;
     } catch (error) {
       rethrow;
+    }
+  }
+
+  Future<bool> cancelStoreOrder(String orderId, {String? reason}) async {
+    try {
+      final body = {
+        if (reason != null && reason.isNotEmpty) "reason": reason,
+      };
+      Response response = await postHttp('/orders/store-orders/$orderId/cancellation', body);
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> exportOrders() async {
+    try {
+      Response response = await getHttp('/orders/export');
+      return response.statusCode == 200 || response.statusCode == 201;
+    } catch (_) {
+      return false;
     }
   }
 }

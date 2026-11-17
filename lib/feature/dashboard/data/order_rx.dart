@@ -15,12 +15,20 @@ final class OrderRx extends RxResponseInt<OrderResponseModel> {
 
   ValueStream get getOrderData => dataFetcher.stream;
 
-  Future<OrderResponseModel> fetchOrders() async {
+  Future<OrderResponseModel> fetchOrders([String? endpoint, Map<String, dynamic>? queryParameters]) async {
     try {
-      OrderResponseModel data = await _api.getOrders();
+      OrderResponseModel data = await _api.getOrders(endpoint, queryParameters);
       return handleSuccessWithReturn(data);
     } catch (error) {
       return handleErrorWithReturn(error);
     }
+  }
+
+  Future<bool> cancelStoreOrder(String orderId, {String? reason}) async {
+    return await _api.cancelStoreOrder(orderId, reason: reason);
+  }
+
+  Future<bool> exportOrders() async {
+    return await _api.exportOrders();
   }
 }
