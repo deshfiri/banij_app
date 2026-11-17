@@ -9,6 +9,8 @@ import '../helpers/toast.dart';
 import '../networks/api_access.dart';
 import '../networks/endpoints.dart';
 
+import '../feature/dashboard/model/catalog_model.dart';
+
 class DashboardProvider extends ChangeNotifier {
   int _currentIndex = 0;
   int _currentStep = 3; // Step 3: KYC, Step 4: Package, Step 5: Approval
@@ -18,6 +20,7 @@ class DashboardProvider extends ChangeNotifier {
   PackageResponseModel? packageResponse;
   MyProductResponseModel? myProductResponse;
   MyProductResponseModel? catalogProductResponse;
+  CatalogResponseModel? catalogResponseModel;
   OrderResponseModel? orderResponse;
   AccountModel? accountModel;
 
@@ -88,18 +91,20 @@ class DashboardProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> fetchCatalogProducts() async {
+  Future<void> fetchCatalogProducts({String? type}) async {
     _isLoadingProducts = true;
     notifyListeners();
 
     try {
-      catalogProductResponse = await myProductRxObj.fetchProducts(EndPoints.catalog());
-    } catch (e) {
-      catalogProductResponse = MyProductResponseModel(data: []);
-      String err = e.toString().replaceAll('Exception: ', '');
-      if (err.isNotEmpty) {
-        ToastUtil.showErrorMessage(err);
+      String endpoint = EndPoints.catalog();
+      if (type == 'wholesale') {
+        endpoint = EndPoints.catalogWholesale();
+      } else if (type == 'dropshipping') {
+        endpoint = EndPoints.catalogDropshipping();
       }
+      catalogResponseModel = await catalogRxObj.fetchCatalogProducts(endpoint);
+      catalogProductResponse = await myProductRxObj.fetchProducts(endpoint);
+    } catch (_) {
     } finally {
       _isLoadingProducts = false;
       notifyListeners();

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -9,6 +8,8 @@ import '../../../../helpers/all_routes.dart';
 import '../../../../helpers/ui_helpers.dart';
 import '../../../../providers/cart_provider.dart';
 import '../../../../providers/dashboard_provider.dart';
+import '../../model/catalog_model.dart';
+import '../../model/my_product_model.dart';
 
 class ProductCategoryDetailSheet extends StatefulWidget {
   final String categoryTitle;
@@ -40,6 +41,7 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
   String _selectedCategory = 'All';
+  String _selectedTypeTab = 'All'; // 'All', 'Wholesale', 'Dropshipping', 'My Products'
 
   @override
   void initState() {
@@ -47,9 +49,10 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
     WidgetsBinding.instance.addPostFrameCallback((_) {
       try {
         if (widget.isCatalog) {
-          context.read<DashboardProvider>().fetchCatalogProducts();
+          context.read<DashboardProvider>().fetchCatalogProducts(type: 'all');
         } else {
           context.read<DashboardProvider>().fetchMyProducts();
+          _selectedTypeTab = 'My Products';
         }
       } catch (_) {}
     });
@@ -61,21 +64,48 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
     super.dispose();
   }
 
+  void _onTypeTabChanged(String tab) {
+    setState(() {
+      _selectedTypeTab = tab;
+      _selectedCategory = 'All';
+    });
+    final provider = context.read<DashboardProvider>();
+    if (tab == 'Wholesale') {
+      provider.fetchCatalogProducts(type: 'wholesale');
+    } else if (tab == 'Dropshipping') {
+      provider.fetchCatalogProducts(type: 'dropshipping');
+    } else if (tab == 'My Products') {
+      provider.fetchMyProducts();
+    } else {
+      provider.fetchCatalogProducts(type: 'all');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final dashboardProvider = context.watch<DashboardProvider>();
-    final rawApiProducts = widget.isCatalog
-        ? (dashboardProvider.catalogProductResponse?.data ?? [])
-        : (dashboardProvider.myProductResponse?.data ?? []);
-    final apiCategories = widget.isCatalog
-        ? (dashboardProvider.catalogProductResponse?.options?.categories ?? [])
-        : (dashboardProvider.myProductResponse?.options?.categories ?? []);
-    final displayProducts = rawApiProducts;
 
-    final filteredList = displayProducts.where((product) {
-      final name = product.name ?? '';
-      final category = product.category ?? '';
+    // Extract API Data or Catalog Model based on active type tab
+    final List<dynamic> rawApiProducts = _selectedTypeTab == 'My Products'
+        ? (dashboardProvider.myProductResponse?.data ?? [])
+        : (dashboardProvider.catalogResponseModel?.data ?? dashboardProvider.catalogProductResponse?.data ?? []);
+
+    final List<dynamic> apiCategories = _selectedTypeTab == 'My Products'
+        ? (dashboardProvider.myProductResponse?.options?.categories ?? [])
+        : (dashboardProvider.catalogResponseModel?.options?.categories ?? dashboardProvider.catalogProductResponse?.options?.categories ?? []);
+
+    final filteredList = rawApiProducts.where((product) {
+      String name = '';
+      String category = '';
+
+      if (product is CatalogProductData) {
+        name = product.name ?? '';
+        category = product.category ?? '';
+      } else if (product is ProductItemModel) {
+        name = product.name ?? '';
+        category = product.category ?? '';
+      }
+
       final matchesSearch = name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           category.toLowerCase().contains(_searchQuery.toLowerCase());
 
@@ -87,7 +117,7 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
     }).toList();
 
     return Container(
-      height: MediaQuery.of(context).size.height * 0.84,
+      height: MediaQuery.of(context).size.height * 0.88,
       decoration: BoxDecoration(
         color: AppColorsTheme.background(context),
         borderRadius: BorderRadius.only(
@@ -177,7 +207,7 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
                               if (cart.totalItemsCount == 0) return const SizedBox.shrink();
                               return Container(
                                 padding: EdgeInsets.all(3.w),
-                                decoration: BoxDecoration(
+                                decoration: const BoxDecoration(
                                   color: primaryOrange,
                                   shape: BoxShape.circle,
                                 ),
@@ -222,7 +252,23 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
               ],
             ),
           ),
-          UIHelper.verticalSpace(16.h),
+          UIHelper.verticalSpace(14.h),
+
+          // Endpoint Type Tabs Bar: All, Wholesale, Dropshipping, My Products
+          SizedBox(
+            height: 38.h,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: EdgeInsets.symmetric(horizontal: 20.w),
+              children: [
+                _buildTypeTabChip('All', 'All Products'),
+                _buildTypeTabChip('Wholesale', 'Wholesale'),
+                _buildTypeTabChip('Dropshipping', 'Dropshipping'),
+                _buildTypeTabChip('My Products', 'My Products'),
+              ],
+            ),
+          ),
+          UIHelper.verticalSpace(12.h),
 
           // Search Field Input
           Padding(
@@ -255,7 +301,7 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
                         color: AppColorsTheme.textMainColor(context),
                       ),
                       decoration: InputDecoration(
-                        hintText: 'Search in ${widget.categoryTitle}...',
+                        hintText: 'Search in $_selectedTypeTab...',
                         hintStyle: TextStyle(
                           fontSize: 13.sp,
                           color: AppColorsTheme.textMutedColor(context),
@@ -298,7 +344,7 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
                     return Padding(
                       padding: EdgeInsets.only(right: 8.w),
                       child: ChoiceChip(
-                        label: Text('All Categories'),
+                        label: const Text('All Categories'),
                         selected: isSelected,
                         selectedColor: primaryOrange,
                         backgroundColor: AppColorsTheme.cardBg(context),
@@ -319,7 +365,7 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
                     );
                   }
                   final cat = apiCategories[index - 1];
-                  final label = cat.label ?? '';
+                  final label = (cat?.label ?? '').toString();
                   final displayLabel = label.contains('›') ? label.split('›').last.trim() : label;
                   final isSelected = _selectedCategory == label;
 
@@ -378,208 +424,246 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
                             child: Text(
                               'No matching products found',
                               style: TextStyle(
-                                fontSize: 14.sp,
+                                fontSize: 13.sp,
                                 color: AppColorsTheme.textMutedColor(context),
                               ),
                             ),
                           )
                         : ListView.builder(
-                        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
-                        itemCount: filteredList.length,
-                        itemBuilder: (context, index) {
-                          final product = filteredList[index];
-                          final imageUrl = product.image?.url ?? '';
-                          final title = product.name ?? '';
-                          final category = product.category ?? '';
-                          final price = product.wholesale?.price?.formatted ?? '';
-                          final stock = product.wholesale?.inStock != null
-                              ? '${product.wholesale!.inStock} Units in Stock'
-                              : '';
+                            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+                            itemCount: filteredList.length,
+                            itemBuilder: (context, index) {
+                              final item = filteredList[index];
+                              return _buildProductItemCard(context, item);
+                            },
+                          ),
+          ),
+        ],
+      ),
+    );
+  }
 
-                          return Container(
-                            margin: EdgeInsets.only(bottom: 16.h),
-                            padding: EdgeInsets.all(16.w),
-                            decoration: BoxDecoration(
-                              color: AppColorsTheme.cardBg(context),
-                              borderRadius: BorderRadius.circular(18.r),
-                              border: Border.all(
-                                color: AppColorsTheme.borderColor(context),
-                                width: 1.w,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
-                                  blurRadius: 10.r,
-                                  offset: const Offset(0, 4),
-                                ),
-                              ],
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Top Row: Product Image Thumbnail, Title & Status Tag
-                                Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(14.r),
-                                      child: Container(
-                                        width: 64.w,
-                                        height: 64.h,
-                                        decoration: BoxDecoration(
-                                          color: primaryOrange.withValues(alpha: isDark ? 0.15 : 0.12),
-                                          borderRadius: BorderRadius.circular(14.r),
-                                          border: Border.all(
-                                            color: primaryOrange.withValues(alpha: 0.3),
-                                            width: 1.w,
-                                          ),
-                                        ),
-                                        child: Image.network(
-                                          imageUrl,
-                                          fit: BoxFit.cover,
-                                          errorBuilder: (context, error, stackTrace) {
-                                            return Center(
-                                              child: Icon(
-                                                Icons.inventory_2_outlined,
-                                                color: primaryOrange,
-                                                size: 26.sp,
-                                              ),
-                                            );
-                                          },
-                                        ),
-                                      ),
-                                    ),
-                                    UIHelper.horizontalSpace(12.w),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            title,
-                                            style: TextStyle(
-                                              fontSize: 14.5.sp,
-                                              fontWeight: FontWeight.w800,
-                                              color: AppColorsTheme.textMainColor(context),
-                                              height: 1.25,
-                                            ),
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          UIHelper.verticalSpace(4.h),
-                                          Text(
-                                            product.shortDescription ?? 'Catalog',
-                                            style: TextStyle(
-                                              fontSize: 12.sp,
-                                              color: AppColorsTheme.textMutedColor(context),
-                                            ),
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                          UIHelper.verticalSpace(4.h),
-                                          Container(
-                                            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-                                            decoration: BoxDecoration(
-                                              color: const Color(0xFF10B981).withValues(alpha: 0.12),
-                                              borderRadius: BorderRadius.circular(8.r),
-                                            ),
-                                            child: Text(
-                                              category.toUpperCase(),
-                                              style: TextStyle(
-                                                fontSize: 9.5.sp,
-                                                fontWeight: FontWeight.w800,
-                                                color: const Color(0xFF10B981),
-                                                letterSpacing: 0.5,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                UIHelper.verticalSpace(12.h),
-                                Divider(color: AppColorsTheme.borderColor(context)),
-                                UIHelper.verticalSpace(10.h),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          price,
-                                          style: TextStyle(
-                                            fontSize: 17.sp,
-                                            fontWeight: FontWeight.w900,
-                                            color: primaryOrange,
-                                          ),
-                                        ),
-                                        UIHelper.verticalSpace(2.h),
-                                        Text(
-                                          stock,
-                                          style: TextStyle(
-                                            fontSize: 11.sp,
-                                            fontWeight: FontWeight.w600,
-                                            color: AppColorsTheme.textMutedColor(context),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      children: [
-                                        OutlinedButton(
-                                          onPressed: () {
-                                            context.read<CartProvider>().addToCart(product, quantity: 1);
-                                          },
-                                          style: OutlinedButton.styleFrom(
-                                            foregroundColor: AppColorsTheme.textMainColor(context),
-                                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
-                                            side: BorderSide(color: AppColorsTheme.borderColor(context)),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(10.r),
-                                            ),
-                                          ),
-                                          child: Text(
-                                            'Add to Cart',
-                                            style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold),
-                                          ),
-                                        ),
-                                        UIHelper.horizontalSpace(8.w),
-                                        ElevatedButton.icon(
-                                          onPressed: () {
-                                            Navigator.pushNamed(
-                                              context,
-                                              Routes.productDetailScreen,
-                                              arguments: product,
-                                            );
-                                          },
-                                          icon: Icon(Icons.arrow_forward_rounded, size: 14.sp),
-                                          label: Text(
-                                            'Details'.tr,
-                                            style: TextStyle(
-                                              fontSize: 12.sp,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: primaryOrange,
-                                            foregroundColor: Colors.white,
-                                            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(10.r),
-                                            ),
-                                            elevation: 0,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          );
-                        },
+  Widget _buildTypeTabChip(String value, String label) {
+    final isSelected = _selectedTypeTab == value;
+    return Padding(
+      padding: EdgeInsets.only(right: 8.w),
+      child: GestureDetector(
+        onTap: () => _onTypeTabChanged(value),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
+          decoration: BoxDecoration(
+            color: isSelected ? primaryOrange : AppColorsTheme.cardBg(context),
+            borderRadius: BorderRadius.circular(18.r),
+            border: Border.all(
+              color: isSelected ? primaryOrange : AppColorsTheme.borderColor(context),
+              width: 1.w,
+            ),
+            boxShadow: [
+              if (isSelected)
+                BoxShadow(
+                  color: primaryOrange.withValues(alpha: 0.3),
+                  blurRadius: 6.r,
+                  offset: const Offset(0, 2),
+                ),
+            ],
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
+                color: isSelected ? Colors.white : AppColorsTheme.textMainColor(context),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProductItemCard(BuildContext context, dynamic item) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    String name = 'Product Name';
+    String category = 'General';
+    String priceText = '৳ 0.00';
+    String? imageUrl;
+    int minQty = 1;
+    bool isFeatured = false;
+    String? slug;
+
+    if (item is CatalogProductData) {
+      name = item.name ?? 'Product Name';
+      category = item.category ?? 'General';
+      imageUrl = item.image?.url;
+      minQty = item.wholesale?.minOrderQuantity ?? 1;
+      isFeatured = item.isFeatured ?? false;
+      slug = item.slug;
+
+      if (item.wholesale?.price?.formatted != null) {
+        priceText = item.wholesale!.price!.formatted!;
+      } else if (item.partnerSelling?.suggestedSellingPrice?.formatted != null) {
+        priceText = item.partnerSelling!.suggestedSellingPrice!.formatted!;
+      } else if (item.wholesale?.price?.amount != null) {
+        priceText = '৳ ${item.wholesale!.price!.amount}';
+      }
+    } else if (item is ProductItemModel) {
+      name = item.name ?? 'Product Name';
+      category = item.category ?? 'General';
+      imageUrl = item.image?.url;
+      minQty = item.wholesale?.minOrderQuantity ?? 1;
+      isFeatured = item.isFeatured ?? false;
+      slug = item.slug;
+
+      if (item.wholesale?.price?.formatted != null) {
+        priceText = item.wholesale!.price!.formatted!;
+      }
+    }
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 12.h),
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: AppColorsTheme.cardBg(context),
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(
+          color: isFeatured ? primaryOrange.withValues(alpha: 0.5) : AppColorsTheme.borderColor(context),
+          width: 1.w,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+            blurRadius: 8.r,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          // Product Image Container
+          Container(
+            width: 72.w,
+            height: 72.h,
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+              color: primaryOrange.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(14.r),
+            ),
+            child: imageUrl != null && imageUrl.isNotEmpty
+                ? Image.network(
+                    imageUrl,
+                    width: 72.w,
+                    height: 72.h,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) => Center(
+                      child: Icon(Icons.shopping_bag_outlined, color: primaryOrange, size: 28.sp),
+                    ),
+                  )
+                : Center(
+                    child: Icon(Icons.shopping_bag_outlined, color: primaryOrange, size: 28.sp),
+                  ),
+          ),
+          UIHelper.horizontalSpace(12.w),
+
+          // Details Column
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (isFeatured) ...[
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                    decoration: BoxDecoration(
+                      color: primaryOrange.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(6.r),
+                    ),
+                    child: Text(
+                      'FEATURED',
+                      style: TextStyle(
+                        fontSize: 8.5.sp,
+                        fontWeight: FontWeight.w800,
+                        color: primaryOrange,
                       ),
+                    ),
+                  ),
+                  UIHelper.verticalSpace(3.h),
+                ],
+                Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColorsTheme.textMainColor(context),
+                  ),
+                ),
+                UIHelper.verticalSpace(2.h),
+                Text(
+                  category,
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    color: AppColorsTheme.textMutedColor(context),
+                  ),
+                ),
+                UIHelper.verticalSpace(6.h),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      priceText,
+                      style: TextStyle(
+                        fontSize: 14.5.sp,
+                        fontWeight: FontWeight.w900,
+                        color: primaryOrange,
+                      ),
+                    ),
+                    Text(
+                      'Min: $minQty unit',
+                      style: TextStyle(
+                        fontSize: 10.5.sp,
+                        fontWeight: FontWeight.w600,
+                        color: AppColorsTheme.textMutedColor(context),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          UIHelper.horizontalSpace(8.w),
+
+          // Add to Cart Button
+          GestureDetector(
+            onTap: () {
+              final cart = context.read<CartProvider>();
+              if (slug != null && slug.isNotEmpty) {
+                cart.addItemToCart(productSlug: slug, quantity: minQty);
+              }
+              if (item is ProductItemModel) {
+                cart.addToCart(item, quantity: minQty);
+              }
+            },
+            child: Container(
+              padding: EdgeInsets.all(10.w),
+              decoration: BoxDecoration(
+                color: primaryOrange,
+                borderRadius: BorderRadius.circular(12.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryOrange.withValues(alpha: 0.3),
+                    blurRadius: 6.r,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.add_shopping_cart_rounded,
+                color: Colors.white,
+                size: 18.sp,
+              ),
+            ),
           ),
         ],
       ),
@@ -588,101 +672,21 @@ class _ProductCategoryDetailSheetState extends State<ProductCategoryDetailSheet>
 
   Widget _buildProductShimmer(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[300]!;
-    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
-
-    return ListView.builder(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 4.h),
-      itemCount: 4,
-      itemBuilder: (context, index) {
-        return Shimmer.fromColors(
-          baseColor: baseColor,
-          highlightColor: highlightColor,
-          child: Container(
-            margin: EdgeInsets.only(bottom: 16.h),
-            padding: EdgeInsets.all(16.w),
-            decoration: BoxDecoration(
-              color: AppColorsTheme.cardBg(context),
-              borderRadius: BorderRadius.circular(18.r),
-              border: Border.all(
-                color: AppColorsTheme.borderColor(context),
-                width: 1.w,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      width: 64.w,
-                      height: 64.h,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(14.r),
-                      ),
-                    ),
-                    UIHelper.horizontalSpace(12.w),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: double.infinity,
-                            height: 14.h,
-                            color: Colors.white,
-                          ),
-                          UIHelper.verticalSpace(6.h),
-                          Container(
-                            width: 140.w,
-                            height: 12.h,
-                            color: Colors.white,
-                          ),
-                          UIHelper.verticalSpace(8.h),
-                          Container(
-                            width: 70.w,
-                            height: 16.h,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(8.r),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-                UIHelper.verticalSpace(12.h),
-                Container(
-                  width: double.infinity,
-                  height: 1.h,
-                  color: Colors.white,
-                ),
-                UIHelper.verticalSpace(10.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      width: 90.w,
-                      height: 20.h,
-                      color: Colors.white,
-                    ),
-                    Container(
-                      width: 80.w,
-                      height: 32.h,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(10.r),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+    return Shimmer.fromColors(
+      baseColor: isDark ? Colors.grey[800]! : Colors.grey[300]!,
+      highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
+      child: ListView.builder(
+        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
+        itemCount: 5,
+        itemBuilder: (context, index) => Container(
+          margin: EdgeInsets.only(bottom: 12.h),
+          height: 85.h,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18.r),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
