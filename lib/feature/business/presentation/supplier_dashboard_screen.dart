@@ -166,7 +166,7 @@ class _SupplierDashboardScreenState extends State<SupplierDashboardScreen> {
         Container(
           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
           decoration: BoxDecoration(
-            color: AppColorsTheme.cardBg(context),
+            color: AppColorsTheme.background(context),
             border: Border(
               bottom: BorderSide(
                 color: AppColorsTheme.borderColor(context),

@@ -86,8 +86,8 @@ class _AddWebsiteScreenState extends State<AddWebsiteScreen> {
     return Scaffold(
       backgroundColor: AppColorsTheme.background(context),
       appBar: AppBar(
-        backgroundColor: AppColorsTheme.cardBg(context),
-        elevation: 1,
+        backgroundColor: AppColorsTheme.background(context),
+        elevation: 0,
         leading: IconButton(
           icon: Icon(
             Icons.arrow_back_rounded,
