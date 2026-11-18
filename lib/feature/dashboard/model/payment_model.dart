@@ -3,12 +3,14 @@ import 'dart:convert';
 class PaymentMethodResponseModel {
   final List<PaymentMethodModel>? data;
   final List<PaymentTypeModel>? types;
+  final PaymentCanModel? can;
   final bool? success;
   final String? message;
 
   PaymentMethodResponseModel({
     this.data,
     this.types,
+    this.can,
     this.success,
     this.message,
   });
@@ -36,13 +38,30 @@ class PaymentMethodResponseModel {
       typeItems = rawTypes.map((x) => PaymentTypeModel.fromJson(x)).toList();
     }
 
+    final rawCan = jsonInput['can'];
+    PaymentCanModel? canModel;
+    if (rawCan is Map<String, dynamic>) {
+      canModel = PaymentCanModel.fromJson(rawCan);
+    }
+
     return PaymentMethodResponseModel(
       success: jsonInput['success'] is bool ? jsonInput['success'] : true,
       message: jsonInput['message']?.toString(),
       data: items,
       types: typeItems,
+      can: canModel,
     );
   }
+}
+
+class PaymentCanModel {
+  final bool? create;
+
+  PaymentCanModel({this.create});
+
+  factory PaymentCanModel.fromJson(Map<String, dynamic> json) => PaymentCanModel(
+        create: json['create'] is bool ? json['create'] : true,
+      );
 }
 
 class PaymentTypeModel {
@@ -69,27 +88,63 @@ class PaymentTypeModel {
 
 class PaymentMethodModel {
   final String? id;
+  final String? type;
+  final String? typeLabel;
+  final String? label;
+  final String? maskedNumber;
+  final String? bankName;
+  final String? branchName;
+  final bool? isDefault;
+  final bool? isActive;
+  final String? statusLabel;
+  final String? verifiedAt;
+  final String? createdAt;
   final String? name;
   final String? code;
   final String? description;
-  final String? icon;
 
   PaymentMethodModel({
     this.id,
+    this.type,
+    this.typeLabel,
+    this.label,
+    this.maskedNumber,
+    this.bankName,
+    this.branchName,
+    this.isDefault,
+    this.isActive,
+    this.statusLabel,
+    this.verifiedAt,
+    this.createdAt,
     this.name,
     this.code,
     this.description,
-    this.icon,
   });
 
   factory PaymentMethodModel.fromJson(dynamic json) {
     if (json is! Map<String, dynamic>) return PaymentMethodModel();
+    final typeLabelStr = json['type_label']?.toString() ?? json['name']?.toString() ?? json['label']?.toString() ?? 'Payment Method';
+    final labelStr = json['label']?.toString();
+    final maskedStr = json['masked_number']?.toString();
+    final descStr = json['description']?.toString() ??
+        (maskedStr != null ? '$maskedStr (${json['status_label'] ?? ''})' : labelStr);
+
     return PaymentMethodModel(
       id: json['id']?.toString() ?? json['code']?.toString(),
-      name: json['name']?.toString() ?? json['title']?.toString() ?? json['label']?.toString(),
-      code: json['code']?.toString(),
-      description: json['description']?.toString() ?? json['subtitle']?.toString(),
-      icon: json['icon']?.toString(),
+      type: json['type']?.toString(),
+      typeLabel: typeLabelStr,
+      label: labelStr,
+      maskedNumber: maskedStr,
+      bankName: json['bank_name']?.toString(),
+      branchName: json['branch_name']?.toString(),
+      isDefault: json['is_default'] is bool ? json['is_default'] : null,
+      isActive: json['is_active'] is bool ? json['is_active'] : null,
+      statusLabel: json['status_label']?.toString(),
+      verifiedAt: json['verified_at']?.toString(),
+      createdAt: json['created_at']?.toString(),
+      name: typeLabelStr,
+      code: json['code']?.toString() ?? json['type']?.toString() ?? json['id']?.toString(),
+      description: descStr,
     );
   }
 }

@@ -100,84 +100,93 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           // Step 5: Approval Pending & Unlock Workspace
           if (dashboardProvider.currentStep >= 5) ...[
-            Container(
-              padding: EdgeInsets.all(20.w),
-              decoration: BoxDecoration(
-                color: AppColorsTheme.cardBg(context),
-                borderRadius: BorderRadius.circular(18.r),
-                border: Border.all(
-                  color: const Color(0xFF10B981).withValues(alpha: 0.5),
-                  width: 1.5.w,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: const Color(0xFF10B981).withValues(alpha: isDark ? 0.0 : 0.06),
-                    blurRadius: 16.r,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Approval Status',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.bold,
-                          color: AppColorsTheme.textMainColor(context),
-                        ),
+            Builder(
+              builder: (context) {
+                final onboardingData = dashboardProvider.onboardingModel?.data;
+                final statusBadge = onboardingData?.approvalStatus ?? 'FINAL STEP';
+                final statusMsg = onboardingData?.message ??
+                    'Package Confirmed! Your account is undergoing final workspace verification.';
+
+                return Container(
+                  padding: EdgeInsets.all(20.w),
+                  decoration: BoxDecoration(
+                    color: AppColorsTheme.cardBg(context),
+                    borderRadius: BorderRadius.circular(18.r),
+                    border: Border.all(
+                      color: const Color(0xFF10B981).withValues(alpha: 0.5),
+                      width: 1.5.w,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF10B981).withValues(alpha: isDark ? 0.0 : 0.06),
+                        blurRadius: 16.r,
+                        offset: const Offset(0, 6),
                       ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'Approval Status',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColorsTheme.textMainColor(context),
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF10B981).withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            child: Text(
+                              statusBadge.toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 10.sp,
+                                fontWeight: FontWeight.bold,
+                                color: const Color(0xFF10B981),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                      UIHelper.verticalSpace(14.h),
                       Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                        padding: EdgeInsets.all(14.w),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF10B981).withValues(alpha: 0.12),
+                          color: const Color(0xFF10B981).withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(12.r),
                         ),
-                        child: Text(
-                          'FINAL STEP',
-                          style: TextStyle(
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.bold,
-                            color: const Color(0xFF10B981),
-                          ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.verified_rounded,
+                              size: 24.sp,
+                              color: const Color(0xFF10B981),
+                            ),
+                            UIHelper.horizontalSpace(12.w),
+                            Expanded(
+                              child: Text(
+                                statusMsg,
+                                style: TextStyle(
+                                  fontSize: 13.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColorsTheme.textMainColor(context),
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                  UIHelper.verticalSpace(14.h),
-                  Container(
-                    padding: EdgeInsets.all(14.w),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF10B981).withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.verified_rounded,
-                          size: 24.sp,
-                          color: const Color(0xFF10B981),
-                        ),
-                        UIHelper.horizontalSpace(12.w),
-                        Expanded(
-                          child: Text(
-                            'Package Confirmed! Your account is undergoing final workspace verification.',
-                            style: TextStyle(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w600,
-                              color: AppColorsTheme.textMainColor(context),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+                );
+              },
             ),
             UIHelper.verticalSpace(28.h),
             CustomButton(

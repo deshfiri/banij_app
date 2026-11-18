@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
 
 import '../feature/account/model/account_model.dart';
+import '../feature/dashboard/model/address_model.dart';
+import '../feature/dashboard/model/catalog_model.dart';
+import '../feature/dashboard/model/checkout_response_model.dart';
 import '../feature/dashboard/model/dashboard_model.dart';
 import '../feature/dashboard/model/my_product_model.dart';
+import '../feature/dashboard/model/onboarding_model.dart';
 import '../feature/dashboard/model/order_model.dart';
+import '../feature/dashboard/model/payment_model.dart';
+import '../feature/dashboard/model/wholesale_checkout_model.dart';
 import '../feature/package/model/package_model.dart';
 import '../helpers/toast.dart';
 import '../networks/api_access.dart';
 import '../networks/endpoints.dart';
-
-import '../feature/dashboard/model/catalog_model.dart';
 
 class DashboardProvider extends ChangeNotifier {
   int _currentIndex = 0;
@@ -23,6 +27,25 @@ class DashboardProvider extends ChangeNotifier {
   CatalogResponseModel? catalogResponseModel;
   OrderResponseModel? orderResponse;
   AccountModel? accountModel;
+  OnboardingResponseModel? onboardingModel;
+
+  WholesaleCheckoutResponseModel? wholesaleCheckoutModel;
+  PaymentMethodResponseModel? paymentResponseModel;
+  AddressResponseModel? addressResponseModel;
+  AddressItemModel? selectedAddress;
+  CheckoutResponseModel? checkoutResponseModel;
+
+  bool _isLoadingCheckout = false;
+  bool get isLoadingCheckout => _isLoadingCheckout;
+
+  bool _isApplyingCoupon = false;
+  bool get isApplyingCoupon => _isApplyingCoupon;
+
+  String _selectedPaymentMethod = 'bKash';
+  String get selectedPaymentMethod => _selectedPaymentMethod;
+
+  int _orderQuantity = 1;
+  int get orderQuantity => _orderQuantity;
 
   int get currentIndex => _currentIndex;
   int get currentStep => _currentStep;
@@ -47,6 +70,7 @@ class DashboardProvider extends ChangeNotifier {
     fetchPackages();
     fetchProfile();
     fetchMyProducts();
+    fetchOnboardingStatus();
   }
 
   bool _isLoadingProducts = false;
@@ -54,6 +78,118 @@ class DashboardProvider extends ChangeNotifier {
 
   bool _isLoadingOrders = false;
   bool get isLoadingOrders => _isLoadingOrders;
+
+  void setSelectedPaymentMethod(String method) {
+    _selectedPaymentMethod = method;
+    notifyListeners();
+  }
+
+  void incrementOrderQuantity() {
+    _orderQuantity++;
+    notifyListeners();
+  }
+
+  void decrementOrderQuantity() {
+    if (_orderQuantity > 1) {
+      _orderQuantity--;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchCheckoutState() async {
+    _isLoadingCheckout = true;
+    notifyListeners();
+
+    try {
+      final results = await Future.wait([
+        wholesaleCheckoutRxObj.fetchCheckout().catchError((_) => WholesaleCheckoutResponseModel()),
+        paymentRxObj.fetchPaymentMethods().catchError((_) => PaymentMethodResponseModel(data: [])),
+        addressRxObj.fetchAddresses().catchError((_) => AddressResponseModel(data: [])),
+        checkoutRxObj.fetchCheckoutDetails().catchError((_) => CheckoutResponseModel()),
+      ]);
+
+      if (results[0] is WholesaleCheckoutResponseModel) {
+        wholesaleCheckoutModel = results[0] as WholesaleCheckoutResponseModel;
+      }
+      if (results[1] is PaymentMethodResponseModel) {
+        paymentResponseModel = results[1] as PaymentMethodResponseModel;
+      }
+      if (results[2] is AddressResponseModel) {
+        addressResponseModel = results[2] as AddressResponseModel;
+        final addresses = addressResponseModel?.data ?? [];
+        if (addresses.isNotEmpty) {
+          selectedAddress = addresses.firstWhere(
+            (a) => a.isDefault == true,
+            orElse: () => addresses.first,
+          );
+        }
+      }
+      if (results[3] is CheckoutResponseModel) {
+        checkoutResponseModel = results[3] as CheckoutResponseModel;
+      }
+    } catch (_) {
+    } finally {
+      _isLoadingCheckout = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> applyWholesaleCoupon(String couponCode) async {
+    if (couponCode.trim().isEmpty) return;
+    _isApplyingCoupon = true;
+    notifyListeners();
+    try {
+      wholesaleCheckoutModel = await wholesaleCheckoutRxObj.applyCoupon(couponCode);
+      ToastUtil.showSuccessMessage('Coupon applied successfully');
+    } catch (e) {
+      String err = e.toString().replaceAll('Exception: ', '');
+      ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Failed to apply coupon');
+    } finally {
+      _isApplyingCoupon = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> removeWholesaleCoupon() async {
+    _isApplyingCoupon = true;
+    notifyListeners();
+    try {
+      wholesaleCheckoutModel = await wholesaleCheckoutRxObj.removeCoupon();
+      ToastUtil.showSuccessMessage('Coupon removed');
+    } catch (_) {
+    } finally {
+      _isApplyingCoupon = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> selectWholesaleAddress(AddressItemModel address) async {
+    selectedAddress = address;
+    notifyListeners();
+    if (address.id != null) {
+      try {
+        wholesaleCheckoutModel = await wholesaleCheckoutRxObj.selectAddress(address.id.toString());
+        ToastUtil.showSuccessMessage('Address updated for checkout');
+      } catch (_) {}
+    }
+  }
+
+  Future<bool> confirmWholesaleOrder() async {
+    _isLoadingCheckout = true;
+    notifyListeners();
+    try {
+      wholesaleCheckoutModel = await wholesaleCheckoutRxObj.confirmOrder();
+      ToastUtil.showSuccessMessage('Order confirmed successfully!');
+      return true;
+    } catch (e) {
+      String err = e.toString().replaceAll('Exception: ', '');
+      ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Order confirmation failed');
+      return false;
+    } finally {
+      _isLoadingCheckout = false;
+      notifyListeners();
+    }
+  }
 
   Future<void> fetchOrders({
     String? type,
@@ -281,5 +417,18 @@ class DashboardProvider extends ChangeNotifier {
   void unlockDashboard() {
     _isKycSubmitted = true;
     notifyListeners();
+  }
+
+  Future<void> fetchOnboardingStatus() async {
+    try {
+      onboardingModel = await onboardingRxObj.fetchOnboardingStatus();
+      if (onboardingModel?.data?.step != null) {
+        final stepNum = onboardingModel!.data!.step!;
+        if (stepNum > _currentStep) {
+          _currentStep = stepNum;
+        }
+      }
+      notifyListeners();
+    } catch (_) {}
   }
 }

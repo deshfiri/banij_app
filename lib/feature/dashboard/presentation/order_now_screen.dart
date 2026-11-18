@@ -2,19 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../../../constants/color.dart';
 import '../../../helpers/all_routes.dart';
 import '../../../helpers/toast.dart';
 import '../../../helpers/ui_helpers.dart';
-import '../../../networks/api_access.dart';
 import '../../../providers/cart_provider.dart';
-import '../model/address_model.dart';
-import '../model/checkout_response_model.dart';
+import '../../../providers/dashboard_provider.dart';
 import '../model/my_product_model.dart';
-import '../model/payment_model.dart';
-import '../model/wholesale_checkout_model.dart';
+import 'widgets/checkout/checkout_address_card.dart';
+import 'widgets/checkout/checkout_delivery_banner.dart';
+import 'widgets/checkout/checkout_payment_section.dart';
+import 'widgets/checkout/checkout_voucher_section.dart';
 
 class OrderNowScreen extends StatefulWidget {
   final ProductItemModel? product;
@@ -29,385 +28,22 @@ class OrderNowScreen extends StatefulWidget {
 }
 
 class _OrderNowScreenState extends State<OrderNowScreen> {
-  int _quantity = 1;
-  String _selectedPaymentMethod = 'bKash';
-  bool _isLoading = false;
   bool _isSummaryExpanded = false;
-  bool _isApplyingCoupon = false;
-
   final TextEditingController _couponController = TextEditingController();
-
-  bool _isLoadingPaymentMethods = true;
-  PaymentMethodResponseModel? _paymentResponseModel;
-
-  bool _isLoadingAddresses = true;
-  AddressResponseModel? _addressResponseModel;
-  AddressItemModel? _selectedAddress;
-  CheckoutResponseModel? _checkoutResponseModel;
-  WholesaleCheckoutResponseModel? _wholesaleCheckoutModel;
 
   @override
   void initState() {
     super.initState();
-    _fetchPaymentMethods();
-    _fetchAddresses();
-    _fetchCheckoutDetails();
-    _fetchWholesaleCheckout();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final dashboardProvider = context.read<DashboardProvider>();
+      dashboardProvider.fetchCheckoutState();
+    });
   }
 
   @override
   void dispose() {
     _couponController.dispose();
     super.dispose();
-  }
-
-  Future<void> _fetchWholesaleCheckout() async {
-    try {
-      final res = await wholesaleCheckoutRxObj.fetchCheckout();
-      if (mounted) {
-        setState(() {
-          _wholesaleCheckoutModel = res;
-          if (res.data?.appliedCoupon != null && res.data!.appliedCoupon!.isNotEmpty) {
-            _couponController.text = res.data!.appliedCoupon!;
-          }
-        });
-      }
-    } catch (_) {}
-  }
-
-  Future<void> _applyWholesaleCoupon() async {
-    final code = _couponController.text.trim();
-    if (code.isEmpty) return;
-    setState(() => _isApplyingCoupon = true);
-    try {
-      final res = await wholesaleCheckoutRxObj.applyCoupon(code);
-      if (mounted) {
-        setState(() {
-          _wholesaleCheckoutModel = res;
-        });
-        ToastUtil.showSuccessMessage('Coupon applied successfully');
-      }
-    } catch (e) {
-      String err = e.toString().replaceAll('Exception: ', '');
-      ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Failed to apply coupon');
-    } finally {
-      if (mounted) setState(() => _isApplyingCoupon = false);
-    }
-  }
-
-  Future<void> _removeWholesaleCoupon() async {
-    setState(() => _isApplyingCoupon = true);
-    try {
-      final res = await wholesaleCheckoutRxObj.removeCoupon();
-      if (mounted) {
-        setState(() {
-          _wholesaleCheckoutModel = res;
-          _couponController.clear();
-        });
-        ToastUtil.showSuccessMessage('Coupon removed');
-      }
-    } catch (_) {} finally {
-      if (mounted) setState(() => _isApplyingCoupon = false);
-    }
-  }
-
-  Future<void> _selectWholesaleAddress(String addressId) async {
-    try {
-      final res = await wholesaleCheckoutRxObj.selectAddress(addressId);
-      if (mounted) {
-        setState(() {
-          _wholesaleCheckoutModel = res;
-        });
-        ToastUtil.showSuccessMessage('Address updated for checkout');
-      }
-    } catch (_) {}
-  }
-
-  Future<void> _confirmWholesaleOrder() async {
-    setState(() => _isLoading = true);
-    try {
-      final res = await wholesaleCheckoutRxObj.confirmOrder();
-      if (mounted) {
-        setState(() {
-          _wholesaleCheckoutModel = res;
-          _isLoading = false;
-        });
-        ToastUtil.showSuccessMessage('Order confirmed successfully!');
-        Navigator.pushReplacementNamed(context, Routes.dashboardScreen);
-      }
-    } catch (e) {
-      String err = e.toString().replaceAll('Exception: ', '');
-      ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Order confirmation failed');
-      if (mounted) setState(() => _isLoading = false);
-    }
-  }
-
-  Future<void> _fetchCheckoutDetails() async {
-    try {
-      _checkoutResponseModel = await checkoutRxObj.fetchCheckoutDetails();
-      if (_checkoutResponseModel?.data?.coupon != null) {
-        _couponController.text = _checkoutResponseModel!.data!.coupon!;
-      }
-      if (mounted) {
-        setState(() {});
-      }
-    } catch (_) {}
-  }
-
-  Future<void> _fetchPaymentMethods() async {
-    setState(() {
-      _isLoadingPaymentMethods = true;
-    });
-    try {
-      _paymentResponseModel = await paymentRxObj.fetchPaymentMethods();
-    } catch (_) {
-      _paymentResponseModel = PaymentMethodResponseModel(data: []);
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoadingPaymentMethods = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _fetchAddresses() async {
-    setState(() {
-      _isLoadingAddresses = true;
-    });
-    try {
-      _addressResponseModel = await addressRxObj.fetchAddresses();
-      final addresses = _addressResponseModel?.data ?? [];
-      if (addresses.isNotEmpty) {
-        _selectedAddress = addresses.firstWhere(
-          (a) => a.isDefault == true,
-          orElse: () => addresses.first,
-        );
-      } else {
-        _selectedAddress = null;
-      }
-    } catch (_) {
-      _addressResponseModel = AddressResponseModel(data: []);
-      _selectedAddress = null;
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoadingAddresses = false;
-        });
-      }
-    }
-  }
-
-  void _incrementQuantity() {
-    setState(() {
-      _quantity++;
-    });
-  }
-
-  void _decrementQuantity() {
-    if (_quantity > 1) {
-      setState(() {
-        _quantity--;
-      });
-    }
-  }
-
-  Future<void> _applyCoupon() async {
-    final code = _couponController.text.trim();
-    if (code.isEmpty) {
-      ToastUtil.showErrorMessage('Please enter a coupon code');
-      return;
-    }
-    setState(() {
-      _isApplyingCoupon = true;
-    });
-    try {
-      await checkoutRxObj.coupon({"code": code});
-      ToastUtil.showSuccessMessage('Coupon applied successfully!');
-    } catch (e) {
-      String err = e.toString().replaceAll('Exception: ', '');
-      ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Failed to apply coupon');
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isApplyingCoupon = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _placeOrder(CartProvider cartProvider) async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final body = {
-        "payment_method": _selectedPaymentMethod,
-        if (_selectedAddress != null) "address_id": _selectedAddress!.id,
-      };
-      await checkoutRxObj.pay(body);
-
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-        cartProvider.clearCart();
-        _showSuccessDialog(context);
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-      String err = e.toString().replaceAll('Exception: ', '');
-      ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Payment failed. Please try again.');
-    }
-  }
-
-  Future<void> _showAddressSelectionSheet(BuildContext context) async {
-    try {
-      _addressResponseModel = await addressRxObj.fetchAddresses();
-    } catch (_) {}
-
-    if (!mounted) return;
-
-    final addresses = _addressResponseModel?.data ?? [];
-
-    if (!mounted) return;
-
-    showModalBottomSheet(
-      context: this.context,
-      backgroundColor: AppColorsTheme.cardBg(this.context),
-      isScrollControlled: true,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24.r),
-          topRight: Radius.circular(24.r),
-        ),
-      ),
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 30.h),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Select Address',
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold,
-                    color: AppColorsTheme.textMainColor(context),
-                  ),
-                ),
-                IconButton(
-                  icon: Icon(Icons.close_rounded, color: AppColorsTheme.textMainColor(context)),
-                  onPressed: () => Navigator.pop(ctx),
-                ),
-              ],
-            ),
-            UIHelper.verticalSpace(12.h),
-            if (addresses.isEmpty)
-              Padding(
-                padding: EdgeInsets.symmetric(vertical: 24.h),
-                child: Center(
-                  child: Column(
-                    children: [
-                      Icon(Icons.location_off_outlined, size: 40.sp, color: AppColorsTheme.textMutedColor(context)),
-                      UIHelper.verticalSpace(8.h),
-                      Text(
-                        'Address is not found',
-                        style: TextStyle(
-                          fontSize: 13.5.sp,
-                          color: AppColorsTheme.textMutedColor(context),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            else
-              ConstrainedBox(
-                constraints: BoxConstraints(maxHeight: 300.h),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: addresses.length,
-                  itemBuilder: (context, index) {
-                    final addr = addresses[index];
-                    final isSelected = _selectedAddress?.id == addr.id;
-                    return Container(
-                      margin: EdgeInsets.only(bottom: 10.h),
-                      decoration: BoxDecoration(
-                        color: AppColorsTheme.background(context),
-                        borderRadius: BorderRadius.circular(12.r),
-                        border: Border.all(
-                          color: isSelected ? primaryOrange : AppColorsTheme.borderColor(context),
-                          width: isSelected ? 1.5.w : 1.w,
-                        ),
-                      ),
-                      child: ListTile(
-                        leading: Icon(
-                          isSelected ? Icons.radio_button_checked : Icons.radio_button_unchecked,
-                          color: isSelected ? primaryOrange : AppColorsTheme.textMutedColor(context),
-                        ),
-                        title: Text(
-                          addr.recipientName,
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.bold,
-                            color: AppColorsTheme.textMainColor(context),
-                          ),
-                        ),
-                        subtitle: Text(
-                          addr.fullAddressFormatted.isNotEmpty ? addr.fullAddressFormatted : 'No address details',
-                          style: TextStyle(
-                            fontSize: 12.sp,
-                            color: AppColorsTheme.textMutedColor(context),
-                          ),
-                        ),
-                        onTap: () {
-                          setState(() {
-                            _selectedAddress = addr;
-                          });
-                          Navigator.pop(ctx);
-                        },
-                      ),
-                    );
-                  },
-                ),
-              ),
-            UIHelper.verticalSpace(16.h),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  Navigator.pop(ctx);
-                  Navigator.pushNamed(context, Routes.addAddressScreen).then((_) {
-                    _fetchAddresses();
-                  });
-                },
-                icon: Icon(Icons.add, size: 18.sp),
-                label: Text(
-                  'Add New Address',
-                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryOrange,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                  elevation: 0,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   void _showSuccessDialog(BuildContext context) {
@@ -437,7 +73,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
               ),
               UIHelper.verticalSpace(20.h),
               Text(
-                'Payment Successful',
+                'Payment Successful'.tr,
                 style: TextStyle(
                   fontSize: 20.sp,
                   fontWeight: FontWeight.bold,
@@ -446,7 +82,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
               ),
               UIHelper.verticalSpace(6.h),
               Text(
-                'Congratulation! Your order has been placed successfully.',
+                'Congratulation! Your order has been placed successfully.'.tr,
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 13.sp,
@@ -459,38 +95,23 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pop(ctx);
-                    Navigator.pushNamedAndRemoveUntil(context, Routes.dashboardScreen, (route) => false);
+                    Navigator.pushReplacementNamed(context, Routes.dashboardScreen);
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryOrange,
                     foregroundColor: Colors.white,
                     padding: EdgeInsets.symmetric(vertical: 14.h),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14.r),
+                    ),
                     elevation: 0,
                   ),
                   child: Text(
-                    'Download your booking task',
-                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-              UIHelper.verticalSpace(10.h),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton(
-                  onPressed: () {
-                    Navigator.pop(ctx);
-                    Navigator.pushNamedAndRemoveUntil(context, Routes.dashboardScreen, (route) => false);
-                  },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColorsTheme.textMainColor(context),
-                    padding: EdgeInsets.symmetric(vertical: 14.h),
-                    side: BorderSide(color: AppColorsTheme.borderColor(context)),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                  ),
-                  child: Text(
-                    'Cancel',
-                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
+                    'Back to Dashboard'.tr,
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -503,6 +124,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final dashboardProvider = context.watch<DashboardProvider>();
     final cartProvider = context.watch<CartProvider>();
     final product = widget.product;
 
@@ -531,9 +153,15 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
     final categoryVariant = product?.category ?? product?.brand ?? 'Standard Unit';
 
     final double shippingFee = cartProvider.deliveryFee > 0 ? cartProvider.deliveryFee : 60.0;
-    final double itemSubtotal = unitPriceNum > 0 ? (unitPriceNum * _quantity) : (cartProvider.subtotal > 0 ? cartProvider.subtotal : 0.0);
+    final double itemSubtotal = unitPriceNum > 0 ? (unitPriceNum * dashboardProvider.orderQuantity) : (cartProvider.subtotal > 0 ? cartProvider.subtotal : 0.0);
     final double grandTotalBdt = itemSubtotal + shippingFee;
     final double grandTotalUsd = grandTotalBdt / 115.0;
+
+    final appliedCouponText = dashboardProvider.wholesaleCheckoutModel?.data?.appliedCoupon ?? dashboardProvider.checkoutResponseModel?.data?.coupon;
+
+    if (_couponController.text.isEmpty && appliedCouponText != null && appliedCouponText.isNotEmpty) {
+      _couponController.text = appliedCouponText;
+    }
 
     return Scaffold(
       backgroundColor: AppColorsTheme.background(context),
@@ -601,8 +229,8 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Package Info Banner from GET /checkout
-              if (_checkoutResponseModel?.data?.package != null) ...[
+              // Package Info Banner
+              if (dashboardProvider.checkoutResponseModel?.data?.package != null) ...[
                 Container(
                   padding: EdgeInsets.all(14.w),
                   decoration: BoxDecoration(
@@ -619,17 +247,17 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              _checkoutResponseModel!.data!.package!.name ?? 'Package',
+                              dashboardProvider.checkoutResponseModel!.data!.package!.name ?? 'Package',
                               style: TextStyle(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.bold,
                                 color: AppColorsTheme.textMainColor(context),
                               ),
                             ),
-                            if (_checkoutResponseModel!.data!.package!.validityDays != null) ...[
+                            if (dashboardProvider.checkoutResponseModel!.data!.package!.validityDays != null) ...[
                               UIHelper.verticalSpace(2.h),
                               Text(
-                                'Validity: ${_checkoutResponseModel!.data!.package!.validityDays} days',
+                                'Validity: ${dashboardProvider.checkoutResponseModel!.data!.package!.validityDays} days',
                                 style: TextStyle(
                                   fontSize: 12.sp,
                                   color: AppColorsTheme.textMutedColor(context),
@@ -645,139 +273,20 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                 UIHelper.verticalSpace(16.h),
               ],
 
-              // 1. Address Card Banner (Tapping fetches GET API address list & opens sheet or Add Address screen)
-              _isLoadingAddresses
-                  ? _buildAddressShimmer(context)
-                  : GestureDetector(
-                      onTap: () {
-                        if (_selectedAddress == null) {
-                          Navigator.pushNamed(context, Routes.addAddressScreen).then((_) {
-                            _fetchAddresses();
-                          });
-                        } else {
-                          _showAddressSelectionSheet(context);
-                        }
-                      },
-                      child: Container(
-                        padding: EdgeInsets.all(16.w),
-                        decoration: BoxDecoration(
-                          color: AppColorsTheme.cardBg(context),
-                          borderRadius: BorderRadius.circular(16.r),
-                          border: Border.all(color: AppColorsTheme.borderColor(context)),
-                        ),
-                        child: Row(
-                          children: [
-                            Container(
-                              padding: EdgeInsets.all(10.w),
-                              decoration: BoxDecoration(
-                                color: primaryOrange.withValues(alpha: 0.1),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(Icons.location_on_outlined, color: primaryOrange, size: 22.sp),
-                            ),
-                            UIHelper.horizontalSpace(12.w),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    _selectedAddress != null
-                                        ? _selectedAddress!.recipientName
-                                        : 'Address is not found',
-                                    style: TextStyle(
-                                      fontSize: 15.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColorsTheme.textMainColor(context),
-                                    ),
-                                  ),
-                                  UIHelper.verticalSpace(2.h),
-                                  Text(
-                                    _selectedAddress != null
-                                        ? _selectedAddress!.fullAddressFormatted
-                                        : 'Add your address for shipping options and more accurate costs.',
-                                    style: TextStyle(
-                                      fontSize: 11.5.sp,
-                                      color: AppColorsTheme.textMutedColor(context),
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Icon(Icons.arrow_forward_ios_rounded, size: 16.sp, color: AppColorsTheme.textMutedColor(context)),
-                          ],
-                        ),
-                      ),
-                    ),
+              // 1. Shipping Address Section
+              CheckoutAddressCard(dashboardProvider: dashboardProvider),
               UIHelper.verticalSpace(16.h),
 
-              // 2. Guaranteed Delivery & Shipping Section
-              Container(
-                padding: EdgeInsets.all(16.w),
-                decoration: BoxDecoration(
-                  color: AppColorsTheme.cardBg(context),
-                  borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(color: AppColorsTheme.borderColor(context)),
-                ),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Guaranteed delivery: Dec 12 - Jan 22',
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.bold,
-                              color: AppColorsTheme.textMainColor(context),
-                            ),
-                          ),
-                          UIHelper.verticalSpace(2.h),
-                          Text(
-                            '5% compensation if delivered late',
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              fontWeight: FontWeight.w600,
-                              color: const Color(0xFF10B981),
-                            ),
-                          ),
-                          UIHelper.verticalSpace(8.h),
-                          Text(
-                            'Shipping fee: BDT ${shippingFee.toStringAsFixed(2)}',
-                            style: TextStyle(
-                              fontSize: 13.sp,
-                              color: AppColorsTheme.textMainColor(context),
-                            ),
-                          ),
-                          UIHelper.verticalSpace(2.h),
-                          Row(
-                            children: [
-                              Text(
-                                'Incoterm DAP',
-                                style: TextStyle(
-                                  fontSize: 12.sp,
-                                  color: AppColorsTheme.textMutedColor(context),
-                                ),
-                              ),
-                              UIHelper.horizontalSpace(4.w),
-                              Icon(Icons.info_outline_rounded, size: 13.sp, color: AppColorsTheme.textMutedColor(context)),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                    Icon(Icons.arrow_forward_ios_rounded, size: 16.sp, color: AppColorsTheme.textMutedColor(context)),
-                  ],
-                ),
+              // 2. Guaranteed Delivery & Shipping Info Section
+              CheckoutDeliveryBanner(
+                dashboardProvider: dashboardProvider,
+                shippingFee: shippingFee,
               ),
               UIHelper.verticalSpace(16.h),
 
-              // 3. Order Items Section (Dynamic from Cart / Checkout quote lines)
+              // 3. Order Items Section
               Text(
-                'Order items',
+                'Order items'.tr,
                 style: TextStyle(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
@@ -855,7 +364,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                   padding: EdgeInsets.all(16.w),
                   decoration: BoxDecoration(
                     color: AppColorsTheme.cardBg(context),
-                    borderRadius: BorderRadius.circular(16.r),
+                    borderRadius: BorderRadius.circular(18.r),
                     border: Border.all(color: AppColorsTheme.borderColor(context)),
                   ),
                   child: Column(
@@ -864,7 +373,6 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Image with variant tag
                           Stack(
                             children: [
                               ClipRRect(
@@ -954,7 +462,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                             child: Row(
                               children: [
                                 InkWell(
-                                  onTap: _decrementQuantity,
+                                  onTap: () => dashboardProvider.decrementOrderQuantity(),
                                   child: Padding(
                                     padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                                     child: Icon(Icons.remove, size: 14.sp, color: AppColorsTheme.textMainColor(context)),
@@ -963,7 +471,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                                 Padding(
                                   padding: EdgeInsets.symmetric(horizontal: 8.w),
                                   child: Text(
-                                    '$_quantity',
+                                    '${dashboardProvider.orderQuantity}',
                                     style: TextStyle(
                                       fontSize: 13.sp,
                                       fontWeight: FontWeight.bold,
@@ -972,7 +480,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                                   ),
                                 ),
                                 InkWell(
-                                  onTap: _incrementQuantity,
+                                  onTap: () => dashboardProvider.incrementOrderQuantity(),
                                   child: Padding(
                                     padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
                                     child: Icon(Icons.add, size: 14.sp, color: AppColorsTheme.textMainColor(context)),
@@ -993,7 +501,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                           ToastUtil.showSuccessMessage('Note dialog opened');
                         },
                         child: Text(
-                          'Add note to supplier',
+                          'Add note to supplier'.tr,
                           style: TextStyle(
                             fontSize: 12.5.sp,
                             fontWeight: FontWeight.w600,
@@ -1007,83 +515,16 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                 ),
               UIHelper.verticalSpace(20.h),
 
-              // Apply Voucher / Coupon Section
-              Text(
-                'Apply Voucher',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppColorsTheme.textMainColor(context),
-                ),
-              ),
-              UIHelper.verticalSpace(10.h),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-                decoration: BoxDecoration(
-                  color: AppColorsTheme.cardBg(context),
-                  borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(color: AppColorsTheme.borderColor(context)),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        controller: _couponController,
-                        style: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMainColor(context)),
-                        decoration: InputDecoration(
-                          hintText: 'Enter coupon code',
-                          hintStyle: TextStyle(fontSize: 12.5.sp, color: AppColorsTheme.textMutedColor(context)),
-                          border: InputBorder.none,
-                          isDense: true,
-                        ),
-                      ),
-                    ),
-                    ElevatedButton(
-                      onPressed: _isApplyingCoupon ? null : _applyCoupon,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryOrange,
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                        elevation: 0,
-                      ),
-                      child: _isApplyingCoupon
-                          ? SizedBox(
-                              width: 16.w,
-                              height: 16.h,
-                              child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                            )
-                          : Text(
-                              'Apply',
-                              style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.bold),
-                            ),
-                    ),
-                  ],
-                ),
+              // 4. Voucher / Coupon Section
+              CheckoutVoucherSection(
+                dashboardProvider: dashboardProvider,
+                couponController: _couponController,
               ),
               UIHelper.verticalSpace(20.h),
 
-              // 4. Payment Method Section
-              Text(
-                'Payment method',
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppColorsTheme.textMainColor(context),
-                ),
-              ),
-              UIHelper.verticalSpace(10.h),
-              Container(
-                decoration: BoxDecoration(
-                  color: AppColorsTheme.cardBg(context),
-                  borderRadius: BorderRadius.circular(16.r),
-                  border: Border.all(color: AppColorsTheme.borderColor(context)),
-                ),
-                child: _isLoadingPaymentMethods
-                    ? _buildPaymentShimmer(context)
-                    : Column(
-                        children: _buildPaymentList(context),
-                      ),
+              // 5. Payment Method Section
+              CheckoutPaymentSection(
+                dashboardProvider: dashboardProvider,
               ),
               UIHelper.verticalSpace(30.h),
             ],
@@ -1119,7 +560,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                   Row(
                     children: [
                       Text(
-                        'Total',
+                        'Total'.tr,
                         style: TextStyle(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.bold,
@@ -1128,7 +569,8 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                       ),
                       UIHelper.horizontalSpace(8.w),
                       Text(
-                        _checkoutResponseModel?.data?.quote?.total?.formatted ?? 'USD ${grandTotalUsd.toStringAsFixed(2)}',
+                        dashboardProvider.wholesaleCheckoutModel?.data?.total?.formatted ??
+                            (dashboardProvider.checkoutResponseModel?.data?.quote?.total?.formatted ?? 'USD ${grandTotalUsd.toStringAsFixed(2)}'),
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w900,
@@ -1151,16 +593,23 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Items Subtotal', style: TextStyle(fontSize: 12.sp, color: AppColorsTheme.textMutedColor(context))),
-                  Text(_checkoutResponseModel?.data?.quote?.subtotal?.formatted ?? 'BDT ${itemSubtotal.toStringAsFixed(2)}', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context))),
+                  Text('Items Subtotal'.tr, style: TextStyle(fontSize: 12.sp, color: AppColorsTheme.textMutedColor(context))),
+                  Text(
+                    dashboardProvider.wholesaleCheckoutModel?.data?.subtotal?.formatted ??
+                        (dashboardProvider.checkoutResponseModel?.data?.quote?.subtotal?.formatted ?? 'BDT ${itemSubtotal.toStringAsFixed(2)}'),
+                    style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
+                  ),
                 ],
               ),
               UIHelper.verticalSpace(4.h),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Shipping Fee', style: TextStyle(fontSize: 12.sp, color: AppColorsTheme.textMutedColor(context))),
-                  Text('BDT ${shippingFee.toStringAsFixed(2)}', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context))),
+                  Text('Shipping Fee'.tr, style: TextStyle(fontSize: 12.sp, color: AppColorsTheme.textMutedColor(context))),
+                  Text(
+                    dashboardProvider.wholesaleCheckoutModel?.data?.shipping?.formatted ?? 'BDT ${shippingFee.toStringAsFixed(2)}',
+                    style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
+                  ),
                 ],
               ),
             ],
@@ -1168,15 +617,19 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: _isLoading
+                onPressed: dashboardProvider.isLoadingCheckout
                     ? null
-                    : () {
-                        if (_selectedAddress == null) {
+                    : () async {
+                        if (dashboardProvider.selectedAddress == null) {
                           Navigator.pushNamed(context, Routes.addAddressScreen).then((_) {
-                            _fetchAddresses();
+                            dashboardProvider.fetchCheckoutState();
                           });
                         } else {
-                          _placeOrder(context.read<CartProvider>());
+                          final success = await dashboardProvider.confirmWholesaleOrder();
+                          if (success && mounted) {
+                            cartProvider.clearCart();
+                            _showSuccessDialog(context);
+                          }
                         }
                       },
                 style: ElevatedButton.styleFrom(
@@ -1188,14 +641,14 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                   ),
                   elevation: 0,
                 ),
-                child: _isLoading
+                child: dashboardProvider.isLoadingCheckout
                     ? SizedBox(
                         height: 20.h,
                         width: 20.w,
                         child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
                       )
                     : Text(
-                        _selectedAddress != null ? 'Place Order' : 'Add address',
+                        dashboardProvider.selectedAddress != null ? 'Place Order'.tr : 'Add address'.tr,
                         style: TextStyle(
                           fontSize: 15.sp,
                           fontWeight: FontWeight.bold,
@@ -1203,352 +656,6 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                       ),
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAddressShimmer(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[300]!;
-    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
-
-    return Shimmer.fromColors(
-      baseColor: baseColor,
-      highlightColor: highlightColor,
-      child: Container(
-        width: double.infinity,
-        height: 80.h,
-        decoration: BoxDecoration(
-          color: AppColorsTheme.cardBg(context),
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: AppColorsTheme.borderColor(context)),
-        ),
-      ),
-    );
-  }
-
-  List<Widget> _buildPaymentList(BuildContext context) {
-    final apiTypes = _paymentResponseModel?.types ?? [];
-    final apiData = _paymentResponseModel?.data ?? [];
-
-    List<Widget> list = [];
-
-    if (apiTypes.isNotEmpty) {
-      for (int i = 0; i < apiTypes.length; i++) {
-        final type = apiTypes[i];
-        final label = type.label ?? type.value ?? 'Payment Option';
-        final val = type.value ?? label;
-
-        if (i > 0) list.add(Divider(height: 1, color: AppColorsTheme.borderColor(context)));
-        list.add(
-          _buildPaymentOption(
-            context: context,
-            title: label,
-            subtitleText: type.fields != null && type.fields!.isNotEmpty
-                ? 'Fields: ${type.fields!.join(", ")}'
-                : null,
-            icon: _getPaymentIcon(val),
-            iconColor: _getPaymentColor(val),
-            value: val,
-          ),
-        );
-      }
-    } else if (apiData.isNotEmpty) {
-      for (int i = 0; i < apiData.length; i++) {
-        final method = apiData[i];
-        final name = method.name ?? 'Payment Option';
-        final desc = method.description;
-        final val = method.code ?? method.id ?? name;
-
-        if (i > 0) list.add(Divider(height: 1, color: AppColorsTheme.borderColor(context)));
-        list.add(
-          _buildPaymentOption(
-            context: context,
-            title: name,
-            subtitleText: desc,
-            icon: _getPaymentIcon(val),
-            iconColor: _getPaymentColor(val),
-            value: val,
-          ),
-        );
-      }
-    } else {
-      list.addAll([
-        _buildPaymentOption(
-          context: context,
-          title: 'bKash',
-          subtitleText: 'Pay securely with bKash mobile banking',
-          icon: Icons.account_balance_wallet_rounded,
-          iconColor: const Color(0xFFE2136E),
-          value: 'bKash',
-        ),
-        Divider(height: 1, color: AppColorsTheme.borderColor(context)),
-        _buildPaymentOption(
-          context: context,
-          title: 'Nagad',
-          subtitleText: 'Pay securely with Nagad mobile financial service',
-          icon: Icons.mobile_friendly_rounded,
-          iconColor: const Color(0xFFED1C24),
-          value: 'Nagad',
-        ),
-        Divider(height: 1, color: AppColorsTheme.borderColor(context)),
-        _buildPaymentOption(
-          context: context,
-          title: 'PayPal',
-          subtitleText: null,
-          icon: Icons.payment_rounded,
-          iconColor: primaryOrange,
-          value: 'PayPal',
-        ),
-        Divider(height: 1, color: AppColorsTheme.borderColor(context)),
-        _buildPaymentOption(
-          context: context,
-          title: 'Other payment methods',
-          subtitleText: 'T/T\nPlace order first, pay with your preferred method later.',
-          icon: Icons.account_balance_outlined,
-          iconColor: AppColorsTheme.textMutedColor(context),
-          value: 'Other payment methods',
-        ),
-      ]);
-    }
-
-    return list;
-  }
-
-  Color _getPaymentColor(String val) {
-    final lower = val.toLowerCase();
-    if (lower.contains('bkash')) {
-      return const Color(0xFFE2136E);
-    } else if (lower.contains('nagad')) {
-      return const Color(0xFFED1C24);
-    } else if (lower.contains('card') || lower.contains('visa')) {
-      return const Color(0xFF0284C7);
-    } else {
-      return primaryOrange;
-    }
-  }
-
-  IconData _getPaymentIcon(String val) {
-    final lower = val.toLowerCase();
-    if (lower.contains('card') || lower.contains('visa') || lower.contains('master')) {
-      return Icons.credit_card_rounded;
-    } else if (lower.contains('bkash')) {
-      return Icons.account_balance_wallet_rounded;
-    } else if (lower.contains('nagad')) {
-      return Icons.mobile_friendly_rounded;
-    } else if (lower.contains('bank')) {
-      return Icons.account_balance_rounded;
-    } else if (lower.contains('paypal')) {
-      return Icons.payment_rounded;
-    } else if (lower.contains('google') || lower.contains('gpay')) {
-      return Icons.g_mobiledata_rounded;
-    } else {
-      return Icons.account_balance_outlined;
-    }
-  }
-
-  Widget _buildPaymentShimmer(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[300]!;
-    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
-
-    return Padding(
-      padding: EdgeInsets.all(14.w),
-      child: Column(
-        children: List.generate(3, (index) {
-          return Padding(
-            padding: EdgeInsets.only(bottom: index == 2 ? 0 : 12.h),
-            child: Shimmer.fromColors(
-              baseColor: baseColor,
-              highlightColor: highlightColor,
-              child: Row(
-                children: [
-                  Container(
-                    width: 20.w,
-                    height: 20.h,
-                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                  ),
-                  UIHelper.horizontalSpace(12.w),
-                  Container(
-                    width: 32.w,
-                    height: 32.h,
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8.r)),
-                  ),
-                  UIHelper.horizontalSpace(12.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(width: 120.w, height: 14.h, color: Colors.white),
-                        UIHelper.verticalSpace(4.h),
-                        Container(width: 180.w, height: 10.h, color: Colors.white),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
-
-  Widget _buildPaymentLogo(String title, Color brandColor) {
-    final lower = title.toLowerCase();
-    bool isBkash = lower.contains('bkash');
-    bool isNagad = lower.contains('nagad');
-
-    if (isBkash) {
-      return Container(
-        width: 52.w,
-        height: 32.h,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8.r),
-          border: Border.all(color: AppColorsTheme.borderColor(context)),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8.r),
-          child: Image.network(
-            'https://static.vecteezy.com/system/resources/previews/039/340/798/non_2x/bkash-logo-free-vector.jpg',
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) => Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                color: const Color(0xFFE2136E),
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Center(
-                child: Text(
-                  'bKash',
-                  style: TextStyle(
-                    fontSize: 10.5.sp,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    } else if (isNagad) {
-      return Container(
-        width: 52.w,
-        height: 32.h,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(8.r),
-          border: Border.all(color: AppColorsTheme.borderColor(context)),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(8.r),
-          child: Image.network(
-            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSrBk93RWS1sEp0YhxzsCPXVxu5ldNjhyHOdbfi9sEbEw&s',
-            fit: BoxFit.contain,
-            errorBuilder: (context, error, stackTrace) => Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
-              decoration: BoxDecoration(
-                color: const Color(0xFFED1C24),
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Center(
-                child: Text(
-                  'Nagad',
-                  style: TextStyle(
-                    fontSize: 10.5.sp,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      padding: EdgeInsets.all(7.w),
-      decoration: BoxDecoration(
-        color: brandColor.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(8.r),
-        border: Border.all(color: AppColorsTheme.borderColor(context)),
-      ),
-      child: Icon(Icons.payment_rounded, size: 20.sp, color: brandColor),
-    );
-  }
-
-  Widget _buildPaymentOption({
-    required BuildContext context,
-    required String title,
-    String? subtitleText,
-    Widget? subtitleWidget,
-    required IconData icon,
-    Color? iconColor,
-    required String value,
-    bool showArrow = false,
-  }) {
-    return InkWell(
-      onTap: () {
-        setState(() {
-          _selectedPaymentMethod = value;
-        });
-      },
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-        child: Row(
-          children: [
-            Radio<String>(
-              value: value,
-              groupValue: _selectedPaymentMethod,
-              activeColor: primaryOrange,
-              onChanged: (val) {
-                if (val != null) {
-                  setState(() {
-                    _selectedPaymentMethod = val;
-                  });
-                }
-              },
-            ),
-            UIHelper.horizontalSpace(4.w),
-            _buildPaymentLogo(title, iconColor ?? primaryOrange),
-            UIHelper.horizontalSpace(12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColorsTheme.textMainColor(context),
-                    ),
-                  ),
-                  if (subtitleWidget != null) ...[
-                    UIHelper.verticalSpace(4.h),
-                    subtitleWidget,
-                  ],
-                  if (subtitleText != null && subtitleText.isNotEmpty) ...[
-                    UIHelper.verticalSpace(2.h),
-                    Text(
-                      subtitleText,
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        color: AppColorsTheme.textMutedColor(context),
-                        height: 1.3,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            if (showArrow)
-              Icon(Icons.arrow_forward_ios_rounded, size: 14.sp, color: AppColorsTheme.textMutedColor(context)),
           ],
         ),
       ),

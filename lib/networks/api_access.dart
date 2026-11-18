@@ -17,6 +17,7 @@ import '../feature/dashboard/data/current_user_rx.dart';
 import '../feature/dashboard/data/dashboard_rx.dart';
 import '../feature/dashboard/data/location_child_rx.dart';
 import '../feature/dashboard/data/location_division_rx.dart';
+import '../feature/dashboard/data/onboarding_rx.dart';
 import '../feature/dashboard/data/order_rx.dart';
 import '../feature/dashboard/data/payment_rx.dart';
 import '../feature/dashboard/data/product_rx.dart';
@@ -71,6 +72,7 @@ WholesaleCheckoutRx wholesaleCheckoutRxObj = WholesaleCheckoutRx();
 CurrentUserRx currentUserRxObj = CurrentUserRx();
 
 CatalogRx catalogRxObj = CatalogRx();
+OnboardingRx onboardingRxObj = OnboardingRx();
 
 LanguageLocaleRx languageLocaleRxObj = LanguageLocaleRx.instance;
 ReferralsRx referralsRxObj = ReferralsRx.instance;

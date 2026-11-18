@@ -7,6 +7,9 @@ import '../../../../constants/color.dart';
 import '../../../../helpers/ui_helpers.dart';
 import '../../../../providers/dashboard_provider.dart';
 import '../../model/order_model.dart';
+import 'order/order_cancellation_dialog.dart';
+import 'order/order_item_card.dart';
+import 'order/order_tab_chips.dart';
 import 'order_advanced_filter_sheet.dart';
 
 class OrderCategoryDetailSheet extends StatefulWidget {
@@ -81,71 +84,6 @@ class _OrderCategoryDetailSheetState extends State<OrderCategoryDetailSheet> {
           sort: _currentSort,
           direction: _currentDirection,
         );
-  }
-
-  void _showCancellationDialog(BuildContext context, String orderId) {
-    final reasonController = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: AppColorsTheme.cardBg(context),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-        title: Row(
-          children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.redAccent, size: 24.sp),
-            UIHelper.horizontalSpace(8.w),
-            Text(
-              'Cancel Order',
-              style: TextStyle(
-                fontSize: 18.sp,
-                fontWeight: FontWeight.bold,
-                color: AppColorsTheme.textMainColor(context),
-              ),
-            ),
-          ],
-        ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Are you sure you want to cancel order #$orderId?',
-              style: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMutedColor(context)),
-            ),
-            UIHelper.verticalSpace(14.h),
-            TextField(
-              controller: reasonController,
-              style: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMainColor(context)),
-              decoration: InputDecoration(
-                hintText: 'Cancellation reason (optional)...',
-                hintStyle: TextStyle(fontSize: 12.sp, color: AppColorsTheme.textMutedColor(context)),
-                filled: true,
-                fillColor: AppColorsTheme.background(context),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: AppColorsTheme.borderColor(context))),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: Text('Keep Order', style: TextStyle(color: AppColorsTheme.textMutedColor(context))),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              context.read<DashboardProvider>().cancelStoreOrder(orderId, reason: reasonController.text);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.redAccent,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-            ),
-            child: const Text('Confirm Cancellation'),
-          ),
-        ],
-      ),
-    );
   }
 
   @override
@@ -264,18 +202,10 @@ class _OrderCategoryDetailSheetState extends State<OrderCategoryDetailSheet> {
           ),
           UIHelper.verticalSpace(14.h),
 
-          // Endpoint Order Tabs Bar: All Orders, Store Orders, Connected Stores
-          SizedBox(
-            height: 38.h,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              children: [
-                _buildOrderTabChip('all', 'All Orders'),
-                _buildOrderTabChip('store', 'Store Orders'),
-                _buildOrderTabChip('stores', 'Connected Stores'),
-              ],
-            ),
+          // Order Tabs Chip Bar
+          OrderTabChips(
+            selectedTypeTab: _selectedTypeTab,
+            onTabChanged: _onTypeTabChanged,
           ),
           UIHelper.verticalSpace(12.h),
 
@@ -443,197 +373,17 @@ class _OrderCategoryDetailSheetState extends State<OrderCategoryDetailSheet> {
                             itemCount: filteredList.length,
                             itemBuilder: (context, index) {
                               final order = filteredList[index];
-                              return _buildOrderItemCard(context, order);
+                              return OrderItemCard(
+                                order: order,
+                                isStoreTab: _selectedTypeTab == 'store',
+                                onCancelTap: (orderId) {
+                                  OrderCancellationDialog.show(context, orderId, (reason) {
+                                    context.read<DashboardProvider>().cancelStoreOrder(orderId, reason: reason);
+                                  });
+                                },
+                              );
                             },
                           ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOrderTabChip(String value, String label) {
-    final isSelected = _selectedTypeTab == value;
-    return Padding(
-      padding: EdgeInsets.only(right: 8.w),
-      child: GestureDetector(
-        onTap: () => _onTypeTabChanged(value),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 6.h),
-          decoration: BoxDecoration(
-            color: isSelected ? primaryOrange : AppColorsTheme.cardBg(context),
-            borderRadius: BorderRadius.circular(18.r),
-            border: Border.all(
-              color: isSelected ? primaryOrange : AppColorsTheme.borderColor(context),
-              width: 1.w,
-            ),
-            boxShadow: [
-              if (isSelected)
-                BoxShadow(
-                  color: primaryOrange.withValues(alpha: 0.3),
-                  blurRadius: 6.r,
-                  offset: const Offset(0, 2),
-                ),
-            ],
-          ),
-          child: Center(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: isSelected ? FontWeight.w900 : FontWeight.w600,
-                color: isSelected ? Colors.white : AppColorsTheme.textMainColor(context),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOrderItemCard(BuildContext context, OrderItemModel order) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final orderId = order.orderNumber ?? 'ORD-${order.id ?? 1}';
-    final status = order.status ?? 'Pending';
-    final total = order.total?.toString() ?? '0.00';
-    final currency = order.currency ?? '৳';
-    final date = order.createdAt ?? 'Recent';
-
-    Color statusBg = const Color(0xFFFEF3C7);
-    Color statusFg = const Color(0xFFD97706);
-
-    if (status.toLowerCase().contains('deliver') || status.toLowerCase().contains('complet')) {
-      statusBg = const Color(0xFFD1FAE5);
-      statusFg = const Color(0xFF059669);
-    } else if (status.toLowerCase().contains('cancel')) {
-      statusBg = const Color(0xFFFEE2E2);
-      statusFg = const Color(0xFFDC2626);
-    } else if (status.toLowerCase().contains('process')) {
-      statusBg = const Color(0xFFDBEAFE);
-      statusFg = const Color(0xFF2563EB);
-    }
-
-    return Container(
-      margin: EdgeInsets.only(bottom: 14.h),
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: AppColorsTheme.cardBg(context),
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: AppColorsTheme.borderColor(context)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
-            blurRadius: 10.r,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(8.w),
-                    decoration: BoxDecoration(
-                      color: primaryOrange.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    child: Icon(Icons.receipt_long_rounded, color: primaryOrange, size: 20.sp),
-                  ),
-                  UIHelper.horizontalSpace(10.w),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        orderId,
-                        style: TextStyle(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.bold,
-                          color: AppColorsTheme.textMainColor(context),
-                        ),
-                      ),
-                      UIHelper.verticalSpace(2.h),
-                      Text(
-                        date,
-                        style: TextStyle(
-                          fontSize: 11.sp,
-                          color: AppColorsTheme.textMutedColor(context),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                decoration: BoxDecoration(
-                  color: statusBg,
-                  borderRadius: BorderRadius.circular(20.r),
-                ),
-                child: Text(
-                  status.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.bold,
-                    color: statusFg,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          UIHelper.verticalSpace(12.h),
-          Divider(color: AppColorsTheme.borderColor(context), height: 1.h),
-          UIHelper.verticalSpace(12.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Total Amount',
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      color: AppColorsTheme.textMutedColor(context),
-                    ),
-                  ),
-                  UIHelper.verticalSpace(2.h),
-                  Text(
-                    '$currency $total',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w900,
-                      color: primaryOrange,
-                    ),
-                  ),
-                ],
-              ),
-              if (_selectedTypeTab == 'store' && !status.toLowerCase().contains('cancel')) ...[
-                OutlinedButton(
-                  onPressed: () {
-                    final targetId = order.id?.toString() ?? order.orderNumber ?? '';
-                    if (targetId.isNotEmpty) {
-                      _showCancellationDialog(context, targetId);
-                    }
-                  },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.redAccent,
-                    side: const BorderSide(color: Colors.redAccent),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                  ),
-                  child: Text(
-                    'Cancel Order',
-                    style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ],
           ),
         ],
       ),

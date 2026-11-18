@@ -30,6 +30,7 @@ final class EndPoints {
   static String package()=>"/packages";
   static String selectPackage(String slug) => "/packages/$slug/select";
   static String subscription() => "/subscription";
+  static String onboradingActive()=>"/onboarding";
   static String subscriptionCancel() => "/subscription/cancel";
   static String subscriptionChange() => "/subscription/change";
   static String subscriptionRenew() => "/subscription/renew";
