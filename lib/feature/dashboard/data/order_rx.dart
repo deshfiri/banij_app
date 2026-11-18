@@ -24,6 +24,10 @@ final class OrderRx extends RxResponseInt<OrderResponseModel> {
     }
   }
 
+  Future<OrderItemModel> fetchOrderDetail(String orderId) async {
+    return await _api.getOrderDetail(orderId);
+  }
+
   Future<bool> cancelStoreOrder(String orderId, {String? reason}) async {
     return await _api.cancelStoreOrder(orderId, reason: reason);
   }

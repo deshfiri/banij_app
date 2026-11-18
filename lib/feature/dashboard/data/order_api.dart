@@ -50,6 +50,20 @@ final class OrderApi {
     }
   }
 
+  Future<OrderItemModel> getOrderDetail(String orderId) async {
+    try {
+      Response response = await getHttp('/wholesale/orders/$orderId');
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        final data = response.data is Map ? (response.data['data'] ?? response.data) : response.data;
+        return OrderItemModel.fromJson(data);
+      } else {
+        throw DataSource.DEFAULT.getFailure();
+      }
+    } catch (error) {
+      rethrow;
+    }
+  }
+
   Future<bool> cancelStoreOrder(String orderId, {String? reason}) async {
     try {
       final body = {

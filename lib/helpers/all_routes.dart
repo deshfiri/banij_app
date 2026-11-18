@@ -22,6 +22,7 @@ import '../feature/dashboard/presentation/dashboard_screen.dart';
 import '../feature/dashboard/presentation/product_detail_screen.dart';
 import '../feature/dashboard/presentation/cart_screen.dart';
 import '../feature/dashboard/presentation/order_now_screen.dart';
+import '../feature/dashboard/presentation/order_detail_screen.dart';
 import '../feature/dashboard/presentation/add_website_screen.dart';
 import '../feature/dashboard/presentation/add_address_screen.dart';
 import '../feature/dashboard/presentation/addresses_screen.dart';
@@ -58,6 +59,7 @@ final class Routes {
   static const String twoFactorChallengeScreen = '/twoFactorChallengeScreen';
   static const String addressesScreen = '/addressesScreen';
   static const String partnerNetworkScreen = '/partnerNetworkScreen';
+  static const String orderDetailScreen = '/orderDetailScreen';
 }
 
 final class RouteGenerator {
@@ -134,6 +136,11 @@ final class RouteGenerator {
         return Platform.isAndroid
             ? _LightningFastTransitionRoute(widget: OrderNowScreen(product: product), settings: settings)
             : CupertinoPageRoute(builder: (context) => OrderNowScreen(product: product), settings: settings);
+      case Routes.orderDetailScreen:
+        final orderId = settings.arguments as String? ?? '1';
+        return Platform.isAndroid
+            ? _LightningFastTransitionRoute(widget: OrderDetailScreen(orderId: orderId), settings: settings)
+            : CupertinoPageRoute(builder: (context) => OrderDetailScreen(orderId: orderId), settings: settings);
       case Routes.addWebsiteScreen:
         return Platform.isAndroid
             ? _LightningFastTransitionRoute(widget: const AddWebsiteScreen(), settings: settings)

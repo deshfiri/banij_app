@@ -26,6 +26,9 @@ class DashboardProvider extends ChangeNotifier {
   MyProductResponseModel? catalogProductResponse;
   CatalogResponseModel? catalogResponseModel;
   OrderResponseModel? orderResponse;
+  OrderItemModel? selectedOrderModel;
+  bool _isLoadingOrderDetail = false;
+  bool get isLoadingOrderDetail => _isLoadingOrderDetail;
   AccountModel? accountModel;
   OnboardingResponseModel? onboardingModel;
 
@@ -241,6 +244,22 @@ class DashboardProvider extends ChangeNotifier {
       }
     } finally {
       _isLoadingOrders = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> fetchOrderDetail(String orderId) async {
+    _isLoadingOrderDetail = true;
+    notifyListeners();
+    try {
+      selectedOrderModel = await orderRxObj.fetchOrderDetail(orderId);
+    } catch (e) {
+      String err = e.toString().replaceAll('Exception: ', '');
+      if (err.isNotEmpty) {
+        ToastUtil.showErrorMessage(err);
+      }
+    } finally {
+      _isLoadingOrderDetail = false;
       notifyListeners();
     }
   }
