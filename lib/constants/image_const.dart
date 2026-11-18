@@ -7,3 +7,5 @@ const String banijBlackIcon = "assets/images/Banij Black Icon.png";
 const String banijWhiteIcon = "assets/images/Banij White Icon.png";
 const String products3dIllustration = "assets/images/products_3d_illustration.jpg";
 const String myProducts3dIllustration = "assets/images/my_products_3d_illustration.jpg";
+const String productsImage = "assets/images/Products.png";
+const String myProductsImage = "assets/images/My-Products.png";

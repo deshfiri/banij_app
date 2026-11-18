@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -39,13 +40,24 @@ class DashboardHubWidget extends StatefulWidget {
   State<DashboardHubWidget> createState() => _DashboardHubWidgetState();
 }
 
-class _DashboardHubWidgetState extends State<DashboardHubWidget> {
+class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTickerProviderStateMixin {
   CurrentUserModel? _currentUserModel;
+  late AnimationController _waveAnimationController;
 
   @override
   void initState() {
     super.initState();
     _fetchCurrentUser();
+    _waveAnimationController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 4),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _waveAnimationController.dispose();
+    super.dispose();
   }
 
   Future<void> _fetchCurrentUser() async {
@@ -217,8 +229,16 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
           child: Stack(
             children: [
               Positioned.fill(
-                child: CustomPaint(
-                  painter: _MetricCardWavePainter(color: color),
+                child: AnimatedBuilder(
+                  animation: _waveAnimationController,
+                  builder: (context, child) {
+                    return CustomPaint(
+                      painter: _MetricCardWavePainter(
+                        color: color,
+                        animationValue: _waveAnimationController.value,
+                      ),
+                    );
+                  },
                 ),
               ),
               Row(
@@ -240,21 +260,24 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                         Text(
                           value,
                           style: TextStyle(
-                            fontSize: 17.sp,
+                            fontSize: 18.sp,
                             fontWeight: FontWeight.w900,
-                            color: isDark ? Colors.white : _BrandColors.primaryText,
+                            color: isDark ? Colors.white : AppColorsTheme.textMainColor(context),
+                            letterSpacing: -0.3,
+                            height: 1.1,
                           ),
                         ),
-                        UIHelper.verticalSpace(1.h),
+                        UIHelper.verticalSpace(3.h),
                         Text(
                           title,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontSize: 11.5.sp,
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? const Color(0xFF9CA3AF) : _BrandColors.secondaryText,
-                            height: 1.15,
+                            fontWeight: FontWeight.w700,
+                            color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF64748B),
+                            height: 1.18,
+                            letterSpacing: -0.1,
                           ),
                         ),
                       ],
@@ -293,17 +316,17 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
         'onTap': () => ProductCategoryDetailSheet.show(context, 'hub_products'.tr, isCatalog: true),
       },
       {
-        'title': 'Sales & Orders',
+        'title': 'Order',
         'icon': Icons.shopping_cart_rounded,
-        'color': _BrandColors.blue,
-        'bg': const Color(0xFFEDF6FF),
+        'color': _BrandColors.primaryOrange,
+        'bg': const Color(0xFFFFF0E8),
         'onTap': () => OrderCategoryDetailSheet.show(context, 'hub_all_orders'.tr),
       },
       {
         'title': 'Finance',
         'icon': Icons.analytics_rounded,
-        'color': _BrandColors.green,
-        'bg': const Color(0xFFEFFFF6),
+        'color': _BrandColors.primaryOrange,
+        'bg': const Color(0xFFFFF0E8),
         'onTap': () => InvoicesReceiptsSheet.show(context, initialTab: 'Invoices'),
       },
     ];
@@ -356,7 +379,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
               ),
             ],
           ),
-          UIHelper.verticalSpace(12.h),
+          UIHelper.verticalSpace(8.h),
           SizedBox(
             height: 118.h,
             child: Row(
@@ -375,7 +398,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                       onTap: onTap,
                       borderRadius: BorderRadius.circular(22.r),
                       child: Container(
-                        padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 6.w),
+                        padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
                         decoration: BoxDecoration(
                           color: isDark ? AppColorsTheme.cardBg(context) : bg,
                           borderRadius: BorderRadius.circular(22.r),
@@ -395,7 +418,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Container(
-                              padding: EdgeInsets.all(11.w),
+                              padding: EdgeInsets.all(9.w),
                               decoration: BoxDecoration(
                                 color: isDark ? color.withValues(alpha: 0.2) : Colors.white,
                                 shape: BoxShape.circle,
@@ -408,19 +431,18 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                                     ),
                                 ],
                               ),
-                              child: Icon(icon, color: color, size: 23.sp),
+                              child: Icon(icon, color: color, size: 21.sp),
                             ),
-                            UIHelper.verticalSpace(10.h),
+                            UIHelper.verticalSpace(6.h),
                             Text(
                               title,
                               textAlign: TextAlign.center,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                fontSize: 12.sp,
+                                fontSize: 11.5.sp,
                                 fontWeight: FontWeight.w800,
                                 color: isDark ? Colors.white : _BrandColors.primaryText,
-                                height: 1.15,
                               ),
                             ),
                           ],
@@ -437,121 +459,103 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
     );
   }
 
-  // 4. Products & My Products Full-Width Stacked Tiles matching reference screenshot
+  // 4. Products & My Products Banners Horizontally Side-by-Side (Flex Half-Half) in SizedBox
   Widget _buildFeaturedModulesList(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
-      child: Column(
+      child: Row(
         children: [
-          // Tile 1: Products
-          _buildFullWidthTileCard(
-            context: context,
-            title: 'Products',
-            subtitle: 'Manage your catalog',
-            iconData: Icons.inventory_2_rounded,
-            iconColor: _BrandColors.primaryOrange,
-            iconBg: const Color(0xFFFFF0E8),
-            isDark: isDark,
-            onTap: () => ProductCategoryDetailSheet.show(context, 'hub_products'.tr, isCatalog: true),
+          // Banner 1: Products
+          Expanded(
+            flex: 1,
+            child: SizedBox(
+              height: 140.h,
+              child: _buildBannerCard(
+                context: context,
+                imagePath: productsImage,
+                buttonText: 'Products view',
+                onTap: () => ProductCategoryDetailSheet.show(context, 'hub_products'.tr, isCatalog: true),
+              ),
+            ),
           ),
-          UIHelper.verticalSpace(12.h),
-
-          // Tile 2: My Products
-          _buildFullWidthTileCard(
-            context: context,
-            title: 'My Products',
-            subtitle: 'Your uploaded products',
-            iconData: Icons.cloud_upload_rounded,
-            iconColor: _BrandColors.purple,
-            iconBg: const Color(0xFFF7F0FF),
-            isDark: isDark,
-            onTap: () => ProductCategoryDetailSheet.show(context, 'hub_my_products'.tr, isCatalog: false),
+          UIHelper.horizontalSpace(12.w),
+          // Banner 2: My Products
+          Expanded(
+            flex: 1,
+            child: SizedBox(
+              height: 140.h,
+              child: _buildBannerCard(
+                context: context,
+                imagePath: myProductsImage,
+                buttonText: 'My Products view',
+                onTap: () => ProductCategoryDetailSheet.show(context, 'hub_my_products'.tr, isCatalog: false),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFullWidthTileCard({
+  Widget _buildBannerCard({
     required BuildContext context,
-    required String title,
-    required String subtitle,
-    required IconData iconData,
-    required Color iconColor,
-    required Color iconBg,
-    required bool isDark,
+    required String imagePath,
+    required String buttonText,
     required VoidCallback onTap,
   }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20.r),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-          decoration: BoxDecoration(
-            color: isDark ? AppColorsTheme.cardBg(context) : Colors.white,
-            borderRadius: BorderRadius.circular(20.r),
-            border: Border.all(
-              color: isDark ? const Color(0xFF374151) : const Color(0xFFE2E8F0),
-              width: 1.w,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20.r),
+          border: Border.all(
+            color: isDark ? const Color(0xFF374151) : primaryOrange.withValues(alpha: 0.3),
+            width: 1.w,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: primaryOrange.withValues(alpha: isDark ? 0.08 : 0.12),
+              blurRadius: 10.r,
+              offset: const Offset(0, 3),
             ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
-                blurRadius: 10.r,
-                offset: const Offset(0, 3),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Container(
-                padding: EdgeInsets.all(12.w),
-                decoration: BoxDecoration(
-                  color: isDark ? iconColor.withValues(alpha: 0.15) : iconBg,
-                  borderRadius: BorderRadius.circular(16.r),
-                ),
-                child: Icon(
-                  iconData,
-                  color: iconColor,
-                  size: 24.sp,
-                ),
-              ),
-              UIHelper.horizontalSpace(14.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w900,
-                        color: isDark ? Colors.white : _BrandColors.primaryText,
-                      ),
+          ],
+        ),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Background 3D Illustration Image - BoxFit.fill to fit height and width of card perfectly
+            Image.asset(
+              imagePath,
+              fit: BoxFit.fill,
+            ),
+            // Button inside Stack at bottom left over image
+            Padding(
+              padding: EdgeInsets.all(10.w),
+              child: Align(
+                alignment: Alignment.bottomLeft,
+                child: ElevatedButton(
+                  onPressed: onTap,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryOrange,
+                    foregroundColor: Colors.white,
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                    elevation: 3,
+                  ),
+                  child: Text(
+                    buttonText,
+                    style: TextStyle(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.bold,
                     ),
-                    UIHelper.verticalSpace(2.h),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w500,
-                        color: isDark ? const Color(0xFF9CA3AF) : _BrandColors.secondaryText,
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
               ),
-              Icon(
-                Icons.chevron_right_rounded,
-                color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF64748B),
-                size: 22.sp,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -671,7 +675,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                             value: '12',
                             icon: Icons.shopping_bag_rounded,
                             color: _BrandColors.primaryOrange,
-                            lightBg: const Color(0xFFFFF0E8),
+                            lightBg: const Color(0xFFFFF0E8).withValues(alpha: 0.1),
                             onTap: () => ProductCategoryDetailSheet.show(context, 'hub_products'.tr, isCatalog: true),
                           ),
                         ),
@@ -683,7 +687,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                             value: '4',
                             icon: Icons.format_list_bulleted_rounded,
                             color: _BrandColors.blue,
-                            lightBg: const Color(0xFFEDF6FF),
+                            lightBg: const Color(0xFFEDF6FF).withValues(alpha: 0.8),
                             onTap: () => OrderCategoryDetailSheet.show(context, 'hub_orders'.tr),
                           ),
                         ),
@@ -699,7 +703,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                             value: '৳ 45,800',
                             icon: Icons.account_balance_wallet_rounded,
                             color: _BrandColors.green,
-                            lightBg: const Color(0xFFEFFFF6),
+                            lightBg: const Color(0xFFEFFFF6).withValues(alpha: 0.4),
                             onTap: () => InvoicesReceiptsSheet.show(context, initialTab: 'Receipts'),
                           ),
                         ),
@@ -711,7 +715,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                             value: '8',
                             icon: Icons.receipt_long_rounded,
                             color: _BrandColors.purple,
-                            lightBg: const Color(0xFFF7F0FF),
+                            lightBg: const Color(0xFFF7F0FF).withValues(alpha: 0.4),
                             onTap: () => InvoicesReceiptsSheet.show(context, initialTab: 'Invoices'),
                           ),
                         ),
@@ -725,7 +729,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
               // Quick Access Section (3 Cards)
               _buildQuickAccessSection(context),
 
-              // Products & My Products Full-Width Stacked List Tiles
+              // Products & My Products Banners Side-by-Side (Flex Half-Half)
               _buildFeaturedModulesList(context),
 
               UIHelper.verticalSpace(90.h),
@@ -805,29 +809,59 @@ class _WelcomeBannerWavePainter extends CustomPainter {
 
 class _MetricCardWavePainter extends CustomPainter {
   final Color color;
+  final double animationValue;
 
-  _MetricCardWavePainter({required this.color});
+  _MetricCardWavePainter({
+    required this.color,
+    this.animationValue = 0.0,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
+    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
     final paint = Paint()
-      ..color = color.withValues(alpha: 0.18)
+      ..shader = LinearGradient(
+        colors: [
+          color.withValues(alpha: 0.10),
+          color.withValues(alpha: 0.26),
+        ],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ).createShader(rect)
       ..style = PaintingStyle.fill;
 
+    // Smooth sinusoidal wave offset for organic fluid motion
+    final wavePhase = animationValue * 2 * math.pi;
+    final waveHeight = 5.h * math.sin(wavePhase);
+    final waveShift = 6.w * math.cos(wavePhase);
+
     final path = Path()
-      ..moveTo(size.width * 0.4, size.height)
-      ..quadraticBezierTo(
-        size.width * 0.65,
-        size.height * 0.55,
+      ..moveTo(size.width * 0.45 + waveShift, 0)
+      ..cubicTo(
+        size.width * 0.65 + waveShift,
+        size.height * 0.25 + waveHeight,
+        size.width * 0.75 + waveShift,
+        size.height * 0.75 - waveHeight,
         size.width,
-        size.height * 0.65,
+        size.height * 0.4 + waveHeight,
       )
       ..lineTo(size.width, size.height)
+      ..lineTo(size.width * 0.25 + waveShift, size.height)
+      ..cubicTo(
+        size.width * 0.35 + waveShift,
+        size.height * 0.6 + waveHeight,
+        size.width * 0.38 + waveShift,
+        size.height * 0.3 - waveHeight,
+        size.width * 0.45 + waveShift,
+        0,
+      )
       ..close();
 
     canvas.drawPath(path, paint);
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _MetricCardWavePainter oldDelegate) {
+    return oldDelegate.animationValue != animationValue || oldDelegate.color != color;
+  }
 }
