@@ -63,6 +63,11 @@ final class EndPoints {
   static String wholesaleCartItems() => "/wholesale/cart/items";
   static String wholesaleCartItemDetail(String item) => "/wholesale/cart/items/$item";
   static String wholesaleCartPrices() => "/wholesale/cart/prices";
+  static String wholesaleCheckout() => "/wholesale/checkout";
+  static String wholesaleCheckoutCoupon() => "/wholesale/checkout/coupon";
+  static String wholesaleCheckoutAddress() => "/wholesale/checkout/address";
+  static String wholesaleCheckoutAddresses(String type) => "/wholesale/checkout/addresses/$type";
+  static String wholesaleCheckoutConfirmation() => "/wholesale/checkout/confirmation";
   static String checkout() => "/checkout";
   static String checkoutCoupon() => "/checkout/coupon";
   static String checkoutPayment() => "/checkout/payment";

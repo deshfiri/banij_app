@@ -22,6 +22,7 @@ import '../feature/dashboard/data/payment_rx.dart';
 import '../feature/dashboard/data/product_rx.dart';
 import '../feature/dashboard/data/website_rx.dart';
 import '../feature/dashboard/data/wholesale_cart_rx.dart';
+import '../feature/dashboard/data/wholesale_checkout_rx.dart';
 import '../feature/finance/data/bank_branch_rx.dart';
 import '../feature/finance/data/bank_rx.dart';
 import '../feature/finance/data/request_withdrawal_rx.dart';
@@ -66,6 +67,7 @@ LocationDivisionRx locationDivisionRxObj = LocationDivisionRx();
 LocationChildRx locationChildRxObj = LocationChildRx();
 CheckoutRx checkoutRxObj = CheckoutRx();
 WholesaleCartRx wholesaleCartRxObj = WholesaleCartRx();
+WholesaleCheckoutRx wholesaleCheckoutRxObj = WholesaleCheckoutRx();
 CurrentUserRx currentUserRxObj = CurrentUserRx();
 
 CatalogRx catalogRxObj = CatalogRx();

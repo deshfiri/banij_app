@@ -14,6 +14,7 @@ import '../model/address_model.dart';
 import '../model/checkout_response_model.dart';
 import '../model/my_product_model.dart';
 import '../model/payment_model.dart';
+import '../model/wholesale_checkout_model.dart';
 
 class OrderNowScreen extends StatefulWidget {
   final ProductItemModel? product;
@@ -43,6 +44,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
   AddressResponseModel? _addressResponseModel;
   AddressItemModel? _selectedAddress;
   CheckoutResponseModel? _checkoutResponseModel;
+  WholesaleCheckoutResponseModel? _wholesaleCheckoutModel;
 
   @override
   void initState() {
@@ -50,12 +52,94 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
     _fetchPaymentMethods();
     _fetchAddresses();
     _fetchCheckoutDetails();
+    _fetchWholesaleCheckout();
   }
 
   @override
   void dispose() {
     _couponController.dispose();
     super.dispose();
+  }
+
+  Future<void> _fetchWholesaleCheckout() async {
+    try {
+      final res = await wholesaleCheckoutRxObj.fetchCheckout();
+      if (mounted) {
+        setState(() {
+          _wholesaleCheckoutModel = res;
+          if (res.data?.appliedCoupon != null && res.data!.appliedCoupon!.isNotEmpty) {
+            _couponController.text = res.data!.appliedCoupon!;
+          }
+        });
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _applyWholesaleCoupon() async {
+    final code = _couponController.text.trim();
+    if (code.isEmpty) return;
+    setState(() => _isApplyingCoupon = true);
+    try {
+      final res = await wholesaleCheckoutRxObj.applyCoupon(code);
+      if (mounted) {
+        setState(() {
+          _wholesaleCheckoutModel = res;
+        });
+        ToastUtil.showSuccessMessage('Coupon applied successfully');
+      }
+    } catch (e) {
+      String err = e.toString().replaceAll('Exception: ', '');
+      ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Failed to apply coupon');
+    } finally {
+      if (mounted) setState(() => _isApplyingCoupon = false);
+    }
+  }
+
+  Future<void> _removeWholesaleCoupon() async {
+    setState(() => _isApplyingCoupon = true);
+    try {
+      final res = await wholesaleCheckoutRxObj.removeCoupon();
+      if (mounted) {
+        setState(() {
+          _wholesaleCheckoutModel = res;
+          _couponController.clear();
+        });
+        ToastUtil.showSuccessMessage('Coupon removed');
+      }
+    } catch (_) {} finally {
+      if (mounted) setState(() => _isApplyingCoupon = false);
+    }
+  }
+
+  Future<void> _selectWholesaleAddress(String addressId) async {
+    try {
+      final res = await wholesaleCheckoutRxObj.selectAddress(addressId);
+      if (mounted) {
+        setState(() {
+          _wholesaleCheckoutModel = res;
+        });
+        ToastUtil.showSuccessMessage('Address updated for checkout');
+      }
+    } catch (_) {}
+  }
+
+  Future<void> _confirmWholesaleOrder() async {
+    setState(() => _isLoading = true);
+    try {
+      final res = await wholesaleCheckoutRxObj.confirmOrder();
+      if (mounted) {
+        setState(() {
+          _wholesaleCheckoutModel = res;
+          _isLoading = false;
+        });
+        ToastUtil.showSuccessMessage('Order confirmed successfully!');
+        Navigator.pushReplacementNamed(context, Routes.dashboardScreen);
+      }
+    } catch (e) {
+      String err = e.toString().replaceAll('Exception: ', '');
+      ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Order confirmation failed');
+      if (mounted) setState(() => _isLoading = false);
+    }
   }
 
   Future<void> _fetchCheckoutDetails() async {
