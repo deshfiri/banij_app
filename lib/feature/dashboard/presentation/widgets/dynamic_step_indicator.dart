@@ -17,10 +17,12 @@ class StepData {
 
 class DynamicStepIndicator extends StatelessWidget {
   final int currentStep;
+  final bool isApproved;
 
   const DynamicStepIndicator({
     super.key,
     this.currentStep = 3,
+    this.isApproved = false,
   });
 
   static const List<StepData> steps = [
@@ -43,8 +45,8 @@ class DynamicStepIndicator extends StatelessWidget {
         children: List.generate(steps.length, (index) {
           final step = steps[index];
           final stepNum = step.stepNumber;
-          final isCompleted = stepNum < currentStep;
-          final isActive = stepNum == currentStep;
+          final isCompleted = stepNum < currentStep || (stepNum == 5 && (currentStep >= 6 || isApproved));
+          final isActive = stepNum == currentStep && !isCompleted;
           final isLast = index == steps.length - 1;
 
           return Expanded(
@@ -60,7 +62,7 @@ class DynamicStepIndicator extends StatelessWidget {
                         height: 2.h,
                         color: index == 0
                             ? Colors.transparent
-                            : (stepNum <= currentStep
+                            : (isCompleted || stepNum <= currentStep
                                 ? successGreen
                                 : (isActive
                                     ? primaryOrange
@@ -139,7 +141,7 @@ class DynamicStepIndicator extends StatelessWidget {
                   ),
                 ),
 
-                // Active Badge (e.g. 'KYC' highlight under active step)
+                // Active Badge
                 if (isActive && step.badgeText != null) ...[
                   SizedBox(height: 4.h),
                   Container(

@@ -36,6 +36,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildDashboardTab(BuildContext context, DashboardProvider dashboardProvider) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final onboardingData = dashboardProvider.onboardingModel?.data;
+    final isApproved = onboardingData?.isApproved == true ||
+        onboardingData?.status?.value?.toLowerCase() == 'active' ||
+        onboardingData?.status?.value?.toLowerCase() == 'approved';
 
     if (dashboardProvider.isKycSubmitted) {
       return DashboardHubWidget(
@@ -52,9 +56,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
           // Title Header
           Text(
             dashboardProvider.currentStep == 4
-                ? 'Select Subscription Package'
-                : (dashboardProvider.currentStep == 5
-                    ? 'Account Under Review'
+                ? 'Select Subscription Package'.tr
+                : (dashboardProvider.currentStep >= 5
+                    ? (isApproved ? 'Account Approved & Active'.tr : 'Account Under Review'.tr)
                     : 'setting_up_account'.tr),
             textAlign: TextAlign.center,
             style: TextStyle(
@@ -66,7 +70,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           UIHelper.verticalSpace(20.h),
 
           // Dynamic Step Indicator (Steps 1 to 5)
-          DynamicStepIndicator(currentStep: dashboardProvider.currentStep),
+          DynamicStepIndicator(
+            currentStep: dashboardProvider.currentStep,
+            isApproved: isApproved,
+          ),
           UIHelper.verticalSpace(24.h),
 
           // Step 3: KYC Documents Pending
@@ -103,7 +110,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Builder(
               builder: (context) {
                 final onboardingData = dashboardProvider.onboardingModel?.data;
-                final statusBadge = onboardingData?.approvalStatus ?? 'FINAL STEP';
+                final statusBadge = onboardingData?.status?.label ?? onboardingData?.approvalStatus ?? 'ACTIVE';
                 final statusMsg = onboardingData?.message ??
                     'Package Confirmed! Your account is undergoing final workspace verification.';
 

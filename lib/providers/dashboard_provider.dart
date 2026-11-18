@@ -422,10 +422,14 @@ class DashboardProvider extends ChangeNotifier {
   Future<void> fetchOnboardingStatus() async {
     try {
       onboardingModel = await onboardingRxObj.fetchOnboardingStatus();
-      if (onboardingModel?.data?.step != null) {
-        final stepNum = onboardingModel!.data!.step!;
-        if (stepNum > _currentStep) {
-          _currentStep = stepNum;
+      if (onboardingModel?.data != null) {
+        final data = onboardingModel!.data!;
+        if (data.currentStep == 'approval' || data.isApproved) {
+          _currentStep = 5;
+        } else if (data.currentStep == 'package' || data.currentStep == 'payment') {
+          _currentStep = 4;
+        } else if (data.currentStep == 'kyc') {
+          _currentStep = 3;
         }
       }
       notifyListeners();
