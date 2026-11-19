@@ -1,3 +1,4 @@
+import 'package:bbnij/gen/colors.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -115,17 +116,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     'Package Confirmed! Your account is undergoing final workspace verification.';
 
                 return Container(
-                  padding: EdgeInsets.all(20.w),
+                  padding: EdgeInsets.all(22.w),
                   decoration: BoxDecoration(
-                    color: AppColorsTheme.cardBg(context),
-                    borderRadius: BorderRadius.circular(18.r),
+                    color: isDark ? AppColorsTheme.cardBg(context) : primaryOrange.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(22.r),
                     border: Border.all(
-                      color: const Color(0xFF10B981).withValues(alpha: 0.5),
+                      color:primaryOrange,
                       width: 1.5.w,
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF10B981).withValues(alpha: isDark ? 0.0 : 0.06),
+                        color: primaryOrange.withValues(alpha: isDark ? 0.08 : 0.08),
                         blurRadius: 16.r,
                         offset: const Offset(0, 6),
                       ),
@@ -138,25 +139,30 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            'Approval Status',
+                            'Approval Status'.tr,
                             style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.bold,
+                              fontSize: 16.5.sp,
+                              fontWeight: FontWeight.w900,
                               color: AppColorsTheme.textMainColor(context),
                             ),
                           ),
                           Container(
-                            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF10B981).withValues(alpha: 0.12),
-                              borderRadius: BorderRadius.circular(12.r),
+                              color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(20.r),
+                              border: Border.all(
+                                color: const Color(0xFF10B981).withValues(alpha: 0.3),
+                                width: 1.w,
+                              ),
                             ),
                             child: Text(
                               statusBadge.toUpperCase(),
                               style: TextStyle(
-                                fontSize: 10.sp,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF10B981),
+                                fontSize: 10.5.sp,
+                                fontWeight: FontWeight.w900,
+                                color: const Color(0xFF059669),
+                                letterSpacing: 0.5,
                               ),
                             ),
                           ),
@@ -166,15 +172,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Container(
                         padding: EdgeInsets.all(14.w),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF10B981).withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(12.r),
+                          color: isDark ? const Color(0xFF111827) : Colors.white,
+                          borderRadius: BorderRadius.circular(16.r),
+                          border: Border.all(
+                            color: const Color(0xFF10B981).withValues(alpha: 0.25),
+                            width: 1.w,
+                          ),
                         ),
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Icon(
-                              Icons.verified_rounded,
-                              size: 24.sp,
-                              color: const Color(0xFF10B981),
+                            Container(
+                              padding: EdgeInsets.all(8.w),
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFD1FAE5),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.verified_rounded,
+                                size: 22.sp,
+                                color: const Color(0xFF059669),
+                              ),
                             ),
                             UIHelper.horizontalSpace(12.w),
                             Expanded(
@@ -184,6 +202,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.w600,
                                   color: AppColorsTheme.textMainColor(context),
+                                  height: 1.35,
                                 ),
                               ),
                             ),
