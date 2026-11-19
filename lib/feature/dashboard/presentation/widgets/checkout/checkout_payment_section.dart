@@ -125,11 +125,11 @@ class CheckoutPaymentSection extends StatelessWidget {
   Color _getPaymentColor(String val) {
     final lower = val.toLowerCase();
     if (lower.contains('bkash')) {
-      return const Color(0xFFE2136E);
+      return bkashPink;
     } else if (lower.contains('nagad')) {
-      return const Color(0xFFED1C24);
+      return nagadRed;
     } else if (lower.contains('card') || lower.contains('visa')) {
-      return const Color(0xFF0284C7);
+      return infoBlue;
     } else {
       return primaryOrange;
     }

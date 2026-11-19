@@ -73,7 +73,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
 
   Widget _buildWelcomeBanner(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final userName = _currentUserModel?.data?.name ?? 'Mohammad Ashraf';
+    final userName = _currentUserModel?.data?.name ?? '';
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
@@ -96,7 +96,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
           boxShadow: [
             BoxShadow(
               color: _BrandColors.primaryOrange.withValues(alpha: isDark ? 0.12 : 0.06),
-              blurRadius: 14.r,
+              blurRadius: 0.r,
               offset: const Offset(0, 4),
             ),
           ],
@@ -124,7 +124,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: _BrandColors.primaryOrange.withValues(alpha: 0.3),
+                      color: _BrandColors.primaryOrange.withValues(alpha: 0.10),
                       blurRadius: 14.r,
                       offset: const Offset(0, 5),
                     ),
@@ -195,7 +195,8 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
     required BuildContext context,
     required String title,
     required String value,
-    required IconData icon,
+    IconData? icon,
+    String? iconAsset,
     required Color color,
     required Color lightBg,
     VoidCallback? onTap,
@@ -215,14 +216,14 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
             color: isDark ? AppColorsTheme.cardBg(context) : lightBg,
             borderRadius: BorderRadius.circular(22.r),
             border: Border.all(
-              color: color.withValues(alpha: isDark ? 0.3 : 0.18),
+              color: color.withValues(alpha: isDark ? 0.25 : 0.14),
               width: 1.w,
             ),
             boxShadow: [
               BoxShadow(
-                color: color.withValues(alpha: isDark ? 0.08 : 0.05),
-                blurRadius: 10.r,
-                offset: const Offset(0, 3),
+                color: color.withValues(alpha: isDark ? 0.02 : 0.03),
+                blurRadius: 1.r,
+                offset: const Offset(0, 1),
               ),
             ],
           ),
@@ -244,12 +245,20 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
               Row(
                 children: [
                   Container(
-                    padding: EdgeInsets.all(9.w),
+                    padding: EdgeInsets.all(8.w),
                     decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.18),
+                      color: color.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(15.r),
                     ),
-                    child: Icon(icon, color: color, size: 20.sp),
+                    child: iconAsset != null
+                        ? Image.asset(
+                            iconAsset,
+                            width: 20.w,
+                            height: 20.h,
+                            color: color,
+                            fit: BoxFit.contain,
+                          )
+                        : Icon(icon ?? Icons.analytics_rounded, color: color, size: 20.sp),
                   ),
                   UIHelper.horizontalSpace(10.w),
                   Expanded(
@@ -310,23 +319,17 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
     final quickTiles = [
       {
         'title': 'Products',
-        'icon': Icons.shopping_bag_rounded,
-        'color': _BrandColors.primaryOrange,
-        'bg': const Color(0xFFFFF0E8),
+        'iconAsset': productIcon,
         'onTap': () => ProductCategoryDetailSheet.show(context, 'hub_products'.tr, isCatalog: true),
       },
       {
         'title': 'Order',
-        'icon': Icons.shopping_cart_rounded,
-        'color': _BrandColors.primaryOrange,
-        'bg': const Color(0xFFFFF0E8),
+        'iconAsset': cartIconAsset,
         'onTap': () => OrderCategoryDetailSheet.show(context, 'hub_all_orders'.tr),
       },
       {
         'title': 'Finance',
-        'icon': Icons.analytics_rounded,
-        'color': _BrandColors.primaryOrange,
-        'bg': const Color(0xFFFFF0E8),
+        'iconAsset': financeIconAsset,
         'onTap': () => InvoicesReceiptsSheet.show(context, initialTab: 'Invoices'),
       },
     ];
@@ -345,7 +348,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
                     width: 4.w,
                     height: 17.h,
                     decoration: BoxDecoration(
-                      color: _BrandColors.primaryOrange,
+                      color: primaryOrange,
                       borderRadius: BorderRadius.circular(2.r),
                     ),
                   ),
@@ -369,25 +372,23 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
                       style: TextStyle(
                         fontSize: 12.5.sp,
                         fontWeight: FontWeight.w800,
-                        color: _BrandColors.primaryOrange,
+                        color: Colors.black
                       ),
                     ),
                     UIHelper.horizontalSpace(2.w),
-                    Icon(Icons.arrow_forward_rounded, color: _BrandColors.primaryOrange, size: 14.sp),
+                    Icon(Icons.arrow_forward_rounded, color: primaryOrange, size: 14.sp),
                   ],
                 ),
               ),
             ],
           ),
-          UIHelper.verticalSpace(8.h),
+          UIHelper.verticalSpace(10.h),
           SizedBox(
-            height: 118.h,
+            height: 105  .h,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: quickTiles.map((tile) {
-                final color = tile['color'] as Color;
-                final bg = tile['bg'] as Color;
-                final icon = tile['icon'] as IconData;
+                final iconAsset = tile['iconAsset'] as String;
                 final title = tile['title'] as String;
                 final onTap = tile['onTap'] as VoidCallback;
 
@@ -400,50 +401,79 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
                       child: Container(
                         padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
                         decoration: BoxDecoration(
-                          color: isDark ? AppColorsTheme.cardBg(context) : bg,
+                          color: isDark ? AppColorsTheme.cardBg(context) : const Color(0xFFFFF6F0),
                           borderRadius: BorderRadius.circular(22.r),
                           border: Border.all(
-                            color: isDark ? const Color(0xFF374151) : color.withValues(alpha: 0.2),
+                            color: isDark ? const Color(0xFF374151) : primaryOrange.withValues(alpha: 0.22),
                             width: 1.w,
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: color.withValues(alpha: isDark ? 0.08 : 0.05),
+                              color: primaryOrange.withValues(alpha: isDark ? 0.08 : 0.05),
                               blurRadius: 10.r,
                               offset: const Offset(0, 3),
                             ),
                           ],
                         ),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                        child: Stack(
                           children: [
-                            Container(
-                              padding: EdgeInsets.all(9.w),
-                              decoration: BoxDecoration(
-                                color: isDark ? color.withValues(alpha: 0.2) : Colors.white,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  if (!isDark)
-                                    BoxShadow(
-                                      color: color.withValues(alpha: 0.12),
-                                      blurRadius: 6.r,
-                                      offset: const Offset(0, 2),
-                                    ),
-                                ],
+                            // Arrow Pill on Top Right matching screenshot
+                            Positioned(
+                              top: 0,
+                              right: 0,
+                              child: Container(
+                                padding: EdgeInsets.all(4.w),
+                                decoration: BoxDecoration(
+                                  color: primaryOrange.withValues(alpha: 0.14),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  Icons.chevron_right_rounded,
+                                  color: primaryOrange,
+                                  size: 14.sp,
+                                ),
                               ),
-                              child: Icon(icon, color: color, size: 21.sp),
                             ),
-                            UIHelper.verticalSpace(6.h),
-                            Text(
-                              title,
-                              textAlign: TextAlign.center,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 11.5.sp,
-                                fontWeight: FontWeight.w800,
-                                color: isDark ? Colors.white : _BrandColors.primaryText,
-                              ),
+                            // Center Icon & Bottom Title
+                            Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Center(
+                                  child: Container(
+                                    padding: EdgeInsets.all(9.w),
+                                    decoration: BoxDecoration(
+                                      color: isDark ? const Color(0xFF1F2937) : Colors.white,
+                                      shape: BoxShape.circle,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: primaryOrange.withValues(alpha: isDark ? 0.2 : 0.12),
+                                          blurRadius: 8.r,
+                                          offset: const Offset(0, 3),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Image.asset(
+                                      iconAsset,
+                                      width: 24.w,
+                                      height: 24.h,
+                                      fit: BoxFit.contain,
+                                    ),
+                                  ),
+                                ),
+                                UIHelper.verticalSpace(6.h),
+                                Text(
+                                  title,
+                                  textAlign: TextAlign.center,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: isDark ? Colors.white : _BrandColors.primaryText,
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
                         ),
@@ -459,7 +489,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
     );
   }
 
-  // 4. Products & My Products Banners Horizontally Side-by-Side (Flex Half-Half) in SizedBox
+  // 4. Products & My Products Banners Horizontally Side-by-Side (Flex Half-Half) with Natural Aspect Ratio
   Widget _buildFeaturedModulesList(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
@@ -469,7 +499,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
           Expanded(
             flex: 1,
             child: SizedBox(
-              height: 140.h,
+              height: 102.h,
               child: _buildBannerCard(
                 context: context,
                 imagePath: productsImage,
@@ -483,7 +513,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
           Expanded(
             flex: 1,
             child: SizedBox(
-              height: 140.h,
+              height: 102.h,
               child: _buildBannerCard(
                 context: context,
                 imagePath: myProductsImage,
@@ -510,15 +540,15 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
       child: Container(
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20.r),
+          borderRadius: BorderRadius.circular(18.r),
           border: Border.all(
-            color: isDark ? const Color(0xFF374151) : primaryOrange.withValues(alpha: 0.3),
+            color: isDark ? const Color(0xFF374151) : primaryOrange.withValues(alpha: 0.25),
             width: 1.w,
           ),
           boxShadow: [
             BoxShadow(
-              color: primaryOrange.withValues(alpha: isDark ? 0.08 : 0.12),
-              blurRadius: 10.r,
+              color: primaryOrange.withValues(alpha: isDark ? 0.08 : 0.08),
+              blurRadius: 8.r,
               offset: const Offset(0, 3),
             ),
           ],
@@ -526,14 +556,15 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Background 3D Illustration Image - BoxFit.fill to fit height and width of card perfectly
+            // Background 3D Illustration Image - BoxFit.cover to maintain natural aspect ratio
             Image.asset(
               imagePath,
-              fit: BoxFit.fill,
+              fit: BoxFit.cover,
+              alignment: Alignment.center,
             ),
             // Button inside Stack at bottom left over image
             Padding(
-              padding: EdgeInsets.all(10.w),
+              padding: EdgeInsets.all(7.w),
               child: Align(
                 alignment: Alignment.bottomLeft,
                 child: ElevatedButton(
@@ -541,14 +572,16 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryOrange,
                     foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    elevation: 3,
+                    padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 3.h),
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
+                    elevation: 2,
                   ),
                   child: Text(
                     buttonText,
                     style: TextStyle(
-                      fontSize: 10.sp,
+                      fontSize: 8.5.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -673,7 +706,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
                             context: context,
                             title: 'Active Products',
                             value: '12',
-                            icon: Icons.shopping_bag_rounded,
+                            iconAsset: productIcon,
                             color: _BrandColors.primaryOrange,
                             lightBg: const Color(0xFFFFF0E8).withValues(alpha: 0.1),
                             onTap: () => ProductCategoryDetailSheet.show(context, 'hub_products'.tr, isCatalog: true),
@@ -685,7 +718,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
                             context: context,
                             title: 'Pending Orders',
                             value: '4',
-                            icon: Icons.format_list_bulleted_rounded,
+                            iconAsset: cartIconAsset,
                             color: _BrandColors.blue,
                             lightBg: const Color(0xFFEDF6FF).withValues(alpha: 0.8),
                             onTap: () => OrderCategoryDetailSheet.show(context, 'hub_orders'.tr),
@@ -701,7 +734,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
                             context: context,
                             title: 'Revenue',
                             value: '৳ 45,800',
-                            icon: Icons.account_balance_wallet_rounded,
+                            iconAsset: financeIconAsset,
                             color: _BrandColors.green,
                             lightBg: const Color(0xFFEFFFF6).withValues(alpha: 0.4),
                             onTap: () => InvoicesReceiptsSheet.show(context, initialTab: 'Receipts'),
@@ -713,9 +746,9 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
                             context: context,
                             title: 'Issued Invoices',
                             value: '8',
-                            icon: Icons.receipt_long_rounded,
+                            iconAsset: financeIconAsset,
                             color: _BrandColors.purple,
-                            lightBg: const Color(0xFFF7F0FF).withValues(alpha: 0.4),
+                            lightBg: const Color(0xFFF7F0FF).withValues(alpha: 0.2),
                             onTap: () => InvoicesReceiptsSheet.show(context, initialTab: 'Invoices'),
                           ),
                         ),

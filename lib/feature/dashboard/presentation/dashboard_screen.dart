@@ -1,4 +1,3 @@
-import 'package:bbnij/gen/colors.gen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -118,7 +117,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 return Container(
                   padding: EdgeInsets.all(22.w),
                   decoration: BoxDecoration(
-                    color: isDark ? AppColorsTheme.cardBg(context) : primaryOrange.withOpacity(0.1),
+                    color: isDark ? AppColorsTheme.cardBg(context) : primaryOrange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(22.r),
                     border: Border.all(
                       color:primaryOrange,
@@ -149,10 +148,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           Container(
                             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                              color: successGreenLight,
                               borderRadius: BorderRadius.circular(20.r),
                               border: Border.all(
-                                color: const Color(0xFF10B981).withValues(alpha: 0.3),
+                                color: successGreen.withValues(alpha: 0.3),
                                 width: 1.w,
                               ),
                             ),
@@ -161,7 +160,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               style: TextStyle(
                                 fontSize: 10.5.sp,
                                 fontWeight: FontWeight.w900,
-                                color: const Color(0xFF059669),
+                                color: successGreenDark,
                                 letterSpacing: 0.5,
                               ),
                             ),

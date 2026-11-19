@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// Primary Brand Colors
 const Color lightBackground = Color(0xFFFFF8F5);
 const Color darkBackground = Color(0xFF121214);
 
@@ -10,12 +11,34 @@ const Color inputFillColor = Color(0xFFFFFFFF);
 const Color darkInputFillColor = Color(0xFF111827);
 
 const Color primaryOrange = Color(0xFFFD6B04);
+const Color secondaryOrange = Color(0xFFFF8A3D);
 
 const Color textMain = Color(0xFF0F172A);
 const Color darkTextMain = Color(0xFFF8FAFC);
 
 const Color textMuted = Color(0xFF64748B);
 const Color darkTextMuted = Color(0xFF9CA3AF);
+
+// System Status & Module Accent Colors
+const Color successGreen = Color(0xFF10B981);
+const Color successGreenDark = Color(0xFF059669);
+const Color successGreenLight = Color(0xFFD1FAE5);
+
+const Color infoBlue = Color(0xFF0284C7);
+const Color infoBlueLight = Color(0xFFEDF6FF);
+
+const Color warningYellow = Color(0xFFD97706);
+const Color warningYellowLight = Color(0xFFFEF3C7);
+
+const Color errorRed = Color(0xFFDC2626);
+const Color errorRedLight = Color(0xFFFEE2E2);
+
+const Color purpleAccent = Color(0xFF8B5CF6);
+const Color purpleAccentLight = Color(0xFFF7F0FF);
+
+// Payment Brand Colors
+const Color bkashPink = Color(0xFFE2136E);
+const Color nagadRed = Color(0xFFED1C24);
 
 class AppColorsTheme {
   static Color background(BuildContext context) {

@@ -9,3 +9,6 @@ const String products3dIllustration = "assets/images/products_3d_illustration.jp
 const String myProducts3dIllustration = "assets/images/my_products_3d_illustration.jpg";
 const String productsImage = "assets/images/Products.png";
 const String myProductsImage = "assets/images/My-Products.png";
+const String productIcon = "assets/icons/Product.png";
+const String cartIconAsset = "assets/icons/Cart.png";
+const String financeIconAsset = "assets/icons/Finance.png";
