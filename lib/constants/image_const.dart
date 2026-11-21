@@ -12,3 +12,6 @@ const String myProductsImage = "assets/images/My-Products.png";
 const String productIcon = "assets/icons/Product.png";
 const String cartIconAsset = "assets/icons/Cart.png";
 const String financeIconAsset = "assets/icons/Finance.png";
+const String wallterAssets = "assets/icons/wallet.png";
+
+

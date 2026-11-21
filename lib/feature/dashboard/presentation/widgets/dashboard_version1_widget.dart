@@ -372,7 +372,7 @@ class _DashboardVersion1WidgetState extends State<DashboardVersion1Widget> {
           ),
           UIHelper.verticalSpace(12.h),
           SizedBox(
-            height: 106.h,
+            height: 100.h,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: quickTiles.map((tile) {

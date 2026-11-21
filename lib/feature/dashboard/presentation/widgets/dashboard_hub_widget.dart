@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:math' as math;
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -15,6 +17,7 @@ import '../../model/current_user_model.dart';
 import 'order_category_detail_sheet.dart';
 import 'product_category_detail_sheet.dart';
 import 'all_hub_cards_sheet.dart';
+import 'summary_card_widget.dart';
 
 class _BrandColors {
   static const Color primaryOrange = Color(0xFFFF6900);
@@ -23,9 +26,6 @@ class _BrandColors {
   static const Color primaryText = Color(0xFF151D32);
   static const Color secondaryText = Color(0xFF64748B);
   static const Color border = Color(0xFFFFE1D0);
-  static const Color blue = Color(0xFF1595DC);
-  static const Color green = Color(0xFF10B981);
-  static const Color purple = Color(0xFF9257F6);
 }
 
 class DashboardHubWidget extends StatefulWidget {
@@ -40,23 +40,27 @@ class DashboardHubWidget extends StatefulWidget {
   State<DashboardHubWidget> createState() => _DashboardHubWidgetState();
 }
 
-class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTickerProviderStateMixin {
+class _DashboardHubWidgetState extends State<DashboardHubWidget> {
   CurrentUserModel? _currentUserModel;
-  late AnimationController _waveAnimationController;
+  Timer? _chartAnimationTimer;
+  int _chartTick = 0;
 
   @override
   void initState() {
     super.initState();
     _fetchCurrentUser();
-    _waveAnimationController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 4),
-    )..repeat(reverse: true);
+    _chartAnimationTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (mounted) {
+        setState(() {
+          _chartTick++;
+        });
+      }
+    });
   }
 
   @override
   void dispose() {
-    _waveAnimationController.dispose();
+    _chartAnimationTimer?.cancel();
     super.dispose();
   }
 
@@ -73,7 +77,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
 
   Widget _buildWelcomeBanner(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final userName = _currentUserModel?.data?.name ?? '';
+    final userName = _currentUserModel?.data?.name ?? 'Mohammad Ashraf';
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
@@ -96,7 +100,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
           boxShadow: [
             BoxShadow(
               color: _BrandColors.primaryOrange.withValues(alpha: isDark ? 0.12 : 0.06),
-              blurRadius: 0.r,
+              blurRadius: 14.r,
               offset: const Offset(0, 4),
             ),
           ],
@@ -124,7 +128,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
                   ),
                   boxShadow: [
                     BoxShadow(
-                      color: _BrandColors.primaryOrange.withValues(alpha: 0.10),
+                      color: _BrandColors.primaryOrange.withValues(alpha: 0.3),
                       blurRadius: 14.r,
                       offset: const Offset(0, 5),
                     ),
@@ -160,28 +164,22 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
                     children: [
                       Flexible(
                         child: Text(
-                          userName,
+                          'Good morning,\n $userName',
                           style: TextStyle(
-                            fontSize: 19.sp,
+                            fontSize: 18.sp,
                             fontWeight: FontWeight.w900,
                             color: isDark ? Colors.white : _BrandColors.primaryText,
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      UIHelper.horizontalSpace(4.w),
-                      Text('👏', style: TextStyle(fontSize: 17.sp)),
                     ],
                   ),
                   UIHelper.verticalSpace(4.h),
-                  Text(
-                    'Manage your business with ease',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w500,
-                      color: isDark ? const Color(0xFF9CA3AF) : _BrandColors.secondaryText,
-                    ),
-                  ),
+
+
+
+
                 ],
               ),
             ),
@@ -191,124 +189,320 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
     );
   }
 
-  Widget _buildMetricCard({
-    required BuildContext context,
-    required String title,
-    required String value,
-    IconData? icon,
-    String? iconAsset,
-    required Color color,
-    required Color lightBg,
-    VoidCallback? onTap,
-  }) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+  // Analytics Dashboard Section (Wallet/Paid Summary + Side-by-Side Charts Row)
+  Widget _buildAnalyticsSection(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      child: Column(
+        children: [
+          // 1. Wallet Balance & Total Paid Summary Cards Row
+          _buildWalletAndTotalPaidRow(context),
+          UIHelper.verticalSpace(12.h),
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(22.r),
-        child: Container(
-          constraints: BoxConstraints(minHeight: 78.h),
-          clipBehavior: Clip.antiAlias,
-          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-          decoration: BoxDecoration(
-            color: isDark ? AppColorsTheme.cardBg(context) : lightBg,
-            borderRadius: BorderRadius.circular(22.r),
-            border: Border.all(
-              color: color.withValues(alpha: isDark ? 0.25 : 0.14),
-              width: 1.w,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: color.withValues(alpha: isDark ? 0.02 : 0.03),
-                blurRadius: 1.r,
-                offset: const Offset(0, 1),
+          // 2. Side-by-Side Grid Row: Line Chart + Donut Chart
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _buildPaidLineChartCard(context),
+              ),
+              UIHelper.horizontalSpace(10.w),
+              Expanded(
+                child: _buildExpenseDonutChartCard(context),
               ),
             ],
           ),
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: AnimatedBuilder(
-                  animation: _waveAnimationController,
-                  builder: (context, child) {
-                    return CustomPaint(
-                      painter: _MetricCardWavePainter(
-                        color: color,
-                        animationValue: _waveAnimationController.value,
-                      ),
-                    );
-                  },
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWalletAndTotalPaidRow(BuildContext context) {
+    return Row(
+      children: [
+        // Wallet Balance Card
+        Expanded(
+          flex: 1,
+          child: SummaryCardWidget(
+            title: 'Wallet balance'.tr,
+
+            amount: '৳44,850.00',
+            iconAsset: wallterAssets,
+            onTap: () => Navigator.pushNamed(context, Routes.walletScreen),
+          ),
+        ),
+        UIHelper.horizontalSpace(12.w),
+        // Total Paid Card
+        Expanded(
+          flex: 1,
+          child: SummaryCardWidget(
+            title: 'Total paid'.tr,
+            subtitle: 'Settled payments (6 mos)',
+            amount: '৳150.00',
+            iconAsset: financeIconAsset,
+            onTap: () => InvoicesReceiptsSheet.show(context, initialTab: 'Receipts'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPaidLineChartCard(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      constraints: BoxConstraints(minHeight: 215.h),
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        color: primaryOrange.withValues(alpha: 0.0),
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: AppColorsTheme.borderColor(context)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+            blurRadius: 10.r,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'What you have paid'.tr,
+            style: TextStyle(
+              fontSize: 13.5.sp,
+              fontWeight: FontWeight.w900,
+              color: AppColorsTheme.textMainColor(context),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          UIHelper.verticalSpace(2.h),
+          Text(
+            'Settled payments'.tr,
+            style: TextStyle(
+              fontSize: 10.sp,
+              color: AppColorsTheme.textMutedColor(context),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          UIHelper.verticalSpace(14.h),
+          SizedBox(
+            height: 130.h,
+            child: LineChart(
+              LineChartData(
+                gridData: FlGridData(
+                  show: true,
+                  drawVerticalLine: false,
+                  getDrawingHorizontalLine: (value) => FlLine(
+                    color: AppColorsTheme.borderColor(context).withValues(alpha: 0.5),
+                    strokeWidth: 0.8,
+                    dashArray: [4, 4],
+                  ),
                 ),
-              ),
-              Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(8.w),
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(15.r),
-                    ),
-                    child: iconAsset != null
-                        ? Image.asset(
-                            iconAsset,
-                            width: 20.w,
-                            height: 20.h,
-                            color: color,
-                            fit: BoxFit.contain,
-                          )
-                        : Icon(icon ?? Icons.analytics_rounded, color: color, size: 20.sp),
-                  ),
-                  UIHelper.horizontalSpace(10.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          value,
+                titlesData: FlTitlesData(
+                  show: true,
+                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 28.w,
+                      getTitlesWidget: (value, meta) {
+                        String text = '';
+                        if (value == 0) text = '৳0';
+                        if (value == 76) text = '৳76';
+                        if (value == 152) text = '৳152';
+                        return Text(
+                          text,
                           style: TextStyle(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w900,
-                            color: isDark ? Colors.white : AppColorsTheme.textMainColor(context),
-                            letterSpacing: -0.3,
-                            height: 1.1,
+                            fontSize: 8.5.sp,
+                            color: AppColorsTheme.textMutedColor(context),
                           ),
-                        ),
-                        UIHelper.verticalSpace(3.h),
-                        Text(
-                          title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: 11.5.sp,
-                            fontWeight: FontWeight.w700,
-                            color: isDark ? const Color(0xFF9CA3AF) : const Color(0xFF64748B),
-                            height: 1.18,
-                            letterSpacing: -0.1,
-                          ),
-                        ),
-                      ],
+                        );
+                      },
                     ),
                   ),
-                  Container(
-                    padding: EdgeInsets.all(5.w),
-                    decoration: BoxDecoration(
-                      color: color.withValues(alpha: 0.14),
-                      shape: BoxShape.circle,
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      reservedSize: 20.h,
+                      interval: 1,
+                      getTitlesWidget: (value, meta) {
+                        const months = ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'];
+                        int index = value.round();
+                        if (index >= 0 && index < months.length) {
+                          return Padding(
+                            padding: EdgeInsets.only(top: 4.h),
+                            child: Text(
+                              months[index],
+                              style: TextStyle(
+                                fontSize: 8.5.sp,
+                                fontWeight: FontWeight.w600,
+                                color: AppColorsTheme.textMutedColor(context),
+                              ),
+                            ),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
                     ),
-                    child: Icon(
-                      Icons.chevron_right_rounded,
-                      color: color,
-                      size: 16.sp,
+                  ),
+                ),
+                borderData: FlBorderData(show: false),
+                minX: 0,
+                maxX: 5,
+                minY: 0,
+                maxY: 160,
+                lineBarsData: [
+                  LineChartBarData(
+                    spots: [
+                      const FlSpot(0, 0),
+                      FlSpot(1, 4.0 + (3.0 * math.sin(_chartTick * 0.7))),
+                      FlSpot(2, 6.0 + (4.0 * math.cos(_chartTick * 0.6))),
+                      FlSpot(3, 10.0 + (5.0 * math.sin(_chartTick * 0.8))),
+                      FlSpot(4, 18.0 + (6.0 * math.cos(_chartTick * 0.5))),
+                      FlSpot(5, 142.0 + (10.0 * math.sin(_chartTick * 0.9))),
+                    ],
+                    isCurved: true,
+                    curveSmoothness: 0.28,
+                    color: primaryOrange,
+                    barWidth: 2.2.w,
+                    isStrokeCapRound: true,
+                    dotData: const FlDotData(show: false),
+                    belowBarData: BarAreaData(
+                      show: true,
+                      gradient: LinearGradient(
+                        colors: [
+                          primaryOrange.withValues(alpha: 0.35),
+                          primaryOrange.withValues(alpha: 0.02),
+                        ],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
                     ),
                   ),
                 ],
               ),
+              duration: const Duration(milliseconds: 800),
+              curve: Curves.easeInOutCubic,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExpenseDonutChartCard(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final mainSlice = 82.0 + (8.0 * math.sin(_chartTick * 0.8));
+    final subSlice = 100.0 - mainSlice;
+
+    return Container(
+      constraints: BoxConstraints(minHeight: 215.h),
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        color: primaryOrange.withValues(alpha: 0.0),
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: AppColorsTheme.borderColor(context)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+            blurRadius: 10.r,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'What it went on'.tr,
+            style: TextStyle(
+              fontSize: 13.5.sp,
+              fontWeight: FontWeight.w900,
+              color: AppColorsTheme.textMainColor(context),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          UIHelper.verticalSpace(2.h),
+          Text(
+            'Expense breakdown'.tr,
+            style: TextStyle(
+              fontSize: 10.sp,
+              color: AppColorsTheme.textMutedColor(context),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          UIHelper.verticalSpace(14.h),
+          Center(
+            child: SizedBox(
+              width: 82.w,
+              height: 82.h,
+              child: PieChart(
+                PieChartData(
+                  sectionsSpace: 2,
+                  centerSpaceRadius: 22.r,
+                  sections: [
+                    PieChartSectionData(
+                      color: primaryOrange,
+                      value: mainSlice,
+                      title: '',
+                      radius: 16.r,
+                    ),
+                    PieChartSectionData(
+                      color: primaryOrange.withValues(alpha: 0.3),
+                      value: subSlice,
+                      title: '',
+                      radius: 14.r,
+                    ),
+                  ],
+                ),
+                swapAnimationDuration: const Duration(milliseconds: 800),
+                swapAnimationCurve: Curves.easeInOut,
+              ),
+            ),
+          ),
+          UIHelper.verticalSpace(12.h),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 7.w,
+                    height: 7.h,
+                    decoration: const BoxDecoration(
+                      color: primaryOrange,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  UIHelper.horizontalSpace(4.w),
+                  Text(
+                    'Wholesale'.tr,
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      fontWeight: FontWeight.w600,
+                      color: AppColorsTheme.textMainColor(context),
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                '৳150.00',
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  fontWeight: FontWeight.w900,
+                  color: primaryOrange,
+                ),
+              ),
             ],
           ),
-        ),
+        ],
       ),
     );
   }
@@ -372,7 +566,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
                       style: TextStyle(
                         fontSize: 12.5.sp,
                         fontWeight: FontWeight.w800,
-                        color: Colors.black
+                        color: primaryOrange,
                       ),
                     ),
                     UIHelper.horizontalSpace(2.w),
@@ -384,13 +578,13 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
           ),
           UIHelper.verticalSpace(10.h),
           SizedBox(
-            height: 105  .h,
+            height: 114.h,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: quickTiles.map((tile) {
-                final iconAsset = tile['iconAsset'] as String;
-                final title = tile['title'] as String;
-                final onTap = tile['onTap'] as VoidCallback;
+                final iconAsset = tile['iconAsset']?.toString() ?? productIcon;
+                final title = tile['title']?.toString() ?? '';
+                final onTap = tile['onTap'] is VoidCallback ? tile['onTap'] as VoidCallback : () {};
 
                 return Expanded(
                   child: Padding(
@@ -489,7 +683,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
     );
   }
 
-  // 4. Products & My Products Banners Horizontally Side-by-Side (Flex Half-Half) with Natural Aspect Ratio
+  // 4. Products & My Products Banners Horizontally Side-by-Side (Flex Half-Half) in SizedBox
   Widget _buildFeaturedModulesList(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
@@ -689,83 +883,23 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> with SingleTick
           ),
         ),
 
-        // Main Dashboard Body Sections
         SliverToBoxAdapter(
           child: Column(
             children: [
               _buildWelcomeBanner(context),
               UIHelper.verticalSpace(4.h),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20.w),
-                child: Column(
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildMetricCard(
-                            context: context,
-                            title: 'Active Products',
-                            value: '12',
-                            iconAsset: productIcon,
-                            color: _BrandColors.primaryOrange,
-                            lightBg: const Color(0xFFFFF0E8).withValues(alpha: 0.1),
-                            onTap: () => ProductCategoryDetailSheet.show(context, 'hub_products'.tr, isCatalog: true),
-                          ),
-                        ),
-                        UIHelper.horizontalSpace(10.w),
-                        Expanded(
-                          child: _buildMetricCard(
-                            context: context,
-                            title: 'Pending Orders',
-                            value: '4',
-                            iconAsset: cartIconAsset,
-                            color: _BrandColors.blue,
-                            lightBg: const Color(0xFFEDF6FF).withValues(alpha: 0.8),
-                            onTap: () => OrderCategoryDetailSheet.show(context, 'hub_orders'.tr),
-                          ),
-                        ),
-                      ],
-                    ),
-                    UIHelper.verticalSpace(10.h),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildMetricCard(
-                            context: context,
-                            title: 'Revenue',
-                            value: '৳ 45,800',
-                            iconAsset: financeIconAsset,
-                            color: _BrandColors.green,
-                            lightBg: const Color(0xFFEFFFF6).withValues(alpha: 0.4),
-                            onTap: () => InvoicesReceiptsSheet.show(context, initialTab: 'Receipts'),
-                          ),
-                        ),
-                        UIHelper.horizontalSpace(10.w),
-                        Expanded(
-                          child: _buildMetricCard(
-                            context: context,
-                            title: 'Issued Invoices',
-                            value: '8',
-                            iconAsset: financeIconAsset,
-                            color: _BrandColors.purple,
-                            lightBg: const Color(0xFFF7F0FF).withValues(alpha: 0.2),
-                            onTap: () => InvoicesReceiptsSheet.show(context, initialTab: 'Invoices'),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+
+              _buildAnalyticsSection(context),
+
               UIHelper.verticalSpace(12.h),
 
-              // Quick Access Section (3 Cards)
               _buildQuickAccessSection(context),
 
               // Products & My Products Banners Side-by-Side (Flex Half-Half)
               _buildFeaturedModulesList(context),
+              UIHelper.verticalSpace(15.h)
 
-              UIHelper.verticalSpace(90.h),
+              
             ],
           ),
         ),
@@ -838,63 +972,4 @@ class _WelcomeBannerWavePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class _MetricCardWavePainter extends CustomPainter {
-  final Color color;
-  final double animationValue;
-
-  _MetricCardWavePainter({
-    required this.color,
-    this.animationValue = 0.0,
-  });
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
-    final paint = Paint()
-      ..shader = LinearGradient(
-        colors: [
-          color.withValues(alpha: 0.10),
-          color.withValues(alpha: 0.26),
-        ],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ).createShader(rect)
-      ..style = PaintingStyle.fill;
-
-    // Smooth sinusoidal wave offset for organic fluid motion
-    final wavePhase = animationValue * 2 * math.pi;
-    final waveHeight = 5.h * math.sin(wavePhase);
-    final waveShift = 6.w * math.cos(wavePhase);
-
-    final path = Path()
-      ..moveTo(size.width * 0.45 + waveShift, 0)
-      ..cubicTo(
-        size.width * 0.65 + waveShift,
-        size.height * 0.25 + waveHeight,
-        size.width * 0.75 + waveShift,
-        size.height * 0.75 - waveHeight,
-        size.width,
-        size.height * 0.4 + waveHeight,
-      )
-      ..lineTo(size.width, size.height)
-      ..lineTo(size.width * 0.25 + waveShift, size.height)
-      ..cubicTo(
-        size.width * 0.35 + waveShift,
-        size.height * 0.6 + waveHeight,
-        size.width * 0.38 + waveShift,
-        size.height * 0.3 - waveHeight,
-        size.width * 0.45 + waveShift,
-        0,
-      )
-      ..close();
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _MetricCardWavePainter oldDelegate) {
-    return oldDelegate.animationValue != animationValue || oldDelegate.color != color;
-  }
 }
