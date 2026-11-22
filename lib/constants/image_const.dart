@@ -41,3 +41,15 @@ const String addressesIconAsset = "assets/icons/module_addresses.png";
 
 // Onboarding illustrations
 const String onboardingGlobalImage = "assets/images/onboarding_global.png";
+
+// Bottom navigation icons (Flaticon UIcons Rounded: outline = inactive, solid = active).
+// Single-colour masks, tinted in code.
+const String navHomeIcon = "assets/icons/nav_home.png";
+const String navHomeActiveIcon = "assets/icons/nav_home_active.png";
+const String navFinanceIcon = "assets/icons/nav_finance.png";
+const String navFinanceActiveIcon = "assets/icons/nav_finance_active.png";
+const String navBusinessIcon = "assets/icons/nav_business.png";
+const String navBusinessActiveIcon = "assets/icons/nav_business_active.png";
+const String navAccountIcon = "assets/icons/nav_account.png";
+const String navAccountActiveIcon = "assets/icons/nav_account_active.png";
+const String navPlusIcon = "assets/icons/nav_plus.png";

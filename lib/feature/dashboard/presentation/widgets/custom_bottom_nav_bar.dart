@@ -3,12 +3,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 import '../../../../constants/color.dart';
+import '../../../../constants/image_const.dart';
 
 /// One tab in [CustomBottomNavBar]. [index] is what `onTap` receives.
 class _NavTab {
   final int index;
-  final IconData icon;
-  final IconData activeIcon;
+  final String icon;
+  final String activeIcon;
   final String labelKey;
 
   const _NavTab(this.index, this.icon, this.activeIcon, this.labelKey);
@@ -26,13 +27,13 @@ class CustomBottomNavBar extends StatelessWidget {
   static const int quickActionIndex = 2;
 
   static const List<_NavTab> _leftTabs = [
-    _NavTab(0, Icons.home_outlined, Icons.home_rounded, 'dashboard'),
-    _NavTab(1, Icons.receipt_long_outlined, Icons.receipt_long_rounded, 'finance'),
+    _NavTab(0, navHomeIcon, navHomeActiveIcon, 'dashboard'),
+    _NavTab(1, navFinanceIcon, navFinanceActiveIcon, 'finance'),
   ];
 
   static const List<_NavTab> _rightTabs = [
-    _NavTab(3, Icons.business_center_outlined, Icons.business_center_rounded, 'business'),
-    _NavTab(4, Icons.person_outline_rounded, Icons.person_rounded, 'account'),
+    _NavTab(3, navBusinessIcon, navBusinessActiveIcon, 'business'),
+    _NavTab(4, navAccountIcon, navAccountActiveIcon, 'account'),
   ];
 
   @override
@@ -60,8 +61,9 @@ class CustomBottomNavBar extends StatelessWidget {
       ),
       child: SafeArea(
         top: false,
-        child: SizedBox(
-          height: 72.h,
+        child: Container(
+          height: 66.h,
+          padding: EdgeInsets.fromLTRB(8.w, 6.h, 8.w, 4.h),
           child: Row(
             children: [
               ..._leftTabs.map(tab),
@@ -98,11 +100,12 @@ class _NavItem extends StatelessWidget {
             AnimatedContainer(
               duration: const Duration(milliseconds: 250),
               curve: Curves.easeOut,
-              width: isActive ? 46.w : 36.w,
-              height: 30.h,
+              width: isActive ? 50.w : 40.w,
+              height: 32.w,
+              alignment: Alignment.center,
               decoration: BoxDecoration(
                 gradient: isActive ? const LinearGradient(colors: [primaryOrange, secondaryOrange]) : null,
-                borderRadius: BorderRadius.circular(15.r),
+                borderRadius: BorderRadius.circular(16.w),
                 boxShadow: isActive
                     ? [
                         BoxShadow(
@@ -113,13 +116,19 @@ class _NavItem extends StatelessWidget {
                       ]
                     : null,
               ),
-              child: Icon(
-                isActive ? tab.activeIcon : tab.icon,
-                size: 20.sp,
-                color: isActive ? Colors.white : inactiveColor,
+              // Outline icon when inactive, solid icon on the gradient pill when active.
+              child: AnimatedSwitcher(
+                duration: const Duration(milliseconds: 200),
+                child: Image.asset(
+                  isActive ? tab.activeIcon : tab.icon,
+                  key: ValueKey(isActive),
+                  width: 19.w,
+                  height: 19.w,
+                  color: isActive ? Colors.white : inactiveColor,
+                ),
               ),
             ),
-            SizedBox(height: 4.h),
+            SizedBox(height: 5.h),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 4.w),
               child: FittedBox(
@@ -155,10 +164,11 @@ class _QuickActionButton extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: Center(
         child: Transform.translate(
-          offset: Offset(0, -10.h),
+          offset: Offset(0, -12.h),
           child: Container(
-            width: 54.w,
-            height: 54.w,
+            width: 56.w,
+            height: 56.w,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: const LinearGradient(
@@ -171,7 +181,7 @@ class _QuickActionButton extends StatelessWidget {
                 BoxShadow(color: primaryOrange.withValues(alpha: 0.45), blurRadius: 16.r, offset: const Offset(0, 6)),
               ],
             ),
-            child: Icon(Icons.add_rounded, color: Colors.white, size: 28.sp),
+            child: Image.asset(navPlusIcon, width: 20.w, height: 20.w, color: Colors.white),
           ),
         ),
       ),
