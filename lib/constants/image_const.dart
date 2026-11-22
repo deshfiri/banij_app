@@ -18,3 +18,5 @@ const String settingIcon = "assets/icons/customer.png";
 
 
 
+const String walletIconAsset = "assets/icons/walletIcon.png";
+const String paidMediaIconAsset = "assets/icons/paid-media.png";
