@@ -20,3 +20,15 @@ const String settingIcon = "assets/icons/customer.png";
 
 const String walletIconAsset = "assets/icons/walletIcon.png";
 const String paidMediaIconAsset = "assets/icons/paid-media.png";
+
+// Module icons (Flaticon UIcons, Regular Rounded — attribution: Flaticon, flaticon.com)
+const String myProductsIconAsset = "assets/icons/module_my_products.png";
+const String myDamagesIconAsset = "assets/icons/module_my_damages.png";
+const String allOrdersIconAsset = "assets/icons/module_all_orders.png";
+const String customersIconAsset = "assets/icons/module_customers.png";
+const String websiteIconAsset = "assets/icons/module_website.png";
+const String storeOrdersIconAsset = "assets/icons/module_store_orders.png";
+const String orderExchangeIconAsset = "assets/icons/module_order_exchange.png";
+
+// Onboarding illustrations
+const String onboardingGlobalImage = "assets/images/onboarding_global.png";

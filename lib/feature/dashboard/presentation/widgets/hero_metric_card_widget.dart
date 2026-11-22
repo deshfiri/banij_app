@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 
 import '../../../../helpers/ui_helpers.dart';
 
@@ -37,16 +36,23 @@ class HeroMetricCardWidget extends StatelessWidget {
               children: [
                 if (iconPath != null) ...[
                   Container(
-                    width: 24.w,
-                    height: 24.w,
-                    padding: EdgeInsets.all(5.w),
+                    width: 28.w,
+                    height: 28.w,
+                    padding: EdgeInsets.all(6.w),
                     decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.22),
+                      color: Colors.white,
                       shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.12),
+                          blurRadius: 6.r,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: Image.asset(
                       iconPath!,
-                      color: Colors.white,
+                      color: Colors.black,
                       fit: BoxFit.contain,
                     ),
                   ),
@@ -54,7 +60,7 @@ class HeroMetricCardWidget extends StatelessWidget {
                 ],
                 Expanded(
                   child: Text(
-                    title.tr,
+                    title,
                     style: TextStyle(
                       fontSize: 10.5.sp,
                       fontWeight: FontWeight.w600,

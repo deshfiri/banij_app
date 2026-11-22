@@ -36,6 +36,10 @@ const Color errorRedLight = Color(0xFFFEE2E2);
 const Color purpleAccent = Color(0xFF8B5CF6);
 const Color purpleAccentLight = Color(0xFFF7F0FF);
 
+// Hero header gradient (dashboard header, drawer header)
+const Color heroDarkStart = Color(0xFF1E293B);
+const Color heroDarkEnd = Color(0xFF0F172A);
+
 // Payment Brand Colors
 const Color bkashPink = Color(0xFFE2136E);
 const Color nagadRed = Color(0xFFED1C24);
@@ -64,6 +68,12 @@ class AppColorsTheme {
   static Color textMainColor(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return isDark ? darkTextMain : textMain;
+  }
+
+  /// Orange in light mode, slate in dark mode.
+  static List<Color> heroGradient(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return isDark ? const [heroDarkStart, heroDarkEnd] : const [primaryOrange, secondaryOrange];
   }
 
   static Color textMutedColor(BuildContext context) {

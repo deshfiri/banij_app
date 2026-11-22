@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
+import '../../../common_widget/animated_side_menu.dart';
 import '../../../common_widget/custom_button.dart';
 import '../../../constants/color.dart';
 import '../../../helpers/all_routes.dart';
@@ -12,6 +13,7 @@ import '../../account/presentation/account_screen.dart';
 import '../../business/presentation/business_screen.dart';
 import '../../business/presentation/widgets/supplier_drawer_widget.dart';
 import '../../finance/presentation/finance_screen.dart';
+import 'widgets/approval_status_card_widget.dart';
 import 'widgets/custom_bottom_nav_bar.dart';
 import 'widgets/dashboard_hub_widget.dart';
 import 'widgets/dynamic_step_indicator.dart';
@@ -26,43 +28,50 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<AnimatedSideMenuState> _sideMenuKey = GlobalKey<AnimatedSideMenuState>();
 
-  void _closeDrawer(BuildContext context) {
-    if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
-      Navigator.pop(context);
-    }
+  void _openDrawer() => _sideMenuKey.currentState?.open();
+
+  void _closeDrawer() => _sideMenuKey.currentState?.close();
+
+  void _showSnackBar(BuildContext context, String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: primaryOrange,
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+
+  String _onboardingTitle(int step, bool isApproved) {
+    if (step == 4) return 'Select Subscription Package'.tr;
+    if (step >= 5) return isApproved ? 'Account Approved & Active'.tr : 'Account Under Review'.tr;
+    return 'setting_up_account'.tr;
   }
 
   Widget _buildDashboardTab(BuildContext context, DashboardProvider dashboardProvider) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final onboardingData = dashboardProvider.onboardingModel?.data;
-    final isApproved = onboardingData?.isApproved == true ||
-        onboardingData?.status?.value?.toLowerCase() == 'active' ||
-        onboardingData?.status?.value?.toLowerCase() == 'approved';
+    final onboardingStatus = onboardingData?.status?.value?.toLowerCase();
+    final isApproved =
+        onboardingData?.isApproved == true || onboardingStatus == 'active' || onboardingStatus == 'approved';
 
     final standingStatus = dashboardProvider.dashboardModel?.data?.standing?.status?.toLowerCase();
     final isStandingActive = standingStatus == 'active' || standingStatus == 'approved';
 
     if (isApproved || isStandingActive || dashboardProvider.isAccountSetupCompleted || dashboardProvider.isKycSubmitted) {
-      return DashboardHubWidget(
-        onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
-      );
+      return DashboardHubWidget(onOpenDrawer: _openDrawer);
     }
+
+    final step = dashboardProvider.currentStep;
 
     return SingleChildScrollView(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
       child: Column(
         children: [
           UIHelper.verticalSpace(12.h),
-
-          // Title Header
           Text(
-            dashboardProvider.currentStep == 4
-                ? 'Select Subscription Package'.tr
-                : (dashboardProvider.currentStep >= 5
-                    ? (isApproved ? 'Account Approved & Active'.tr : 'Account Under Review'.tr)
-                    : 'setting_up_account'.tr),
+            _onboardingTitle(step, isApproved),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 22.sp,
@@ -71,16 +80,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
           ),
           UIHelper.verticalSpace(20.h),
-
-          // Dynamic Step Indicator (Steps 1 to 5)
-          DynamicStepIndicator(
-            currentStep: dashboardProvider.currentStep,
-            isApproved: isApproved,
-          ),
+          DynamicStepIndicator(currentStep: step, isApproved: isApproved),
           UIHelper.verticalSpace(24.h),
 
-          // Step 3: KYC Documents Pending
-          if (dashboardProvider.currentStep == 3) ...[
+          // Step 3: KYC documents pending
+          if (step == 3) ...[
             StatusCardWidget(),
             UIHelper.verticalSpace(28.h),
             CustomButton(
@@ -88,147 +92,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 dashboardProvider.submitKYC();
                 Navigator.pushNamed(context, Routes.kycVerificationScreen);
               },
-              btnName: 'Submit your KYC documents',
+              btnName: 'submit_kyc'.tr,
             ),
           ],
 
-          // Step 4: Package Selection
-          if (dashboardProvider.currentStep == 4) ...[
+          // Step 4: package selection
+          if (step == 4)
             PackageSelectionWidget(
               onContinue: () {
                 dashboardProvider.completePackageSelection();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Package selected successfully!'),
-                    backgroundColor: primaryOrange,
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
+                _showSnackBar(context, 'Package selected successfully!'.tr);
               },
             ),
-          ],
 
-          // Step 5: Approval Pending & Unlock Workspace
-          if (dashboardProvider.currentStep >= 5) ...[
-            Builder(
-              builder: (context) {
-                final onboardingData = dashboardProvider.onboardingModel?.data;
-                final statusBadge = onboardingData?.status?.label ?? onboardingData?.approvalStatus ?? 'ACTIVE';
-                final statusMsg = onboardingData?.message ??
-                    'Package Confirmed! Your account is undergoing final workspace verification.';
-
-                return Container(
-                  padding: EdgeInsets.all(22.w),
-                  decoration: BoxDecoration(
-                    color: isDark ? AppColorsTheme.cardBg(context) : primaryOrange.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(22.r),
-                    border: Border.all(
-                      color:primaryOrange,
-                      width: 1.5.w,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: primaryOrange.withValues(alpha: isDark ? 0.08 : 0.08),
-                        blurRadius: 16.r,
-                        offset: const Offset(0, 6),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Approval Status'.tr,
-                            style: TextStyle(
-                              fontSize: 16.5.sp,
-                              fontWeight: FontWeight.w900,
-                              color: AppColorsTheme.textMainColor(context),
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 5.h),
-                            decoration: BoxDecoration(
-                              color: successGreenLight,
-                              borderRadius: BorderRadius.circular(20.r),
-                              border: Border.all(
-                                color: successGreen.withValues(alpha: 0.3),
-                                width: 1.w,
-                              ),
-                            ),
-                            child: Text(
-                              statusBadge.toUpperCase(),
-                              style: TextStyle(
-                                fontSize: 10.5.sp,
-                                fontWeight: FontWeight.w900,
-                                color: successGreenDark,
-                                letterSpacing: 0.5,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      UIHelper.verticalSpace(14.h),
-                      Container(
-                        padding: EdgeInsets.all(14.w),
-                        decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF111827) : Colors.white,
-                          borderRadius: BorderRadius.circular(16.r),
-                          border: Border.all(
-                            color: const Color(0xFF10B981).withValues(alpha: 0.25),
-                            width: 1.w,
-                          ),
-                        ),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              padding: EdgeInsets.all(8.w),
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFD1FAE5),
-                                shape: BoxShape.circle,
-                              ),
-                              child: Icon(
-                                Icons.verified_rounded,
-                                size: 22.sp,
-                                color: const Color(0xFF059669),
-                              ),
-                            ),
-                            UIHelper.horizontalSpace(12.w),
-                            Expanded(
-                              child: Text(
-                                statusMsg,
-                                style: TextStyle(
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColorsTheme.textMainColor(context),
-                                  height: 1.35,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
+          // Step 5: approval pending & unlock workspace
+          if (step >= 5) ...[
+            ApprovalStatusCardWidget(
+              badgeLabel: onboardingData?.status?.label ?? onboardingData?.approvalStatus ?? 'active'.tr,
+              message: onboardingData?.message ?? 'Package confirmed! Your account is undergoing final workspace verification.'.tr,
             ),
             UIHelper.verticalSpace(28.h),
             CustomButton(
               onTap: () {
                 dashboardProvider.unlockDashboard();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Welcome to your Product Dashboard!'),
-                    backgroundColor: primaryOrange,
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
+                _showSnackBar(context, 'Welcome to your Product Dashboard!'.tr);
               },
-              btnName: 'Unlock Workspace Dashboard',
+              btnName: 'Unlock Workspace Dashboard'.tr,
             ),
           ],
           UIHelper.verticalSpace(20.h),
@@ -241,59 +130,52 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     final dashboardProvider = context.watch<DashboardProvider>();
 
-    return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: AppColorsTheme.background(context),
-      drawer: SupplierDrawerWidget(
-        activeDrawerItem: 'dashboard',
-        onItemSelect: (item) {},
-        onCloseDrawer: () => _closeDrawer(context),
-      ),
-      body: SafeArea(
-        top: false,
-        child: IndexedStack(
-          index: dashboardProvider.currentIndex,
-          children: [
-            // Index 0: Dashboard Tab
-            _buildDashboardTab(context, dashboardProvider),
-
-            // Index 1: Finance Tab
-            FinanceScreenBody(
-              onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
-            ),
-
-            // Index 2: Quick Action Placeholder
-            const SizedBox.shrink(),
-
-            // Index 3: Business Tab
-            BusinessScreenBody(
-              onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
-            ),
-
-            // Index 4: Account Tab
-            AccountScreenBody(
-              onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
-            ),
-          ],
-        ),
-      ),
-
-      // Custom Bottom Navigation Bar
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: dashboardProvider.currentIndex == 2 ? 0 : dashboardProvider.currentIndex,
-        onTap: (index) {
-          if (index == 2) {
-            // Center (+) Button action
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('quick_action_clicked'.tr),
-                backgroundColor: primaryOrange,
-              ),
-            );
-            return;
-          }
-          dashboardProvider.setBottomNavIndex(index);
+    return AnimatedSideMenu(
+      key: _sideMenuKey,
+      menu: SupplierDrawerWidget(
+        activeDrawerItem: 'Dashboard',
+        onItemSelect: (item) {
+          if (item == 'Dashboard') dashboardProvider.setBottomNavIndex(0);
         },
+        onCloseDrawer: _closeDrawer,
+      ),
+      child: Scaffold(
+        backgroundColor: AppColorsTheme.background(context),
+        body: SafeArea(
+          top: false,
+          child: IndexedStack(
+            index: dashboardProvider.currentIndex,
+            children: [
+              // Index 0: Dashboard Tab
+              _buildDashboardTab(context, dashboardProvider),
+
+              // Index 1: Finance Tab
+              FinanceScreenBody(onOpenDrawer: _openDrawer),
+
+              // Index 2: Quick Action Placeholder
+              const SizedBox.shrink(),
+
+              // Index 3: Business Tab
+              BusinessScreenBody(onOpenDrawer: _openDrawer),
+
+              // Index 4: Account Tab
+              AccountScreenBody(onOpenDrawer: _openDrawer),
+            ],
+          ),
+        ),
+
+        // Custom Bottom Navigation Bar
+        bottomNavigationBar: CustomBottomNavBar(
+          currentIndex: dashboardProvider.currentIndex == 2 ? 0 : dashboardProvider.currentIndex,
+          onTap: (index) {
+            if (index == 2) {
+              // Center (+) Button action
+              _showSnackBar(context, 'quick_action_clicked'.tr);
+              return;
+            }
+            dashboardProvider.setBottomNavIndex(index);
+          },
+        ),
       ),
     );
   }

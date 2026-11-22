@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:get/get.dart';
 
 import '../../../../constants/color.dart';
 import '../../../../helpers/ui_helpers.dart';
+import 'dashboard_card_decoration.dart';
 
+/// Card shell for a dashboard chart: title, subtitle, then the chart.
+/// [title] and [subtitle] are expected to be translated already.
+/// Place it in a height-bounded parent (e.g. IntrinsicHeight row): the chart
+/// expands so side-by-side cards line up.
 class DashboardChartCardWidget extends StatelessWidget {
   final String title;
   final String subtitle;
@@ -19,31 +23,15 @@ class DashboardChartCardWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Container(
       constraints: BoxConstraints(minHeight: 215.h),
       padding: EdgeInsets.all(14.w),
-      decoration: BoxDecoration(
-        color: isDark ? AppColorsTheme.cardBg(context) : const Color(0xFFFFF7F2),
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(
-          color: isDark ? const Color(0xFF374151) : primaryOrange.withValues(alpha: 0.25),
-          width: 1.w,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: primaryOrange.withValues(alpha: isDark ? 0.08 : 0.05),
-            blurRadius: 10.r,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
+      decoration: DashboardCardDecoration.of(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            title.tr,
+            title,
             style: TextStyle(
               fontSize: 13.5.sp,
               fontWeight: FontWeight.w900,
@@ -54,17 +42,42 @@ class DashboardChartCardWidget extends StatelessWidget {
           ),
           UIHelper.verticalSpace(2.h),
           Text(
-            subtitle.tr,
+            subtitle,
             style: TextStyle(
               fontSize: 10.sp,
+              height: 1.3,
               color: AppColorsTheme.textMutedColor(context),
             ),
-            maxLines: 1,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          UIHelper.verticalSpace(14.h),
-          child,
+          UIHelper.verticalSpace(12.h),
+          Expanded(child: child),
         ],
+      ),
+    );
+  }
+}
+
+/// Centered muted message shown when a chart has no data.
+class ChartEmptyState extends StatelessWidget {
+  final String message;
+
+  const ChartEmptyState({super.key, required this.message});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 30.h),
+      child: Center(
+        child: Text(
+          message,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 12.sp,
+            color: AppColorsTheme.textMutedColor(context),
+          ),
+        ),
       ),
     );
   }

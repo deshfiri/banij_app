@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../constants/color.dart';
-import '../../../../constants/image_const.dart';
-import '../../../../helpers/all_routes.dart';
 import '../../../../helpers/ui_helpers.dart';
-import '../../../../providers/account_provider.dart';
+import 'drawer/drawer_menu_config.dart';
+import 'drawer/drawer_menu_tile.dart';
+import 'drawer/drawer_profile_header.dart';
+import 'drawer/logout_confirmation_dialog.dart';
 
+/// Supplier navigation drawer, styled like the dashboard (hero header,
+/// orange accents, theme-aware surfaces). Works both as `Scaffold.drawer`
+/// and as the menu of `AnimatedSideMenu`.
 class SupplierDrawerWidget extends StatelessWidget {
   final String activeDrawerItem;
   final ValueChanged<String> onItemSelect;
@@ -21,322 +24,59 @@ class SupplierDrawerWidget extends StatelessWidget {
     required this.onCloseDrawer,
   });
 
-  void _closeAndNavigate(BuildContext context, String routeName, {Object? arguments}) {
+  void _onItemTap(BuildContext context, DrawerMenuItem item) {
+    onItemSelect(item.id);
     onCloseDrawer();
-    Navigator.pushNamed(context, routeName, arguments: arguments);
+    if (item.routeName != null) {
+      Navigator.pushNamed(context, item.routeName!, arguments: item.arguments);
+    }
+  }
+
+  void _onLogoutTap(BuildContext context) {
+    onCloseDrawer();
+    LogoutConfirmationDialog.show(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Drawer(
       backgroundColor: AppColorsTheme.background(context),
+      elevation: 0,
+      shape: const RoundedRectangleBorder(),
       child: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header Logo
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
-              child: Image.asset(
-                isDark ? whiteLogo : logo,
-                width: 120.w,
-                height: 42.h,
-                fit: BoxFit.contain,
-              ),
-            ),
-            Divider(color: AppColorsTheme.borderColor(context)),
-            UIHelper.verticalSpace(12.h),
-
-            // Business Supplier Tile
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
-              child: Row(
-                children: [
-                  Container(
-                    padding: EdgeInsets.all(10.w),
-                    decoration: BoxDecoration(
-                      color: isDark ? const Color(0xFF221A15) : const Color(0xFFFFECE0),
-                      borderRadius: BorderRadius.circular(12.r),
-                      border: Border.all(
-                        color: primaryOrange.withValues(alpha: 0.2),
-                      ),
-                    ),
-                    child: Icon(
-                      Icons.local_shipping,
-                      color: primaryOrange,
-                      size: 22.sp,
-                    ),
-                  ),
-                  UIHelper.horizontalSpace(12.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'xyz business',
-                          style: TextStyle(
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.bold,
-                            color: AppColorsTheme.textMainColor(context),
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const DrawerProfileHeader(),
+              UIHelper.verticalSpace(20.h),
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    for (final section in DrawerMenuConfig.sections) ...[
+                      DrawerSectionLabel(title: section.titleKey.tr),
+                      for (final item in section.items)
+                        DrawerMenuTile(
+                          icon: item.icon,
+                          title: item.titleKey.tr,
+                          isSelected: item.id == activeDrawerItem,
+                          onTap: () => _onItemTap(context, item),
                         ),
-                        UIHelper.verticalSpace(2.h),
-                        Text(
-                          'SUP-261104-D48Y5RV8',
-                          style: TextStyle(
-                            fontSize: 10.sp,
-                            fontWeight: FontWeight.w500,
-                            color: AppColorsTheme.textMutedColor(context),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            UIHelper.verticalSpace(24.h),
-
-            // Section 1: OVERVIEW
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: Text(
-                'overview'.tr,
-                style: TextStyle(
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppColorsTheme.textMutedColor(context),
-                  letterSpacing: 1.2,
+                      UIHelper.verticalSpace(14.h),
+                    ],
+                  ],
                 ),
               ),
-            ),
-            UIHelper.verticalSpace(8.h),
-            _buildDrawerItem(
-              context: context,
-              icon: Icons.grid_view_rounded,
-              title: 'dashboard'.tr,
-              isSelected: activeDrawerItem == 'Dashboard',
-              onTap: () {
-                onItemSelect('Dashboard');
-                Navigator.pop(context);
-              },
-            ),
-            _buildDrawerItem(
-              context: context,
-              icon: Icons.verified_user_outlined,
-              title: 'application_and_kyc'.tr,
-              isSelected: activeDrawerItem == 'Application & KYC',
-              onTap: () {
-                onItemSelect('Application & KYC');
-                _closeAndNavigate(context, Routes.kycVerificationScreen);
-              },
-            ),
-            UIHelper.verticalSpace(24.h),
-
-            // Section 2: ACCOUNT
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20.w),
-              child: Text(
-                'account'.tr.toUpperCase(),
-                style: TextStyle(
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppColorsTheme.textMutedColor(context),
-                  letterSpacing: 1.2,
-                ),
+              Divider(color: AppColorsTheme.borderColor(context), height: 20.h),
+              DrawerMenuTile(
+                icon: Icons.logout_rounded,
+                title: 'logout'.tr,
+                style: DrawerTileStyle.danger,
+                onTap: () => _onLogoutTap(context),
               ),
-            ),
-            UIHelper.verticalSpace(8.h),
-            _buildDrawerItem(
-              context: context,
-              icon: Icons.notifications_none,
-              title: 'notifications'.tr,
-              isSelected: activeDrawerItem == 'Notifications',
-              onTap: () {
-                onItemSelect('Notifications');
-                _closeAndNavigate(context, Routes.notificationScreen);
-              },
-            ),
-            _buildDrawerItem(
-              context: context,
-              icon: Icons.person_outline,
-              title: 'profile'.tr,
-              isSelected: activeDrawerItem == 'Profile',
-              onTap: () {
-                onItemSelect('Profile');
-                _closeAndNavigate(context, Routes.accountScreen, arguments: 'supplier');
-              },
-            ),
-            _buildDrawerItem(
-              context: context,
-              icon: Icons.security,
-              title: 'security'.tr,
-              isSelected: activeDrawerItem == 'Security',
-              onTap: () {
-                onItemSelect('Security');
-                _closeAndNavigate(context, Routes.changePasswordScreen);
-              },
-            ),
-
-            const Spacer(),
-            Divider(color: AppColorsTheme.borderColor(context)),
-            _buildDrawerItem(
-              context: context,
-              icon: Icons.logout_rounded,
-              title: 'logout'.tr,
-              isSelected: false,
-              isRed: true,
-              onTap: () {
-                onCloseDrawer();
-                _showLogoutConfirmation(context);
-              },
-            ),
-            UIHelper.verticalSpace(12.h),
-          ],
-        ),
-      ),
-    );
-  }
-
-  void _showLogoutConfirmation(BuildContext context) {
-    final accountProvider = context.read<AccountProvider>();
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16.r),
-          ),
-          backgroundColor: AppColorsTheme.cardBg(context),
-          title: Text(
-            'Are you sure you want to logout?'.tr,
-            style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.bold,
-              color: AppColorsTheme.textMainColor(context),
-            ),
-          ),
-          content: Text(
-            'You will need to sign in again to access your account and workspace.'.tr,
-            style: TextStyle(
-              fontSize: 13.sp,
-              color: AppColorsTheme.textMutedColor(context),
-            ),
-          ),
-          actionsPadding: EdgeInsets.zero,
-          actions: [
-            Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 0.h, 16.w, 16.h),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.pop(dialogContext);
-                      },
-                      style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(vertical: 12.h),
-                        side: BorderSide(
-                          color: AppColorsTheme.borderColor(context),
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                      ),
-                      child: Text(
-                        'No'.tr,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.bold,
-                          color: AppColorsTheme.textMainColor(context),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.pop(dialogContext);
-                        accountProvider.logout(context);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryOrange,
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: 12.h),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10.r),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: Text(
-                        'Yes'.tr,
-                        style: TextStyle(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  Widget _buildDrawerItem({
-    required BuildContext context,
-    required IconData icon,
-    required String title,
-    required bool isSelected,
-    required VoidCallback onTap,
-    bool isRed = false,
-  }) {
-    final color = isRed
-        ? Colors.redAccent
-        : (isSelected ? Colors.white : AppColorsTheme.textMainColor(context));
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 3.h),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(10.r),
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-            decoration: BoxDecoration(
-              color: isSelected
-                  ? primaryOrange
-                  : (isRed ? Colors.redAccent.withValues(alpha: 0.1) : Colors.transparent),
-              borderRadius: BorderRadius.circular(10.r),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  icon,
-                  size: 20.sp,
-                  color: color,
-                ),
-                UIHelper.horizontalSpace(14.w),
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: isSelected || isRed ? FontWeight.bold : FontWeight.w500,
-                    color: color,
-                  ),
-                ),
-              ],
-            ),
+            ],
           ),
         ),
       ),

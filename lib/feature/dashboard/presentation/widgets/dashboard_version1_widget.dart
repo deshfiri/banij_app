@@ -12,7 +12,7 @@ import '../../../../providers/dashboard_provider.dart';
 import '../../../finance/presentation/widgets/invoices_receipts_sheet.dart';
 import '../../model/current_user_model.dart';
 import 'order_category_detail_sheet.dart';
-import 'product_category_detail_sheet.dart';
+import '../products_screen.dart';
 
 class _BrandColorsV1 {
   static const Color primaryOrange = Color(0xFFFF6900);
@@ -297,7 +297,7 @@ class _DashboardVersion1WidgetState extends State<DashboardVersion1Widget> {
         'icon': Icons.shopping_bag_rounded,
         'color': _BrandColorsV1.primaryOrange,
         'bg': const Color(0xFFFFF2EB),
-        'onTap': () => ProductCategoryDetailSheet.show(context, 'hub_products'.tr, isCatalog: true),
+        'onTap': () => ProductsScreen.open(context, 'hub_products'.tr, isCatalog: true),
       },
       {
         'title': 'Sales & Orders',
@@ -318,7 +318,7 @@ class _DashboardVersion1WidgetState extends State<DashboardVersion1Widget> {
         'icon': Icons.percent_rounded,
         'color': const Color(0xFFEC4899),
         'bg': const Color(0xFFFFEBF3),
-        'onTap': () => ProductCategoryDetailSheet.show(context, 'Offers', isCatalog: false),
+        'onTap': () => ProductsScreen.open(context, 'Offers', isCatalog: false),
       },
     ];
 
@@ -458,7 +458,7 @@ class _DashboardVersion1WidgetState extends State<DashboardVersion1Widget> {
               isDark: isDark,
               illustration: const _ProductsBagsIllustrationV1(),
               onPressed: () {
-                ProductCategoryDetailSheet.show(
+                ProductsScreen.open(
                   context,
                   'hub_products'.tr,
                   isCatalog: true,
@@ -476,7 +476,7 @@ class _DashboardVersion1WidgetState extends State<DashboardVersion1Widget> {
               isDark: isDark,
               illustration: const _MyProductsBoxIllustrationV1(),
               onPressed: () {
-                ProductCategoryDetailSheet.show(
+                ProductsScreen.open(
                   context,
                   'hub_my_products'.tr,
                   isCatalog: false,
@@ -774,7 +774,7 @@ class _DashboardVersion1WidgetState extends State<DashboardVersion1Widget> {
                             icon: Icons.shopping_bag_rounded,
                             color: _BrandColorsV1.primaryOrange,
                             lightBg: const Color(0xFFFFF0E8),
-                            onTap: () => ProductCategoryDetailSheet.show(context, 'hub_products'.tr, isCatalog: true),
+                            onTap: () => ProductsScreen.open(context, 'hub_products'.tr, isCatalog: true),
                           ),
                         ),
                         UIHelper.horizontalSpace(10.w),

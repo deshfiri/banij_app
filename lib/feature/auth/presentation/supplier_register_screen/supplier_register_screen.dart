@@ -3,17 +3,19 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../common_widget/custom_button.dart';
 import '../../../../common_widget/custom_field_label.dart';
 import '../../../../common_widget/custom_form_field.dart';
 import '../../../../common_widget/custom_password_field.dart';
+import '../../../../common_widget/gradient_button.dart';
 import '../../../../constants/color.dart';
-import '../../../../constants/image_const.dart';
-import '../../../../helpers/di.dart';
 import '../../../../helpers/ui_helpers.dart';
 import '../../../../providers/supplier_register_provider.dart';
-import '../../../../providers/theme_provider.dart';
+import '../widgets/auth_components.dart';
+import '../widgets/auth_form_card.dart';
+import '../widgets/auth_scaffold.dart';
+import '../widgets/auth_validators.dart';
 
+/// Three-step supplier registration: business → contact & documents → security.
 class SupplierRegisterScreen extends StatefulWidget {
   const SupplierRegisterScreen({super.key});
 
@@ -21,14 +23,27 @@ class SupplierRegisterScreen extends StatefulWidget {
   State<SupplierRegisterScreen> createState() => _SupplierRegisterScreenState();
 }
 
+/// Icon, title key and subtitle key for each step's section header.
+class _SupplierStep {
+  final IconData icon;
+  final String titleKey;
+  final String subtitleKey;
+
+  const _SupplierStep(this.icon, this.titleKey, this.subtitleKey);
+
+  static const List<_SupplierStep> all = [
+    _SupplierStep(Icons.business_rounded, 'business_information', 'business_info_subtitle'),
+    _SupplierStep(Icons.email_outlined, 'contact_and_documents', 'contact_and_documents_subtitle'),
+    _SupplierStep(Icons.lock_outline_rounded, 'account_security', 'account_security_subtitle'),
+  ];
+}
+
 class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
   static final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-  late bool _isBengali;
 
   @override
   void initState() {
     super.initState();
-    _isBengali = appData.read('isBengali') ?? false;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       try {
         context.read<SupplierRegisterProvider>().resetSupplierForm();
@@ -44,592 +59,139 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
     super.dispose();
   }
 
-  Future<void> _toggleLanguage() async {
-    bool newIsBengali = !_isBengali;
-    await appData.write('isBengali', newIsBengali);
-    if (!mounted) return;
-    setState(() {
-      _isBengali = newIsBengali;
-    });
-    Get.updateLocale(
-      newIsBengali ? const Locale('bn', 'BD') : const Locale('en', 'US'),
-    );
-  }
-
-  Widget _buildStepIndicator(BuildContext context, int currentStep) {
-    final steps = [
-      {'num': 1, 'title': 'step_business'.tr},
-      {'num': 2, 'title': 'step_contact'.tr},
-      {'num': 3, 'title': 'step_security'.tr},
-    ];
-
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: List.generate(steps.length, (index) {
-        final step = steps[index];
-        final stepNum = step['num'] as int;
-        final stepTitle = step['title'] as String;
-        final isCompleted = stepNum < currentStep;
-        final isActive = stepNum == currentStep;
-        final isLast = index == steps.length - 1;
-
-        const successGreen = Color(0xFF10B981);
-
-        return Expanded(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  Expanded(
-                    child: Container(
-                      height: 2.h,
-                      color: index == 0
-                          ? Colors.transparent
-                          : (stepNum <= currentStep
-                              ? successGreen
-                              : AppColorsTheme.borderColor(context)),
-                    ),
-                  ),
-                  Container(
-                    width: 32.w,
-                    height: 32.h,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isCompleted
-                          ? successGreen
-                          : (isActive ? primaryOrange : AppColorsTheme.cardBg(context)),
-                      border: Border.all(
-                        color: isCompleted
-                            ? successGreen
-                            : (isActive
-                                ? primaryOrange
-                                : AppColorsTheme.borderColor(context)),
-                        width: 1.5.w,
-                      ),
-                    ),
-                    alignment: Alignment.center,
-                    child: isCompleted
-                        ? Icon(Icons.check, color: Colors.white, size: 16.sp)
-                        : Text(
-                            '$stepNum',
-                            style: TextStyle(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.bold,
-                              color: isActive ? Colors.white : AppColorsTheme.textMutedColor(context),
-                            ),
-                          ),
-                  ),
-                  Expanded(
-                    child: Container(
-                      height: 2.h,
-                      color: isLast
-                          ? Colors.transparent
-                          : (stepNum < currentStep
-                              ? successGreen
-                              : AppColorsTheme.borderColor(context)),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 6.h),
-              Text(
-                stepTitle,
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: isActive || isCompleted ? FontWeight.bold : FontWeight.w500,
-                  color: isActive || isCompleted
-                      ? AppColorsTheme.textMainColor(context)
-                      : AppColorsTheme.textMutedColor(context),
-                ),
-              ),
-            ],
-          ),
-        );
-      }),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    final themeProvider = context.watch<ThemeProvider>();
-    final isDark = themeProvider.isDarkMode;
     final provider = context.watch<SupplierRegisterProvider>();
+    final step = _SupplierStep.all[(provider.currentStep - 1).clamp(0, _SupplierStep.all.length - 1)];
 
-    return Scaffold(
-      backgroundColor: AppColorsTheme.background(context),
-      body: Stack(
+    return AuthScaffold(
+      heroHeight: 260,
+      onBack: () => provider.handleBack(context),
+      body: AuthScrollBody(
         children: [
-          // Top Background Orange Decorative Accent Shapes & Circles (Onboarding Pattern)
-          Positioned(
-            top: -40.h,
-            right: -40.w,
-            child: Container(
-              width: 160.w,
-              height: 160.h,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: primaryOrange.withValues(alpha: isDark ? 0.12 : 0.15),
-              ),
-            ),
-          ),
-          Positioned(
-            top: 60.h,
-            left: -30.w,
-            child: Container(
-              width: 120.w,
-              height: 180.h,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(60.r),
-                color: primaryOrange.withValues(alpha: isDark ? 0.08 : 0.15),
-              ),
-            ),
-          ),
-
-          SafeArea(
-            child: Column(
-              children: [
-                // Top Header Bar: Back Button, Centered Logo & Theme/Language Controls
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-                  child: Stack(
-                    alignment: Alignment.center,
+          AuthHeroTag(label: 'supplier_registration'.tr.toUpperCase()),
+          UIHelper.verticalSpace(12.h),
+          AuthHeroTitle(title: 'become_a_supplier'.tr, subtitle: 'supplier_subtitle'.tr),
+          UIHelper.verticalSpace(22.h),
+          AuthFormCard(
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  AuthStepIndicator(
+                    titles: ['step_business'.tr, 'step_contact'.tr, 'step_security'.tr],
+                    currentStep: provider.currentStep,
+                  ),
+                  UIHelper.verticalSpace(18.h),
+                  Divider(color: AppColorsTheme.borderColor(context), height: 1),
+                  UIHelper.verticalSpace(18.h),
+                  AuthSectionHeader(icon: step.icon, title: step.titleKey.tr, subtitle: step.subtitleKey.tr),
+                  UIHelper.verticalSpace(20.h),
+                  if (provider.currentStep == 1) ..._businessFields(provider),
+                  if (provider.currentStep == 2) ..._contactFields(provider),
+                  if (provider.currentStep == 3) ..._securityFields(provider),
+                  UIHelper.verticalSpace(26.h),
+                  Row(
                     children: [
-                      // 100% Perfectly Centered Brand Logo (Fixed Position)
-                      Center(
-                        child: Image.asset(
-                          isDark ? whiteLogo : logo,
-                          width: 120.w,
-                          height: 38.h,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
-                      // Back Button on Left
-                      Positioned(
-                        left: 0,
-                        child: IconButton(
+                      Expanded(
+                        child: AuthOutlinedButton(
+                          label: 'back'.tr,
+                          icon: Icons.arrow_back_rounded,
                           onPressed: () => provider.handleBack(context),
-                          icon: Icon(
-                            Icons.arrow_back,
-                            color: AppColorsTheme.textMainColor(context),
-                            size: 22.sp,
-                          ),
                         ),
                       ),
-                      // Theme & Language Controls on Right
-                      Positioned(
-                        right: 0,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Theme Switcher Button
-                            GestureDetector(
-                              onTap: () {
-                                final newMode = !isDark;
-                                context.read<ThemeProvider>().toggleDarkMode(newMode);
-                              },
-                              child: Container(
-                                padding: EdgeInsets.all(7.w),
-                                decoration: BoxDecoration(
-                                  color: isDark
-                                      ? const Color(0xFF221A15)
-                                      : Colors.white.withValues(alpha: 0.9),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: AppColorsTheme.borderColor(context),
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.05),
-                                      blurRadius: 6.r,
-                                    ),
-                                  ],
-                                ),
-                                child: Icon(
-                                  isDark ? Icons.wb_sunny_rounded : Icons.dark_mode_outlined,
-                                  color: isDark ? const Color(0xFFFFB74D) : primaryOrange,
-                                  size: 16.sp,
-                                ),
-                              ),
-                            ),
-                            UIHelper.horizontalSpace(6.w),
-                            // Language Switcher Pill Button
-                            GestureDetector(
-                              onTap: _toggleLanguage,
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-                                decoration: BoxDecoration(
-                                  color: isDark
-                                      ? const Color(0xFF221A15)
-                                      : Colors.white.withValues(alpha: 0.9),
-                                  borderRadius: BorderRadius.circular(20.r),
-                                  border: Border.all(
-                                    color: AppColorsTheme.borderColor(context),
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.05),
-                                      blurRadius: 6.r,
-                                    ),
-                                  ],
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(
-                                      Icons.g_translate,
-                                      color: primaryOrange,
-                                      size: 14.sp,
-                                    ),
-                                    UIHelper.horizontalSpace(4.w),
-                                    Text(
-                                      _isBengali ? 'বাংলা' : 'EN',
-                                      style: TextStyle(
-                                        fontSize: 11.sp,
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColorsTheme.textMainColor(context),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
+                      UIHelper.horizontalSpace(12.w),
+                      Expanded(
+                        flex: 2,
+                        child: GradientButton(
+                          label: provider.currentStep == 3 ? 'create_supplier_account'.tr : 'continue'.tr,
+                          isLoading: provider.isLoading,
+                          onPressed: () => provider.handleContinue(context, _formKey),
                         ),
                       ),
                     ],
                   ),
-                ),
-                UIHelper.verticalSpace(10.h),
-
-                // Main Immersive Scrollable Body
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 16.h),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // Supplier Registration Tag
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Container(
-                                width: 8.w,
-                                height: 8.h,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: primaryOrange,
-                                ),
-                              ),
-                              UIHelper.horizontalSpace(6.w),
-                              Text(
-                                'supplier_registration'.tr,
-                                style: TextStyle(
-                                  fontSize: 11.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColorsTheme.textMutedColor(context),
-                                  letterSpacing: 1.0,
-                                ),
-                              ),
-                            ],
-                          ),
-                          UIHelper.verticalSpace(8.h),
-
-                          // Title & Subtitle
-                          Text(
-                            'become_a_supplier'.tr,
-                            style: TextStyle(
-                              fontSize: 26.sp,
-                              fontWeight: FontWeight.bold,
-                              color: AppColorsTheme.textMainColor(context),
-                            ),
-                          ),
-                          UIHelper.verticalSpace(6.h),
-                          Text(
-                            'supplier_subtitle'.tr,
-                            style: TextStyle(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w500,
-                              color: AppColorsTheme.textMutedColor(context),
-                            ),
-                          ),
-                          UIHelper.verticalSpace(24.h),
-
-                          // 3-Step Indicator
-                          _buildStepIndicator(context, provider.currentStep),
-                          UIHelper.verticalSpace(28.h),
-
-                          // Section Header Card
-                          Container(
-                            padding: EdgeInsets.all(14.w),
-                            decoration: BoxDecoration(
-                              color: AppColorsTheme.cardBg(context),
-                              borderRadius: BorderRadius.circular(12.r),
-                              border: Border.all(color: AppColorsTheme.borderColor(context)),
-                            ),
-                            child: Row(
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.all(10.w),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFFFECE0),
-                                    borderRadius: BorderRadius.circular(10.r),
-                                  ),
-                                  child: Icon(
-                                    provider.currentStep == 1
-                                        ? Icons.business
-                                        : (provider.currentStep == 2
-                                            ? Icons.email_outlined
-                                            : Icons.lock_outline),
-                                    color: primaryOrange,
-                                    size: 22.sp,
-                                  ),
-                                ),
-                                UIHelper.horizontalSpace(14.w),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        provider.currentStep == 1
-                                            ? 'business_information'.tr
-                                            : (provider.currentStep == 2
-                                                ? 'contact_and_documents'.tr
-                                                : 'account_security'.tr),
-                                        style: TextStyle(
-                                          fontSize: 15.sp,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColorsTheme.textMainColor(context),
-                                        ),
-                                      ),
-                                      UIHelper.verticalSpace(2.h),
-                                      Text(
-                                        provider.currentStep == 1
-                                            ? 'business_info_subtitle'.tr
-                                            : (provider.currentStep == 2
-                                                ? 'contact_and_documents_subtitle'.tr
-                                                : 'account_security_subtitle'.tr),
-                                        style: TextStyle(
-                                          fontSize: 12.sp,
-                                          color: AppColorsTheme.textMutedColor(context),
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          UIHelper.verticalSpace(24.h),
-
-                          // Step 1 Fields (Business)
-                          if (provider.currentStep == 1) ...[
-                            CustomFieldLabel(label: 'business_name'.tr, isRequired: true),
-                            CustomFormField(
-                              controller: provider.businessNameController,
-                              hintText: 'enter_business_name'.tr,
-                              validator: (val) => val == null || val.trim().isEmpty
-                                  ? 'err_enter_business_name'.tr
-                                  : null,
-                            ),
-                            UIHelper.verticalSpace(16.h),
-                            CustomFieldLabel(label: 'contact_person'.tr, isRequired: true),
-                            CustomFormField(
-                              controller: provider.contactPersonController,
-                              hintText: 'enter_contact_person'.tr,
-                              validator: (val) => val == null || val.trim().isEmpty
-                                  ? 'err_enter_contact_person'.tr
-                                  : null,
-                            ),
-                            UIHelper.verticalSpace(16.h),
-                            CustomFieldLabel(label: 'business_address'.tr, isRequired: true),
-                            CustomFormField(
-                              controller: provider.businessAddressController,
-                              maxline: 4,
-                              hintText: 'enter_business_address'.tr,
-                              validator: (val) => val == null || val.trim().isEmpty
-                                  ? 'err_enter_business_address'.tr
-                                  : null,
-                            ),
-                          ],
-
-                          // Step 2 Fields (Contact & documents)
-                          if (provider.currentStep == 2) ...[
-                            CustomFieldLabel(label: 'email_address'.tr, isRequired: true),
-                            CustomFormField(
-                              controller: provider.emailController,
-                              inputType: TextInputType.emailAddress,
-                              hintText: 'email@example.com',
-                              validator: (val) {
-                                if (val == null || val.trim().isEmpty) {
-                                  return 'err_enter_email'.tr;
-                                }
-                                final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
-                                if (!emailRegex.hasMatch(val.trim())) {
-                                  return 'err_valid_email'.tr;
-                                }
-                                return null;
-                              },
-                            ),
-                            UIHelper.verticalSpace(16.h),
-                            CustomFieldLabel(label: 'phone_number'.tr, isRequired: true),
-                            CustomFormField(
-                              controller: provider.phoneController,
-                              inputType: TextInputType.phone,
-                              hintText: '+8801XXXXXXXXX',
-                              validator: (val) => val == null || val.trim().isEmpty
-                                  ? 'err_enter_phone'.tr
-                                  : null,
-                            ),
-                            UIHelper.verticalSpace(16.h),
-                            CustomFieldLabel(label: 'trade_licence_optional'.tr, isRequired: false),
-                            CustomFormField(
-                              controller: provider.tradeLicenceController,
-                              hintText: 'Trade licence number',
-                            ),
-                            UIHelper.verticalSpace(16.h),
-                            CustomFieldLabel(label: 'tin_optional'.tr, isRequired: false),
-                            CustomFormField(
-                              controller: provider.tinController,
-                              hintText: 'Tax identification number',
-                            ),
-                          ],
-
-                          // Step 3 Fields (Account security)
-                          if (provider.currentStep == 3) ...[
-                            CustomFieldLabel(label: 'password'.tr, isRequired: true),
-                            CustomPasswordField(
-                              controller: provider.passwordController,
-                              hintText: 'create_password'.tr,
-                              isObscure: provider.obscurePassword,
-                              onToggleObscure: provider.toggleObscurePassword,
-                              validator: (val) {
-                                if (val == null || val.isEmpty) {
-                                  return 'err_enter_password'.tr;
-                                }
-                                if (val.length < 12) {
-                                  return 'Password must be at least 12 characters long';
-                                }
-                                if (!RegExp(r'[A-Z]').hasMatch(val)) {
-                                  return 'Password must contain at least one capital letter';
-                                }
-                                if (!RegExp(r'[a-z]').hasMatch(val)) {
-                                  return 'Password must contain at least one small letter';
-                                }
-                                if (!RegExp(r'[0-9]').hasMatch(val)) {
-                                  return 'Password must contain at least one number';
-                                }
-                                return null;
-                              },
-                            ),
-                            UIHelper.verticalSpace(16.h),
-                            CustomFieldLabel(label: 'confirm_password'.tr, isRequired: true),
-                            CustomPasswordField(
-                              controller: provider.confirmPasswordController,
-                              hintText: 'confirm_password'.tr,
-                              isObscure: provider.obscureConfirmPassword,
-                              onToggleObscure: provider.toggleObscureConfirmPassword,
-                              validator: (val) {
-                                if (val == null || val.isEmpty) {
-                                  return 'err_confirm_password'.tr;
-                                }
-                                if (val != provider.passwordController.text) {
-                                  return 'err_passwords_match'.tr;
-                                }
-                                return null;
-                              },
-                            ),
-                          ],
-
-                          UIHelper.verticalSpace(28.h),
-
-                          // Bottom Buttons: Side-by-side Back and Continue / Create Supplier account
-                          Row(
-                            children: [
-                              // Back Button
-                              Expanded(
-                                child: OutlinedButton(
-                                  onPressed: () => provider.handleBack(context),
-                                  style: OutlinedButton.styleFrom(
-                                    backgroundColor: AppColorsTheme.cardBg(context),
-                                    padding: EdgeInsets.symmetric(vertical: 14.h),
-                                    side: BorderSide(color: AppColorsTheme.borderColor(context)),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(10.r),
-                                    ),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.arrow_back, color: AppColorsTheme.textMainColor(context), size: 16.sp),
-                                      UIHelper.horizontalSpace(6.w),
-                                      Text(
-                                        'back'.tr,
-                                        style: TextStyle(
-                                          color: AppColorsTheme.textMainColor(context),
-                                          fontSize: 14.sp,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                              UIHelper.horizontalSpace(16.w),
-
-                              Expanded(
-                                flex: 2,
-                                child: CustomButton(
-                                  onTap: () => provider.handleContinue(context, _formKey),
-                                  btnName: provider.currentStep == 3 ? 'create_supplier_account'.tr : 'continue'.tr,
-                                  isLoading: provider.isLoading,
-                                ),
-                              ),
-                            ],
-                          ),
-                          UIHelper.verticalSpace(24.h),
-
-                          // Footer Sign In Link
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                'already_supplier'.tr,
-                                style: TextStyle(
-                                  color: AppColorsTheme.textMutedColor(context),
-                                  fontSize: 13.sp,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.pop(context);
-                                },
-                                child: Text(
-                                  'sign_in'.tr,
-                                  style: TextStyle(
-                                    color: primaryOrange,
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          UIHelper.verticalSpace(16.h),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
+          ),
+          UIHelper.verticalSpace(22.h),
+          AuthLinkPrompt(
+            prompt: 'already_supplier'.tr,
+            actionLabel: 'sign_in'.tr,
+            onTap: () => Navigator.pop(context),
           ),
         ],
       ),
     );
   }
+
+  List<Widget> _businessFields(SupplierRegisterProvider provider) => [
+        CustomFieldLabel(label: 'business_name'.tr, isRequired: true),
+        CustomFormField(
+          controller: provider.businessNameController,
+          hintText: 'enter_business_name'.tr,
+          validator: (val) => AuthValidators.required(val, 'err_enter_business_name'),
+        ),
+        UIHelper.verticalSpace(16.h),
+        CustomFieldLabel(label: 'contact_person'.tr, isRequired: true),
+        CustomFormField(
+          controller: provider.contactPersonController,
+          hintText: 'enter_contact_person'.tr,
+          validator: (val) => AuthValidators.required(val, 'err_enter_contact_person'),
+        ),
+        UIHelper.verticalSpace(16.h),
+        CustomFieldLabel(label: 'business_address'.tr, isRequired: true),
+        CustomFormField(
+          controller: provider.businessAddressController,
+          maxline: 4,
+          hintText: 'enter_business_address'.tr,
+          validator: (val) => AuthValidators.required(val, 'err_enter_business_address'),
+        ),
+      ];
+
+  List<Widget> _contactFields(SupplierRegisterProvider provider) => [
+        CustomFieldLabel(label: 'email_address'.tr, isRequired: true),
+        CustomFormField(
+          controller: provider.emailController,
+          inputType: TextInputType.emailAddress,
+          hintText: 'email@example.com',
+          validator: AuthValidators.email,
+        ),
+        UIHelper.verticalSpace(16.h),
+        CustomFieldLabel(label: 'phone_number'.tr, isRequired: true),
+        CustomFormField(
+          controller: provider.phoneController,
+          inputType: TextInputType.phone,
+          hintText: '+8801XXXXXXXXX',
+          validator: (val) => AuthValidators.required(val, 'err_enter_phone'),
+        ),
+        UIHelper.verticalSpace(16.h),
+        CustomFieldLabel(label: 'trade_licence_optional'.tr, isRequired: false),
+        CustomFormField(controller: provider.tradeLicenceController, hintText: 'Trade licence number'.tr),
+        UIHelper.verticalSpace(16.h),
+        CustomFieldLabel(label: 'tin_optional'.tr, isRequired: false),
+        CustomFormField(controller: provider.tinController, hintText: 'Tax identification number'.tr),
+      ];
+
+  List<Widget> _securityFields(SupplierRegisterProvider provider) => [
+        CustomFieldLabel(label: 'password'.tr, isRequired: true),
+        CustomPasswordField(
+          controller: provider.passwordController,
+          hintText: 'create_password'.tr,
+          isObscure: provider.obscurePassword,
+          onToggleObscure: provider.toggleObscurePassword,
+          validator: AuthValidators.strongPassword,
+        ),
+        UIHelper.verticalSpace(16.h),
+        CustomFieldLabel(label: 'confirm_password'.tr, isRequired: true),
+        CustomPasswordField(
+          controller: provider.confirmPasswordController,
+          hintText: 'confirm_password'.tr,
+          isObscure: provider.obscureConfirmPassword,
+          onToggleObscure: provider.toggleObscureConfirmPassword,
+          validator: (val) => AuthValidators.confirmPassword(val, provider.passwordController.text),
+        ),
+      ];
 }
