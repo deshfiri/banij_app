@@ -14,6 +14,7 @@ import '../../../../networks/api_access.dart';
 import '../../../../providers/dashboard_provider.dart';
 import '../../../finance/presentation/widgets/invoices_receipts_sheet.dart';
 import '../../model/current_user_model.dart';
+import '../../model/dashboard_model.dart';
 import 'order_category_detail_sheet.dart';
 import 'product_category_detail_sheet.dart';
 import 'all_hub_cards_sheet.dart';
@@ -77,7 +78,13 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
 
   Widget _buildWelcomeBanner(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final userName = _currentUserModel?.data?.name ?? 'Mohammad Ashraf';
+    final dashboardProvider = context.watch<DashboardProvider>();
+    final greeting = dashboardProvider.dashboardModel?.data?.greeting;
+    final standing = dashboardProvider.dashboardModel?.data?.standing;
+
+    final userName = greeting?.name ?? _currentUserModel?.data!.name ?? '';
+    final period = greeting?.period ?? 'morning';
+    final statusLabel = standing?.label ?? 'Active';
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
@@ -164,7 +171,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                     children: [
                       Flexible(
                         child: Text(
-                          'Good morning,\n $userName',
+                          'Good ${period.capitalizeFirst},\n$userName',
                           style: TextStyle(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w900,
@@ -177,9 +184,29 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                   ),
                   UIHelper.verticalSpace(4.h),
 
-
-
-
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(16.r),
+                      border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.3)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.check_circle_rounded, size: 12.sp, color: const Color(0xFF059669)),
+                        UIHelper.horizontalSpace(4.w),
+                        Text(
+                          statusLabel.tr,
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF059669),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -189,14 +216,17 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
     );
   }
 
-  // Analytics Dashboard Section (Wallet/Paid Summary + Side-by-Side Charts Row)
+  // Analytics Dashboard Section (Wallet/Paid Summary + Side-by-Side Professional Charts Row)
   Widget _buildAnalyticsSection(BuildContext context) {
+    final dashboardProvider = context.watch<DashboardProvider>();
+    final dashboardModel = dashboardProvider.dashboardModel;
+
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w),
       child: Column(
         children: [
           // 1. Wallet Balance & Total Paid Summary Cards Row
-          _buildWalletAndTotalPaidRow(context),
+          _buildWalletAndTotalPaidRow(context, dashboardModel),
           UIHelper.verticalSpace(12.h),
 
           // 2. Side-by-Side Grid Row: Line Chart + Donut Chart
@@ -204,11 +234,11 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Expanded(
-                child: _buildPaidLineChartCard(context),
+                child: _buildPaidLineChartCard(context, dashboardModel),
               ),
               UIHelper.horizontalSpace(10.w),
               Expanded(
-                child: _buildExpenseDonutChartCard(context),
+                child: _buildExpenseDonutChartCard(context, dashboardModel),
               ),
             ],
           ),
@@ -217,7 +247,30 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
     );
   }
 
-  Widget _buildWalletAndTotalPaidRow(BuildContext context) {
+  String _formatSpendTotal(dynamic total) {
+    if (total == null) return '';
+    if (total is Map) {
+      final formatted = total['formatted']?.toString();
+      if (formatted != null && formatted.isNotEmpty && !formatted.contains('amount')) return formatted;
+      final amt = total['amount']?.toString();
+      if (amt != null && amt.isNotEmpty) return amt.startsWith('৳') ? amt : '৳$amt';
+      return '';
+    }
+    if (total is num) {
+      return '৳$total';
+    }
+    final str = total.toString();
+    if (str.startsWith('৳')) return str;
+    if (str.contains('amount') || str.contains('{')) {
+      return '';
+    }
+    return '৳$str';
+  }
+
+  Widget _buildWalletAndTotalPaidRow(BuildContext context, DashboardModel? model) {
+    final walletFormatted = model?.data?.walletUsable?.formatted ?? '';
+    final totalPaidFormatted = _formatSpendTotal(model?.data?.spend?.total);
+
     return Row(
       children: [
         // Wallet Balance Card
@@ -225,8 +278,8 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
           flex: 1,
           child: SummaryCardWidget(
             title: 'Wallet balance'.tr,
-
-            amount: '৳44,850.00',
+            subtitle: 'Available balance',
+            amount: walletFormatted,
             iconAsset: wallterAssets,
             onTap: () => Navigator.pushNamed(context, Routes.walletScreen),
           ),
@@ -237,8 +290,8 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
           flex: 1,
           child: SummaryCardWidget(
             title: 'Total paid'.tr,
-            subtitle: 'Settled payments (6 mos)',
-            amount: '৳150.00',
+            subtitle: model?.data?.spend?.months != null ? 'Settled payments (${model?.data?.spend?.months} mos)' : 'Settled payments (6 mos)',
+            amount: totalPaidFormatted,
             iconAsset: financeIconAsset,
             onTap: () => InvoicesReceiptsSheet.show(context, initialTab: 'Receipts'),
           ),
@@ -247,21 +300,68 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
     );
   }
 
-  Widget _buildPaidLineChartCard(BuildContext context) {
+  Widget _buildPaidLineChartCard(BuildContext context, DashboardModel? model) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final spend = model?.data?.spend;
+    List<dynamic> points = [];
+    if (spend?.series is List && (spend?.series as List).isNotEmpty) {
+      final firstSeries = spend?.series?[0];
+      if (firstSeries is Map && firstSeries['points'] is List) {
+        points = firstSeries['points'] as List;
+      }
+    }
+
+    List<FlSpot> spots = [];
+    List<String> monthLabels = [];
+
+    if (points.isNotEmpty) {
+      for (int i = 0; i < points.length; i++) {
+        final pt = points[i];
+        if (pt is Map) {
+          final label = pt['label']?.toString() ?? '';
+          monthLabels.add(label);
+          final formatted = pt['formatted']?.toString() ?? pt['amount']?.toString() ?? '0';
+          final cleanVal = formatted.replaceAll(RegExp(r'[^0-9.]'), '');
+          double val = double.tryParse(cleanVal) ?? 0.0;
+          if (i == points.length - 1) {
+            val += (5.0 * math.sin(_chartTick * 0.8));
+          }
+          spots.add(FlSpot(i.toDouble(), math.max(0.0, val)));
+        }
+      }
+    } else {
+      monthLabels = ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'];
+      spots = [
+        const FlSpot(0, 0),
+        FlSpot(1, 0),
+        FlSpot(2, 0),
+        FlSpot(3, 0),
+        FlSpot(4, 0),
+        FlSpot(5, 150.0 + (5.0 * math.sin(_chartTick * 0.8))),
+      ];
+    }
+
+    double maxYVal = 160.0;
+    if (spots.isNotEmpty) {
+      final maxSpotY = spots.map((s) => s.y).reduce(math.max);
+      maxYVal = math.max(160.0, maxSpotY * 1.25);
+    }
 
     return Container(
       constraints: BoxConstraints(minHeight: 215.h),
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: primaryOrange.withValues(alpha: 0.0),
+        color: isDark ? AppColorsTheme.cardBg(context) : const Color(0xFFFFF7F2),
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: AppColorsTheme.borderColor(context)),
+        border: Border.all(
+          color: isDark ? const Color(0xFF374151) : primaryOrange.withValues(alpha: 0.25),
+          width: 1.w,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+            color: primaryOrange.withValues(alpha: isDark ? 0.08 : 0.05),
             blurRadius: 10.r,
-            offset: const Offset(0, 4),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -280,7 +380,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
           ),
           UIHelper.verticalSpace(2.h),
           Text(
-            'Settled payments'.tr,
+            spend?.months != null ? 'Settled payments over the last ${spend?.months} months.' : 'Settled payments',
             style: TextStyle(
               fontSize: 10.sp,
               color: AppColorsTheme.textMutedColor(context),
@@ -313,8 +413,8 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                       getTitlesWidget: (value, meta) {
                         String text = '';
                         if (value == 0) text = '৳0';
-                        if (value == 76) text = '৳76';
-                        if (value == 152) text = '৳152';
+                        if (value == (maxYVal * 0.5).round()) text = '৳${(maxYVal * 0.5).toInt()}';
+                        if (value == maxYVal.round()) text = '৳${maxYVal.toInt()}';
                         return Text(
                           text,
                           style: TextStyle(
@@ -331,13 +431,12 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                       reservedSize: 20.h,
                       interval: 1,
                       getTitlesWidget: (value, meta) {
-                        const months = ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'];
                         int index = value.round();
-                        if (index >= 0 && index < months.length) {
+                        if (index >= 0 && index < monthLabels.length) {
                           return Padding(
                             padding: EdgeInsets.only(top: 4.h),
                             child: Text(
-                              months[index],
+                              monthLabels[index],
                               style: TextStyle(
                                 fontSize: 8.5.sp,
                                 fontWeight: FontWeight.w600,
@@ -353,22 +452,19 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                 ),
                 borderData: FlBorderData(show: false),
                 minX: 0,
-                maxX: 5,
+                maxX: math.max(5.0, (spots.length - 1).toDouble()),
                 minY: 0,
-                maxY: 160,
+                maxY: maxYVal,
                 lineBarsData: [
                   LineChartBarData(
-                    spots: [
-                      const FlSpot(0, 0),
-                      FlSpot(1, 4.0 + (3.0 * math.sin(_chartTick * 0.7))),
-                      FlSpot(2, 6.0 + (4.0 * math.cos(_chartTick * 0.6))),
-                      FlSpot(3, 10.0 + (5.0 * math.sin(_chartTick * 0.8))),
-                      FlSpot(4, 18.0 + (6.0 * math.cos(_chartTick * 0.5))),
-                      FlSpot(5, 142.0 + (10.0 * math.sin(_chartTick * 0.9))),
-                    ],
+                    spots: spots,
                     isCurved: true,
                     curveSmoothness: 0.28,
-                    color: primaryOrange,
+                    gradient: LinearGradient(
+                      colors: [primaryOrange, secondaryOrange],
+                      begin: Alignment.centerLeft,
+                      end: Alignment.centerRight,
+                    ),
                     barWidth: 2.2.w,
                     isStrokeCapRound: true,
                     dotData: const FlDotData(show: false),
@@ -386,8 +482,6 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                   ),
                 ],
               ),
-              duration: const Duration(milliseconds: 800),
-              curve: Curves.easeInOutCubic,
             ),
           ),
         ],
@@ -395,23 +489,46 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
     );
   }
 
-  Widget _buildExpenseDonutChartCard(BuildContext context) {
+  Widget _buildExpenseDonutChartCard(BuildContext context, DashboardModel? model) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final mainSlice = 82.0 + (8.0 * math.sin(_chartTick * 0.8));
+    final breakdown = model?.data?.spend?.breakdown;
+
+    List<Map<String, dynamic>> breakdownList = [];
+    if (breakdown is List && breakdown.isNotEmpty) {
+      for (var item in breakdown) {
+        if (item is Map) {
+          breakdownList.add({
+            'label': item['label']?.toString() ?? 'Wholesale order',
+            'formatted': item['formatted']?.toString() ?? item['amount']?.toString() ?? '৳150.00',
+          });
+        }
+      }
+    }
+    if (breakdownList.isEmpty) {
+      breakdownList.add({'label': 'Wholesale order', 'formatted': '৳150.00'});
+    }
+
+    final mainSlice = 85.0 + (5.0 * math.sin(_chartTick * 0.8));
     final subSlice = 100.0 - mainSlice;
+
+    String label1 = breakdownList.isNotEmpty ? breakdownList[0]['label'] : 'Wholesale order';
+    String amount1 = breakdownList.isNotEmpty ? breakdownList[0]['formatted'] : '৳150.00';
 
     return Container(
       constraints: BoxConstraints(minHeight: 215.h),
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: primaryOrange.withValues(alpha: 0.0),
+        color: isDark ? AppColorsTheme.cardBg(context) : const Color(0xFFFFF7F2),
         borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: AppColorsTheme.borderColor(context)),
+        border: Border.all(
+          color: isDark ? const Color(0xFF374151) : primaryOrange.withValues(alpha: 0.25),
+          width: 1.w,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+            color: primaryOrange.withValues(alpha: isDark ? 0.08 : 0.05),
             blurRadius: 10.r,
-            offset: const Offset(0, 4),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -455,7 +572,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                       radius: 16.r,
                     ),
                     PieChartSectionData(
-                      color: primaryOrange.withValues(alpha: 0.3),
+                      color: successGreen,
                       value: subSlice,
                       title: '',
                       radius: 14.r,
@@ -467,37 +584,95 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
               ),
             ),
           ),
-          UIHelper.verticalSpace(12.h),
+          UIHelper.verticalSpace(8.h),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  Container(
-                    width: 7.w,
-                    height: 7.h,
-                    decoration: const BoxDecoration(
-                      color: primaryOrange,
-                      shape: BoxShape.circle,
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 4.w,
+                          height: 4.h,
+                          decoration: const BoxDecoration(
+                            color: primaryOrange,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        UIHelper.horizontalSpace(3.w),
+                        Expanded(
+                          child: Text(
+                            label1.tr,
+                            style: TextStyle(
+                              fontSize: 8.5.sp,
+                              fontWeight: FontWeight.w600,
+                              color: AppColorsTheme.textMainColor(context),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  UIHelper.horizontalSpace(4.w),
-                  Text(
-                    'Wholesale'.tr,
-                    style: TextStyle(
-                      fontSize: 11.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColorsTheme.textMainColor(context),
+                    UIHelper.verticalSpace(1.h),
+                    Text(
+                      amount1,
+                      style: TextStyle(
+                        fontSize: 9.5.sp,
+                        fontWeight: FontWeight.w900,
+                        color: primaryOrange,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
-              Text(
-                '৳150.00',
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.w900,
-                  color: primaryOrange,
+              UIHelper.horizontalSpace(2.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 4.w,
+                          height: 4.h,
+                          decoration: const BoxDecoration(
+                            color: successGreen,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        UIHelper.horizontalSpace(3.w),
+                        Expanded(
+                          child: Text(
+                            'Logistics'.tr,
+                            style: TextStyle(
+                              fontSize: 8.5.sp,
+                              fontWeight: FontWeight.w600,
+                              color: AppColorsTheme.textMutedColor(context),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    UIHelper.verticalSpace(1.h),
+                    Text(
+                      '৳0.00',
+                      style: TextStyle(
+                        fontSize: 9.5.sp,
+                        fontWeight: FontWeight.w700,
+                        color: AppColorsTheme.textMutedColor(context),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
             ],
