@@ -217,3 +217,29 @@ class QuickAccessTile extends StatelessWidget {
     );
   }
 }
+
+/// Grid of [QuickAccessTile]s with the same columns, size and spacing as the
+/// dashboard Quick Access row and the All Modules screen. For use inside a
+/// scroll view (shrink-wraps, does not scroll itself).
+class QuickAccessGrid extends StatelessWidget {
+  final List<QuickAccessTile> tiles;
+
+  const QuickAccessGrid({super.key, required this.tiles});
+
+  @override
+  Widget build(BuildContext context) {
+    return GridView.builder(
+      shrinkWrap: true,
+      padding: EdgeInsets.symmetric(horizontal: 4.w),
+      physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 3,
+        crossAxisSpacing: 8.w,
+        mainAxisSpacing: 10.h,
+        mainAxisExtent: 114.h,
+      ),
+      itemCount: tiles.length,
+      itemBuilder: (_, index) => tiles[index],
+    );
+  }
+}

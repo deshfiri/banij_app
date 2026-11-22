@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../../constants/color.dart';
+import '../../../../helpers/ui_helpers.dart';
+import 'dashboard_card_decoration.dart';
 
+/// KYC step card: "Current status: KYC pending", a progress banner and the
+/// list of required documents. Default texts are translation keys.
 class StatusCardWidget extends StatelessWidget {
   final String statusTitle;
   final String statusHighlight;
@@ -20,18 +25,12 @@ class StatusCardWidget extends StatelessWidget {
         progressLabel = progressLabel ?? 'Documents Pending',
         items = items ??
             [
-              const StatusItemModel(
-                title: 'Government ID',
-                iconData: Icons.badge_outlined,
-              ),
-              const StatusItemModel(
-                title: 'Proof of Address',
-                iconData: Icons.location_on_outlined,
-              ),
+              const StatusItemModel(title: 'Government ID', iconData: Icons.badge_outlined),
+              const StatusItemModel(title: 'Proof of Address', iconData: Icons.location_on_outlined),
               const StatusItemModel(
                 title: 'Self-Declaration Form',
                 statusTag: '(Pending)',
-                iconData: Icons.circle_outlined,
+                iconData: Icons.description_outlined,
               ),
             ];
 
@@ -40,76 +39,53 @@ class StatusCardWidget extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        color: AppColorsTheme.cardBg(context),
-        borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(
-          color: primaryOrange.withValues(alpha: 0.5),
-          width: 1.2.w,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: primaryOrange.withValues(alpha: isDark ? 0.0 : 0.05),
-            blurRadius: 16.r,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
+      padding: EdgeInsets.all(18.w),
+      decoration: DashboardCardDecoration.of(context, radius: 22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header: Current status: KYC pending
-          RichText(
-            text: TextSpan(
-              style: TextStyle(
-                fontSize: 17.sp,
-                fontFamily: Theme.of(context).textTheme.bodyMedium?.fontFamily,
-              ),
+          Text.rich(
+            TextSpan(
               children: [
                 TextSpan(
-                  text: statusTitle,
-                  style: TextStyle(
-                    color: AppColorsTheme.textMainColor(context),
-                    fontWeight: FontWeight.bold,
-                  ),
+                  text: statusTitle.tr,
+                  style: TextStyle(color: AppColorsTheme.textMainColor(context), fontWeight: FontWeight.w800),
                 ),
                 TextSpan(
-                  text: statusHighlight,
-                  style: const TextStyle(
-                    color: primaryOrange,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  text: statusHighlight.tr,
+                  style: const TextStyle(color: primaryOrange, fontWeight: FontWeight.w900),
                 ),
               ],
             ),
+            style: TextStyle(fontSize: 16.sp),
           ),
-          SizedBox(height: 16.h),
+          UIHelper.verticalSpace(14.h),
 
-          // Inner Light Box: Documents Pending with Circular Orange Sync Icon
+          // Progress banner
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF221A15) : const Color(0xFFFFF9F5),
-              borderRadius: BorderRadius.circular(12.r),
-              border: Border.all(
-                color: primaryOrange.withValues(alpha: 0.2),
-              ),
+              color: primaryOrange.withValues(alpha: isDark ? 0.14 : 0.07),
+              borderRadius: BorderRadius.circular(14.r),
+              border: Border.all(color: primaryOrange.withValues(alpha: 0.25)),
             ),
             child: Row(
               children: [
-                Icon(
-                  Icons.sync_rounded,
-                  size: 22.sp,
-                  color: primaryOrange,
+                Container(
+                  padding: EdgeInsets.all(7.w),
+                  decoration: const BoxDecoration(
+                    gradient: LinearGradient(colors: [primaryOrange, secondaryOrange]),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(Icons.sync_rounded, size: 16.sp, color: Colors.white),
                 ),
-                SizedBox(width: 12.w),
+                UIHelper.horizontalSpace(12.w),
                 Expanded(
                   child: Text(
-                    progressLabel,
+                    progressLabel.tr,
                     style: TextStyle(
-                      fontSize: 15.sp,
-                      fontWeight: FontWeight.bold,
+                      fontSize: 14.5.sp,
+                      fontWeight: FontWeight.w800,
                       color: AppColorsTheme.textMainColor(context),
                     ),
                   ),
@@ -117,56 +93,59 @@ class StatusCardWidget extends StatelessWidget {
               ],
             ),
           ),
-          SizedBox(height: 20.h),
+          UIHelper.verticalSpace(14.h),
 
-          // Document Items List
-          Column(
-            children: items.map((item) {
-              return Padding(
-                padding: EdgeInsets.only(bottom: 14.h),
-                child: Row(
-                  children: [
-                    Icon(
-                      item.iconData,
-                      size: 20.sp,
-                      color: AppColorsTheme.textMainColor(context),
-                    ),
-                    SizedBox(width: 14.w),
-                    Expanded(
-                      child: RichText(
-                        text: TextSpan(
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontFamily:
-                                Theme.of(context).textTheme.bodyMedium?.fontFamily,
-                          ),
-                          children: [
-                            TextSpan(
-                              text: item.title,
-                              style: TextStyle(
-                                color: AppColorsTheme.textMainColor(context),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            if (item.statusTag != null) ...[
-                              const TextSpan(text: ' '),
-                              TextSpan(
-                                text: item.statusTag!,
-                                style: const TextStyle(
-                                  color: primaryOrange,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }).toList(),
+          for (final item in items) _DocumentRow(item: item),
+        ],
+      ),
+    );
+  }
+}
+
+class _DocumentRow extends StatelessWidget {
+  final StatusItemModel item;
+
+  const _DocumentRow({required this.item});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Padding(
+      padding: EdgeInsets.only(bottom: 10.h),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(8.w),
+            decoration: BoxDecoration(
+              color: isDark ? AppColorsTheme.innerCardBg(context) : lightBackground,
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Icon(item.iconData, size: 18.sp, color: primaryOrange),
           ),
+          UIHelper.horizontalSpace(12.w),
+          Expanded(
+            child: Text(
+              item.title.tr,
+              style: TextStyle(
+                fontSize: 13.5.sp,
+                fontWeight: FontWeight.w700,
+                color: AppColorsTheme.textMainColor(context),
+              ),
+            ),
+          ),
+          if (item.statusTag != null)
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+              decoration: BoxDecoration(
+                color: warningYellow.withValues(alpha: isDark ? 0.2 : 0.12),
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              child: Text(
+                item.statusTag!.tr,
+                style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w800, color: warningYellow),
+              ),
+            ),
         ],
       ),
     );

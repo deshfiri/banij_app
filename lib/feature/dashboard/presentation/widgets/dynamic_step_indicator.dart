@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../../constants/color.dart';
 
@@ -15,6 +16,8 @@ class StepData {
   });
 }
 
+/// Five-step account setup progress (Register → Approval). Done steps are
+/// green with a check, the active step is an orange gradient circle.
 class DynamicStepIndicator extends StatelessWidget {
   final int currentStep;
   final bool isApproved;
@@ -25,6 +28,7 @@ class DynamicStepIndicator extends StatelessWidget {
     this.isApproved = false,
   });
 
+  /// [StepData.title] / [StepData.badgeText] are translation keys.
   static const List<StepData> steps = [
     StepData(stepNumber: 1, title: 'Register'),
     StepData(stepNumber: 2, title: 'Verify'),
@@ -33,139 +37,118 @@ class DynamicStepIndicator extends StatelessWidget {
     StepData(stepNumber: 5, title: 'Approval'),
   ];
 
-  static const Color successGreen = Color(0xFF10B981);
-
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 8.h),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: List.generate(steps.length, (index) {
-          final step = steps[index];
-          final stepNum = step.stepNumber;
-          final isCompleted = stepNum < currentStep || (stepNum == 5 && (currentStep >= 6 || isApproved));
-          final isActive = stepNum == currentStep && !isCompleted;
-          final isLast = index == steps.length - 1;
+    final border = AppColorsTheme.borderColor(context);
 
-          return Expanded(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Circle Node & Connector Line
-                Row(
-                  children: [
-                    // Left Connector (invisible for first item)
-                    Expanded(
-                      child: Container(
-                        height: 2.h,
-                        color: index == 0
-                            ? Colors.transparent
-                            : (isCompleted || stepNum <= currentStep
-                                ? successGreen
-                                : (isActive
-                                    ? primaryOrange
-                                    : AppColorsTheme.borderColor(context))),
-                      ),
-                    ),
-                    // Circle Node
-                    Container(
-                      width: 28.w,
-                      height: 28.h,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isCompleted
-                            ? successGreen
-                            : AppColorsTheme.cardBg(context),
-                        border: Border.all(
-                          color: isCompleted
-                              ? successGreen
-                              : (isActive
-                                  ? primaryOrange
-                                  : AppColorsTheme.borderColor(context)),
-                          width: isActive ? 2.w : 1.5.w,
-                        ),
-                      ),
-                      alignment: Alignment.center,
-                      child: isCompleted
-                          ? Icon(
-                              Icons.check,
-                              color: Colors.white,
-                              size: 15.sp,
-                            )
-                          : Text(
-                              '$stepNum',
-                              style: TextStyle(
-                                fontSize: 12.sp,
-                                fontWeight: isActive
-                                    ? FontWeight.bold
-                                    : FontWeight.w500,
-                                color: isActive
-                                    ? primaryOrange
-                                    : AppColorsTheme.textMutedColor(context),
-                              ),
-                            ),
-                    ),
-                    // Right Connector (invisible for last item)
-                    Expanded(
-                      child: Container(
-                        height: 2.h,
-                        color: isLast
-                            ? Colors.transparent
-                            : (isCompleted
-                                ? successGreen
-                                : AppColorsTheme.borderColor(context)),
-                      ),
-                    ),
-                  ],
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: List.generate(steps.length, (index) {
+        final step = steps[index];
+        final stepNum = step.stepNumber;
+        final isCompleted = stepNum < currentStep || (stepNum == 5 && (currentStep >= 6 || isApproved));
+        final isActive = stepNum == currentStep && !isCompleted;
+        final isLast = index == steps.length - 1;
+
+        Widget connector({required bool visible, required bool done}) => Expanded(
+              child: Container(
+                height: 2.h,
+                decoration: BoxDecoration(
+                  color: visible ? (done ? successGreen : border) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(1.r),
                 ),
-                SizedBox(height: 6.h),
+              ),
+            );
 
-                // Title Label
-                FittedBox(
+        return Expanded(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  connector(visible: index != 0, done: isCompleted || stepNum <= currentStep),
+                  _StepNode(stepNum: stepNum, isCompleted: isCompleted, isActive: isActive),
+                  connector(visible: !isLast, done: isCompleted),
+                ],
+              ),
+              SizedBox(height: 6.h),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 2.w),
+                child: FittedBox(
                   fit: BoxFit.scaleDown,
                   child: Text(
-                    step.title,
+                    step.title.tr,
                     textAlign: TextAlign.center,
                     maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 11.sp,
-                      fontWeight:
-                          isActive || isCompleted ? FontWeight.bold : FontWeight.w500,
+                      fontWeight: isActive || isCompleted ? FontWeight.w800 : FontWeight.w500,
                       color: isCompleted || isActive
                           ? AppColorsTheme.textMainColor(context)
                           : AppColorsTheme.textMutedColor(context),
                     ),
                   ),
                 ),
-
-                // Active Badge
-                if (isActive && step.badgeText != null) ...[
-                  SizedBox(height: 4.h),
-                  Container(
-                    padding:
-                        EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFECE0),
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                    child: Text(
-                      step.badgeText!,
-                      style: TextStyle(
-                        fontSize: 9.sp,
-                        fontWeight: FontWeight.bold,
-                        color: primaryOrange,
-                      ),
-                    ),
+              ),
+              if (isActive && step.badgeText != null) ...[
+                SizedBox(height: 4.h),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                  decoration: BoxDecoration(
+                    color: primaryOrange.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10.r),
                   ),
-                ],
+                  child: Text(
+                    step.badgeText!.tr,
+                    style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w800, color: primaryOrange),
+                  ),
+                ),
               ],
-            ),
-          );
-        }),
+            ],
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class _StepNode extends StatelessWidget {
+  final int stepNum;
+  final bool isCompleted;
+  final bool isActive;
+
+  const _StepNode({required this.stepNum, required this.isCompleted, required this.isActive});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 30.w,
+      height: 30.w,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: isActive ? const LinearGradient(colors: [primaryOrange, secondaryOrange]) : null,
+        color: isActive ? null : (isCompleted ? successGreen : AppColorsTheme.cardBg(context)),
+        border: Border.all(
+          color: isActive
+              ? Colors.transparent
+              : (isCompleted ? successGreen : AppColorsTheme.borderColor(context)),
+          width: 1.5.w,
+        ),
+        boxShadow: isActive
+            ? [BoxShadow(color: primaryOrange.withValues(alpha: 0.35), blurRadius: 8.r, offset: const Offset(0, 3))]
+            : null,
       ),
+      child: isCompleted
+          ? Icon(Icons.check_rounded, color: Colors.white, size: 15.sp)
+          : Text(
+              '$stepNum',
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w900,
+                color: isActive ? Colors.white : AppColorsTheme.textMutedColor(context),
+              ),
+            ),
     );
   }
 }

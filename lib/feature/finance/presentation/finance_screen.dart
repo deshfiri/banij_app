@@ -4,13 +4,16 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 import '../../../constants/color.dart';
-import '../../../constants/image_const.dart';
 import '../../../helpers/all_routes.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../../providers/dashboard_provider.dart';
 import '../../../providers/supplier_dashboard_provider.dart';
-import 'widgets/invoices_receipts_sheet.dart';
+import '../../dashboard/presentation/widgets/quick_access_section_widget.dart';
+import 'widgets/finance_tab/finance_action.dart';
+import 'widgets/finance_tab/finance_hero_header.dart';
 
+/// Finance tab: hero header and a grid of finance shortcuts
+/// (wallet, withdrawals, payout methods, invoices, receipts).
 class FinanceScreenBody extends StatelessWidget {
   final VoidCallback? onOpenDrawer;
 
@@ -35,259 +38,33 @@ class FinanceScreenBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    final List<Map<String, dynamic>> financeItems = [
-      {
-        'title': 'Wallet',
-        'subtitle': 'View balance & manage funds',
-        'icon': Icons.account_balance_wallet_rounded,
-        'onTap': (BuildContext ctx) => Navigator.pushNamed(ctx, Routes.walletScreen),
-      },
-      {
-        'title': 'Withdrawals',
-        'subtitle': 'Track payout withdrawals',
-        'icon': Icons.payments_rounded,
-        'onTap': (BuildContext ctx) => Navigator.pushNamed(ctx, Routes.withdrawalsScreen),
-      },
-      {
-        'title': 'Payout methods',
-        'subtitle': 'Manage bank accounts & gateways',
-        'icon': Icons.credit_card_rounded,
-        'onTap': (BuildContext ctx) => Navigator.pushNamed(ctx, Routes.payoutMethodsScreen),
-      },
-      {
-        'title': 'Invoice',
-        'subtitle': 'Manage, create & view invoices',
-        'icon': Icons.receipt_long_outlined,
-        'onTap': (BuildContext ctx) => InvoicesReceiptsSheet.show(ctx, initialTab: 'Invoices'),
-      },
-      {
-        'title': 'Receipts',
-        'subtitle': 'Track payment receipts & transactions',
-        'icon': Icons.receipt_rounded,
-        'onTap': (BuildContext ctx) => InvoicesReceiptsSheet.show(ctx, initialTab: 'Receipts'),
-      },
-    ];
+    final actions = FinanceAction.all;
 
     return Container(
       color: AppColorsTheme.background(context),
       child: Column(
         children: [
-          // Finance Top Header / AppBar Stack (Fixed Centered Logo & Left Drawer Menu Icon)
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-            decoration: BoxDecoration(
-              color: AppColorsTheme.cardBg(context),
-              border: Border(
-                bottom: BorderSide(
-                  color: AppColorsTheme.borderColor(context),
-                  width: 1.w,
-                ),
-              ),
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // 100% Dead-Centered Logo
-                Center(
-                  child: Image.asset(
-                    isDark ? whiteLogo : logo,
-                    width: 110.w,
-                    height: 36.h,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-                // Left Drawer Menu Icon
-                if (onOpenDrawer != null)
-                  Positioned(
-                    left: 0,
-                    child: IconButton(
-                      onPressed: onOpenDrawer,
-                      icon: Icon(
-                        Icons.menu_rounded,
-                        color: AppColorsTheme.textMainColor(context),
-                        size: 24.sp,
-                      ),
-                    ),
-                  ),
-                // Right Action Icons: Notifications & Profile
-                Positioned(
-                  right: 0,
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        onPressed: () {
-                          Navigator.pushNamed(context, Routes.notificationScreen);
-                        },
-                        icon: Stack(
-                          clipBehavior: Clip.none,
-                          children: [
-                            Icon(
-                              Icons.notifications_none_rounded,
-                              color: AppColorsTheme.textMainColor(context),
-                              size: 22.sp,
-                            ),
-                            Positioned(
-                              top: -2.h,
-                              right: -2.w,
-                              child: Container(
-                                width: 8.w,
-                                height: 8.h,
-                                decoration: const BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: primaryOrange,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => _handleProfileTap(context),
-                        icon: Icon(
-                          Icons.person_outline_rounded,
-                          color: AppColorsTheme.textMainColor(context),
-                          size: 22.sp,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
+          FinanceHeroHeader(
+            onOpenDrawer: onOpenDrawer,
+            onProfileTap: () => _handleProfileTap(context),
           ),
-
-          // Body Content with Grid Cards
           Expanded(
             child: SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 100.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'finance'.tr,
-                              style: TextStyle(
-                                fontSize: 22.sp,
-                                fontWeight: FontWeight.w900,
-                                color: AppColorsTheme.textMainColor(context),
-                              ),
-                            ),
-                            UIHelper.verticalSpace(2.h),
-                            Text(
-                              'financial_subtitle'.tr,
-                              style: TextStyle(
-                                fontSize: 12.5.sp,
-                                fontWeight: FontWeight.w500,
-                                color: AppColorsTheme.textMutedColor(context),
-                              ),
-                            ),
-                          ],
+                  DashboardSectionHeader(title: 'Finance tools'.tr),
+                  UIHelper.verticalSpace(14.h),
+                  QuickAccessGrid(
+                    tiles: [
+                      for (final action in actions)
+                        QuickAccessTile(
+                          title: action.titleKey.tr,
+                          iconAsset: action.iconAsset,
+                          onTap: () => action.open(context),
                         ),
-                      ),
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-                        decoration: BoxDecoration(
-                          color: primaryOrange.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(20.r),
-                        ),
-                        child: Text(
-                          'B2B Billing',
-                          style: TextStyle(
-                            fontSize: 11.sp,
-                            fontWeight: FontWeight.bold,
-                            color: primaryOrange,
-                          ),
-                        ),
-                      ),
                     ],
-                  ),
-                  UIHelper.verticalSpace(20.h),
-
-                  // GridView of Finance Cards (Wallet, Withdrawals, Payout methods, Invoices, Receipts)
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 14.w,
-                      mainAxisSpacing: 14.h,
-                      childAspectRatio: 1.15,
-                    ),
-                    itemCount: financeItems.length,
-                    itemBuilder: (context, index) {
-                      final item = financeItems[index];
-                      return GestureDetector(
-                        onTap: () => item['onTap'](context),
-                        child: Container(
-                          padding: EdgeInsets.all(16.w),
-                          decoration: BoxDecoration(
-                            color: AppColorsTheme.cardBg(context),
-                            borderRadius: BorderRadius.circular(18.r),
-                            border: Border.all(color: AppColorsTheme.borderColor(context), width: 1.w),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
-                                blurRadius: 10.r,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                padding: EdgeInsets.all(10.w),
-                                decoration: BoxDecoration(
-                                  color: primaryOrange.withValues(alpha: 0.12),
-                                  borderRadius: BorderRadius.circular(12.r),
-                                ),
-                                child: Icon(
-                                  item['icon'],
-                                  color: primaryOrange,
-                                  size: 22.sp,
-                                ),
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    item['title'],
-                                    style: TextStyle(
-                                      fontSize: 15.sp,
-                                      fontWeight: FontWeight.bold,
-                                      color: AppColorsTheme.textMainColor(context),
-                                    ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  UIHelper.verticalSpace(2.h),
-                                  Text(
-                                    item['subtitle'],
-                                    style: TextStyle(
-                                      fontSize: 11.sp,
-                                      color: AppColorsTheme.textMutedColor(context),
-                                      height: 1.2,
-                                    ),
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
                   ),
                 ],
               ),

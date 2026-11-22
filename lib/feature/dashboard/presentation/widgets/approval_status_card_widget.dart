@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../../constants/color.dart';
 import '../../../../helpers/ui_helpers.dart';
+import 'dashboard_card_decoration.dart';
 
 /// Onboarding step 5 card: approval badge and the review message.
 class ApprovalStatusCardWidget extends StatelessWidget {
@@ -21,19 +22,8 @@ class ApprovalStatusCardWidget extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
-      padding: EdgeInsets.all(22.w),
-      decoration: BoxDecoration(
-        color: isDark ? AppColorsTheme.cardBg(context) : primaryOrange.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(22.r),
-        border: Border.all(color: primaryOrange, width: 1.5.w),
-        boxShadow: [
-          BoxShadow(
-            color: primaryOrange.withValues(alpha: 0.08),
-            blurRadius: 16.r,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
+      padding: EdgeInsets.all(18.w),
+      decoration: DashboardCardDecoration.of(context, radius: 22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

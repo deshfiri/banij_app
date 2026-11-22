@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 import '../../../common_widget/animated_side_menu.dart';
-import '../../../common_widget/custom_button.dart';
+import '../../../common_widget/gradient_button.dart';
 import '../../../constants/color.dart';
 import '../../../helpers/all_routes.dart';
 import '../../../helpers/ui_helpers.dart';
@@ -16,7 +16,7 @@ import '../../finance/presentation/finance_screen.dart';
 import 'widgets/approval_status_card_widget.dart';
 import 'widgets/custom_bottom_nav_bar.dart';
 import 'widgets/dashboard_hub_widget.dart';
-import 'widgets/dynamic_step_indicator.dart';
+import 'widgets/account_setup/account_setup_header.dart';
 import 'widgets/package_selection_widget.dart';
 import 'widgets/status_card_widget.dart';
 
@@ -66,61 +66,58 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final step = dashboardProvider.currentStep;
 
     return SingleChildScrollView(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          UIHelper.verticalSpace(12.h),
-          Text(
-            _onboardingTitle(step, isApproved),
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 22.sp,
-              fontWeight: FontWeight.bold,
-              color: AppColorsTheme.textMainColor(context),
+          AccountSetupHeader(title: _onboardingTitle(step, isApproved), currentStep: step, isApproved: isApproved),
+          Padding(
+            padding: EdgeInsets.fromLTRB(20.w, 20.h, 20.w, 28.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Step 3: KYC documents pending
+                if (step == 3) ...[
+                  StatusCardWidget(),
+                  UIHelper.verticalSpace(24.h),
+                  GradientButton(
+                    label: 'submit_kyc'.tr,
+                    trailingIcon: Icons.upload_file_rounded,
+                    onPressed: () {
+                      dashboardProvider.submitKYC();
+                      Navigator.pushNamed(context, Routes.kycVerificationScreen);
+                    },
+                  ),
+                ],
+
+                // Step 4: package selection
+                if (step == 4)
+                  PackageSelectionWidget(
+                    onContinue: () {
+                      dashboardProvider.completePackageSelection();
+                      _showSnackBar(context, 'Package selected successfully!'.tr);
+                    },
+                  ),
+
+                // Step 5: approval pending & unlock workspace
+                if (step >= 5) ...[
+                  ApprovalStatusCardWidget(
+                    badgeLabel: onboardingData?.status?.label ?? onboardingData?.approvalStatus ?? 'active'.tr,
+                    message: onboardingData?.message ??
+                        'Package confirmed! Your account is undergoing final workspace verification.'.tr,
+                  ),
+                  UIHelper.verticalSpace(24.h),
+                  GradientButton(
+                    label: 'Unlock Workspace Dashboard'.tr,
+                    trailingIcon: Icons.lock_open_rounded,
+                    onPressed: () {
+                      dashboardProvider.unlockDashboard();
+                      _showSnackBar(context, 'Welcome to your Product Dashboard!'.tr);
+                    },
+                  ),
+                ],
+              ],
             ),
           ),
-          UIHelper.verticalSpace(20.h),
-          DynamicStepIndicator(currentStep: step, isApproved: isApproved),
-          UIHelper.verticalSpace(24.h),
-
-          // Step 3: KYC documents pending
-          if (step == 3) ...[
-            StatusCardWidget(),
-            UIHelper.verticalSpace(28.h),
-            CustomButton(
-              onTap: () {
-                dashboardProvider.submitKYC();
-                Navigator.pushNamed(context, Routes.kycVerificationScreen);
-              },
-              btnName: 'submit_kyc'.tr,
-            ),
-          ],
-
-          // Step 4: package selection
-          if (step == 4)
-            PackageSelectionWidget(
-              onContinue: () {
-                dashboardProvider.completePackageSelection();
-                _showSnackBar(context, 'Package selected successfully!'.tr);
-              },
-            ),
-
-          // Step 5: approval pending & unlock workspace
-          if (step >= 5) ...[
-            ApprovalStatusCardWidget(
-              badgeLabel: onboardingData?.status?.label ?? onboardingData?.approvalStatus ?? 'active'.tr,
-              message: onboardingData?.message ?? 'Package confirmed! Your account is undergoing final workspace verification.'.tr,
-            ),
-            UIHelper.verticalSpace(28.h),
-            CustomButton(
-              onTap: () {
-                dashboardProvider.unlockDashboard();
-                _showSnackBar(context, 'Welcome to your Product Dashboard!'.tr);
-              },
-              btnName: 'Unlock Workspace Dashboard'.tr,
-            ),
-          ],
-          UIHelper.verticalSpace(20.h),
         ],
       ),
     );

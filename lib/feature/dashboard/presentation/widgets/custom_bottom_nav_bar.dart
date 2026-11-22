@@ -1,42 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:provider/provider.dart';
 
 import '../../../../constants/color.dart';
-import '../../../../providers/theme_provider.dart';
 
+/// One tab in [CustomBottomNavBar]. [index] is what `onTap` receives.
+class _NavTab {
+  final int index;
+  final IconData icon;
+  final IconData activeIcon;
+  final String labelKey;
+
+  const _NavTab(this.index, this.icon, this.activeIcon, this.labelKey);
+}
+
+/// App bottom bar in the dashboard style: rounded card surface, orange
+/// gradient pill behind the active tab's icon, and a raised orange gradient
+/// "+" quick-action button in the center (index 2).
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
 
-  const CustomBottomNavBar({
-    super.key,
-    required this.currentIndex,
-    required this.onTap,
-  });
+  const CustomBottomNavBar({super.key, required this.currentIndex, required this.onTap});
+
+  static const int quickActionIndex = 2;
+
+  static const List<_NavTab> _leftTabs = [
+    _NavTab(0, Icons.home_outlined, Icons.home_rounded, 'dashboard'),
+    _NavTab(1, Icons.receipt_long_outlined, Icons.receipt_long_rounded, 'finance'),
+  ];
+
+  static const List<_NavTab> _rightTabs = [
+    _NavTab(3, Icons.business_center_outlined, Icons.business_center_rounded, 'business'),
+    _NavTab(4, Icons.person_outline_rounded, Icons.person_rounded, 'account'),
+  ];
 
   @override
   Widget build(BuildContext context) {
-    final themeProvider = context.watch<ThemeProvider>();
-    final isDark = themeProvider.isDarkMode;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    Widget tab(_NavTab t) => Expanded(
+      child: _NavItem(tab: t, isActive: currentIndex == t.index, onTap: () => onTap(t.index)),
+    );
 
     return Container(
       decoration: BoxDecoration(
         color: AppColorsTheme.cardBg(context),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24.r),
-          topRight: Radius.circular(24.r),
-        ),
-        border: Border.all(
-          color: AppColorsTheme.borderColor(context),
-          width: 1.w,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28.r)),
+        border: Border(
+          top: BorderSide(color: isDark ? darkCardBorderColor : primaryOrange.withValues(alpha: 0.15), width: 1.w),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.08),
+            color: isDark ? Colors.black.withValues(alpha: 0.35) : primaryOrange.withValues(alpha: 0.10),
             blurRadius: 24.r,
-            offset: const Offset(0, -8),
+            offset: const Offset(0, -6),
           ),
         ],
       ),
@@ -45,140 +63,115 @@ class CustomBottomNavBar extends StatelessWidget {
         child: SizedBox(
           height: 72.h,
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              // 1. Dashboard Tab
-              Expanded(
-                child: _buildNavItem(
-                  context: context,
-                  index: 0,
-                  icon: Icons.home_filled,
-                  label: 'dashboard'.tr,
-                  isActive: currentIndex == 0,
-                ),
-              ),
-
-              // 2. Finance Tab
-              Expanded(
-                child: _buildNavItem(
-                  context: context,
-                  index: 1,
-                  icon: Icons.receipt_long_rounded,
-                  label: 'finance'.tr,
-                  isActive: currentIndex == 1,
-                ),
-              ),
-
-              // 3. Center Quick Action Button (+)
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => onTap(2),
-                  behavior: HitTestBehavior.opaque,
-                  child: Center(
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 300),
-                      width: 50.w,
-                      height: 42.h,
-                      decoration: BoxDecoration(
-                        color: primaryOrange,
-                        borderRadius: BorderRadius.circular(16.r),
-                        border: Border.all(
-                          color: isDark ? primaryOrange : Colors.white,
-                          width: 2.w,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: primaryOrange.withValues(alpha: isDark ? 0.4 : 0.5),
-                            blurRadius: 14.r,
-                            offset: const Offset(0, 5),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.add_rounded,
-                        color: Colors.white,
-                        size: 28.sp,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-
-              // 4. Business Tab
-              Expanded(
-                child: _buildNavItem(
-                  context: context,
-                  index: 3,
-                  icon: Icons.business_center_outlined,
-                  label: 'business'.tr,
-                  isActive: currentIndex == 3,
-                ),
-              ),
-
-              // 5. Account Tab
-              Expanded(
-                child: _buildNavItem(
-                  context: context,
-                  index: 4,
-                  icon: Icons.person_outline_rounded,
-                  label: 'account'.tr,
-                  isActive: currentIndex == 4,
-                ),
-              ),
+              ..._leftTabs.map(tab),
+              Expanded(child: _QuickActionButton(onTap: () => onTap(quickActionIndex))),
+              ..._rightTabs.map(tab),
             ],
           ),
         ),
       ),
     );
   }
+}
 
-  Widget _buildNavItem({
-    required BuildContext context,
-    required int index,
-    required IconData icon,
-    required String label,
-    required bool isActive,
-  }) {
+class _NavItem extends StatelessWidget {
+  final _NavTab tab;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _NavItem({required this.tab, required this.isActive, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
     final inactiveColor = AppColorsTheme.textMutedColor(context);
 
     return GestureDetector(
-      onTap: () => onTap(index),
+      onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Center(
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
-          padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 6.h),
-          decoration: BoxDecoration(
-            color: isActive
-                ? primaryOrange.withValues(alpha: 0.12)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(16.r),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                icon,
-                size: 22.sp,
-                color: isActive ? primaryOrange : inactiveColor,
+      // Scales down instead of overflowing on very short/landscape screens.
+      child: FittedBox(
+        fit: BoxFit.scaleDown,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOut,
+              width: isActive ? 46.w : 36.w,
+              height: 30.h,
+              decoration: BoxDecoration(
+                gradient: isActive ? const LinearGradient(colors: [primaryOrange, secondaryOrange]) : null,
+                borderRadius: BorderRadius.circular(15.r),
+                boxShadow: isActive
+                    ? [
+                        BoxShadow(
+                          color: primaryOrange.withValues(alpha: 0.35),
+                          blurRadius: 10.r,
+                          offset: const Offset(0, 3),
+                        ),
+                      ]
+                    : null,
               ),
-              SizedBox(height: 3.h),
-              FittedBox(
+              child: Icon(
+                isActive ? tab.activeIcon : tab.icon,
+                size: 20.sp,
+                color: isActive ? Colors.white : inactiveColor,
+              ),
+            ),
+            SizedBox(height: 4.h),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4.w),
+              child: FittedBox(
                 fit: BoxFit.scaleDown,
                 child: Text(
-                  label,
+                  tab.labelKey.tr,
                   maxLines: 1,
-                  overflow: TextOverflow.visible,
                   style: TextStyle(
-                    fontSize: 10.sp,
+                    fontSize: 10.5.sp,
                     fontWeight: isActive ? FontWeight.w900 : FontWeight.w600,
                     color: isActive ? primaryOrange : inactiveColor,
-                    letterSpacing: 0.2,
                   ),
                 ),
               ),
-            ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Raised circular "+" button with the brand gradient and a soft glow.
+class _QuickActionButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _QuickActionButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Center(
+        child: Transform.translate(
+          offset: Offset(0, -10.h),
+          child: Container(
+            width: 54.w,
+            height: 54.w,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const LinearGradient(
+                colors: [primaryOrange, secondaryOrange],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              border: Border.all(color: AppColorsTheme.cardBg(context), width: 4.w),
+              boxShadow: [
+                BoxShadow(color: primaryOrange.withValues(alpha: 0.45), blurRadius: 16.r, offset: const Offset(0, 6)),
+              ],
+            ),
+            child: Icon(Icons.add_rounded, color: Colors.white, size: 28.sp),
           ),
         ),
       ),

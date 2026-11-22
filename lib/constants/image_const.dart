@@ -29,6 +29,15 @@ const String customersIconAsset = "assets/icons/module_customers.png";
 const String websiteIconAsset = "assets/icons/module_website.png";
 const String storeOrdersIconAsset = "assets/icons/module_store_orders.png";
 const String orderExchangeIconAsset = "assets/icons/module_order_exchange.png";
+const String walletModuleIconAsset = "assets/icons/module_wallet.png";
+const String withdrawalsIconAsset = "assets/icons/module_withdrawals.png";
+const String payoutMethodsIconAsset = "assets/icons/module_payout_methods.png";
+const String invoiceIconAsset = "assets/icons/module_invoice.png";
+const String receiptIconAsset = "assets/icons/module_receipt.png";
+const String verificationIconAsset = "assets/icons/module_verification.png";
+const String subscriptionIconAsset = "assets/icons/module_subscription.png";
+const String partnerNetworkIconAsset = "assets/icons/module_partner_network.png";
+const String addressesIconAsset = "assets/icons/module_addresses.png";
 
 // Onboarding illustrations
 const String onboardingGlobalImage = "assets/images/onboarding_global.png";
