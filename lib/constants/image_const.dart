@@ -13,5 +13,8 @@ const String productIcon = "assets/icons/Product.png";
 const String cartIconAsset = "assets/icons/Cart.png";
 const String financeIconAsset = "assets/icons/Finance.png";
 const String wallterAssets = "assets/icons/wallet.png";
+const String alarmIcon = "assets/icons/alarm.png";
+const String settingIcon = "assets/icons/customer.png";
+
 
 

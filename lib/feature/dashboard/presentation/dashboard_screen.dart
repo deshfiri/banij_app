@@ -250,6 +250,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onCloseDrawer: () => _closeDrawer(context),
       ),
       body: SafeArea(
+        top: false,
         child: IndexedStack(
           index: dashboardProvider.currentIndex,
           children: [

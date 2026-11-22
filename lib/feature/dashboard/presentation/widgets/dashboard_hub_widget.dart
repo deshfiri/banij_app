@@ -18,7 +18,8 @@ import '../../model/dashboard_model.dart';
 import 'order_category_detail_sheet.dart';
 import 'product_category_detail_sheet.dart';
 import 'all_hub_cards_sheet.dart';
-import 'summary_card_widget.dart';
+import 'hero_action_button_widget.dart';
+import 'hero_metric_card_widget.dart';
 
 class _BrandColors {
   static const Color primaryOrange = Color(0xFFFF6900);
@@ -76,132 +77,162 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
     } catch (_) {}
   }
 
-  Widget _buildWelcomeBanner(BuildContext context) {
+  Widget _buildIntegratedHeroHeader(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final dashboardProvider = context.watch<DashboardProvider>();
-    final greeting = dashboardProvider.dashboardModel?.data?.greeting;
-    final standing = dashboardProvider.dashboardModel?.data?.standing;
+    final model = dashboardProvider.dashboardModel;
+    final greeting = model?.data?.greeting;
+    final standing = model?.data?.standing;
+    final walletUsable = model?.data?.walletUsable;
+    final spend = model?.data?.spend;
 
-    final userName = greeting?.name ?? _currentUserModel?.data!.name ?? '';
-    final period = greeting?.period ?? 'morning';
+    final userName = greeting?.name ?? _currentUserModel?.data?.name ?? 'Mohammad';
+    final period = greeting?.period ?? 'afternoon';
+    final walletFormatted = walletUsable?.formatted ?? '';
+    final totalPaidFormatted = _formatSpendTotal(spend?.total);
     final statusLabel = standing?.label ?? 'Active';
 
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
-      child: Container(
-        constraints: BoxConstraints(minHeight: 110.h),
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: isDark
-                ? [const Color(0xFF2E221E), const Color(0xFF1E1E24)]
-                : [_BrandColors.background, _BrandColors.secondaryOrange.withValues(alpha: 0.18)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(24.r),
-          border: Border.all(
-            color: isDark ? const Color(0xFF374151) : _BrandColors.border,
-            width: 1.w,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: _BrandColors.primaryOrange.withValues(alpha: isDark ? 0.12 : 0.06),
-              blurRadius: 14.r,
-              offset: const Offset(0, 4),
-            ),
-          ],
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDark
+              ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
+              : [primaryOrange, secondaryOrange],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        child: Stack(
-          children: [
-            Positioned.fill(
-              child: CustomPaint(
-                painter: _WelcomeBannerWavePainter(isDark: isDark),
-              ),
-            ),
-            // Right Side Emblem Card
-            Positioned(
-              right: 14.w,
-              top: 14.h,
-              bottom: 14.h,
-              child: Container(
-                width: 82.w,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(22.r),
-                  border: Border.all(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    width: 1.5.w,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: _BrandColors.primaryOrange.withValues(alpha: 0.3),
-                      blurRadius: 14.r,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: Image.asset(
-                    banijIcon,
-                    width: 48.w,
-                    height: 48.h,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => Text(
-                      'B',
-                      style: TextStyle(
-                        fontSize: 38.sp,
-                        fontWeight: FontWeight.w900,
-                        color: _BrandColors.primaryOrange,
-                        fontStyle: FontStyle.italic,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            // User Greeting Details
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32.r),
+          bottomRight: Radius.circular(32.r),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: primaryOrange.withValues(alpha: isDark ? 0.2 : 0.28),
+            blurRadius: 18.r,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 18.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 1. Integrated Top Bar (Menu Icon, Logo, Notification Bell, Profile)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
+                  IconButton(
+                    onPressed: widget.onOpenDrawer,
+                    icon: Icon(
+                      Icons.menu_rounded,
+                      color: Colors.white,
+                      size: 24.sp,
+                    ),
+                  ),
+                  Image.asset(
+                    whiteLogo,
+                    width: 105.w,
+                    height: 34.h,
+                    fit: BoxFit.contain,
+                  ),
                   Row(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Flexible(
-                        child: Text(
-                          'Good ${period.capitalizeFirst},\n$userName',
-                          style: TextStyle(
-                            fontSize: 18.sp,
-                            fontWeight: FontWeight.w900,
-                            color: isDark ? Colors.white : _BrandColors.primaryText,
-                          ),
-                          overflow: TextOverflow.ellipsis,
+                      IconButton(
+                        onPressed: () {
+                          Navigator.pushNamed(context, Routes.notificationScreen);
+                        },
+                        icon: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Icon(
+                              Icons.notifications_none_rounded,
+                              color: Colors.white,
+                              size: 22.sp,
+                            ),
+                            Positioned(
+                              top: -2.h,
+                              right: -2.w,
+                              child: Container(
+                                padding: EdgeInsets.all(3.w),
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.redAccent,
+                                ),
+                                child: Text(
+                                  '1',
+                                  style: TextStyle(
+                                    fontSize: 8.5.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          dashboardProvider.setBottomNavIndex(4);
+                        },
+                        icon: Icon(
+                          Icons.person_outline_rounded,
+                          color: Colors.white,
+                          size: 22.sp,
                         ),
                       ),
                     ],
                   ),
-                  UIHelper.verticalSpace(4.h),
+                ],
+              ),
+              UIHelper.verticalSpace(10.h),
 
+              // 2. User Greeting Row + Active Status Badge
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Good ${period.capitalizeFirst}, $userName',
+                          style: TextStyle(
+                            fontSize: 17.sp,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        UIHelper.verticalSpace(2.h),
+
+                      ],
+                    ),
+                  ),
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                      color: const Color(0xFF10B981).withValues(alpha: 0.28),
                       borderRadius: BorderRadius.circular(16.r),
-                      border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.3)),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(Icons.check_circle_rounded, size: 12.sp, color: const Color(0xFF059669)),
+                        Icon(Icons.check_circle_rounded, size: 12.sp, color: Colors.white),
                         UIHelper.horizontalSpace(4.w),
                         Text(
                           statusLabel.tr,
                           style: TextStyle(
                             fontSize: 10.sp,
                             fontWeight: FontWeight.bold,
-                            color: const Color(0xFF059669),
+                            color: Colors.white,
                           ),
                         ),
                       ],
@@ -209,40 +240,36 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                   ),
                 ],
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+              UIHelper.verticalSpace(16.h),
 
-  // Analytics Dashboard Section (Wallet/Paid Summary + Side-by-Side Professional Charts Row)
-  Widget _buildAnalyticsSection(BuildContext context) {
-    final dashboardProvider = context.watch<DashboardProvider>();
-    final dashboardModel = dashboardProvider.dashboardModel;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 20.w),
-      child: Column(
-        children: [
-          // 1. Wallet Balance & Total Paid Summary Cards Row
-          _buildWalletAndTotalPaidRow(context, dashboardModel),
-          UIHelper.verticalSpace(12.h),
-
-          // 2. Side-by-Side Grid Row: Line Chart + Donut Chart
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: _buildPaidLineChartCard(context, dashboardModel),
+              // 3. Integrated Inner Metrics Row: Wallet Balance & Total Paid Cards
+              Row(
+                children: [
+                  Expanded(
+                    child: HeroMetricCardWidget(
+                      title: 'Wallet balance',
+                      amount: walletFormatted,
+                      onTap: () => Navigator.pushNamed(context, Routes.walletScreen),
+                    ),
+                  ),
+                  UIHelper.horizontalSpace(10.w),
+                  Expanded(
+                    child: HeroMetricCardWidget(
+                      title: 'Total paid',
+                      amount: totalPaidFormatted,
+                      onTap: () => InvoicesReceiptsSheet.show(context, initialTab: 'Receipts'),
+                    ),
+                  ),
+                ],
               ),
-              UIHelper.horizontalSpace(10.w),
-              Expanded(
-                child: _buildExpenseDonutChartCard(context, dashboardModel),
-              ),
+              UIHelper.verticalSpace(12.h),
+
+              // 4. Seated Action Buttons (Customer & Product)
+
+
             ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -267,36 +294,25 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
     return '৳$str';
   }
 
-  Widget _buildWalletAndTotalPaidRow(BuildContext context, DashboardModel? model) {
-    final walletFormatted = model?.data?.walletUsable?.formatted ?? '';
-    final totalPaidFormatted = _formatSpendTotal(model?.data?.spend?.total);
+  // Analytics Dashboard Section (Side-by-Side Professional Charts Row)
+  Widget _buildAnalyticsSection(BuildContext context) {
+    final dashboardProvider = context.watch<DashboardProvider>();
+    final dashboardModel = dashboardProvider.dashboardModel;
 
-    return Row(
-      children: [
-        // Wallet Balance Card
-        Expanded(
-          flex: 1,
-          child: SummaryCardWidget(
-            title: 'Wallet balance'.tr,
-            subtitle: 'Available balance',
-            amount: walletFormatted,
-            iconAsset: wallterAssets,
-            onTap: () => Navigator.pushNamed(context, Routes.walletScreen),
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 20.w),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: _buildPaidLineChartCard(context, dashboardModel),
           ),
-        ),
-        UIHelper.horizontalSpace(12.w),
-        // Total Paid Card
-        Expanded(
-          flex: 1,
-          child: SummaryCardWidget(
-            title: 'Total paid'.tr,
-            subtitle: model?.data?.spend?.months != null ? 'Settled payments (${model?.data?.spend?.months} mos)' : 'Settled payments (6 mos)',
-            amount: totalPaidFormatted,
-            iconAsset: financeIconAsset,
-            onTap: () => InvoicesReceiptsSheet.show(context, initialTab: 'Receipts'),
+          UIHelper.horizontalSpace(10.w),
+          Expanded(
+            child: _buildExpenseDonutChartCard(context, dashboardModel),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -314,20 +330,18 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
     List<FlSpot> spots = [];
     List<String> monthLabels = [];
 
-    if (points.isNotEmpty) {
-      for (int i = 0; i < points.length; i++) {
-        final pt = points[i];
-        if (pt is Map) {
-          final label = pt['label']?.toString() ?? '';
-          monthLabels.add(label);
-          final formatted = pt['formatted']?.toString() ?? pt['amount']?.toString() ?? '0';
-          final cleanVal = formatted.replaceAll(RegExp(r'[^0-9.]'), '');
-          double val = double.tryParse(cleanVal) ?? 0.0;
-          if (i == points.length - 1 && val > 0) {
-            val += (5.0 * math.sin(_chartTick * 0.8));
-          }
-          spots.add(FlSpot(i.toDouble(), math.max(0.0, val)));
+    for (int i = 0; i < points.length; i++) {
+      final pt = points[i];
+      if (pt is Map) {
+        final label = pt['label']?.toString() ?? '';
+        monthLabels.add(label);
+        final formatted = pt['formatted']?.toString() ?? pt['amount']?.toString() ?? '0';
+        final cleanVal = formatted.replaceAll(RegExp(r'[^0-9.]'), '');
+        double val = double.tryParse(cleanVal) ?? 0.0;
+        if (i == points.length - 1 && val > 0) {
+          val += (5.0 * math.sin(_chartTick * 0.8));
         }
+        spots.add(FlSpot(i.toDouble(), math.max(0.0, val)));
       }
     }
 
@@ -379,101 +393,124 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
             overflow: TextOverflow.ellipsis,
           ),
           UIHelper.verticalSpace(14.h),
-          SizedBox(
-            height: 130.h,
-            child: LineChart(
-              LineChartData(
-                gridData: FlGridData(
-                  show: true,
-                  drawVerticalLine: false,
-                  getDrawingHorizontalLine: (value) => FlLine(
-                    color: AppColorsTheme.borderColor(context).withValues(alpha: 0.5),
-                    strokeWidth: 0.8,
-                    dashArray: [4, 4],
+          if (spots.isEmpty) ...[
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 30.h),
+              child: Center(
+                child: Text(
+                  'No payment history data available'.tr,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: AppColorsTheme.textMutedColor(context),
                   ),
                 ),
-                titlesData: FlTitlesData(
-                  show: true,
-                  rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                  leftTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 28.w,
-                      getTitlesWidget: (value, meta) {
-                        String text = '';
-                        if (value == 0) text = '৳0';
-                        if (value == (maxYVal * 0.5).round()) text = '৳${(maxYVal * 0.5).toInt()}';
-                        if (value == maxYVal.round()) text = '৳${maxYVal.toInt()}';
-                        return Text(
-                          text,
-                          style: TextStyle(
-                            fontSize: 8.5.sp,
-                            color: AppColorsTheme.textMutedColor(context),
-                          ),
-                        );
-                      },
+              ),
+            ),
+          ] else ...[
+            SizedBox(
+              height: 130.h,
+              child: LineChart(
+                LineChartData(
+                  gridData: FlGridData(
+                    show: true,
+                    drawVerticalLine: false,
+                    getDrawingHorizontalLine: (value) => FlLine(
+                      color: AppColorsTheme.borderColor(context).withValues(alpha: 0.5),
+                      strokeWidth: 0.8,
+                      dashArray: [4, 4],
                     ),
                   ),
-                  bottomTitles: AxisTitles(
-                    sideTitles: SideTitles(
-                      showTitles: true,
-                      reservedSize: 20.h,
-                      interval: 1,
-                      getTitlesWidget: (value, meta) {
-                        int index = value.round();
-                        if (index >= 0 && index < monthLabels.length) {
-                          return Padding(
-                            padding: EdgeInsets.only(top: 4.h),
-                            child: Text(
-                              monthLabels[index],
-                              style: TextStyle(
-                                fontSize: 8.5.sp,
-                                fontWeight: FontWeight.w600,
-                                color: AppColorsTheme.textMutedColor(context),
-                              ),
+                  titlesData: FlTitlesData(
+                    show: true,
+                    rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 28.w,
+                        getTitlesWidget: (value, meta) {
+                          String text = '';
+                          if (value == 0) text = '৳0';
+                          if (value == (maxYVal * 0.5).round()) text = '৳${(maxYVal * 0.5).toInt()}';
+                          if (value == maxYVal.round()) text = '৳${maxYVal.toInt()}';
+                          return Text(
+                            text,
+                            style: TextStyle(
+                              fontSize: 8.5.sp,
+                              color: AppColorsTheme.textMutedColor(context),
                             ),
                           );
-                        }
-                        return const SizedBox.shrink();
-                      },
+                        },
+                      ),
                     ),
-                  ),
-                ),
-                borderData: FlBorderData(show: false),
-                minX: 0,
-                maxX: math.max(5.0, (spots.length - 1).toDouble()),
-                minY: 0,
-                maxY: maxYVal,
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: spots,
-                    isCurved: true,
-                    curveSmoothness: 0.28,
-                    gradient: LinearGradient(
-                      colors: [primaryOrange, secondaryOrange],
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                    ),
-                    barWidth: 2.2.w,
-                    isStrokeCapRound: true,
-                    dotData: const FlDotData(show: false),
-                    belowBarData: BarAreaData(
-                      show: true,
-                      gradient: LinearGradient(
-                        colors: [
-                          primaryOrange.withValues(alpha: 0.35),
-                          primaryOrange.withValues(alpha: 0.02),
-                        ],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 20.h,
+                        interval: 1,
+                        getTitlesWidget: (value, meta) {
+                          int index = value.round();
+                          if (index >= 0 && index < monthLabels.length) {
+                            return Padding(
+                              padding: EdgeInsets.only(top: 4.h),
+                              child: Text(
+                                monthLabels[index],
+                                style: TextStyle(
+                                  fontSize: 8.5.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColorsTheme.textMutedColor(context),
+                                ),
+                              ),
+                            );
+                          }
+                          return const SizedBox.shrink();
+                        },
                       ),
                     ),
                   ),
-                ],
+                  borderData: FlBorderData(show: false),
+                  minX: 0,
+                  maxX: math.max(1.0, (spots.length - 1).toDouble()),
+                  minY: 0,
+                  maxY: maxYVal,
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: spots,
+                      isCurved: true,
+                      curveSmoothness: 0.28,
+                      gradient: LinearGradient(
+                        colors: [primaryOrange, secondaryOrange],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
+                      barWidth: 2.8.w,
+                      isStrokeCapRound: true,
+                      dotData: FlDotData(
+                        show: true,
+                        getDotPainter: (spot, percent, barData, index) => FlDotCirclePainter(
+                          radius: 3.2.r,
+                          color: primaryOrange,
+                          strokeWidth: 1.5.w,
+                          strokeColor: Colors.white,
+                        ),
+                      ),
+                      belowBarData: BarAreaData(
+                        show: true,
+                        gradient: LinearGradient(
+                          colors: [
+                            primaryOrange.withValues(alpha: 0.35),
+                            primaryOrange.withValues(alpha: 0.02),
+                          ],
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -580,7 +617,12 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
             ),
             UIHelper.verticalSpace(8.h),
             Column(
-              children: breakdownList.map((item) {
+              children: breakdownList.asMap().entries.map((entry) {
+                final index = entry.key;
+                final item = entry.value;
+                final colors = [primaryOrange, successGreen, infoBlue, purpleAccent];
+                final itemColor = colors[index % colors.length];
+
                 return Padding(
                   padding: EdgeInsets.only(bottom: 4.h),
                   child: Row(
@@ -590,14 +632,14 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                         child: Row(
                           children: [
                             Container(
-                              width: 5.w,
-                              height: 5.h,
-                              decoration: const BoxDecoration(
-                                color: primaryOrange,
+                              width: 6.w,
+                              height: 6.h,
+                              decoration: BoxDecoration(
+                                color: itemColor,
                                 shape: BoxShape.circle,
                               ),
                             ),
-                            UIHelper.horizontalSpace(3.w),
+                            UIHelper.horizontalSpace(4.w),
                             Expanded(
                               child: Text(
                                 item['label'].toString().tr,
@@ -618,7 +660,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                         style: TextStyle(
                           fontSize: 9.5.sp,
                           fontWeight: FontWeight.w900,
-                          color: primaryOrange,
+                          color: itemColor,
                         ),
                       ),
                     ],
@@ -736,7 +778,6 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                         ),
                         child: Stack(
                           children: [
-                            // Arrow Pill on Top Right matching screenshot
                             Positioned(
                               top: 0,
                               right: 0,
@@ -753,7 +794,6 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                                 ),
                               ),
                             ),
-                            // Center Icon & Bottom Title
                             Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -808,13 +848,11 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
     );
   }
 
-  // 4. Products & My Products Banners Horizontally Side-by-Side (Flex Half-Half) in SizedBox
   Widget _buildFeaturedModulesList(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
       child: Row(
         children: [
-          // Banner 1: Products
           Expanded(
             flex: 1,
             child: SizedBox(
@@ -828,7 +866,6 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
             ),
           ),
           UIHelper.horizontalSpace(12.w),
-          // Banner 2: My Products
           Expanded(
             flex: 1,
             child: SizedBox(
@@ -875,13 +912,11 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            // Background 3D Illustration Image - BoxFit.cover to maintain natural aspect ratio
             Image.asset(
               imagePath,
               fit: BoxFit.cover,
               alignment: Alignment.center,
             ),
-            // Button inside Stack at bottom left over image
             Padding(
               padding: EdgeInsets.all(7.w),
               child: Align(
@@ -915,186 +950,22 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final dashboardProvider = context.watch<DashboardProvider>();
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          _buildIntegratedHeroHeader(context),
+          UIHelper.verticalSpace(12.h),
 
-    return CustomScrollView(
-      slivers: [
-        // App Bar
-        SliverAppBar(
-          pinned: true,
-          floating: true,
-          snap: true,
-          elevation: 0,
-          backgroundColor: AppColorsTheme.background(context),
-          automaticallyImplyLeading: false,
-          titleSpacing: 0,
-          toolbarHeight: 52.h,
-          title: Stack(
-            alignment: Alignment.center,
-            children: [
-              Center(
-                child: Image.asset(
-                  isDark ? whiteLogo : logo,
-                  width: 105.w,
-                  height: 34.h,
-                  fit: BoxFit.contain,
-                ),
-              ),
-              Positioned(
-                left: 0,
-                child: IconButton(
-                  onPressed: widget.onOpenDrawer,
-                  icon: Icon(
-                    Icons.menu_rounded,
-                    color: isDark ? Colors.white : _BrandColors.primaryText,
-                    size: 23.sp,
-                  ),
-                ),
-              ),
-              Positioned(
-                right: 0,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        Navigator.pushNamed(context, Routes.notificationScreen);
-                      },
-                      icon: Stack(
-                        clipBehavior: Clip.none,
-                        children: [
-                          Icon(
-                            Icons.notifications_none_rounded,
-                            color: isDark ? Colors.white : _BrandColors.primaryText,
-                            size: 22.sp,
-                          ),
-                          Positioned(
-                            top: -2.h,
-                            right: -2.w,
-                            child: Container(
-                              padding: EdgeInsets.all(3.w),
-                              decoration: const BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.redAccent,
-                              ),
-                              child: Text(
-                                '1',
-                                style: TextStyle(
-                                  fontSize: 8.5.sp,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        dashboardProvider.setBottomNavIndex(4);
-                      },
-                      icon: Icon(
-                        Icons.person_outline_rounded,
-                        color: isDark ? Colors.white : _BrandColors.primaryText,
-                        size: 21.sp,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+          _buildAnalyticsSection(context),
 
-        SliverToBoxAdapter(
-          child: Column(
-            children: [
-              _buildWelcomeBanner(context),
-              UIHelper.verticalSpace(4.h),
+          UIHelper.verticalSpace(12.h),
 
-              _buildAnalyticsSection(context),
+          _buildQuickAccessSection(context),
 
-              UIHelper.verticalSpace(12.h),
-
-              _buildQuickAccessSection(context),
-
-              // Products & My Products Banners Side-by-Side (Flex Half-Half)
-              _buildFeaturedModulesList(context),
-              UIHelper.verticalSpace(15.h)
-
-              
-            ],
-          ),
-        ),
-      ],
+          _buildFeaturedModulesList(context),
+          UIHelper.verticalSpace(90.h),
+        ],
+      ),
     );
   }
-}
-
-class _WelcomeBannerWavePainter extends CustomPainter {
-  final bool isDark;
-
-  _WelcomeBannerWavePainter({required this.isDark});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    if (isDark) return;
-
-    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
-
-    final paint1 = Paint()
-      ..shader = LinearGradient(
-        colors: [
-          const Color(0xFFFCC6BB).withValues(alpha: 0.5),
-          const Color(0xFFFF8533).withValues(alpha: 0.85),
-        ],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ).createShader(rect)
-      ..style = PaintingStyle.fill;
-
-    final path1 = Path()
-      ..moveTo(size.width * 0.42, 0)
-      ..cubicTo(
-        size.width * 0.58,
-        size.height * 0.15,
-        size.width * 0.46,
-        size.height * 0.85,
-        size.width * 0.7,
-        size.height,
-      )
-      ..lineTo(size.width, size.height)
-      ..lineTo(size.width, 0)
-      ..close();
-
-    canvas.drawPath(path1, paint1);
-
-    final paint2 = Paint()
-      ..shader = const LinearGradient(
-        colors: [Color(0xFFFF7A00), Color(0xFFFF5500)],
-        begin: Alignment.topCenter,
-        end: Alignment.bottomRight,
-      ).createShader(rect)
-      ..style = PaintingStyle.fill;
-
-    final path2 = Path()
-      ..moveTo(size.width * 0.65, size.height)
-      ..cubicTo(
-        size.width * 0.72,
-        size.height * 0.35,
-        size.width * 0.84,
-        size.height * 0.88,
-        size.width,
-        size.height * 0.5,
-      )
-      ..lineTo(size.width, size.height)
-      ..close();
-
-    canvas.drawPath(path2, paint2);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
