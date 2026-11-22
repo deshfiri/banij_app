@@ -41,7 +41,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onboardingData?.status?.value?.toLowerCase() == 'active' ||
         onboardingData?.status?.value?.toLowerCase() == 'approved';
 
-    if (dashboardProvider.isKycSubmitted) {
+    final standingStatus = dashboardProvider.dashboardModel?.data?.standing?.status?.toLowerCase();
+    final isStandingActive = standingStatus == 'active' || standingStatus == 'approved';
+
+    if (isApproved || isStandingActive || dashboardProvider.isAccountSetupCompleted || dashboardProvider.isKycSubmitted) {
       return DashboardHubWidget(
         onOpenDrawer: () => _scaffoldKey.currentState?.openDrawer(),
       );

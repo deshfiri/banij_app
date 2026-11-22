@@ -323,22 +323,12 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
           final formatted = pt['formatted']?.toString() ?? pt['amount']?.toString() ?? '0';
           final cleanVal = formatted.replaceAll(RegExp(r'[^0-9.]'), '');
           double val = double.tryParse(cleanVal) ?? 0.0;
-          if (i == points.length - 1) {
+          if (i == points.length - 1 && val > 0) {
             val += (5.0 * math.sin(_chartTick * 0.8));
           }
           spots.add(FlSpot(i.toDouble(), math.max(0.0, val)));
         }
       }
-    } else {
-      monthLabels = ['Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov'];
-      spots = [
-        const FlSpot(0, 0),
-        FlSpot(1, 0),
-        FlSpot(2, 0),
-        FlSpot(3, 0),
-        FlSpot(4, 0),
-        FlSpot(5, 150.0 + (5.0 * math.sin(_chartTick * 0.8))),
-      ];
     }
 
     double maxYVal = 160.0;
@@ -497,22 +487,18 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
     if (breakdown is List && breakdown.isNotEmpty) {
       for (var item in breakdown) {
         if (item is Map) {
+          final label = item['label']?.toString() ?? '';
+          final formatted = item['formatted']?.toString() ?? item['amount']?.toString() ?? '৳0.00';
+          final cleanVal = formatted.replaceAll(RegExp(r'[^0-9.]'), '');
+          final val = double.tryParse(cleanVal) ?? 0.0;
           breakdownList.add({
-            'label': item['label']?.toString() ?? 'Wholesale order',
-            'formatted': item['formatted']?.toString() ?? item['amount']?.toString() ?? '৳150.00',
+            'label': label,
+            'formatted': formatted,
+            'value': val,
           });
         }
       }
     }
-    if (breakdownList.isEmpty) {
-      breakdownList.add({'label': 'Wholesale order', 'formatted': '৳150.00'});
-    }
-
-    final mainSlice = 85.0 + (5.0 * math.sin(_chartTick * 0.8));
-    final subSlice = 100.0 - mainSlice;
-
-    String label1 = breakdownList.isNotEmpty ? breakdownList[0]['label'] : 'Wholesale order';
-    String amount1 = breakdownList.isNotEmpty ? breakdownList[0]['formatted'] : '৳150.00';
 
     return Container(
       constraints: BoxConstraints(minHeight: 215.h),
@@ -556,127 +542,91 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
             overflow: TextOverflow.ellipsis,
           ),
           UIHelper.verticalSpace(14.h),
-          Center(
-            child: SizedBox(
-              width: 82.w,
-              height: 82.h,
-              child: PieChart(
-                PieChartData(
-                  sectionsSpace: 2,
-                  centerSpaceRadius: 22.r,
-                  sections: [
-                    PieChartSectionData(
-                      color: primaryOrange,
-                      value: mainSlice,
-                      title: '',
-                      radius: 16.r,
-                    ),
-                    PieChartSectionData(
-                      color: successGreen,
-                      value: subSlice,
-                      title: '',
-                      radius: 14.r,
-                    ),
-                  ],
+          if (breakdownList.isEmpty) ...[
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 30.h),
+              child: Center(
+                child: Text(
+                  'No expense breakdown data available'.tr,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: AppColorsTheme.textMutedColor(context),
+                  ),
                 ),
-                swapAnimationDuration: const Duration(milliseconds: 800),
-                swapAnimationCurve: Curves.easeInOut,
               ),
             ),
-          ),
-          UIHelper.verticalSpace(8.h),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 4.w,
-                          height: 4.h,
-                          decoration: const BoxDecoration(
-                            color: primaryOrange,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        UIHelper.horizontalSpace(3.w),
-                        Expanded(
-                          child: Text(
-                            label1.tr,
-                            style: TextStyle(
-                              fontSize: 8.5.sp,
-                              fontWeight: FontWeight.w600,
-                              color: AppColorsTheme.textMainColor(context),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                      ],
-                    ),
-                    UIHelper.verticalSpace(1.h),
-                    Text(
-                      amount1,
-                      style: TextStyle(
-                        fontSize: 9.5.sp,
-                        fontWeight: FontWeight.w900,
-                        color: primaryOrange,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+          ] else ...[
+            Center(
+              child: SizedBox(
+                width: 82.w,
+                height: 82.h,
+                child: PieChart(
+                  PieChartData(
+                    sectionsSpace: 2,
+                    centerSpaceRadius: 22.r,
+                    sections: List.generate(breakdownList.length, (index) {
+                      final colors = [primaryOrange, successGreen, infoBlue, purpleAccent];
+                      final val = breakdownList[index]['value'] as double;
+                      return PieChartSectionData(
+                        color: colors[index % colors.length],
+                        value: val > 0 ? val + (2.0 * math.sin(_chartTick * 0.8)) : 100,
+                        title: '',
+                        radius: 16.r,
+                      );
+                    }),
+                  ),
                 ),
               ),
-              UIHelper.horizontalSpace(2.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 4.w,
-                          height: 4.h,
-                          decoration: const BoxDecoration(
-                            color: successGreen,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        UIHelper.horizontalSpace(3.w),
-                        Expanded(
-                          child: Text(
-                            'Logistics'.tr,
-                            style: TextStyle(
-                              fontSize: 8.5.sp,
-                              fontWeight: FontWeight.w600,
-                              color: AppColorsTheme.textMutedColor(context),
+            ),
+            UIHelper.verticalSpace(8.h),
+            Column(
+              children: breakdownList.map((item) {
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 4.h),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 5.w,
+                              height: 5.h,
+                              decoration: const BoxDecoration(
+                                color: primaryOrange,
+                                shape: BoxShape.circle,
+                              ),
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
+                            UIHelper.horizontalSpace(3.w),
+                            Expanded(
+                              child: Text(
+                                item['label'].toString().tr,
+                                style: TextStyle(
+                                  fontSize: 8.5.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColorsTheme.textMainColor(context),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                    UIHelper.verticalSpace(1.h),
-                    Text(
-                      '৳0.00',
-                      style: TextStyle(
-                        fontSize: 9.5.sp,
-                        fontWeight: FontWeight.w700,
-                        color: AppColorsTheme.textMutedColor(context),
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+                      Text(
+                        item['formatted'].toString(),
+                        style: TextStyle(
+                          fontSize: 9.5.sp,
+                          fontWeight: FontWeight.w900,
+                          color: primaryOrange,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
         ],
       ),
     );

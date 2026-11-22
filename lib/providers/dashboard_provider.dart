@@ -373,6 +373,7 @@ class DashboardProvider extends ChangeNotifier {
             status.contains('approved') ||
             status.contains('active')) {
           _currentStep = 5;
+          _isKycSubmitted = true;
         }
       }
       notifyListeners();
