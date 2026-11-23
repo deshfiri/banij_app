@@ -99,64 +99,11 @@ class YourPackageCardWidget extends StatelessWidget {
                 ),
                 UIHelper.verticalSpace(16.h),
 
-                // Fee Label & Value
-                Text(
-                  'Fee:'.tr,
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppColorsTheme.textMutedColor(context),
-                  ),
-                ),
-                UIHelper.verticalSpace(2.h),
-                Text(
-                  feeText,
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w900,
-                    color: AppColorsTheme.textMainColor(context),
-                  ),
-                ),
+                _PackageStat(label: 'Fee:'.tr, value: feeText, valueSize: 18.sp),
                 UIHelper.verticalSpace(12.h),
-
-                // Activation Total Label & Value
-                Text(
-                  'Activation Total'.tr,
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppColorsTheme.textMutedColor(context),
-                  ),
-                ),
-                UIHelper.verticalSpace(2.h),
-                Text(
-                  activationText,
-                  style: TextStyle(
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.w900,
-                    color: AppColorsTheme.textMainColor(context),
-                  ),
-                ),
+                _PackageStat(label: 'Activation Total'.tr, value: activationText, valueSize: 18.sp),
                 UIHelper.verticalSpace(12.h),
-
-                // Validity Label & Value
-                Text(
-                  'Validity'.tr,
-                  style: TextStyle(
-                    fontSize: 11.sp,
-                    fontWeight: FontWeight.w500,
-                    color: AppColorsTheme.textMutedColor(context),
-                  ),
-                ),
-                UIHelper.verticalSpace(2.h),
-                Text(
-                  validityText,
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    fontWeight: FontWeight.w900,
-                    color: AppColorsTheme.textMainColor(context),
-                  ),
-                ),
+                _PackageStat(label: 'Validity'.tr, value: validityText, valueSize: 16.sp),
                 UIHelper.verticalSpace(16.h),
 
                 Divider(color: AppColorsTheme.borderColor(context), height: 1.h),
@@ -175,47 +122,7 @@ class YourPackageCardWidget extends StatelessWidget {
 
                 // Feature List Item Chips with Orange Checkmark
                 Column(
-                  children: featuresList.map((feature) {
-                    return Container(
-                      margin: EdgeInsets.only(bottom: 8.h),
-                      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF2E221E) : const Color(0xFFFFF8F4),
-                        borderRadius: BorderRadius.circular(14.r),
-                        border: Border.all(
-                          color: isDark ? const Color(0xFF49362E) : const Color(0xFFFFE1D0),
-                          width: 1.w,
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            padding: EdgeInsets.all(2.w),
-                            decoration: const BoxDecoration(
-                              color: primaryOrange,
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              Icons.check_rounded,
-                              color: Colors.white,
-                              size: 11.sp,
-                            ),
-                          ),
-                          UIHelper.horizontalSpace(10.w),
-                          Expanded(
-                            child: Text(
-                              feature,
-                              style: TextStyle(
-                                fontSize: 12.5.sp,
-                                fontWeight: FontWeight.w600,
-                                color: AppColorsTheme.textMainColor(context),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
+                  children: [for (final feature in featuresList) _FeatureChip(text: feature)],
                 ),
 
                 // Action Buttons (Change Package / Renew)
@@ -257,6 +164,86 @@ class YourPackageCardWidget extends StatelessWidget {
                   ),
                 ],
               ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Muted label above a bold value (fee, activation total, validity).
+class _PackageStat extends StatelessWidget {
+  final String label;
+  final String value;
+  final double valueSize;
+
+  const _PackageStat({required this.label, required this.value, required this.valueSize});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 11.sp,
+            fontWeight: FontWeight.w500,
+            color: AppColorsTheme.textMutedColor(context),
+          ),
+        ),
+        UIHelper.verticalSpace(2.h),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: valueSize,
+            fontWeight: FontWeight.w900,
+            color: AppColorsTheme.textMainColor(context),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+/// Warm-tinted chip with an orange check for one package feature.
+class _FeatureChip extends StatelessWidget {
+  final String text;
+
+  const _FeatureChip({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      margin: EdgeInsets.only(bottom: 8.h),
+      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF2E221E) : const Color(0xFFFFF8F4),
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(
+          color: isDark ? const Color(0xFF49362E) : const Color(0xFFFFE1D0),
+          width: 1.w,
+        ),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(2.w),
+            decoration: const BoxDecoration(color: primaryOrange, shape: BoxShape.circle),
+            child: Icon(Icons.check_rounded, color: Colors.white, size: 11.sp),
+          ),
+          UIHelper.horizontalSpace(10.w),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 12.5.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColorsTheme.textMainColor(context),
+              ),
             ),
           ),
         ],

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../helpers/error_message.dart';
 import '../constants/app_constants.dart';
 import '../helpers/all_routes.dart';
 import '../helpers/di.dart';
@@ -117,7 +118,7 @@ class AccountProvider extends ChangeNotifier {
 
       ToastUtil.showSuccessMessage('profile_updated_success'.tr);
     } catch (e) {
-      String errorMsg = e.toString().replaceAll('Exception: ', '');
+      String errorMsg = e.apiErrorMessage;
       if (errorMsg.contains('Failure')) {
         errorMsg = 'Failed to update profile. Please check your details and network connection.';
       }

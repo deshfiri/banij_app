@@ -52,6 +52,11 @@ class _ProductsScreenState extends State<ProductsScreen> {
   late ProductListType _type = widget.initialType;
   ProductFilters _filters = const ProductFilters();
 
+  /// Search text the current catalog results were fetched with. The server
+  /// already applied it (and may match on SKU/brand/description), so it must
+  /// not be re-applied as a local name/category filter.
+  String? _serverSearch;
+
   @override
   void initState() {
     super.initState();
@@ -67,6 +72,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
   Future<void> _fetch() {
     final provider = context.read<DashboardProvider>();
     if (!_type.isCatalog) return provider.fetchMyProducts();
+    _serverSearch = _filters.search;
     return provider.fetchCatalogProducts(
       type: _type.apiType,
       search: _filters.search,
@@ -91,7 +97,8 @@ class _ProductsScreenState extends State<ProductsScreen> {
 
   void _changeCategory(String? value) {
     setState(() => _filters = _filters.withCategory(value));
-    _fetch();
+    // My Products filters categories locally; only the catalog needs a refetch.
+    if (_type.isCatalog) _fetch();
   }
 
   void _openAdvancedFilters(_ProductsData data) {
@@ -215,7 +222,10 @@ class _ProductsScreenState extends State<ProductsScreen> {
   /// Instant client-side search while typing; category too for My Products,
   /// whose endpoint does not take a category filter.
   List<ProductCardData> _applyLocalFilters(_ProductsData data) {
-    final query = (_filters.search ?? '').toLowerCase();
+    // Catalog results already reflect the submitted search; only filter locally
+    // while the typed text differs from it (or for My Products).
+    final serverApplied = _type.isCatalog && _filters.search == _serverSearch;
+    final query = serverApplied ? '' : (_filters.search ?? '').toLowerCase();
     final categoryLabel = _type.isCatalog || _filters.category == null
         ? null
         : data.categories.where((c) => c.value == _filters.category).map((c) => c.shortLabel.toLowerCase()).firstOrNull;

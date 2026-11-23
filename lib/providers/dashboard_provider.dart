@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../helpers/error_message.dart';
 import '../feature/account/model/account_model.dart';
 import '../feature/dashboard/model/address_model.dart';
 import '../feature/dashboard/model/catalog_model.dart';
@@ -145,7 +146,7 @@ class DashboardProvider extends ChangeNotifier {
       wholesaleCheckoutModel = await wholesaleCheckoutRxObj.applyCoupon(couponCode);
       ToastUtil.showSuccessMessage('Coupon applied successfully');
     } catch (e) {
-      String err = e.toString().replaceAll('Exception: ', '');
+      String err = e.apiErrorMessage;
       ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Failed to apply coupon');
     } finally {
       _isApplyingCoupon = false;
@@ -185,7 +186,7 @@ class DashboardProvider extends ChangeNotifier {
       ToastUtil.showSuccessMessage('Order confirmed successfully!');
       return true;
     } catch (e) {
-      String err = e.toString().replaceAll('Exception: ', '');
+      String err = e.apiErrorMessage;
       ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Order confirmation failed');
       return false;
     } finally {
@@ -238,7 +239,7 @@ class DashboardProvider extends ChangeNotifier {
       );
     } catch (e) {
       orderResponse = OrderResponseModel(data: []);
-      String err = e.toString().replaceAll('Exception: ', '');
+      String err = e.apiErrorMessage;
       if (err.isNotEmpty) {
         ToastUtil.showErrorMessage(err);
       }
@@ -254,7 +255,7 @@ class DashboardProvider extends ChangeNotifier {
     try {
       selectedOrderModel = await orderRxObj.fetchOrderDetail(orderId);
     } catch (e) {
-      String err = e.toString().replaceAll('Exception: ', '');
+      String err = e.apiErrorMessage;
       if (err.isNotEmpty) {
         ToastUtil.showErrorMessage(err);
       }
@@ -275,7 +276,7 @@ class DashboardProvider extends ChangeNotifier {
       }
       return success;
     } catch (e) {
-      String err = e.toString().replaceAll('Exception: ', '');
+      String err = e.apiErrorMessage;
       ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Failed to cancel order');
       return false;
     }
@@ -304,7 +305,7 @@ class DashboardProvider extends ChangeNotifier {
       myProductResponse = await myProductRxObj.fetchProducts(EndPoints.myProduct());
     } catch (e) {
       myProductResponse = MyProductResponseModel(data: []);
-      String err = e.toString().replaceAll('Exception: ', '');
+      String err = e.apiErrorMessage;
       if (err.contains('account_not_activated') || err.contains('Finish setting up')) {
         ToastUtil.showErrorMessage(err);
       }
@@ -351,7 +352,7 @@ class DashboardProvider extends ChangeNotifier {
         queryParameters: queryParams.isNotEmpty ? queryParams : null,
       );
     } catch (e) {
-      String err = e.toString().replaceAll('Exception: ', '');
+      String err = e.apiErrorMessage;
       ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Failed to fetch filtered products');
       catalogResponseModel = CatalogResponseModel(data: []);
     } finally {

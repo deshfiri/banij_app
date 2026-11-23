@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../helpers/error_message.dart';
 import '../feature/dashboard/model/my_product_model.dart';
 import '../feature/dashboard/model/wholesale_cart_model.dart';
 import '../helpers/toast.dart';
@@ -116,7 +117,7 @@ class CartProvider extends ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      String err = e.toString().replaceAll('Exception: ', '');
+      String err = e.apiErrorMessage;
       ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Failed to add item to cart');
       return false;
     }
@@ -176,7 +177,7 @@ class CartProvider extends ChangeNotifier {
       _cartModel = model;
       notifyListeners();
     } catch (e) {
-      String err = e.toString().replaceAll('Exception: ', '');
+      String err = e.apiErrorMessage;
       ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Failed to update quantity');
       fetchCart();
     }

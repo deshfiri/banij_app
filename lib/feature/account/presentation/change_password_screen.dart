@@ -10,6 +10,7 @@ import '../../../constants/color.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../../networks/api_access.dart';
 import '../../../providers/change_pass_provider.dart';
+import '../../business/presentation/widgets/common/sub_screen_top_bar.dart';
 import '../model/security_model.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
@@ -48,46 +49,14 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<ChangePassProvider>();
+    final passwordRules = _securityModel?.data?.passwordRules;
 
     return Scaffold(
       backgroundColor: AppColorsTheme.background(context),
       body: SafeArea(
         child: Column(
           children: [
-            // Top App Bar with Back Icon
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-              decoration: BoxDecoration(
-                color: AppColorsTheme.cardBg(context),
-                border: Border(
-                  bottom: BorderSide(
-                    color: AppColorsTheme.borderColor(context),
-                    width: 1.w,
-                  ),
-                ),
-              ),
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: Icon(
-                      Icons.arrow_back,
-                      color: AppColorsTheme.textMainColor(context),
-                      size: 22.sp,
-                    ),
-                  ),
-                  UIHelper.horizontalSpace(8.w),
-                  Text(
-                    'change_password'.tr,
-                    style: TextStyle(
-                      fontSize: 18.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColorsTheme.textMainColor(context),
-                    ),
-                  ),
-                ],
-              ),
-            ),
+            SubScreenTopBar(title: 'change_password'.tr),
 
             // Form Body Content
             Expanded(
@@ -108,31 +77,8 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                       UIHelper.verticalSpace(16.h),
 
                       // Password Rules Notice Card (from GET /security)
-                      if (_securityModel?.data?.passwordRules != null &&
-                          _securityModel!.data!.passwordRules!.isNotEmpty) ...[
-                        Container(
-                          padding: EdgeInsets.all(12.w),
-                          decoration: BoxDecoration(
-                            color: primaryOrange.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(10.r),
-                            border: Border.all(color: primaryOrange.withValues(alpha: 0.3)),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.info_outline_rounded, color: primaryOrange, size: 20.sp),
-                              UIHelper.horizontalSpace(10.w),
-                              Expanded(
-                                child: Text(
-                                  _securityModel!.data!.passwordRules!,
-                                  style: TextStyle(
-                                    fontSize: 12.sp,
-                                    color: AppColorsTheme.textMainColor(context),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
+                      if (passwordRules != null && passwordRules.isNotEmpty) ...[
+                        _PasswordRulesNotice(rules: passwordRules),
                         UIHelper.verticalSpace(20.h),
                       ],
 
@@ -203,6 +149,37 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Orange info banner showing the server's password rules.
+class _PasswordRulesNotice extends StatelessWidget {
+  final String rules;
+
+  const _PasswordRulesNotice({required this.rules});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: primaryOrange.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(10.r),
+        border: Border.all(color: primaryOrange.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.info_outline_rounded, color: primaryOrange, size: 20.sp),
+          UIHelper.horizontalSpace(10.w),
+          Expanded(
+            child: Text(
+              rules,
+              style: TextStyle(fontSize: 12.sp, color: AppColorsTheme.textMainColor(context)),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -122,8 +122,26 @@ class _CatalogAdvancedFilterSheetState extends State<CatalogAdvancedFilterSheet>
     widget.onApply(filters);
   }
 
+  /// Dropdown items for API option objects (`value` / `label`), led by an
+  /// "all" entry with a null value.
+  List<DropdownMenuItem<String>> _optionItems(List<dynamic> options, String allLabel) {
+    return [
+      DropdownMenuItem<String>(value: null, child: Text(allLabel)),
+      ...options.map((option) {
+        final value = option.value?.toString() ?? '';
+        final label = option.label?.toString() ?? value;
+        return DropdownMenuItem<String>(
+          value: value,
+          child: Text(label, style: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMainColor(context))),
+        );
+      }),
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
+    final mainColor = AppColorsTheme.textMainColor(context);
+
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
       decoration: BoxDecoration(
@@ -135,7 +153,6 @@ class _CatalogAdvancedFilterSheetState extends State<CatalogAdvancedFilterSheet>
       ),
       child: Column(
         children: [
-          // Drag handle & Header
           UIHelper.verticalSpace(12.h),
           Center(
             child: Container(
@@ -155,226 +172,101 @@ class _CatalogAdvancedFilterSheetState extends State<CatalogAdvancedFilterSheet>
               children: [
                 Text(
                   'Advanced Filters',
-                  style: TextStyle(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.w900,
-                    color: AppColorsTheme.textMainColor(context),
-                  ),
+                  style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: mainColor),
                 ),
                 TextButton(
                   onPressed: _resetFilters,
                   child: Text(
                     'Reset All',
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.bold,
-                      color: primaryOrange,
-                    ),
+                    style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: primaryOrange),
                   ),
                 ),
               ],
             ),
           ),
           Divider(color: AppColorsTheme.borderColor(context)),
-
-          // Scrollable Filter Sections
           Expanded(
             child: ListView(
               padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
               children: [
-                // Search Keyword
-                Text('Search Query', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context))),
+                const _FilterLabel('Search Query'),
                 UIHelper.verticalSpace(6.h),
-                TextField(
+                _FilterTextField(
                   controller: _searchController,
-                  style: TextStyle(fontSize: 13.5.sp, color: AppColorsTheme.textMainColor(context)),
-                  decoration: InputDecoration(
-                    hintText: 'Matches product name or SKU...',
-                    hintStyle: TextStyle(fontSize: 12.5.sp, color: AppColorsTheme.textMutedColor(context)),
-                    filled: true,
-                    fillColor: AppColorsTheme.cardBg(context),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: AppColorsTheme.borderColor(context))),
-                  ),
+                  hintText: 'Matches product name or SKU...',
+                  hintFontSize: 12.5.sp,
                 ),
                 UIHelper.verticalSpace(16.h),
-
-                // Category Dropdown
-                Text('Category', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context))),
+                const _FilterLabel('Category'),
                 UIHelper.verticalSpace(6.h),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w),
-                  decoration: BoxDecoration(
-                    color: AppColorsTheme.cardBg(context),
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: AppColorsTheme.borderColor(context)),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: _selectedCategory,
-                      hint: Text('Select Category', style: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMutedColor(context))),
-                      isExpanded: true,
-                      dropdownColor: AppColorsTheme.cardBg(context),
-                      items: [
-                        const DropdownMenuItem<String>(value: null, child: Text('All Categories')),
-                        ...widget.categories.map((cat) {
-                          final value = cat.value?.toString() ?? '';
-                          final label = cat.label?.toString() ?? value;
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(label, style: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMainColor(context))),
-                          );
-                        }),
-                      ],
-                      onChanged: (val) {
-                        setState(() {
-                          _selectedCategory = val;
-                        });
-                      },
-                    ),
-                  ),
+                _FilterDropdown(
+                  value: _selectedCategory,
+                  hint: 'Select Category',
+                  items: _optionItems(widget.categories, 'All Categories'),
+                  onChanged: (val) => setState(() => _selectedCategory = val),
                 ),
                 UIHelper.verticalSpace(16.h),
-
-                // Brand Dropdown
-                Text('Brand', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context))),
+                const _FilterLabel('Brand'),
                 UIHelper.verticalSpace(6.h),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w),
-                  decoration: BoxDecoration(
-                    color: AppColorsTheme.cardBg(context),
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: AppColorsTheme.borderColor(context)),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: _selectedBrand,
-                      hint: Text('Select Brand', style: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMutedColor(context))),
-                      isExpanded: true,
-                      dropdownColor: AppColorsTheme.cardBg(context),
-                      items: [
-                        const DropdownMenuItem<String>(value: null, child: Text('All Brands')),
-                        ...widget.brands.map((brand) {
-                          final value = brand.value?.toString() ?? '';
-                          final label = brand.label?.toString() ?? value;
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(label, style: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMainColor(context))),
-                          );
-                        }),
-                      ],
-                      onChanged: (val) {
-                        setState(() {
-                          _selectedBrand = val;
-                        });
-                      },
-                    ),
-                  ),
+                _FilterDropdown(
+                  value: _selectedBrand,
+                  hint: 'Select Brand',
+                  items: _optionItems(widget.brands, 'All Brands'),
+                  onChanged: (val) => setState(() => _selectedBrand = val),
                 ),
                 UIHelper.verticalSpace(16.h),
-
-                // Stock status (Wholesale only)
-                Text('Stock Status (Wholesale)', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context))),
+                const _FilterLabel('Stock Status (Wholesale)'),
                 UIHelper.verticalSpace(6.h),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w),
-                  decoration: BoxDecoration(
-                    color: AppColorsTheme.cardBg(context),
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: AppColorsTheme.borderColor(context)),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: _selectedStock,
-                      hint: Text('Select Stock Status', style: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMutedColor(context))),
-                      isExpanded: true,
-                      dropdownColor: AppColorsTheme.cardBg(context),
-                      items: const [
-                        DropdownMenuItem<String>(value: null, child: Text('Any')),
-                        DropdownMenuItem<String>(value: '1', child: Text('In Stock Only')),
-                        DropdownMenuItem<String>(value: '0', child: Text('Out of Stock')),
-                      ],
-                      onChanged: (val) {
-                        setState(() {
-                          _selectedStock = val;
-                        });
-                      },
-                    ),
-                  ),
+                _FilterDropdown(
+                  value: _selectedStock,
+                  hint: 'Select Stock Status',
+                  items: const [
+                    DropdownMenuItem<String>(value: null, child: Text('Any')),
+                    DropdownMenuItem<String>(value: '1', child: Text('In Stock Only')),
+                    DropdownMenuItem<String>(value: '0', child: Text('Out of Stock')),
+                  ],
+                  onChanged: (val) => setState(() => _selectedStock = val),
                 ),
                 UIHelper.verticalSpace(16.h),
-
-                // Price Range (Price Min & Price Max)
-                Text('Price Range (Wholesale Taka)', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context))),
+                const _FilterLabel('Price Range (Wholesale Taka)'),
                 UIHelper.verticalSpace(6.h),
                 Row(
                   children: [
                     Expanded(
-                      child: TextField(
+                      child: _FilterTextField(
                         controller: _priceMinController,
+                        hintText: 'Min Price',
+                        hintFontSize: 12.sp,
                         keyboardType: TextInputType.number,
-                        style: TextStyle(fontSize: 13.5.sp, color: AppColorsTheme.textMainColor(context)),
-                        decoration: InputDecoration(
-                          hintText: 'Min Price',
-                          hintStyle: TextStyle(fontSize: 12.sp, color: AppColorsTheme.textMutedColor(context)),
-                          filled: true,
-                          fillColor: AppColorsTheme.cardBg(context),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: AppColorsTheme.borderColor(context))),
-                        ),
                       ),
                     ),
                     UIHelper.horizontalSpace(12.w),
                     Expanded(
-                      child: TextField(
+                      child: _FilterTextField(
                         controller: _priceMaxController,
+                        hintText: 'Max Price',
+                        hintFontSize: 12.sp,
                         keyboardType: TextInputType.number,
-                        style: TextStyle(fontSize: 13.5.sp, color: AppColorsTheme.textMainColor(context)),
-                        decoration: InputDecoration(
-                          hintText: 'Max Price',
-                          hintStyle: TextStyle(fontSize: 12.sp, color: AppColorsTheme.textMutedColor(context)),
-                          filled: true,
-                          fillColor: AppColorsTheme.cardBg(context),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: AppColorsTheme.borderColor(context))),
-                        ),
                       ),
                     ),
                   ],
                 ),
                 UIHelper.verticalSpace(16.h),
-
-                // Scope
-                Text('Scope', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context))),
+                const _FilterLabel('Scope'),
                 UIHelper.verticalSpace(6.h),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w),
-                  decoration: BoxDecoration(
-                    color: AppColorsTheme.cardBg(context),
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: AppColorsTheme.borderColor(context)),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: _selectedScope,
-                      hint: Text('Select Scope', style: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMutedColor(context))),
-                      isExpanded: true,
-                      dropdownColor: AppColorsTheme.cardBg(context),
-                      items: const [
-                        DropdownMenuItem<String>(value: null, child: Text('All')),
-                        DropdownMenuItem<String>(value: 'mine', child: Text('Mine (Purchased by account)')),
-                      ],
-                      onChanged: (val) {
-                        setState(() {
-                          _selectedScope = val;
-                        });
-                      },
-                    ),
-                  ),
+                _FilterDropdown(
+                  value: _selectedScope,
+                  hint: 'Select Scope',
+                  items: const [
+                    DropdownMenuItem<String>(value: null, child: Text('All')),
+                    DropdownMenuItem<String>(value: 'mine', child: Text('Mine (Purchased by account)')),
+                  ],
+                  onChanged: (val) => setState(() => _selectedScope = val),
                 ),
                 UIHelper.verticalSpace(30.h),
               ],
             ),
           ),
-
-          // Apply Button Footer
           Container(
             padding: EdgeInsets.all(20.w),
             decoration: BoxDecoration(
@@ -392,14 +284,91 @@ class _CatalogAdvancedFilterSheetState extends State<CatalogAdvancedFilterSheet>
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
                   elevation: 0,
                 ),
-                child: Text(
-                  'Apply Filters',
-                  style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
-                ),
+                child: Text('Apply Filters', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold)),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _FilterLabel extends StatelessWidget {
+  final String text;
+
+  const _FilterLabel(this.text);
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
+    );
+  }
+}
+
+/// Filled rounded text field used for search and price inputs.
+class _FilterTextField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hintText;
+  final double hintFontSize;
+  final TextInputType? keyboardType;
+
+  const _FilterTextField({
+    required this.controller,
+    required this.hintText,
+    required this.hintFontSize,
+    this.keyboardType,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboardType,
+      style: TextStyle(fontSize: 13.5.sp, color: AppColorsTheme.textMainColor(context)),
+      decoration: InputDecoration(
+        hintText: hintText,
+        hintStyle: TextStyle(fontSize: hintFontSize, color: AppColorsTheme.textMutedColor(context)),
+        filled: true,
+        fillColor: AppColorsTheme.cardBg(context),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12.r),
+          borderSide: BorderSide(color: AppColorsTheme.borderColor(context)),
+        ),
+      ),
+    );
+  }
+}
+
+/// Bordered dropdown box used for category, brand, stock and scope.
+class _FilterDropdown extends StatelessWidget {
+  final String? value;
+  final String hint;
+  final List<DropdownMenuItem<String>> items;
+  final ValueChanged<String?> onChanged;
+
+  const _FilterDropdown({required this.value, required this.hint, required this.items, required this.onChanged});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 12.w),
+      decoration: BoxDecoration(
+        color: AppColorsTheme.cardBg(context),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: AppColorsTheme.borderColor(context)),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          hint: Text(hint, style: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMutedColor(context))),
+          isExpanded: true,
+          dropdownColor: AppColorsTheme.cardBg(context),
+          items: items,
+          onChanged: onChanged,
+        ),
       ),
     );
   }

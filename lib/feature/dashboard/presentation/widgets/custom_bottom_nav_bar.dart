@@ -36,8 +36,29 @@ class CustomBottomNavBar extends StatelessWidget {
     _NavTab(4, navAccountIcon, navAccountActiveIcon, 'account'),
   ];
 
+  static const List<String> _allIconAssets = [
+    navHomeIcon,
+    navHomeActiveIcon,
+    navFinanceIcon,
+    navFinanceActiveIcon,
+    navBusinessIcon,
+    navBusinessActiveIcon,
+    navAccountIcon,
+    navAccountActiveIcon,
+    navPlusIcon,
+  ];
+
+  /// Decodes every nav icon up front (cheap after the first call: images are
+  /// cached), so switching tabs never shows an empty pill while a PNG loads.
+  static void _precacheIcons(BuildContext context) {
+    for (final asset in _allIconAssets) {
+      precacheImage(AssetImage(asset), context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    _precacheIcons(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     Widget tab(_NavTab t) => Expanded(
@@ -125,6 +146,7 @@ class _NavItem extends StatelessWidget {
                   width: 19.w,
                   height: 19.w,
                   color: isActive ? Colors.white : inactiveColor,
+                  excludeFromSemantics: true,
                 ),
               ),
             ),
@@ -166,8 +188,9 @@ class _QuickActionButton extends StatelessWidget {
         child: Transform.translate(
           offset: Offset(0, -12.h),
           child: Container(
-            width: 56.w,
-            height: 56.w,
+            // .r (min of width/height scale) keeps the circle inside the 56.h row on short/wide screens.
+            width: 56.r,
+            height: 56.r,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
@@ -181,7 +204,13 @@ class _QuickActionButton extends StatelessWidget {
                 BoxShadow(color: primaryOrange.withValues(alpha: 0.45), blurRadius: 16.r, offset: const Offset(0, 6)),
               ],
             ),
-            child: Image.asset(navPlusIcon, width: 20.w, height: 20.w, color: Colors.white),
+            child: Image.asset(
+              navPlusIcon,
+              width: 20.w,
+              height: 20.w,
+              color: Colors.white,
+              semanticLabel: 'Quick action'.tr,
+            ),
           ),
         ),
       ),

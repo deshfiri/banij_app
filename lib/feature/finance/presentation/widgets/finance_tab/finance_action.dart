@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../constants/image_const.dart';
 import '../../../../../helpers/all_routes.dart';
-import '../invoices_receipts_sheet.dart';
+import '../../invoices_receipts_screen.dart';
 
 /// One finance shortcut. [titleKey] is a translation key.
 class FinanceAction {
@@ -36,12 +36,12 @@ class FinanceAction {
     FinanceAction(
       titleKey: 'Invoice',
       iconAsset: invoiceIconAsset,
-      open: (ctx) => InvoicesReceiptsSheet.show(ctx, initialTab: 'Invoices'),
+      open: (ctx) => InvoicesReceiptsScreen.open(ctx, initialTab: 'Invoices'),
     ),
     FinanceAction(
       titleKey: 'Receipts',
       iconAsset: receiptIconAsset,
-      open: (ctx) => InvoicesReceiptsSheet.show(ctx, initialTab: 'Receipts'),
+      open: (ctx) => InvoicesReceiptsScreen.open(ctx, initialTab: 'Receipts'),
     ),
   ];
 }

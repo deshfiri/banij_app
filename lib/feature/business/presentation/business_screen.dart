@@ -17,12 +17,21 @@ import 'widgets/business_tab/business_tab_items.dart';
 class BusinessScreenBody extends StatelessWidget {
   final VoidCallback? onOpenDrawer;
 
+  /// Switches the host's bottom nav to Account. Both dashboard providers are
+  /// registered app-wide, so the host must say which one owns this tab.
+  final VoidCallback? onProfileTap;
+
   const BusinessScreenBody({
     super.key,
     this.onOpenDrawer,
+    this.onProfileTap,
   });
 
   void _handleProfileTap(BuildContext context) {
+    if (onProfileTap != null) {
+      onProfileTap!();
+      return;
+    }
     try {
       final dashProvider = Provider.of<DashboardProvider>(context, listen: false);
       dashProvider.setBottomNavIndex(4);

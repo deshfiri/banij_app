@@ -5,7 +5,9 @@ import 'package:get/get.dart';
 import '../../../../../constants/color.dart';
 import '../../../../../helpers/ui_helpers.dart';
 import '../../../../../providers/dashboard_provider.dart';
+import 'checkout_ui.dart';
 
+/// Coupon input with Apply (or Remove when a coupon is applied).
 class CheckoutVoucherSection extends StatelessWidget {
   final DashboardProvider dashboardProvider;
   final TextEditingController couponController;
@@ -18,78 +20,70 @@ class CheckoutVoucherSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final appliedCouponText = dashboardProvider.wholesaleCheckoutModel?.data?.appliedCoupon ??
-        dashboardProvider.checkoutResponseModel?.data?.coupon;
+    final appliedCouponText =
+        dashboardProvider.wholesaleCheckoutModel?.data?.appliedCoupon ?? dashboardProvider.checkoutResponseModel?.data?.coupon;
+    final hasCoupon = appliedCouponText != null && appliedCouponText.isNotEmpty;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isApplying = dashboardProvider.isApplyingCoupon;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Apply Voucher'.tr,
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.bold,
-            color: AppColorsTheme.textMainColor(context),
+    return CheckoutSectionCard(
+      title: 'Apply Voucher'.tr,
+      child: Container(
+        padding: EdgeInsets.fromLTRB(12.w, 6.h, 6.w, 6.h),
+        decoration: BoxDecoration(
+          color: isDark ? AppColorsTheme.innerCardBg(context) : lightBackground,
+          borderRadius: BorderRadius.circular(14.r),
+          border: Border.all(
+            color: hasCoupon ? successGreen.withValues(alpha: 0.5) : primaryOrange.withValues(alpha: 0.2),
           ),
         ),
-        UIHelper.verticalSpace(10.h),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-          decoration: BoxDecoration(
-            color: AppColorsTheme.cardBg(context),
-            borderRadius: BorderRadius.circular(16.r),
-            border: Border.all(color: AppColorsTheme.borderColor(context)),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: couponController,
-                  style: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMainColor(context)),
-                  decoration: InputDecoration(
-                    hintText: 'Enter coupon code'.tr,
-                    hintStyle: TextStyle(fontSize: 12.5.sp, color: AppColorsTheme.textMutedColor(context)),
-                    border: InputBorder.none,
-                    isDense: true,
-                  ),
+        child: Row(
+          children: [
+            Icon(
+              hasCoupon ? Icons.check_circle_rounded : Icons.confirmation_number_outlined,
+              size: 18.sp,
+              color: hasCoupon ? successGreen : primaryOrange,
+            ),
+            UIHelper.horizontalSpace(8.w),
+            Expanded(
+              child: TextField(
+                controller: couponController,
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColorsTheme.textMainColor(context),
+                ),
+                decoration: InputDecoration(
+                  hintText: 'Enter coupon code'.tr,
+                  hintStyle: TextStyle(fontSize: 12.5.sp, color: AppColorsTheme.textMutedColor(context)),
+                  border: InputBorder.none,
+                  isDense: true,
                 ),
               ),
-              if (appliedCouponText != null && appliedCouponText.isNotEmpty) ...[
-                TextButton(
-                  onPressed: dashboardProvider.isApplyingCoupon ? null : () => dashboardProvider.removeWholesaleCoupon(),
-                  child: Text(
-                    'Remove'.tr,
-                    style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.bold, color: Colors.redAccent),
-                  ),
-                ),
-              ] else ...[
-                ElevatedButton(
-                  onPressed: dashboardProvider.isApplyingCoupon
-                      ? null
-                      : () => dashboardProvider.applyWholesaleCoupon(couponController.text),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryOrange,
-                    foregroundColor: Colors.white,
-                    padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    elevation: 0,
-                  ),
-                  child: dashboardProvider.isApplyingCoupon
-                      ? SizedBox(
-                          width: 16.w,
-                          height: 16.h,
-                          child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                        )
-                      : Text(
-                          'Apply'.tr,
-                          style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.bold),
-                        ),
-                ),
-              ],
-            ],
-          ),
+            ),
+            if (hasCoupon)
+              TextButton(
+                onPressed: isApplying ? null : () => dashboardProvider.removeWholesaleCoupon(),
+                style: TextButton.styleFrom(foregroundColor: errorRed),
+                child: Text('Remove'.tr, style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w800)),
+              )
+            else
+              CheckoutPillButton(
+                onTap: isApplying ? null : () => dashboardProvider.applyWholesaleCoupon(couponController.text),
+                child: isApplying
+                    ? SizedBox(
+                        width: 16.w,
+                        height: 16.w,
+                        child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      )
+                    : Text(
+                        'Apply'.tr,
+                        style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w800, color: Colors.white),
+                      ),
+              ),
+          ],
         ),
-      ],
+      ),
     );
   }
 }

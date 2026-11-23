@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
+import '../../../../common_widget/gradient_button.dart';
 import '../../../../constants/color.dart';
 import '../../../../helpers/ui_helpers.dart';
+import 'order/order_sheet_header.dart';
+import 'order/sheet_parts.dart';
 
 class OrderAdvancedFilterSheet extends StatefulWidget {
   final String? initialSearch;
@@ -86,8 +90,8 @@ class _OrderAdvancedFilterSheetState extends State<OrderAdvancedFilterSheet> {
     _selectedSource = widget.initialSource;
     _selectedStatus = widget.initialStatus;
     _selectedPayment = widget.initialPayment;
-    _selectedSort = widget.initialSort ?? 'placed_at';
-    _selectedDirection = widget.initialDirection ?? 'desc';
+    _selectedSort = widget.initialSort ?? _defaultSort;
+    _selectedDirection = widget.initialDirection ?? _defaultDirection;
   }
 
   @override
@@ -106,8 +110,8 @@ class _OrderAdvancedFilterSheetState extends State<OrderAdvancedFilterSheet> {
       _selectedSource = null;
       _selectedStatus = null;
       _selectedPayment = null;
-      _selectedSort = 'placed_at';
-      _selectedDirection = 'desc';
+      _selectedSort = _defaultSort;
+      _selectedDirection = _defaultDirection;
     });
   }
 
@@ -126,264 +130,137 @@ class _OrderAdvancedFilterSheetState extends State<OrderAdvancedFilterSheet> {
     widget.onApply(filters);
   }
 
+  // Defaults the sort controls reset to.
+  static const String _defaultSort = 'placed_at';
+  static const String _defaultDirection = 'desc';
+
+  /// (value sent to the API, label key). A null value means "all".
+  static const List<(String?, String)> _sourceItems = [
+    (null, 'All Sources'),
+    ('website', 'Website'),
+    ('wholesale', 'Wholesale'),
+    ('external', 'External'),
+  ];
+
+  static const List<(String?, String)> _statusItems = [
+    (null, 'All Statuses'),
+    ('pending', 'Pending'),
+    ('processing', 'Processing'),
+    ('delivered', 'Delivered'),
+    ('cancelled', 'Cancelled'),
+  ];
+
+  static const List<(String?, String)> _paymentItems = [
+    (null, 'All Payment States'),
+    ('paid', 'Paid'),
+    ('unpaid', 'Unpaid / Pending'),
+    ('refunded', 'Refunded'),
+  ];
+
+  static const List<(String?, String)> _sortItems = [
+    ('placed_at', 'Placed Date'),
+    ('total', 'Total Amount'),
+    ('number', 'Order Number'),
+  ];
+
+  static const List<(String?, String)> _directionItems = [
+    ('desc', 'Descending'),
+    ('asc', 'Ascending'),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
-      decoration: BoxDecoration(
-        color: AppColorsTheme.background(context),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(28.r),
-          topRight: Radius.circular(28.r),
-        ),
-      ),
+      decoration: sheetDecoration(context, withShadow: false),
       child: Column(
         children: [
-          // Drag handle & Header
-          UIHelper.verticalSpace(12.h),
-          Center(
-            child: Container(
-              width: 42.w,
-              height: 4.5.h,
-              decoration: BoxDecoration(
-                color: AppColorsTheme.textMutedColor(context).withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(10.r),
-              ),
-            ),
+          OrderSheetHero(
+            title: 'Filter Orders'.tr,
+            subtitle: 'Narrow down orders by source, status, payment and date'.tr,
+            actions: [GlassTextButton(label: 'Reset All'.tr, onTap: _resetFilters)],
           ),
-          UIHelper.verticalSpace(12.h),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20.w),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Filter Orders',
-                  style: TextStyle(
-                    fontSize: 20.sp,
-                    fontWeight: FontWeight.w900,
-                    color: AppColorsTheme.textMainColor(context),
-                  ),
-                ),
-                TextButton(
-                  onPressed: _resetFilters,
-                  child: Text(
-                    'Reset All',
-                    style: TextStyle(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.bold,
-                      color: primaryOrange,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Divider(color: AppColorsTheme.borderColor(context)),
 
           // Scrollable Filter Sections
           Expanded(
             child: ListView(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+              padding: EdgeInsets.fromLTRB(20.w, 18.h, 20.w, 10.h),
               children: [
-                // Search Keyword
-                Text('Search Order Number / Name', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context))),
-                UIHelper.verticalSpace(6.h),
-                TextField(
+                _FilterLabel('Search Order Number / Name'.tr, icon: Icons.search_rounded),
+                _FilterTextField(
                   controller: _searchController,
-                  style: TextStyle(fontSize: 13.5.sp, color: AppColorsTheme.textMainColor(context)),
-                  decoration: InputDecoration(
-                    hintText: 'Order number, phone or customer name...',
-                    hintStyle: TextStyle(fontSize: 12.5.sp, color: AppColorsTheme.textMutedColor(context)),
-                    filled: true,
-                    fillColor: AppColorsTheme.cardBg(context),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: AppColorsTheme.borderColor(context))),
-                  ),
+                  hintText: 'Order number, phone or customer name...'.tr,
+                  hintFontSize: 12.5,
                 ),
                 UIHelper.verticalSpace(16.h),
 
-                // Order Source Dropdown
-                Text('Order Source', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context))),
-                UIHelper.verticalSpace(6.h),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w),
-                  decoration: BoxDecoration(
-                    color: AppColorsTheme.cardBg(context),
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: AppColorsTheme.borderColor(context)),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: _selectedSource,
-                      hint: Text('Select Source', style: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMutedColor(context))),
-                      isExpanded: true,
-                      dropdownColor: AppColorsTheme.cardBg(context),
-                      items: const [
-                        DropdownMenuItem<String>(value: null, child: Text('All Sources')),
-                        DropdownMenuItem<String>(value: 'website', child: Text('Website')),
-                        DropdownMenuItem<String>(value: 'wholesale', child: Text('Wholesale')),
-                        DropdownMenuItem<String>(value: 'external', child: Text('External')),
-                      ],
-                      onChanged: (val) {
-                        setState(() {
-                          _selectedSource = val;
-                        });
-                      },
-                    ),
-                  ),
+                _FilterLabel('Order Source'.tr, icon: Icons.hub_outlined),
+                _FilterDropdown(
+                  value: _selectedSource,
+                  hint: 'Select Source'.tr,
+                  items: _sourceItems,
+                  onChanged: (val) => setState(() => _selectedSource = val),
                 ),
                 UIHelper.verticalSpace(16.h),
 
-                // Order Status Dropdown
-                Text('Order Status', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context))),
-                UIHelper.verticalSpace(6.h),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w),
-                  decoration: BoxDecoration(
-                    color: AppColorsTheme.cardBg(context),
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: AppColorsTheme.borderColor(context)),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: _selectedStatus,
-                      hint: Text('Select Status', style: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMutedColor(context))),
-                      isExpanded: true,
-                      dropdownColor: AppColorsTheme.cardBg(context),
-                      items: const [
-                        DropdownMenuItem<String>(value: null, child: Text('All Statuses')),
-                        DropdownMenuItem<String>(value: 'pending', child: Text('Pending')),
-                        DropdownMenuItem<String>(value: 'processing', child: Text('Processing')),
-                        DropdownMenuItem<String>(value: 'delivered', child: Text('Delivered')),
-                        DropdownMenuItem<String>(value: 'cancelled', child: Text('Cancelled')),
-                      ],
-                      onChanged: (val) {
-                        setState(() {
-                          _selectedStatus = val;
-                        });
-                      },
-                    ),
-                  ),
+                _FilterLabel('Order Status'.tr, icon: Icons.local_shipping_outlined),
+                _FilterDropdown(
+                  value: _selectedStatus,
+                  hint: 'Select Status'.tr,
+                  items: _statusItems,
+                  onChanged: (val) => setState(() => _selectedStatus = val),
                 ),
                 UIHelper.verticalSpace(16.h),
 
-                // Payment State
-                Text('Payment State', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context))),
-                UIHelper.verticalSpace(6.h),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w),
-                  decoration: BoxDecoration(
-                    color: AppColorsTheme.cardBg(context),
-                    borderRadius: BorderRadius.circular(12.r),
-                    border: Border.all(color: AppColorsTheme.borderColor(context)),
-                  ),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton<String>(
-                      value: _selectedPayment,
-                      hint: Text('Select Payment State', style: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMutedColor(context))),
-                      isExpanded: true,
-                      dropdownColor: AppColorsTheme.cardBg(context),
-                      items: const [
-                        DropdownMenuItem<String>(value: null, child: Text('All Payment States')),
-                        DropdownMenuItem<String>(value: 'paid', child: Text('Paid')),
-                        DropdownMenuItem<String>(value: 'unpaid', child: Text('Unpaid / Pending')),
-                        DropdownMenuItem<String>(value: 'refunded', child: Text('Refunded')),
-                      ],
-                      onChanged: (val) {
-                        setState(() {
-                          _selectedPayment = val;
-                        });
-                      },
-                    ),
-                  ),
+                _FilterLabel('Payment State'.tr, icon: Icons.payments_outlined),
+                _FilterDropdown(
+                  value: _selectedPayment,
+                  hint: 'Select Payment State'.tr,
+                  items: _paymentItems,
+                  onChanged: (val) => setState(() => _selectedPayment = val),
                 ),
                 UIHelper.verticalSpace(16.h),
 
-                // Date Range (YYYY-MM-DD)
-                Text('Date Range (YYYY-MM-DD)', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context))),
-                UIHelper.verticalSpace(6.h),
+                _FilterLabel('Date Range (YYYY-MM-DD)'.tr, icon: Icons.date_range_rounded),
                 Row(
                   children: [
                     Expanded(
-                      child: TextField(
+                      child: _FilterTextField(
                         controller: _fromDateController,
-                        style: TextStyle(fontSize: 13.5.sp, color: AppColorsTheme.textMainColor(context)),
-                        decoration: InputDecoration(
-                          hintText: 'From (2026-01-01)',
-                          hintStyle: TextStyle(fontSize: 12.sp, color: AppColorsTheme.textMutedColor(context)),
-                          filled: true,
-                          fillColor: AppColorsTheme.cardBg(context),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: AppColorsTheme.borderColor(context))),
-                        ),
+                        hintText: 'From (2026-01-01)'.tr,
+                        hintFontSize: 12,
                       ),
                     ),
                     UIHelper.horizontalSpace(12.w),
                     Expanded(
-                      child: TextField(
+                      child: _FilterTextField(
                         controller: _toDateController,
-                        style: TextStyle(fontSize: 13.5.sp, color: AppColorsTheme.textMainColor(context)),
-                        decoration: InputDecoration(
-                          hintText: 'To (2026-12-31)',
-                          hintStyle: TextStyle(fontSize: 12.sp, color: AppColorsTheme.textMutedColor(context)),
-                          filled: true,
-                          fillColor: AppColorsTheme.cardBg(context),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r), borderSide: BorderSide(color: AppColorsTheme.borderColor(context))),
-                        ),
+                        hintText: 'To (2026-12-31)'.tr,
+                        hintFontSize: 12,
                       ),
                     ),
                   ],
                 ),
                 UIHelper.verticalSpace(16.h),
 
-                // Sort By & Direction
-                Text('Sort Orders By', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context))),
-                UIHelper.verticalSpace(6.h),
+                _FilterLabel('Sort Orders By'.tr, icon: Icons.sort_rounded),
                 Row(
                   children: [
                     Expanded(
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10.w),
-                        decoration: BoxDecoration(color: AppColorsTheme.cardBg(context), borderRadius: BorderRadius.circular(12.r), border: Border.all(color: AppColorsTheme.borderColor(context))),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: _selectedSort,
-                            isExpanded: true,
-                            dropdownColor: AppColorsTheme.cardBg(context),
-                            items: const [
-                              DropdownMenuItem<String>(value: 'placed_at', child: Text('Placed Date')),
-                              DropdownMenuItem<String>(value: 'total', child: Text('Total Amount')),
-                              DropdownMenuItem<String>(value: 'number', child: Text('Order Number')),
-                            ],
-                            onChanged: (val) {
-                              setState(() {
-                                _selectedSort = val;
-                              });
-                            },
-                          ),
-                        ),
+                      child: _FilterDropdown(
+                        value: _selectedSort,
+                        items: _sortItems,
+                        horizontalPadding: 10,
+                        onChanged: (val) => setState(() => _selectedSort = val),
                       ),
                     ),
                     UIHelper.horizontalSpace(10.w),
                     Expanded(
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: 10.w),
-                        decoration: BoxDecoration(color: AppColorsTheme.cardBg(context), borderRadius: BorderRadius.circular(12.r), border: Border.all(color: AppColorsTheme.borderColor(context))),
-                        child: DropdownButtonHideUnderline(
-                          child: DropdownButton<String>(
-                            value: _selectedDirection,
-                            isExpanded: true,
-                            dropdownColor: AppColorsTheme.cardBg(context),
-                            items: const [
-                              DropdownMenuItem<String>(value: 'desc', child: Text('Descending')),
-                              DropdownMenuItem<String>(value: 'asc', child: Text('Ascending')),
-                            ],
-                            onChanged: (val) {
-                              setState(() {
-                                _selectedDirection = val;
-                              });
-                            },
-                          ),
-                        ),
+                      child: _FilterDropdown(
+                        value: _selectedDirection,
+                        items: _directionItems,
+                        horizontalPadding: 10,
+                        onChanged: (val) => setState(() => _selectedDirection = val),
                       ),
                     ),
                   ],
@@ -395,30 +272,142 @@ class _OrderAdvancedFilterSheetState extends State<OrderAdvancedFilterSheet> {
 
           // Apply Button Footer
           Container(
-            padding: EdgeInsets.all(20.w),
+            padding: EdgeInsets.fromLTRB(20.w, 14.h, 20.w, 20.h),
             decoration: BoxDecoration(
               color: AppColorsTheme.cardBg(context),
               border: Border(top: BorderSide(color: AppColorsTheme.borderColor(context), width: 1.w)),
             ),
-            child: SizedBox(
-              width: double.infinity,
-              height: 48.h,
-              child: ElevatedButton(
+            child: SafeArea(
+              top: false,
+              child: GradientButton(
+                label: 'Apply Filters'.tr,
+                trailingIcon: Icons.check_rounded,
                 onPressed: _applyFilters,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryOrange,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-                  elevation: 0,
-                ),
-                child: Text(
-                  'Apply Filters',
-                  style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold),
-                ),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Field label with a small orange icon and the 8-point gap below it.
+class _FilterLabel extends StatelessWidget {
+  final String text;
+  final IconData icon;
+
+  const _FilterLabel(this.text, {required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 8.h),
+      child: Row(
+        children: [
+          Icon(icon, size: 15.sp, color: primaryOrange),
+          UIHelper.horizontalSpace(6.w),
+          Expanded(
+            child: Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w800,
+                color: AppColorsTheme.textMainColor(context),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Shared input surface: tinted fill, soft orange border, orange when focused.
+BoxDecoration _fieldDecoration(BuildContext context) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  return BoxDecoration(
+    color: isDark ? AppColorsTheme.innerCardBg(context) : lightBackground,
+    borderRadius: BorderRadius.circular(14.r),
+    border: Border.all(color: isDark ? darkCardBorderColor : primaryOrange.withValues(alpha: 0.2)),
+  );
+}
+
+/// Filled, rounded text input used for search and dates.
+class _FilterTextField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hintText;
+  final double hintFontSize;
+
+  const _FilterTextField({required this.controller, required this.hintText, required this.hintFontSize});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    OutlineInputBorder border(Color color, [double width = 1]) => OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14.r),
+          borderSide: BorderSide(color: color, width: width),
+        );
+
+    return TextField(
+      controller: controller,
+      style: TextStyle(fontSize: 13.5.sp, color: AppColorsTheme.textMainColor(context)),
+      decoration: InputDecoration(
+        hintText: hintText,
+        hintStyle: TextStyle(fontSize: hintFontSize.sp, color: AppColorsTheme.textMutedColor(context)),
+        filled: true,
+        fillColor: isDark ? AppColorsTheme.innerCardBg(context) : lightBackground,
+        border: border(AppColorsTheme.borderColor(context)),
+        enabledBorder: border(isDark ? darkCardBorderColor : primaryOrange.withValues(alpha: 0.2)),
+        focusedBorder: border(primaryOrange, 1.5),
+      ),
+    );
+  }
+}
+
+/// Bordered dropdown; [hint] is shown when [value] is null.
+class _FilterDropdown extends StatelessWidget {
+  final String? value;
+  final String? hint;
+  final List<(String?, String)> items;
+  final ValueChanged<String?> onChanged;
+  final double horizontalPadding;
+
+  const _FilterDropdown({
+    required this.value,
+    required this.items,
+    required this.onChanged,
+    this.hint,
+    this.horizontalPadding = 12,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: horizontalPadding.w),
+      decoration: _fieldDecoration(context),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: value,
+          hint: hint == null
+              ? null
+              : Text(hint!, style: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMutedColor(context))),
+          isExpanded: true,
+          icon: Icon(Icons.keyboard_arrow_down_rounded, color: primaryOrange, size: 22.sp),
+          borderRadius: BorderRadius.circular(14.r),
+          dropdownColor: AppColorsTheme.cardBg(context),
+          style: TextStyle(fontSize: 13.5.sp, color: AppColorsTheme.textMainColor(context)),
+          items: [
+            for (final (itemValue, label) in items)
+              DropdownMenuItem<String>(
+                value: itemValue,
+                child: Text(label.tr, maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
+          ],
+          onChanged: onChanged,
+        ),
       ),
     );
   }

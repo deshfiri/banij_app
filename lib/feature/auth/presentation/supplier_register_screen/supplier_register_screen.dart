@@ -39,7 +39,7 @@ class _SupplierStep {
 }
 
 class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
-  static final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {

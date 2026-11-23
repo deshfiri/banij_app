@@ -12,6 +12,9 @@ import '../../../helpers/ui_helpers.dart';
 import '../../../providers/delete_account_provider.dart';
 import '../../../providers/theme_provider.dart';
 
+/// Warning red used for the delete-account icon badge.
+const Color _dangerRed = Color(0xFFE53935);
+
 class DeleteAccountScreen extends StatefulWidget {
   const DeleteAccountScreen({super.key});
 
@@ -93,16 +96,16 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
                           padding: EdgeInsets.all(20.w),
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: const Color(0xFFE53935).withValues(alpha: 0.1),
+                            color: _dangerRed.withValues(alpha: 0.1),
                             border: Border.all(
-                              color: const Color(0xFFE53935).withValues(alpha: 0.3),
+                              color: _dangerRed.withValues(alpha: 0.3),
                               width: 1.5.w,
                             ),
                           ),
                           child: Icon(
                             Icons.warning_amber_rounded,
                             size: 44.sp,
-                            color: const Color(0xFFE53935),
+                            color: _dangerRed,
                           ),
                         ),
                       ),

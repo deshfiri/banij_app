@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
+import '../../../common_widget/gradient_button.dart';
 import '../../../constants/color.dart';
 import '../../../helpers/all_routes.dart';
 import '../../../helpers/toast.dart';
@@ -13,22 +14,19 @@ import '../model/my_product_model.dart';
 import 'widgets/checkout/checkout_address_card.dart';
 import 'widgets/checkout/checkout_delivery_banner.dart';
 import 'widgets/checkout/checkout_payment_section.dart';
+import 'widgets/checkout/checkout_ui.dart';
 import 'widgets/checkout/checkout_voucher_section.dart';
 
 class OrderNowScreen extends StatefulWidget {
   final ProductItemModel? product;
 
-  const OrderNowScreen({
-    super.key,
-    this.product,
-  });
+  const OrderNowScreen({super.key, this.product});
 
   @override
   State<OrderNowScreen> createState() => _OrderNowScreenState();
 }
 
 class _OrderNowScreenState extends State<OrderNowScreen> {
-  bool _isSummaryExpanded = false;
   final TextEditingController _couponController = TextEditingController();
 
   @override
@@ -52,7 +50,9 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
       barrierDismissible: false,
       builder: (ctx) => Dialog(
         backgroundColor: AppColorsTheme.cardBg(context),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20.r),
+        ),
         child: Padding(
           padding: EdgeInsets.all(24.w),
           child: Column(
@@ -95,7 +95,10 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                 child: ElevatedButton(
                   onPressed: () {
                     Navigator.pop(ctx);
-                    Navigator.pushReplacementNamed(context, Routes.dashboardScreen);
+                    Navigator.pushReplacementNamed(
+                      context,
+                      Routes.dashboardScreen,
+                    );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryOrange,
@@ -128,38 +131,85 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
     final cartProvider = context.watch<CartProvider>();
     final product = widget.product;
 
-    final imageUrl = (product?.image?.url != null && product!.image!.url!.isNotEmpty)
+    final imageUrl =
+        (product?.image?.url != null && product!.image!.url!.isNotEmpty)
         ? product.image!.url!
         : (cartProvider.cartItems.isNotEmpty
-            ? (cartProvider.cartItems.first.product.image?.url ?? '')
-            : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500');
+              ? (cartProvider.cartItems.first.product.image?.url ?? '')
+              : 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500');
 
-    final productTitle = product?.name ??
+    final productTitle =
+        product?.name ??
         (cartProvider.cartItems.isNotEmpty
             ? (cartProvider.cartItems.first.product.name ?? 'Wholesale Product')
             : 'Wholesale Product');
 
     final double unitPriceNum = product != null
         ? (double.tryParse(product.wholesale?.price?.amount ?? '') ??
-            (double.tryParse(product.wholesale?.price?.formatted?.replaceAll(RegExp(r'[^0-9.]'), '') ?? '') ?? 0.0))
+              (double.tryParse(
+                    product.wholesale?.price?.formatted?.replaceAll(
+                          RegExp(r'[^0-9.]'),
+                          '',
+                        ) ??
+                        '',
+                  ) ??
+                  0.0))
         : (cartProvider.cartItems.isNotEmpty ? cartProvider.subtotal : 0.0);
 
-    final String productPrice = product?.wholesale?.price?.formatted ??
+    final String productPrice =
+        product?.wholesale?.price?.formatted ??
         (cartProvider.cartItems.isNotEmpty
-            ? (cartProvider.cartItems.first.product.wholesale?.price?.formatted ?? '৳ ${unitPriceNum.toStringAsFixed(2)}')
+            ? (cartProvider
+                      .cartItems
+                      .first
+                      .product
+                      .wholesale
+                      ?.price
+                      ?.formatted ??
+                  '৳ ${unitPriceNum.toStringAsFixed(2)}')
             : '৳ ${unitPriceNum.toStringAsFixed(2)}');
 
     final minOrder = product?.wholesale?.minOrderQuantity ?? 1;
-    final categoryVariant = product?.category ?? product?.brand ?? 'Standard Unit';
+    final categoryVariant =
+        product?.category ?? product?.brand ?? 'Standard Unit';
 
-    final double shippingFee = cartProvider.deliveryFee > 0 ? cartProvider.deliveryFee : 60.0;
-    final double itemSubtotal = unitPriceNum > 0 ? (unitPriceNum * dashboardProvider.orderQuantity) : (cartProvider.subtotal > 0 ? cartProvider.subtotal : 0.0);
+    final double shippingFee = cartProvider.deliveryFee > 0
+        ? cartProvider.deliveryFee
+        : 60.0;
+    final double itemSubtotal = unitPriceNum > 0
+        ? (unitPriceNum * dashboardProvider.orderQuantity)
+        : (cartProvider.subtotal > 0 ? cartProvider.subtotal : 0.0);
     final double grandTotalBdt = itemSubtotal + shippingFee;
     final double grandTotalUsd = grandTotalBdt / 115.0;
 
-    final appliedCouponText = dashboardProvider.wholesaleCheckoutModel?.data?.appliedCoupon ?? dashboardProvider.checkoutResponseModel?.data?.coupon;
+    final appliedCouponText =
+        dashboardProvider.wholesaleCheckoutModel?.data?.appliedCoupon ??
+        dashboardProvider.checkoutResponseModel?.data?.coupon;
+    final orderTotalText =
+        dashboardProvider.wholesaleCheckoutModel?.data?.total?.formatted ??
+        dashboardProvider
+            .checkoutResponseModel
+            ?.data
+            ?.quote
+            ?.total
+            ?.formatted ??
+        'USD ${grandTotalUsd.toStringAsFixed(2)}';
+    final subtotalText =
+        dashboardProvider.wholesaleCheckoutModel?.data?.subtotal?.formatted ??
+        dashboardProvider
+            .checkoutResponseModel
+            ?.data
+            ?.quote
+            ?.subtotal
+            ?.formatted ??
+        'BDT ${itemSubtotal.toStringAsFixed(2)}';
+    final shippingText =
+        dashboardProvider.wholesaleCheckoutModel?.data?.shipping?.formatted ??
+        'BDT ${shippingFee.toStringAsFixed(2)}';
 
-    if (_couponController.text.isEmpty && appliedCouponText != null && appliedCouponText.isNotEmpty) {
+    if (_couponController.text.isEmpty &&
+        appliedCouponText != null &&
+        appliedCouponText.isNotEmpty) {
       _couponController.text = appliedCouponText;
     }
 
@@ -195,7 +245,11 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                     color: AppColorsTheme.textMutedColor(context),
                   ),
                 ),
-                Icon(Icons.shield_rounded, size: 12.sp, color: Colors.amber[700]),
+                Icon(
+                  Icons.shield_rounded,
+                  size: 12.sp,
+                  color: Colors.amber[700],
+                ),
                 UIHelper.horizontalSpace(2.w),
                 Text(
                   'Trade Assurance',
@@ -206,7 +260,11 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                   ),
                 ),
                 UIHelper.horizontalSpace(4.w),
-                Icon(Icons.info_outline_rounded, size: 12.sp, color: AppColorsTheme.textMutedColor(context)),
+                Icon(
+                  Icons.info_outline_rounded,
+                  size: 12.sp,
+                  color: AppColorsTheme.textMutedColor(context),
+                ),
               ],
             ),
           ],
@@ -230,31 +288,48 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Package Info Banner
-              if (dashboardProvider.checkoutResponseModel?.data?.package != null) ...[
+              if (dashboardProvider.checkoutResponseModel?.data?.package !=
+                  null) ...[
                 Container(
                   padding: EdgeInsets.all(14.w),
                   decoration: BoxDecoration(
                     color: primaryOrange.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16.r),
-                    border: Border.all(color: primaryOrange.withValues(alpha: 0.3)),
+                    border: Border.all(
+                      color: primaryOrange.withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Row(
                     children: [
-                      Icon(Icons.workspace_premium_rounded, color: primaryOrange, size: 24.sp),
+                      Icon(
+                        Icons.workspace_premium_rounded,
+                        color: primaryOrange,
+                        size: 24.sp,
+                      ),
                       UIHelper.horizontalSpace(12.w),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              dashboardProvider.checkoutResponseModel!.data!.package!.name ?? 'Package',
+                              dashboardProvider
+                                      .checkoutResponseModel!
+                                      .data!
+                                      .package!
+                                      .name ??
+                                  'Package',
                               style: TextStyle(
                                 fontSize: 14.sp,
                                 fontWeight: FontWeight.bold,
                                 color: AppColorsTheme.textMainColor(context),
                               ),
                             ),
-                            if (dashboardProvider.checkoutResponseModel!.data!.package!.validityDays != null) ...[
+                            if (dashboardProvider
+                                    .checkoutResponseModel!
+                                    .data!
+                                    .package!
+                                    .validityDays !=
+                                null) ...[
                               UIHelper.verticalSpace(2.h),
                               Text(
                                 'Validity: ${dashboardProvider.checkoutResponseModel!.data!.package!.validityDays} days',
@@ -302,7 +377,9 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                     decoration: BoxDecoration(
                       color: AppColorsTheme.cardBg(context),
                       borderRadius: BorderRadius.circular(16.r),
-                      border: Border.all(color: AppColorsTheme.borderColor(context)),
+                      border: Border.all(
+                        color: AppColorsTheme.borderColor(context),
+                      ),
                     ),
                     child: Row(
                       children: [
@@ -317,7 +394,11 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                               width: 54.w,
                               height: 54.h,
                               color: primaryOrange.withValues(alpha: 0.1),
-                              child: Icon(Icons.inventory_2_outlined, color: primaryOrange, size: 22.sp),
+                              child: Icon(
+                                Icons.inventory_2_outlined,
+                                color: primaryOrange,
+                                size: 22.sp,
+                              ),
                             ),
                           ),
                         ),
@@ -365,7 +446,9 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                   decoration: BoxDecoration(
                     color: AppColorsTheme.cardBg(context),
                     borderRadius: BorderRadius.circular(18.r),
-                    border: Border.all(color: AppColorsTheme.borderColor(context)),
+                    border: Border.all(
+                      color: AppColorsTheme.borderColor(context),
+                    ),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -384,9 +467,14 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                                   child: Image.network(
                                     imageUrl,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) => Center(
-                                      child: Icon(Icons.inventory_2_outlined, color: primaryOrange, size: 28.sp),
-                                    ),
+                                    errorBuilder:
+                                        (context, error, stackTrace) => Center(
+                                          child: Icon(
+                                            Icons.inventory_2_outlined,
+                                            color: primaryOrange,
+                                            size: 28.sp,
+                                          ),
+                                        ),
                                   ),
                                 ),
                               ),
@@ -394,7 +482,10 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                                 bottom: 4.h,
                                 left: 4.w,
                                 child: Container(
-                                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 6.w,
+                                    vertical: 2.h,
+                                  ),
                                   decoration: BoxDecoration(
                                     color: Colors.black.withValues(alpha: 0.7),
                                     borderRadius: BorderRadius.circular(6.r),
@@ -421,7 +512,9 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                                   style: TextStyle(
                                     fontSize: 13.5.sp,
                                     fontWeight: FontWeight.w600,
-                                    color: AppColorsTheme.textMainColor(context),
+                                    color: AppColorsTheme.textMainColor(
+                                      context,
+                                    ),
                                   ),
                                   maxLines: 2,
                                   overflow: TextOverflow.ellipsis,
@@ -431,7 +524,9 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                                   'Min. order: $minOrder piece${minOrder > 1 ? "s" : ""}',
                                   style: TextStyle(
                                     fontSize: 11.sp,
-                                    color: AppColorsTheme.textMutedColor(context),
+                                    color: AppColorsTheme.textMutedColor(
+                                      context,
+                                    ),
                                   ),
                                 ),
                                 UIHelper.verticalSpace(8.h),
@@ -440,7 +535,9 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                                   style: TextStyle(
                                     fontSize: 15.sp,
                                     fontWeight: FontWeight.w900,
-                                    color: AppColorsTheme.textMainColor(context),
+                                    color: AppColorsTheme.textMainColor(
+                                      context,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -456,34 +553,60 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                         children: [
                           Container(
                             decoration: BoxDecoration(
-                              border: Border.all(color: AppColorsTheme.borderColor(context)),
+                              border: Border.all(
+                                color: AppColorsTheme.borderColor(context),
+                              ),
                               borderRadius: BorderRadius.circular(8.r),
                             ),
                             child: Row(
                               children: [
                                 InkWell(
-                                  onTap: () => dashboardProvider.decrementOrderQuantity(),
+                                  onTap: () => dashboardProvider
+                                      .decrementOrderQuantity(),
                                   child: Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                                    child: Icon(Icons.remove, size: 14.sp, color: AppColorsTheme.textMainColor(context)),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 12.w,
+                                      vertical: 6.h,
+                                    ),
+                                    child: Icon(
+                                      Icons.remove,
+                                      size: 14.sp,
+                                      color: AppColorsTheme.textMainColor(
+                                        context,
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 8.w),
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 8.w,
+                                  ),
                                   child: Text(
                                     '${dashboardProvider.orderQuantity}',
                                     style: TextStyle(
                                       fontSize: 13.sp,
                                       fontWeight: FontWeight.bold,
-                                      color: AppColorsTheme.textMainColor(context),
+                                      color: AppColorsTheme.textMainColor(
+                                        context,
+                                      ),
                                     ),
                                   ),
                                 ),
                                 InkWell(
-                                  onTap: () => dashboardProvider.incrementOrderQuantity(),
+                                  onTap: () => dashboardProvider
+                                      .incrementOrderQuantity(),
                                   child: Padding(
-                                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                                    child: Icon(Icons.add, size: 14.sp, color: AppColorsTheme.textMainColor(context)),
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 12.w,
+                                      vertical: 6.h,
+                                    ),
+                                    child: Icon(
+                                      Icons.add,
+                                      size: 14.sp,
+                                      color: AppColorsTheme.textMainColor(
+                                        context,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -523,142 +646,103 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
               UIHelper.verticalSpace(20.h),
 
               // 5. Payment Method Section
-              CheckoutPaymentSection(
-                dashboardProvider: dashboardProvider,
+              CheckoutPaymentSection(dashboardProvider: dashboardProvider),
+              UIHelper.verticalSpace(20.h),
+
+              CheckoutSectionCard(
+                title: 'Order summary'.tr,
+                child: Column(
+                  children: [
+                    _OrderSummaryRow(
+                      label: 'Items Subtotal'.tr,
+                      value: subtotalText,
+                    ),
+                    UIHelper.verticalSpace(8.h),
+                    _OrderSummaryRow(
+                      label: 'Shipping Fee'.tr,
+                      value: shippingText,
+                    ),
+                    UIHelper.verticalSpace(10.h),
+                    Divider(color: AppColorsTheme.borderColor(context)),
+                    UIHelper.verticalSpace(8.h),
+                    _OrderSummaryRow(
+                      label: 'Total'.tr,
+                      value: orderTotalText,
+                      isEmphasized: true,
+                    ),
+                    UIHelper.verticalSpace(16.h),
+                    GradientButton(
+                      label: dashboardProvider.selectedAddress != null
+                          ? 'Place Order'.tr
+                          : 'Add address'.tr,
+                      trailingIcon: dashboardProvider.selectedAddress != null
+                          ? Icons.arrow_forward_rounded
+                          : Icons.add_location_alt_rounded,
+                      isLoading: dashboardProvider.isLoadingCheckout,
+                      onPressed: () async {
+                        if (dashboardProvider.selectedAddress == null) {
+                          Navigator.pushNamed(
+                            context,
+                            Routes.addAddressScreen,
+                          ).then((_) {
+                            dashboardProvider.fetchCheckoutState();
+                          });
+                        } else {
+                          final success = await dashboardProvider
+                              .confirmWholesaleOrder();
+                          if (!mounted || !success) {
+                            return;
+                          }
+                          cartProvider.clearCart();
+                          _showSuccessDialog(this.context);
+                        }
+                      },
+                    ),
+                  ],
+                ),
               ),
-              UIHelper.verticalSpace(30.h),
+              UIHelper.verticalSpace(16.h),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: Container(
-        padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 20.h),
-        decoration: BoxDecoration(
-          color: AppColorsTheme.cardBg(context),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 10.r,
-              offset: const Offset(0, -4),
-            ),
-          ],
-          border: Border(top: BorderSide(color: AppColorsTheme.borderColor(context))),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Expandable Summary Header
-            InkWell(
-              onTap: () {
-                setState(() {
-                  _isSummaryExpanded = !_isSummaryExpanded;
-                });
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        'Total'.tr,
-                        style: TextStyle(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.bold,
-                          color: AppColorsTheme.textMainColor(context),
-                        ),
-                      ),
-                      UIHelper.horizontalSpace(8.w),
-                      Text(
-                        dashboardProvider.wholesaleCheckoutModel?.data?.total?.formatted ??
-                            (dashboardProvider.checkoutResponseModel?.data?.quote?.total?.formatted ?? 'USD ${grandTotalUsd.toStringAsFixed(2)}'),
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w900,
-                          color: AppColorsTheme.textMainColor(context),
-                        ),
-                      ),
-                    ],
-                  ),
-                  Icon(
-                    _isSummaryExpanded ? Icons.keyboard_arrow_down_rounded : Icons.keyboard_arrow_up_rounded,
-                    color: AppColorsTheme.textMainColor(context),
-                  ),
-                ],
-              ),
-            ),
-            if (_isSummaryExpanded) ...[
-              UIHelper.verticalSpace(10.h),
-              Divider(color: AppColorsTheme.borderColor(context)),
-              UIHelper.verticalSpace(8.h),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Items Subtotal'.tr, style: TextStyle(fontSize: 12.sp, color: AppColorsTheme.textMutedColor(context))),
-                  Text(
-                    dashboardProvider.wholesaleCheckoutModel?.data?.subtotal?.formatted ??
-                        (dashboardProvider.checkoutResponseModel?.data?.quote?.subtotal?.formatted ?? 'BDT ${itemSubtotal.toStringAsFixed(2)}'),
-                    style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
-                  ),
-                ],
-              ),
-              UIHelper.verticalSpace(4.h),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text('Shipping Fee'.tr, style: TextStyle(fontSize: 12.sp, color: AppColorsTheme.textMutedColor(context))),
-                  Text(
-                    dashboardProvider.wholesaleCheckoutModel?.data?.shipping?.formatted ?? 'BDT ${shippingFee.toStringAsFixed(2)}',
-                    style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold, color: AppColorsTheme.textMainColor(context)),
-                  ),
-                ],
-              ),
-            ],
-            UIHelper.verticalSpace(12.h),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: dashboardProvider.isLoadingCheckout
-                    ? null
-                    : () async {
-                        if (dashboardProvider.selectedAddress == null) {
-                          Navigator.pushNamed(context, Routes.addAddressScreen).then((_) {
-                            dashboardProvider.fetchCheckoutState();
-                          });
-                        } else {
-                          final success = await dashboardProvider.confirmWholesaleOrder();
-                          if (success && mounted) {
-                            cartProvider.clearCart();
-                            _showSuccessDialog(context);
-                          }
-                        }
-                      },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryOrange,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(vertical: 14.h),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14.r),
-                  ),
-                  elevation: 0,
-                ),
-                child: dashboardProvider.isLoadingCheckout
-                    ? SizedBox(
-                        height: 20.h,
-                        width: 20.w,
-                        child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                      )
-                    : Text(
-                        dashboardProvider.selectedAddress != null ? 'Place Order'.tr : 'Add address'.tr,
-                        style: TextStyle(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-              ),
-            ),
-          ],
-        ),
-      ),
+    );
+  }
+}
+
+class _OrderSummaryRow extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool isEmphasized;
+
+  const _OrderSummaryRow({
+    required this.label,
+    required this.value,
+    this.isEmphasized = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final labelStyle = TextStyle(
+      fontSize: isEmphasized ? 14.sp : 12.sp,
+      fontWeight: isEmphasized ? FontWeight.w800 : FontWeight.normal,
+      color: isEmphasized
+          ? AppColorsTheme.textMainColor(context)
+          : AppColorsTheme.textMutedColor(context),
+    );
+    final valueStyle = TextStyle(
+      fontSize: isEmphasized ? 16.sp : 12.sp,
+      fontWeight: FontWeight.w800,
+      color: isEmphasized
+          ? primaryOrange
+          : AppColorsTheme.textMainColor(context),
+    );
+
+    return Row(
+      children: [
+        Expanded(child: Text(label, style: labelStyle)),
+        Text(value, style: valueStyle),
+      ],
     );
   }
 }

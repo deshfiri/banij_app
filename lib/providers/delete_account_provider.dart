@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../helpers/error_message.dart';
 import '../constants/app_constants.dart';
 import '../feature/account/data/account_api.dart';
 import '../helpers/all_routes.dart';
@@ -54,7 +55,7 @@ class DeleteAccountProvider extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      String errorMsg = e.toString().replaceAll('Exception: ', '');
+      String errorMsg = e.apiErrorMessage;
       if (errorMsg.contains('Failure')) {
         errorMsg = 'Failed to delete account. Please check your password and network connection.';
       }

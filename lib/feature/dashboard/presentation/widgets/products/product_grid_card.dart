@@ -174,11 +174,20 @@ class _AddToCartButtonState extends State<_AddToCartButton> {
     final cart = context.read<CartProvider>();
     setState(() => _added = true);
 
+    // Add to the server cart once, then mirror locally. (CartProvider.addToCart
+    // also calls addItemToCart, so calling both would add the item twice.)
     final slug = product.slug;
     if (slug != null && slug.isNotEmpty) {
-      await cart.addItemToCart(productSlug: slug, quantity: product.minQty);
+      final added = await cart.addItemToCart(productSlug: slug, quantity: product.minQty);
+      if (!added) {
+        // addItemToCart already showed the error toast.
+        if (mounted) setState(() => _added = false);
+        return;
+      }
+      cart.addToLocalCart(product.model, quantity: product.minQty);
+    } else {
+      await cart.addToCart(product.model, quantity: product.minQty);
     }
-    await cart.addToCart(product.model, quantity: product.minQty);
     ToastUtil.showSuccessMessage('@name added to cart'.trParams({'name': product.name}));
 
     await Future.delayed(_addedFeedback);

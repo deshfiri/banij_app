@@ -5,7 +5,9 @@ import 'package:get/get.dart';
 import '../../../../../constants/color.dart';
 import '../../../../../helpers/ui_helpers.dart';
 import '../../../../../providers/dashboard_provider.dart';
+import 'checkout_ui.dart';
 
+/// Delivery section: guaranteed dispatch, refund guarantee, shipping fee, incoterm.
 class CheckoutDeliveryBanner extends StatelessWidget {
   final DashboardProvider dashboardProvider;
   final double shippingFee;
@@ -18,66 +20,76 @@ class CheckoutDeliveryBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final formattedShipping = dashboardProvider.wholesaleCheckoutModel?.data?.shipping?.formatted ??
-        "BDT ${shippingFee.toStringAsFixed(2)}";
+    final formattedShipping =
+        dashboardProvider.wholesaleCheckoutModel?.data?.shipping?.formatted ?? "BDT ${shippingFee.toStringAsFixed(2)}";
+    final muted = AppColorsTheme.textMutedColor(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Container(
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: AppColorsTheme.cardBg(context),
-        borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: AppColorsTheme.borderColor(context)),
-      ),
-      child: Row(
+    return CheckoutSectionCard(
+      title: 'Delivery'.tr,
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Guaranteed delivery: Express Dispatch'.tr,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.bold,
-                    color: AppColorsTheme.textMainColor(context),
-                  ),
-                ),
-                UIHelper.verticalSpace(2.h),
-                Text(
-                  'Full refund & live tracking guarantee',
-                  style: TextStyle(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w600,
-                    color: const Color(0xFF10B981),
-                  ),
-                ),
-                UIHelper.verticalSpace(8.h),
-                Text(
-                  'Shipping fee: $formattedShipping',
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    color: AppColorsTheme.textMainColor(context),
-                  ),
-                ),
-                UIHelper.verticalSpace(2.h),
-                Row(
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const CheckoutIconBadge(icon: Icons.local_shipping_rounded, color: successGreen),
+              UIHelper.horizontalSpace(12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Incoterm DAP',
+                      'Guaranteed delivery: Express Dispatch'.tr,
                       style: TextStyle(
-                        fontSize: 12.sp,
-                        color: AppColorsTheme.textMutedColor(context),
+                        fontSize: 13.5.sp,
+                        fontWeight: FontWeight.w800,
+                        color: AppColorsTheme.textMainColor(context),
                       ),
                     ),
-                    UIHelper.horizontalSpace(4.w),
-                    Icon(Icons.info_outline_rounded, size: 13.sp, color: AppColorsTheme.textMutedColor(context)),
+                    UIHelper.verticalSpace(3.h),
+                    Row(
+                      children: [
+                        Icon(Icons.verified_rounded, size: 13.sp, color: successGreen),
+                        UIHelper.horizontalSpace(4.w),
+                        Flexible(
+                          child: Text(
+                            'Full refund & live tracking guarantee'.tr,
+                            style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w700, color: successGreen),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
+              ),
+            ],
+          ),
+          UIHelper.verticalSpace(12.h),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+            decoration: BoxDecoration(
+              color: isDark ? AppColorsTheme.innerCardBg(context) : lightBackground,
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Shipping fee: @fee'.trParams({'fee': formattedShipping}),
+                    style: TextStyle(
+                      fontSize: 12.5.sp,
+                      fontWeight: FontWeight.w700,
+                      color: AppColorsTheme.textMainColor(context),
+                    ),
+                  ),
+                ),
+                Text('Incoterm DAP'.tr, style: TextStyle(fontSize: 11.5.sp, color: muted)),
+                UIHelper.horizontalSpace(4.w),
+                Icon(Icons.info_outline_rounded, size: 13.sp, color: muted),
               ],
             ),
           ),
-          Icon(Icons.arrow_forward_ios_rounded, size: 16.sp, color: AppColorsTheme.textMutedColor(context)),
         ],
       ),
     );

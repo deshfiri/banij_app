@@ -2,14 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../../constants/image_const.dart';
-import '../order_category_detail_sheet.dart';
+import '../../orders_screen.dart';
 import '../../products_screen.dart';
 import '../website_sheet.dart';
 
 /// Module groups shown as filter chips and section headers.
 enum ModuleCategory {
   products(labelKey: 'filter_products', icon: Icons.shopping_bag_outlined),
-  sales(labelKey: 'filter_sales_orders', icon: Icons.format_list_bulleted_rounded);
+  sales(
+    labelKey: 'filter_sales_orders',
+    icon: Icons.format_list_bulleted_rounded,
+  );
 
   final String labelKey;
   final IconData icon;
@@ -42,7 +45,8 @@ class ModuleConfig {
       titleKey: 'hub_products',
       category: ModuleCategory.products,
       iconAsset: productIcon,
-      open: (context) => ProductsScreen.open(context, 'hub_products'.tr, isCatalog: true),
+      open: (context) =>
+          ProductsScreen.open(context, 'hub_products'.tr, isCatalog: true),
     ),
     AppModule(
       titleKey: 'hub_my_products',
@@ -59,19 +63,19 @@ class ModuleConfig {
       titleKey: 'hub_all_orders',
       category: ModuleCategory.sales,
       iconAsset: allOrdersIconAsset,
-      open: (context) => OrderCategoryDetailSheet.show(context, 'hub_all_orders'.tr),
+      open: (context) => OrdersScreen.open(context, 'hub_all_orders'.tr),
     ),
     AppModule(
       titleKey: 'hub_customers',
       category: ModuleCategory.sales,
       iconAsset: customersIconAsset,
-      open: (context) => OrderCategoryDetailSheet.show(context, 'hub_customers'.tr),
+      open: (context) => OrdersScreen.open(context, 'hub_customers'.tr),
     ),
     AppModule(
       titleKey: 'hub_orders',
       category: ModuleCategory.sales,
       iconAsset: cartIconAsset,
-      open: (context) => OrderCategoryDetailSheet.show(context, 'hub_orders'.tr),
+      open: (context) => OrdersScreen.open(context, 'hub_orders'.tr),
     ),
     AppModule(
       titleKey: 'hub_store_orders',

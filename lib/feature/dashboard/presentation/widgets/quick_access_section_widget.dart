@@ -5,10 +5,10 @@ import 'package:get/get.dart';
 import '../../../../constants/color.dart';
 import '../../../../constants/image_const.dart';
 import '../../../../helpers/ui_helpers.dart';
-import '../../../finance/presentation/widgets/invoices_receipts_sheet.dart';
+import '../../../finance/presentation/invoices_receipts_screen.dart';
 import '../all_modules_screen.dart';
 import 'dashboard_card_decoration.dart';
-import 'order_category_detail_sheet.dart';
+import '../orders_screen.dart';
 import '../products_screen.dart';
 
 /// "Quick Access" header plus the Products / Order / Finance shortcut tiles.
@@ -21,17 +21,19 @@ class QuickAccessSectionWidget extends StatelessWidget {
       QuickAccessTile(
         title: 'hub_products'.tr,
         iconAsset: productIcon,
-        onTap: () => ProductsScreen.open(context, 'hub_products'.tr, isCatalog: true),
+        onTap: () =>
+            ProductsScreen.open(context, 'hub_products'.tr, isCatalog: true),
       ),
       QuickAccessTile(
         title: 'hub_orders'.tr,
         iconAsset: cartIconAsset,
-        onTap: () => OrderCategoryDetailSheet.show(context, 'hub_all_orders'.tr),
+        onTap: () => OrdersScreen.open(context, 'hub_all_orders'.tr),
       ),
       QuickAccessTile(
         title: 'finance'.tr,
         iconAsset: financeIconAsset,
-        onTap: () => InvoicesReceiptsSheet.show(context, initialTab: 'Invoices'),
+        onTap: () =>
+            InvoicesReceiptsScreen.open(context, initialTab: 'Invoices'),
       ),
     ];
 
@@ -124,7 +126,11 @@ class DashboardSectionHeader extends StatelessWidget {
                     ),
                   ),
                   UIHelper.horizontalSpace(2.w),
-                  Icon(Icons.arrow_forward_rounded, color: actionColor, size: 14.sp),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    color: actionColor,
+                    size: 14.sp,
+                  ),
                 ],
               ),
             ),
@@ -173,7 +179,11 @@ class QuickAccessTile extends StatelessWidget {
                     color: primaryOrange.withValues(alpha: 0.14),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(Icons.chevron_right_rounded, color: primaryOrange, size: 14.sp),
+                  child: Icon(
+                    Icons.chevron_right_rounded,
+                    color: primaryOrange,
+                    size: 14.sp,
+                  ),
                 ),
               ),
               Center(
@@ -183,17 +193,26 @@ class QuickAccessTile extends StatelessWidget {
                     Container(
                       padding: EdgeInsets.all(9.w),
                       decoration: BoxDecoration(
-                        color: isDark ? AppColorsTheme.innerCardBg(context) : lightBackground,
+                        color: isDark
+                            ? AppColorsTheme.innerCardBg(context)
+                            : lightBackground,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: primaryOrange.withValues(alpha: isDark ? 0.2 : 0.12),
+                            color: primaryOrange.withValues(
+                              alpha: isDark ? 0.2 : 0.12,
+                            ),
                             blurRadius: 8.r,
                             offset: const Offset(0, 3),
                           ),
                         ],
                       ),
-                      child: Image.asset(iconAsset, width: 24.w, height: 24.w, fit: BoxFit.contain),
+                      child: Image.asset(
+                        iconAsset,
+                        width: 24.w,
+                        height: 24.w,
+                        fit: BoxFit.contain,
+                      ),
                     ),
                     UIHelper.verticalSpace(6.h),
                     Text(

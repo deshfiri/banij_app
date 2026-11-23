@@ -1,0 +1,9 @@
+{
+  // Code Runner: Flutter files can't run with the plain `dart` VM (no dart:ui),
+  // so the Run Code button launches the whole app with `flutter run` instead.
+  "code-runner.executorMap": {
+    "dart": "cd $workspaceRoot && flutter run"
+  },
+  "code-runner.runInTerminal": true,
+  "code-runner.saveFileBeforeRun": true
+}

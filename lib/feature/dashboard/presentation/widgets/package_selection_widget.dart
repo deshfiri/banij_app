@@ -125,95 +125,99 @@ class _PackageCard extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.only(bottom: 14.h),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(20.r),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
-            padding: EdgeInsets.all(16.w),
-            decoration: decoration,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      isSelected ? Icons.radio_button_checked_rounded : Icons.radio_button_unchecked_rounded,
-                      color: isSelected ? primaryOrange : AppColorsTheme.textMutedColor(context),
-                      size: 20.sp,
-                    ),
-                    UIHelper.horizontalSpace(10.w),
-                    Expanded(
-                      child: Text(
-                        name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 15.5.sp,
-                          fontWeight: FontWeight.w900,
-                          color: AppColorsTheme.textMainColor(context),
+      // The decoration sits below the transparent Material so the ink splash
+      // is painted on top of the card surface instead of hidden behind it.
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        decoration: decoration,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(20.r),
+            child: Padding(
+              padding: EdgeInsets.all(16.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        isSelected ? Icons.radio_button_checked_rounded : Icons.radio_button_unchecked_rounded,
+                        color: isSelected ? primaryOrange : AppColorsTheme.textMutedColor(context),
+                        size: 20.sp,
+                      ),
+                      UIHelper.horizontalSpace(10.w),
+                      Expanded(
+                        child: Text(
+                          name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 15.5.sp,
+                            fontWeight: FontWeight.w900,
+                            color: AppColorsTheme.textMainColor(context),
+                          ),
                         ),
                       ),
-                    ),
-                    if (isPopular)
-                      Container(
-                        padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(colors: [primaryOrange, secondaryOrange]),
-                          borderRadius: BorderRadius.circular(12.r),
+                      if (isPopular)
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(colors: [primaryOrange, secondaryOrange]),
+                            borderRadius: BorderRadius.circular(12.r),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(Icons.star_rounded, size: 11.sp, color: Colors.white),
+                              UIHelper.horizontalSpace(3.w),
+                              Text(
+                                'MOST POPULAR'.tr,
+                                style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w900, color: Colors.white),
+                              ),
+                            ],
+                          ),
                         ),
+                    ],
+                  ),
+                  UIHelper.verticalSpace(10.h),
+                  Text(priceText, style: TextStyle(fontSize: 19.sp, fontWeight: FontWeight.w900, color: primaryOrange)),
+                  if (description != null && description!.isNotEmpty) ...[
+                    UIHelper.verticalSpace(4.h),
+                    Text(
+                      description!,
+                      style: TextStyle(fontSize: 12.5.sp, color: AppColorsTheme.textMutedColor(context)),
+                    ),
+                  ],
+                  if (features.isNotEmpty) ...[
+                    UIHelper.verticalSpace(10.h),
+                    Divider(color: AppColorsTheme.borderColor(context), height: 1),
+                    UIHelper.verticalSpace(10.h),
+                    for (final feature in features)
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 6.h),
                         child: Row(
-                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(Icons.star_rounded, size: 11.sp, color: Colors.white),
-                            UIHelper.horizontalSpace(3.w),
-                            Text(
-                              'MOST POPULAR'.tr,
-                              style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w900, color: Colors.white),
+                            Icon(Icons.check_circle_rounded, size: 16.sp, color: successGreen),
+                            UIHelper.horizontalSpace(8.w),
+                            Expanded(
+                              child: Text(
+                                feature,
+                                style: TextStyle(
+                                  fontSize: 12.5.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColorsTheme.textMainColor(context),
+                                ),
+                              ),
                             ),
                           ],
                         ),
                       ),
                   ],
-                ),
-                UIHelper.verticalSpace(10.h),
-                Text(priceText, style: TextStyle(fontSize: 19.sp, fontWeight: FontWeight.w900, color: primaryOrange)),
-                if (description != null && description!.isNotEmpty) ...[
-                  UIHelper.verticalSpace(4.h),
-                  Text(
-                    description!,
-                    style: TextStyle(fontSize: 12.5.sp, color: AppColorsTheme.textMutedColor(context)),
-                  ),
                 ],
-                if (features.isNotEmpty) ...[
-                  UIHelper.verticalSpace(10.h),
-                  Divider(color: AppColorsTheme.borderColor(context), height: 1),
-                  UIHelper.verticalSpace(10.h),
-                  for (final feature in features)
-                    Padding(
-                      padding: EdgeInsets.only(bottom: 6.h),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(Icons.check_circle_rounded, size: 16.sp, color: successGreen),
-                          UIHelper.horizontalSpace(8.w),
-                          Expanded(
-                            child: Text(
-                              feature,
-                              style: TextStyle(
-                                fontSize: 12.5.sp,
-                                fontWeight: FontWeight.w600,
-                                color: AppColorsTheme.textMainColor(context),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                ],
-              ],
+              ),
             ),
           ),
         ),

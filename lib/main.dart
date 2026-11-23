@@ -11,6 +11,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import 'constants/app_translations.dart';
+import 'constants/color.dart';
 import 'gen/colors.gen.dart';
 import 'helpers/all_routes.dart';
 import 'helpers/di.dart';
@@ -58,8 +59,7 @@ void main() async {
     log('Error setting high refresh rate: $e');
   }
 
-  //  runApp(const MyApp());
-  runApp(MyApp());
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -92,6 +92,34 @@ class MyApp extends StatelessWidget {
 class UtillScreenMobile extends StatelessWidget {
   const UtillScreenMobile({super.key});
 
+  /// Light and dark themes share everything except the brightness-specific
+  /// text theme, scaffold background and surface colour.
+  static ThemeData _buildTheme(Brightness brightness) {
+    final isDark = brightness == Brightness.dark;
+    return ThemeData(
+      useMaterial3: true,
+      brightness: brightness,
+      textTheme: GoogleFonts.poppinsTextTheme(isDark ? ThemeData.dark().textTheme : ThemeData.light().textTheme),
+      fontFamilyFallback: [
+        'LiAdor',
+        GoogleFonts.hindSiliguri().fontFamily!,
+        GoogleFonts.anekBangla().fontFamily!,
+        GoogleFonts.notoSansBengali().fontFamily!,
+      ],
+      primaryColor: primaryOrange,
+      scaffoldBackgroundColor: isDark ? const Color(0xFF121212) : const Color(0xFFFAFAFA),
+      colorScheme: ColorScheme.fromSeed(
+        seedColor: primaryOrange,
+        primary: primaryOrange,
+        surface: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFFFFFFF),
+        brightness: brightness,
+      ),
+      textSelectionTheme: const TextSelectionThemeData(
+        cursorColor: AppColors.allPrimaryColor,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = context.watch<ThemeProvider>();
@@ -108,50 +136,8 @@ class UtillScreenMobile extends StatelessWidget {
           locale: Get.locale ?? (isBn ? const Locale('bn', 'BD') : const Locale('en', 'US')),
           fallbackLocale: const Locale('en', 'US'),
           themeMode: themeProvider.themeMode,
-          theme: ThemeData(
-            useMaterial3: true,
-            brightness: Brightness.light,
-            textTheme: GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme),
-            fontFamilyFallback: [
-              'LiAdor',
-              GoogleFonts.hindSiliguri().fontFamily!,
-              GoogleFonts.anekBangla().fontFamily!,
-              GoogleFonts.notoSansBengali().fontFamily!,
-            ],
-            primaryColor: const Color(0xFFFD6B04),
-            scaffoldBackgroundColor: const Color(0xFFFAFAFA),
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFFFD6B04),
-              primary: const Color(0xFFFD6B04),
-              surface: const Color(0xFFFFFFFF),
-              brightness: Brightness.light,
-            ),
-            textSelectionTheme: const TextSelectionThemeData(
-              cursorColor: AppColors.allPrimaryColor,
-            ),
-          ),
-          darkTheme: ThemeData(
-            useMaterial3: true,
-            brightness: Brightness.dark,
-            textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
-            fontFamilyFallback: [
-              'LiAdor',
-              GoogleFonts.hindSiliguri().fontFamily!,
-              GoogleFonts.anekBangla().fontFamily!,
-              GoogleFonts.notoSansBengali().fontFamily!,
-            ],
-            primaryColor: const Color(0xFFFD6B04),
-            scaffoldBackgroundColor: const Color(0xFF121212),
-            colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFFFD6B04),
-              primary: const Color(0xFFFD6B04),
-              surface: const Color(0xFF1E1E1E),
-              brightness: Brightness.dark,
-            ),
-            textSelectionTheme: const TextSelectionThemeData(
-              cursorColor: AppColors.allPrimaryColor,
-            ),
-          ),
+          theme: _buildTheme(Brightness.light),
+          darkTheme: _buildTheme(Brightness.dark),
           builder: (context, widget) {
             return MediaQuery(data: MediaQuery.of(context), child: widget!);
           },

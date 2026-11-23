@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../helpers/error_message.dart';
 import '../helpers/loading_helper.dart';
 import '../helpers/toast.dart';
 import '../networks/api_access.dart';
@@ -152,8 +153,14 @@ class KycVerificationProvider extends ChangeNotifier {
     } catch (e) {
       _isSubmitting = false;
       notifyListeners();
-      String errorMsg = e.toString().replaceAll('Exception: ', '');
+      String errorMsg = e.apiErrorMessage;
       ToastUtil.showErrorMessage(errorMsg.isNotEmpty ? errorMsg : 'Failed to submit KYC documents');
     }
+  }
+
+  @override
+  void dispose() {
+    tinController.dispose();
+    super.dispose();
   }
 }

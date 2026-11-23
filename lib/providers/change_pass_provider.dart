@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../helpers/error_message.dart';
 import '../feature/account/data/account_api.dart';
 import '../helpers/toast.dart';
 
@@ -62,7 +63,7 @@ class ChangePassProvider extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      String err = e.toString().replaceAll('Exception: ', '');
+      String err = e.apiErrorMessage;
       ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Failed to change password');
       return false;
     }

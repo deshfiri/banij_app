@@ -6,7 +6,10 @@ import '../../../../../constants/color.dart';
 import '../../../../../helpers/all_routes.dart';
 import '../../../../../helpers/ui_helpers.dart';
 import '../../../model/order_model.dart';
+import 'order_status_style.dart';
 
+/// Order card in the orders list: number, date, status pill, total, and the
+/// cancel (store tab) / view actions.
 class OrderItemCard extends StatelessWidget {
   final OrderItemModel order;
   final bool isStoreTab;
@@ -19,202 +22,292 @@ class OrderItemCard extends StatelessWidget {
     required this.onCancelTap,
   });
 
+  /// Opens this order's detail screen.
+  void _openDetail(BuildContext context) {
+    final targetId = order.id?.toString() ?? order.orderNumber ?? '1';
+    Navigator.pushNamed(context, Routes.orderDetailScreen, arguments: targetId);
+  }
+
+  void _cancel() {
+    final targetId = order.id?.toString() ?? order.orderNumber ?? '';
+    if (targetId.isNotEmpty) onCancelTap(targetId);
+  }
+
+  /// Total as text, whether the API sent a Map {amount, currency, formatted} or a String/number.
+  String _displayTotal(String currency) {
+    String totalText = '0.00';
+    final totalVal = order.total;
+    if (totalVal is Map) {
+      totalText =
+          totalVal['formatted']?.toString() ??
+          totalVal['amount']?.toString() ??
+          '0.00';
+    } else if (totalVal != null) {
+      totalText = totalVal.toString();
+    }
+    return totalText.startsWith('৳') || totalText.startsWith(currency)
+        ? totalText
+        : '$currency $totalText';
+  }
+
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final orderId = order.orderNumber ?? 'ORD-${order.id ?? 1}';
     final status = order.status ?? 'Pending';
     final currency = order.currency ?? '৳';
     final date = order.createdAt ?? 'Recent';
+    final canCancel = isStoreTab && !status.toLowerCase().contains('cancel');
+    final statusStyle = OrderStatusStyle.of(status);
+    final statusColor = statusStyle.text(context);
+    final clientName =
+        order.addresses?.billing?.contactName ??
+        order.placedBy ??
+        'Customer'.tr;
+    final radius = BorderRadius.circular(14.r);
 
-    // Parse total safely whether it's a Map {amount, currency, formatted} or String/number
-    String totalText = '0.00';
-    final totalVal = order.total;
-    if (totalVal is Map) {
-      totalText = totalVal['formatted']?.toString() ?? totalVal['amount']?.toString() ?? '0.00';
-    } else if (totalVal != null) {
-      totalText = totalVal.toString();
-    }
-    final displayTotal = totalText.startsWith('৳') || totalText.startsWith(currency) ? totalText : '$currency $totalText';
-
-    Color statusBg = warningYellowLight;
-    Color statusFg = warningYellow;
-
-    if (status.toLowerCase().contains('deliver') || status.toLowerCase().contains('complet') || status.toLowerCase().contains('active') || status.toLowerCase().contains('paid')) {
-      statusBg = successGreenLight;
-      statusFg = successGreenDark;
-    } else if (status.toLowerCase().contains('cancel')) {
-      statusBg = errorRedLight;
-      statusFg = errorRed;
-    } else if (status.toLowerCase().contains('process')) {
-      statusBg = infoBlueLight;
-      statusFg = infoBlue;
-    }
-
-    return GestureDetector(
-      onTap: () {
-        final targetId = order.id?.toString() ?? order.orderNumber ?? '1';
-        Navigator.pop(context);
-        Navigator.pushNamed(context, Routes.orderDetailScreen, arguments: targetId);
-      },
+    return Padding(
+      padding: EdgeInsets.only(bottom: 10.h),
       child: Container(
-        margin: EdgeInsets.only(bottom: 14.h),
-        padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
           color: AppColorsTheme.cardBg(context),
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: AppColorsTheme.borderColor(context)),
+          borderRadius: radius,
+          border: Border.all(
+            color: AppColorsTheme.borderColor(context),
+            width: 0.8.w,
+          ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
-              blurRadius: 10.r,
-              offset: const Offset(0, 4),
+              color: Colors.black.withValues(
+                alpha: Theme.of(context).brightness == Brightness.dark
+                    ? 0.15
+                    : 0.03,
+              ),
+              blurRadius: 8.r,
+              offset: Offset(0, 2.h),
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(8.w),
-                        decoration: BoxDecoration(
-                          color: primaryOrange.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        child: Icon(Icons.receipt_long_rounded, color: primaryOrange, size: 20.sp),
-                      ),
-                      UIHelper.horizontalSpace(10.w),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              orderId,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 14.5.sp,
-                                fontWeight: FontWeight.bold,
-                                color: AppColorsTheme.textMainColor(context),
-                              ),
-                            ),
-                            UIHelper.verticalSpace(2.h),
-                            Text(
-                              'Placed on $date',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 11.sp,
-                                color: AppColorsTheme.textMutedColor(context),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+        child: ClipRRect(
+          borderRadius: radius,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => _openDetail(context),
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border(
+                    left: BorderSide(color: statusStyle.foreground, width: 4.w),
                   ),
                 ),
-                UIHelper.horizontalSpace(8.w),
-                Container(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-                  decoration: BoxDecoration(
-                    color: statusBg,
-                    borderRadius: BorderRadius.circular(20.r),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.check_circle_rounded, size: 12.sp, color: statusFg),
-                      UIHelper.horizontalSpace(4.w),
-                      Text(
-                        status.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 10.sp,
-                          fontWeight: FontWeight.bold,
-                          color: statusFg,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            UIHelper.verticalSpace(12.h),
-            Divider(color: AppColorsTheme.borderColor(context), height: 1.h),
-            UIHelper.verticalSpace(12.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Total Amount'.tr,
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        color: AppColorsTheme.textMutedColor(context),
+                    Row(
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(5.w),
+                          decoration: BoxDecoration(
+                            color: primaryOrange.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                          child: Icon(
+                            Icons.receipt_long_rounded,
+                            color: primaryOrange,
+                            size: 16.sp,
+                          ),
+                        ),
+                        UIHelper.horizontalSpace(6.w),
+                        Expanded(
+                          child: Text(
+                            orderId,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.w900,
+                              color: AppColorsTheme.textMainColor(context),
+                            ),
+                          ),
+                        ),
+                        UIHelper.horizontalSpace(6.w),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 7.w,
+                            vertical: 2.5.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusColor.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(10.r),
+                            border: Border.all(
+                              color: statusColor.withValues(alpha: 0.35),
+                            ),
+                          ),
+                          child: Text(
+                            status.toUpperCase(),
+                            maxLines: 1,
+                            style: TextStyle(
+                              fontSize: 8.5.sp,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 0.5,
+                              color: statusColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    UIHelper.verticalSpace(8.h),
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 8.w,
+                        vertical: 6.h,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColorsTheme.innerCardBg(context),
+                        borderRadius: BorderRadius.circular(8.r),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            clientName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 11.5.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColorsTheme.textMainColor(context),
+                            ),
+                          ),
+                          UIHelper.verticalSpace(2.h),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.calendar_today_rounded,
+                                size: 10.sp,
+                                color: AppColorsTheme.textMutedColor(context),
+                              ),
+                              UIHelper.horizontalSpace(4.w),
+                              Expanded(
+                                child: Text(
+                                  'Placed on @date'.trParams({'date': date}),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 9.5.sp,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColorsTheme.textMutedColor(
+                                      context,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
                     ),
-                    UIHelper.verticalSpace(2.h),
-                    Text(
-                      displayTotal,
-                      style: TextStyle(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w900,
-                        color: primaryOrange,
-                      ),
+                    UIHelper.verticalSpace(8.h),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Total Amount'.tr,
+                                style: TextStyle(
+                                  fontSize: 9.sp,
+                                  color: AppColorsTheme.textMutedColor(context),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              UIHelper.verticalSpace(1.h),
+                              Text(
+                                _displayTotal(currency),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w900,
+                                  color: primaryOrange,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        if (canCancel) ...[
+                          _CancelButton(onTap: _cancel),
+                          UIHelper.horizontalSpace(6.w),
+                        ],
+                        _ViewOrderButton(onTap: () => _openDetail(context)),
+                      ],
                     ),
                   ],
                 ),
-                Row(
-                  children: [
-                    if (isStoreTab && !status.toLowerCase().contains('cancel')) ...[
-                      OutlinedButton(
-                        onPressed: () {
-                          final targetId = order.id?.toString() ?? order.orderNumber ?? '';
-                          if (targetId.isNotEmpty) {
-                            onCancelTap(targetId);
-                          }
-                        },
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.redAccent,
-                          side: const BorderSide(color: Colors.redAccent),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                        ),
-                        child: Text(
-                          'Cancel Order'.tr,
-                          style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      UIHelper.horizontalSpace(8.w),
-                    ],
-                    TextButton(
-                      onPressed: () {
-                        final targetId = order.id?.toString() ?? order.orderNumber ?? '1';
-                        Navigator.pop(context);
-                        Navigator.pushNamed(context, Routes.orderDetailScreen, arguments: targetId);
-                      },
-                      child: Text(
-                        'View order'.tr,
-                        style: TextStyle(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.bold,
-                          color: primaryOrange,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+              ),
             ),
-          ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CancelButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _CancelButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 7.h),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12.r),
+          border: Border.all(color: errorRed.withValues(alpha: 0.6)),
+        ),
+        child: Text(
+          'Cancel Order'.tr,
+          style: TextStyle(
+            fontSize: 11.sp,
+            fontWeight: FontWeight.w800,
+            color: errorRed,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Small orange gradient "View order →" pill.
+class _ViewOrderButton extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _ViewOrderButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 32.h,
+      child: ElevatedButton.icon(
+        onPressed: onTap,
+        icon: Icon(Icons.arrow_forward_rounded, size: 12.sp),
+        label: Text(
+          'View order'.tr,
+          style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.bold),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primaryOrange,
+          foregroundColor: Colors.white,
+          padding: EdgeInsets.symmetric(horizontal: 8.w),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          elevation: 0,
         ),
       ),
     );

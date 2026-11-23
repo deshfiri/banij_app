@@ -23,52 +23,56 @@ final class EndPoints {
   EndPoints._();
   static String login() => "/auth/login";
   static String twoFactorChallenge() => "/auth/two-factor-challenge";
-  static String logout()=>"/auth/logout";
+  static String logout() => "/auth/logout";
 
   static String signup() => "/register";
-  static String profile()=>"/profile";
-  static String package()=>"/packages";
+  static String profile() => "/profile";
+  static String package() => "/packages";
   static String selectPackage(String slug) => "/packages/$slug/select";
   static String subscription() => "/subscription";
-  static String onboradingActive()=>"/onboarding";
+  static String onboradingActive() => "/onboarding";
   static String subscriptionCancel() => "/subscription/cancel";
   static String subscriptionChange() => "/subscription/change";
   static String subscriptionRenew() => "/subscription/renew";
-  static String addressList()=>"/addresses";
-  static String referrals()=>"/referrals";
-  static String dashborad()=>"/dashboard";
-  static String currentUser()=>"/auth/me";
-  static String submitDocKyc()=>"/kyc/documents";
-  static String notification()=>"/notifications";
-  static String withdrawals()=>"/withdrawals";
-  static String locationDivisions()=>"/locations/divisions";
-  static String bankList()=>"/banks";
+  static String addressList() => "/addresses";
+  static String referrals() => "/referrals";
+  static String dashborad() => "/dashboard";
+  static String currentUser() => "/auth/me";
+  static String submitDocKyc() => "/kyc/documents";
+  static String notification() => "/notifications";
+  static String withdrawals() => "/withdrawals";
+  static String locationDivisions() => "/locations/divisions";
+  static String bankList() => "/banks";
   static String bankBranches(String bankCode) => "/banks/$bankCode/branches";
-  static String walletBalnce()=>"/wallet";
-  static String topWallet()=>"/wallet/top-up";
-  static String walletList()=>"/wallet/transactions";
-  static String accountDelete()=>"/account-deletion";
-  static String locationChild(String type,String sourceId)=>"/locations/$type/$sourceId/children";
-  static String myProduct()=>"/my-products";
+  static String walletBalnce() => "/wallet";
+  static String topWallet() => "/wallet/top-up";
+  static String walletList() => "/wallet/transactions";
+  static String accountDelete() => "/account-deletion";
+  static String locationChild(String type, String sourceId) =>
+      "/locations/$type/$sourceId/children";
+  static String myProduct() => "/my-products";
   static String websites() => "/websites";
   static String payments() => "/payout-methods";
-  static String address()=>"/addresses";
-  static String verificationHistory()=>"/kyc/history";
-  static String order()=>"/orders";
-  static String productCatalog()=>"/catalog";
+  static String address() => "/addresses";
+  static String verificationHistory() => "/kyc/history";
+  static String order() => "/orders";
+  static String productCatalog() => "/catalog";
   static String catalog() => "/catalog";
   static String catalogWholesale() => "/catalog/wholesale";
   static String catalogDropshipping() => "/catalog/dropshipping";
-  static String withdrawaloption()=>"/withdrawals/options";
+  static String withdrawaloption() => "/withdrawals/options";
   static String wholesaleCart() => "/wholesale/cart";
   static String wholesaleCartItems() => "/wholesale/cart/items";
-  static String wholesaleCartItemDetail(String item) => "/wholesale/cart/items/$item";
+  static String wholesaleCartItemDetail(String item) =>
+      "/wholesale/cart/items/$item";
   static String wholesaleCartPrices() => "/wholesale/cart/prices";
   static String wholesaleCheckout() => "/wholesale/checkout";
   static String wholesaleCheckoutCoupon() => "/wholesale/checkout/coupon";
   static String wholesaleCheckoutAddress() => "/wholesale/checkout/address";
-  static String wholesaleCheckoutAddresses(String type) => "/wholesale/checkout/addresses/$type";
-  static String wholesaleCheckoutConfirmation() => "/wholesale/checkout/confirmation";
+  static String wholesaleCheckoutAddresses(String type) =>
+      "/wholesale/checkout/addresses/$type";
+  static String wholesaleCheckoutConfirmation() =>
+      "/wholesale/checkout/confirmation";
   static String checkout() => "/checkout";
   static String checkoutCoupon() => "/checkout/coupon";
   static String checkoutPayment() => "/checkout/payment";
@@ -86,13 +90,13 @@ final class EndPoints {
   static String taskAccept(int id) => "/finance/finance_requisition_list.php";
   static String requistioanlCanel() =>
       "/finance/finance_requisition_cancel.php";
-  static String securityRules()=>"/security";
+  static String securityRules() => "/security";
 
   static String forgetPass() => "/password/forgot";
   static String otpVerify() => "/verify-otp";
   static String resendOtp() => "/resend-otp";
   static String resetPassword() => "/password/reset";
-  static String changepassword()=>"/security/password";
+  static String changepassword() => "/security/password";
   static String userProfile() => "/profile";
   static String editProfile() => "/update-profile";
   static String updateProfile() => "/update-profile";
@@ -100,7 +104,7 @@ final class EndPoints {
   static String special() => "/partner-information/special-days";
   static String partnerInformation() => "/partner-information";
   static String profileInfo() => "/me";
-  static String language()=>"/locale";
+  static String language() => "/locale";
   static String favouriteThingsGet() => "/partner-information/favourite-things";
   static String archives() => "/archives";
   static String upcomingEvents() => "/upcoming_events";
@@ -108,15 +112,15 @@ final class EndPoints {
   static String storePartner() => "/partner-information/store";
   static String invoicesList() => "/finance/invoices.php";
   static String receiptsList() => "/finance/receipts.php";
-  static String invoiceDetail(String id) => "/finance/invoice_detail.php?id=$id";
-  static String receiptDetail(String id) => "/finance/receipt_detail.php?id=$id";
+  static String invoiceDetail(String id) =>
+      "/finance/invoice_detail.php?id=$id";
+  static String receiptDetail(String id) =>
+      "/finance/receipt_detail.php?id=$id";
   static String specialDay() => "/partner/special-days/26";
   static String deletePartner() => "/partner/remove";
   static String deleteAccount() => "/delete-profile";
-
-
-
-
+  static String invoice() => "/invoices";
+  static String invoiceDetails(String id) => "/invoices/$id";
 
   //ashrafi256@gmail.com
 }

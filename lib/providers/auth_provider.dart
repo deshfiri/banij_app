@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
+import '../helpers/error_message.dart';
 import '../constants/app_constants.dart';
 import '../feature/auth/model/response_model.dart';
 import '../helpers/all_routes.dart';
@@ -153,7 +154,7 @@ class AuthProvider extends ChangeNotifier {
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      String errorMsg = e.toString().replaceAll('Exception: ', '');
+      String errorMsg = e.apiErrorMessage;
       if (errorMsg.contains('Failure')) {
         errorMsg = 'Failed to sign in. Please check your credentials and network connection.';
       }

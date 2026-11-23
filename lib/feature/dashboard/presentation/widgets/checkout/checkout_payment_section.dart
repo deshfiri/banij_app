@@ -4,9 +4,28 @@ import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 
 import '../../../../../constants/color.dart';
-import '../../../../../helpers/ui_helpers.dart';
 import '../../../../../providers/dashboard_provider.dart';
+import 'checkout_shimmer.dart';
+import 'checkout_ui.dart';
 
+/// One selectable payment row. [value] is what the provider stores.
+class _PaymentOption {
+  final String title;
+  final String? subtitle;
+  final IconData icon;
+  final Color? iconColor;
+  final String value;
+
+  const _PaymentOption({
+    required this.title,
+    required this.subtitle,
+    required this.icon,
+    required this.iconColor,
+    required this.value,
+  });
+}
+
+/// Payment method section: API methods (or built-in defaults) as selectable tiles.
 class CheckoutPaymentSection extends StatelessWidget {
   final DashboardProvider dashboardProvider;
 
@@ -17,104 +36,93 @@ class CheckoutPaymentSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Payment method'.tr,
-          style: TextStyle(
-            fontSize: 16.sp,
-            fontWeight: FontWeight.bold,
-            color: AppColorsTheme.textMainColor(context),
-          ),
-        ),
-        UIHelper.verticalSpace(10.h),
-        Container(
-          decoration: BoxDecoration(
-            color: AppColorsTheme.cardBg(context),
-            borderRadius: BorderRadius.circular(16.r),
-            border: Border.all(color: AppColorsTheme.borderColor(context)),
-          ),
-          child: dashboardProvider.isLoadingCheckout
-              ? _buildPaymentShimmer(context)
-              : Column(
-                  children: _buildPaymentList(context),
-                ),
-        ),
-      ],
+    return CheckoutSectionCard(
+      title: 'Payment method'.tr,
+      child: dashboardProvider.isLoadingCheckout ? const _PaymentShimmer() : _buildPaymentList(context),
     );
   }
 
-  List<Widget> _buildPaymentList(BuildContext context) {
+  Widget _buildPaymentList(BuildContext context) {
+    final options = _options(context);
+    final selected = dashboardProvider.selectedPaymentMethod;
+
+    return RadioGroup<String>(
+      groupValue: selected,
+      onChanged: (val) {
+        if (val != null) {
+          dashboardProvider.setSelectedPaymentMethod(val);
+        }
+      },
+      child: Column(
+        children: [
+          for (final option in options)
+            CheckoutOptionTile(
+              isSelected: option.value == selected,
+              onTap: () => dashboardProvider.setSelectedPaymentMethod(option.value),
+              leading: CheckoutIconBadge(icon: option.icon, color: option.iconColor ?? primaryOrange, size: 38.w),
+              title: option.title,
+              subtitle: option.subtitle,
+              trailing: Radio<String>(
+                value: option.value,
+                activeColor: primaryOrange,
+                visualDensity: VisualDensity.compact,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  /// Methods from the API, or the built-in defaults when the API returned none.
+  List<_PaymentOption> _options(BuildContext context) {
     final apiMethods = dashboardProvider.paymentResponseModel?.data ?? [];
     if (apiMethods.isNotEmpty) {
-      return List.generate(apiMethods.length, (index) {
-        final method = apiMethods[index];
+      return apiMethods.map((method) {
         final name = method.typeLabel ?? method.name ?? 'Payment Method';
-        final code = method.code ?? method.type ?? method.id ?? name;
-        final description = method.maskedNumber != null ? '${method.label ?? ''} ${method.maskedNumber}' : method.description;
-        final isLast = index == apiMethods.length - 1;
-
-        final brandColor = _getPaymentColor(name);
-        final iconData = _getPaymentIcon(name);
-
-        return Column(
-          children: [
-            _buildPaymentOption(
-              context: context,
-              title: name,
-              subtitleText: description,
-              icon: iconData,
-              iconColor: brandColor,
-              value: code,
-            ),
-            if (!isLast) Divider(height: 1, color: AppColorsTheme.borderColor(context)),
-          ],
+        return _PaymentOption(
+          title: name,
+          subtitle: method.maskedNumber != null ? '${method.label ?? ''} ${method.maskedNumber}' : method.description,
+          icon: _iconFor(name),
+          iconColor: _colorFor(name),
+          value: method.code ?? method.type ?? method.id ?? name,
         );
-      });
+      }).toList();
     }
 
+    // Titles/subtitles are display-only (translated); [value]s are unchanged.
     return [
-      _buildPaymentOption(
-        context: context,
+      _PaymentOption(
         title: 'bKash',
-        subtitleText: 'bKash Online Payment',
+        subtitle: 'bKash Online Payment'.tr,
         icon: Icons.account_balance_wallet_rounded,
-        iconColor: const Color(0xFFE2136E),
+        iconColor: bkashPink,
         value: 'bKash',
       ),
-      Divider(height: 1, color: AppColorsTheme.borderColor(context)),
-      _buildPaymentOption(
-        context: context,
+      _PaymentOption(
         title: 'Nagad',
-        subtitleText: 'Nagad Online Payment',
+        subtitle: 'Nagad Online Payment'.tr,
         icon: Icons.mobile_friendly_rounded,
-        iconColor: const Color(0xFFED1C24),
+        iconColor: nagadRed,
         value: 'Nagad',
       ),
-      Divider(height: 1, color: AppColorsTheme.borderColor(context)),
-      _buildPaymentOption(
-        context: context,
-        title: 'Credit / Debit Card',
-        subtitleText: 'Visa, MasterCard, AMEX, SSLCommerz',
+      _PaymentOption(
+        title: 'Credit / Debit Card'.tr,
+        subtitle: 'Visa, MasterCard, AMEX, SSLCommerz',
         icon: Icons.credit_card_rounded,
-        iconColor: const Color(0xFF0284C7),
+        iconColor: infoBlue,
         value: 'Card',
       ),
-      Divider(height: 1, color: AppColorsTheme.borderColor(context)),
-      _buildPaymentOption(
-        context: context,
+      const _PaymentOption(
         title: 'PayPal',
-        subtitleText: null,
+        subtitle: null,
         icon: Icons.payment_rounded,
         iconColor: primaryOrange,
         value: 'PayPal',
       ),
-      Divider(height: 1, color: AppColorsTheme.borderColor(context)),
-      _buildPaymentOption(
-        context: context,
-        title: 'Other payment methods',
-        subtitleText: 'T/T\nPlace order first, pay with your preferred method later.',
+      _PaymentOption(
+        title: 'Other payment methods'.tr,
+        subtitle: 'T/T\n${'Place order first, pay with your preferred method later.'.tr}',
         icon: Icons.account_balance_outlined,
         iconColor: AppColorsTheme.textMutedColor(context),
         value: 'Other payment methods',
@@ -122,139 +130,45 @@ class CheckoutPaymentSection extends StatelessWidget {
     ];
   }
 
-  Color _getPaymentColor(String val) {
+  static Color _colorFor(String val) {
     final lower = val.toLowerCase();
-    if (lower.contains('bkash')) {
-      return bkashPink;
-    } else if (lower.contains('nagad')) {
-      return nagadRed;
-    } else if (lower.contains('card') || lower.contains('visa')) {
-      return infoBlue;
-    } else {
-      return primaryOrange;
-    }
+    if (lower.contains('bkash')) return bkashPink;
+    if (lower.contains('nagad')) return nagadRed;
+    if (lower.contains('card') || lower.contains('visa')) return infoBlue;
+    return primaryOrange;
   }
 
-  IconData _getPaymentIcon(String val) {
+  static IconData _iconFor(String val) {
     final lower = val.toLowerCase();
     if (lower.contains('card') || lower.contains('visa') || lower.contains('master')) {
       return Icons.credit_card_rounded;
-    } else if (lower.contains('bkash')) {
-      return Icons.account_balance_wallet_rounded;
-    } else if (lower.contains('nagad')) {
-      return Icons.mobile_friendly_rounded;
-    } else if (lower.contains('bank')) {
-      return Icons.account_balance_rounded;
-    } else if (lower.contains('paypal')) {
-      return Icons.payment_rounded;
-    } else {
-      return Icons.account_balance_outlined;
     }
+    if (lower.contains('bkash')) return Icons.account_balance_wallet_rounded;
+    if (lower.contains('nagad')) return Icons.mobile_friendly_rounded;
+    if (lower.contains('bank')) return Icons.account_balance_rounded;
+    if (lower.contains('paypal')) return Icons.payment_rounded;
+    return Icons.account_balance_outlined;
   }
+}
 
-  Widget _buildPaymentShimmer(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final baseColor = isDark ? Colors.grey[800]! : Colors.grey[300]!;
-    final highlightColor = isDark ? Colors.grey[700]! : Colors.grey[100]!;
+class _PaymentShimmer extends StatelessWidget {
+  const _PaymentShimmer();
 
-    return Padding(
-      padding: EdgeInsets.all(14.w),
+  @override
+  Widget build(BuildContext context) {
+    final colors = CheckoutShimmerColors.of(context);
+
+    return Shimmer.fromColors(
+      baseColor: colors.base,
+      highlightColor: colors.highlight,
       child: Column(
         children: List.generate(3, (index) {
-          return Padding(
-            padding: EdgeInsets.only(bottom: index == 2 ? 0 : 12.h),
-            child: Shimmer.fromColors(
-              baseColor: baseColor,
-              highlightColor: highlightColor,
-              child: Row(
-                children: [
-                  Container(
-                    width: 20.w,
-                    height: 20.h,
-                    decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                  ),
-                  UIHelper.horizontalSpace(12.w),
-                  Container(
-                    width: 32.w,
-                    height: 32.h,
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8.r)),
-                  ),
-                  UIHelper.horizontalSpace(12.w),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(width: 120.w, height: 14.h, color: Colors.white),
-                        UIHelper.verticalSpace(4.h),
-                        Container(width: 180.w, height: 10.h, color: Colors.white),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          return Container(
+            margin: EdgeInsets.only(bottom: index == 2 ? 0 : 10.h),
+            height: 58.h,
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14.r)),
           );
         }),
-      ),
-    );
-  }
-
-  Widget _buildPaymentOption({
-    required BuildContext context,
-    required String title,
-    String? subtitleText,
-    required IconData icon,
-    Color? iconColor,
-    required String value,
-  }) {
-    return InkWell(
-      onTap: () {
-        dashboardProvider.setSelectedPaymentMethod(value);
-      },
-      child: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-        child: Row(
-          children: [
-            Radio<String>(
-              value: value,
-              groupValue: dashboardProvider.selectedPaymentMethod,
-              activeColor: primaryOrange,
-              onChanged: (val) {
-                if (val != null) {
-                  dashboardProvider.setSelectedPaymentMethod(val);
-                }
-              },
-            ),
-            UIHelper.horizontalSpace(8.w),
-            Icon(icon, color: iconColor ?? primaryOrange, size: 22.sp),
-            UIHelper.horizontalSpace(12.w),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColorsTheme.textMainColor(context),
-                    ),
-                  ),
-                  if (subtitleText != null && subtitleText.isNotEmpty) ...[
-                    UIHelper.verticalSpace(2.h),
-                    Text(
-                      subtitleText,
-                      style: TextStyle(
-                        fontSize: 11.sp,
-                        color: AppColorsTheme.textMutedColor(context),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

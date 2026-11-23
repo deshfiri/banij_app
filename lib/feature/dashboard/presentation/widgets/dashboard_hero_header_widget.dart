@@ -7,7 +7,7 @@ import '../../../../constants/color.dart';
 import '../../../../constants/image_const.dart';
 import '../../../../helpers/all_routes.dart';
 import '../../../../helpers/ui_helpers.dart';
-import '../../../finance/presentation/widgets/invoices_receipts_sheet.dart';
+import '../../../finance/presentation/invoices_receipts_screen.dart';
 import '../../model/dashboard_model.dart';
 import 'dashboard_chart_data.dart';
 import 'hero_metric_card_widget.dart';
@@ -65,7 +65,9 @@ class DashboardHeroHeaderWidget extends StatelessWidget {
         borderRadius: BorderRadius.vertical(bottom: Radius.circular(32.r)),
         boxShadow: [
           BoxShadow(
-            color: isDark ? Colors.black.withValues(alpha: 0.35) : primaryOrange.withValues(alpha: 0.28),
+            color: isDark
+                ? Colors.black.withValues(alpha: 0.35)
+                : primaryOrange.withValues(alpha: 0.28),
             blurRadius: 18.r,
             offset: const Offset(0, 6),
           ),
@@ -94,7 +96,8 @@ class DashboardHeroHeaderWidget extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  if (statusLabel != null && statusLabel.isNotEmpty) StatusPillWidget(label: statusLabel.tr),
+                  if (statusLabel != null && statusLabel.isNotEmpty)
+                    StatusPillWidget(label: statusLabel.tr),
                 ],
               ),
               UIHelper.verticalSpace(16.h),
@@ -105,7 +108,8 @@ class DashboardHeroHeaderWidget extends StatelessWidget {
                       title: 'Wallet balance'.tr,
                       amount: _orDash(walletAmount),
                       iconPath: walletIconAsset,
-                      onTap: () => Navigator.pushNamed(context, Routes.walletScreen),
+                      onTap: () =>
+                          Navigator.pushNamed(context, Routes.walletScreen),
                     ),
                   ),
                   UIHelper.horizontalSpace(10.w),
@@ -114,7 +118,10 @@ class DashboardHeroHeaderWidget extends StatelessWidget {
                       title: 'Total paid'.tr,
                       amount: _orDash(totalPaid),
                       iconPath: paidMediaIconAsset,
-                      onTap: () => InvoicesReceiptsSheet.show(context, initialTab: 'Receipts'),
+                      onTap: () => InvoicesReceiptsScreen.open(
+                        context,
+                        initialTab: 'Receipts',
+                      ),
                     ),
                   ),
                 ],
@@ -127,22 +134,31 @@ class DashboardHeroHeaderWidget extends StatelessWidget {
   }
 
   // Placeholder while the amount is loading or missing.
-  static String _orDash(String? value) => (value == null || value.isEmpty) ? '—' : value;
+  static String _orDash(String? value) =>
+      (value == null || value.isEmpty) ? '—' : value;
 
   Widget _buildTopBar(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        _HeaderIconButton(icon: Icons.menu_rounded, size: 24.sp, onPressed: onOpenDrawer),
+        _HeaderIconButton(
+          icon: Icons.menu_rounded,
+          size: 24.sp,
+          onPressed: onOpenDrawer,
+        ),
         Image.asset(whiteLogo, width: 105.w, height: 34.h, fit: BoxFit.contain),
         Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             _HeaderIconButton(
               icon: Icons.notifications_none_rounded,
-              onPressed: () => Navigator.pushNamed(context, Routes.notificationScreen),
+              onPressed: () =>
+                  Navigator.pushNamed(context, Routes.notificationScreen),
             ),
-            _HeaderIconButton(icon: Icons.person_outline_rounded, onPressed: onProfileTap),
+            _HeaderIconButton(
+              icon: Icons.person_outline_rounded,
+              onPressed: onProfileTap,
+            ),
           ],
         ),
       ],
