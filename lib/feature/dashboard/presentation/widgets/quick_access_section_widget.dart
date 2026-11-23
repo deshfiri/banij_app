@@ -84,7 +84,7 @@ class DashboardSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final actionColor = AppColorsTheme.textMainColor(context);
+    const actionColor = primaryOrange;
 
     return Row(
       children: [
