@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../constants/color.dart';
+import '../../../constants/image_const.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../../networks/api_access.dart';
 import '../model/wallet_balance_model.dart';
 import '../model/wallet_transaction_model.dart';
-import 'widgets/finance_shared/finance_widgets.dart';
 import 'widgets/wallet/wallet_top_up_sheet.dart';
 import 'widgets/wallet/wallet_widgets.dart';
 
@@ -65,13 +65,126 @@ class _WalletScreenState extends State<WalletScreen> {
 
   void _showTopUpModal() => WalletTopUpSheet.show(context, onToppedUp: _loadData);
 
+  Widget _buildHeroHeader(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final balance = _walletBalanceModel?.data;
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDark
+              ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
+              : [primaryOrange, secondaryOrange],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32.r),
+          bottomRight: Radius.circular(32.r),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: primaryOrange.withValues(alpha: isDark ? 0.2 : 0.28),
+            blurRadius: 18.r,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(12.w, 4.h, 12.w, 20.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top Bar: Back Button, White Logo & Top-Up Button
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(
+                      Icons.arrow_back_rounded,
+                      color: Colors.white,
+                      size: 24.sp,
+                    ),
+                  ),
+                  Image.asset(
+                    whiteLogo,
+                    width: 105.w,
+                    height: 34.h,
+                    fit: BoxFit.contain,
+                  ),
+                  ElevatedButton.icon(
+                    onPressed: _showTopUpModal,
+                    icon: Icon(Icons.add_circle_outline_rounded, size: 14.sp, color: primaryOrange),
+                    label: Text('Top Up', style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.bold, color: primaryOrange)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
+                      elevation: 2,
+                    ),
+                  ),
+                ],
+              ),
+              UIHelper.verticalSpace(12.h),
+
+              // Title, Subtitle & Health Badge Row
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.w),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Wallet',
+                            style: TextStyle(
+                              fontSize: 22.sp,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                            ),
+                          ),
+                          UIHelper.verticalSpace(2.h),
+                          Text(
+                            'What your account holds, and every movement behind it.',
+                            style: TextStyle(
+                              fontSize: 11.5.sp,
+                              color: Colors.white.withValues(alpha: 0.88),
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    UIHelper.horizontalSpace(8.w),
+                    WalletStateBadge(label: balance?.stateLabel, tone: balance?.stateTone),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
       return Scaffold(
         backgroundColor: AppColorsTheme.background(context),
-        appBar: financeAppBar(context, title: 'Wallet'),
-        body: const WalletShimmer(),
+        body: Column(
+          children: [
+            _buildHeroHeader(context),
+            const Expanded(child: WalletShimmer()),
+          ],
+        ),
       );
     }
 
@@ -82,132 +195,140 @@ class _WalletScreenState extends State<WalletScreen> {
 
     return Scaffold(
       backgroundColor: AppColorsTheme.background(context),
-      appBar: financeAppBar(
-        context,
-        title: 'Wallet',
-        backgroundColor: AppColorsTheme.cardBg(context),
-        elevation: 1,
-        actionLabel: 'Top Up',
-        onAction: _showTopUpModal,
-      ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Expanded(child: FinanceIntroText('What your account holds, and every movement behind it.')),
-                WalletStateBadge(label: balance?.stateLabel, tone: balance?.stateTone),
-              ],
-            ),
-            UIHelper.verticalSpace(16.h),
-            WalletTopUpBanner(onTopUp: _showTopUpModal),
-            UIHelper.verticalSpace(20.h),
-
-            // Balance cards (from GET /wallet)
-            GridView.count(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
-              crossAxisSpacing: 12.w,
-              mainAxisSpacing: 12.h,
-              childAspectRatio: 1.25,
-              children: [
-                WalletBalanceCard(
-                  title: 'Total Balance',
-                  amount: balance?.total?.formatted ?? _zero,
-                  subtitle: 'Your total wallet balance.',
-                  icon: Icons.account_balance_wallet_rounded,
-                ),
-                WalletBalanceCard(
-                  title: 'Available Balance',
-                  amount: balance?.usable?.formatted ?? _zero,
-                  subtitle: 'Available for orders.',
-                  icon: Icons.account_balance_rounded,
-                ),
-                WalletBalanceCard(
-                  title: 'Withdrawable',
-                  amount: balance?.withdrawable?.formatted ?? _zero,
-                  subtitle: 'Ready to withdraw.',
-                  icon: Icons.payments_rounded,
-                ),
-              ],
-            ),
-            UIHelper.verticalSpace(24.h),
-
-            // Balance details
-            Text('Balance details', style: sectionTitleStyle),
-            UIHelper.verticalSpace(2.h),
-            Text(
-              'What sits behind the figures above.',
-              style: TextStyle(fontSize: 12.sp, color: AppColorsTheme.textMutedColor(context)),
-            ),
-            UIHelper.verticalSpace(12.h),
-            Container(
-              padding: EdgeInsets.all(16.w),
-              decoration: BoxDecoration(
-                color: AppColorsTheme.cardBg(context),
-                borderRadius: BorderRadius.circular(16.r),
-                border: Border.all(color: AppColorsTheme.borderColor(context)),
-              ),
+            _buildHeroHeader(context),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  WalletDetailRow(
-                    label1: 'Platform credit',
-                    value1: balance?.platformCredit?.formatted ?? _zero,
-                    label2: 'Withdrawable',
-                    value2: balance?.withdrawable?.formatted ?? _zero,
+                  WalletTopUpBanner(onTopUp: _showTopUpModal),
+                  UIHelper.verticalSpace(20.h),
+
+                  // Balance cards (from GET /wallet)
+                  GridView.count(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12.w,
+                    mainAxisSpacing: 12.h,
+                    childAspectRatio: 1.25,
+                    children: [
+                      WalletBalanceCard(
+                        title: 'Total Balance',
+                        amount: balance?.total?.formatted ?? _zero,
+                        subtitle: 'Your total wallet balance.',
+                        icon: Icons.account_balance_wallet_rounded,
+                      ),
+                      WalletBalanceCard(
+                        title: 'Available Balance',
+                        amount: balance?.usable?.formatted ?? _zero,
+                        subtitle: 'Available for orders.',
+                        icon: Icons.account_balance_rounded,
+                      ),
+                      WalletBalanceCard(
+                        title: 'Withdrawable',
+                        amount: balance?.withdrawable?.formatted ?? _zero,
+                        subtitle: 'Ready to withdraw.',
+                        icon: Icons.payments_rounded,
+                      ),
+                    ],
                   ),
-                  UIHelper.verticalSpace(10.h),
-                  WalletDetailRow(
-                    label1: 'Pending',
-                    value1: balance?.pending?.formatted ?? _zero,
-                    label2: 'On hold',
-                    value2: balance?.hold?.formatted ?? _zero,
+                  UIHelper.verticalSpace(24.h),
+
+                  // Balance details
+                  Text('Balance details', style: sectionTitleStyle),
+                  UIHelper.verticalSpace(2.h),
+                  Text(
+                    'What sits behind the figures above.',
+                    style: TextStyle(fontSize: 12.sp, color: AppColorsTheme.textMutedColor(context)),
                   ),
-                  UIHelper.verticalSpace(10.h),
-                  WalletDetailRow(
-                    label1: 'Minimum balance',
-                    value1: balance?.minimumBalance?.formatted ?? _zero,
-                    label2: 'COD Settlement',
-                    value2: balance?.codReceivable?.formatted ?? _zero,
+                  UIHelper.verticalSpace(12.h),
+                  Container(
+                    padding: EdgeInsets.all(16.w),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).brightness == Brightness.dark
+                          ? AppColorsTheme.cardBg(context)
+                          : const Color(0xFFFFF7F2),
+                      borderRadius: BorderRadius.circular(18.r),
+                      border: Border.all(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? const Color(0xFF374151)
+                            : primaryOrange.withValues(alpha: 0.22),
+                        width: 1.w,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: primaryOrange.withValues(
+                            alpha: Theme.of(context).brightness == Brightness.dark ? 0.08 : 0.05,
+                          ),
+                          blurRadius: 10.r,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        WalletDetailRow(
+                          label1: 'Platform credit',
+                          value1: balance?.platformCredit?.formatted ?? _zero,
+                          label2: 'Withdrawable',
+                          value2: balance?.withdrawable?.formatted ?? _zero,
+                        ),
+                        UIHelper.verticalSpace(10.h),
+                        WalletDetailRow(
+                          label1: 'Pending',
+                          value1: balance?.pending?.formatted ?? _zero,
+                          label2: 'On hold',
+                          value2: balance?.hold?.formatted ?? _zero,
+                        ),
+                        UIHelper.verticalSpace(10.h),
+                        WalletDetailRow(
+                          label1: 'Minimum balance',
+                          value1: balance?.minimumBalance?.formatted ?? _zero,
+                          label2: 'COD Settlement',
+                          value2: balance?.codReceivable?.formatted ?? _zero,
+                        ),
+                        UIHelper.verticalSpace(10.h),
+                        WalletDetailRow(
+                          label1: 'Reserved',
+                          value1: balance?.reserved?.formatted ?? _zero,
+                          label2: 'Required deposit',
+                          value2: balance?.requiredDeposit?.formatted ?? _zero,
+                        ),
+                      ],
+                    ),
                   ),
-                  UIHelper.verticalSpace(10.h),
-                  WalletDetailRow(
-                    label1: 'Reserved',
-                    value1: balance?.reserved?.formatted ?? _zero,
-                    label2: 'Required deposit',
-                    value2: balance?.requiredDeposit?.formatted ?? _zero,
+                  UIHelper.verticalSpace(24.h),
+
+                  // Statement + filter
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Statement', style: sectionTitleStyle),
+                      _StatementFilter(
+                        value: _selectedFilter,
+                        options: _filters,
+                        onChanged: (val) => setState(() => _selectedFilter = val),
+                      ),
+                    ],
                   ),
+                  UIHelper.verticalSpace(12.h),
+
+                  apiTransactions.isEmpty
+                      ? const WalletNoTransactions()
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: apiTransactions.length,
+                          itemBuilder: (context, index) => WalletTransactionTile(tx: apiTransactions[index]),
+                        ),
                 ],
               ),
             ),
-            UIHelper.verticalSpace(24.h),
-
-            // Statement + filter
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text('Statement', style: sectionTitleStyle),
-                _StatementFilter(
-                  value: _selectedFilter,
-                  options: _filters,
-                  onChanged: (val) => setState(() => _selectedFilter = val),
-                ),
-              ],
-            ),
-            UIHelper.verticalSpace(12.h),
-
-            apiTransactions.isEmpty
-                ? const WalletNoTransactions()
-                : ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: apiTransactions.length,
-                    itemBuilder: (context, index) => WalletTransactionTile(tx: apiTransactions[index]),
-                  ),
           ],
         ),
       ),

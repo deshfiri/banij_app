@@ -250,6 +250,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                     child: HeroMetricCardWidget(
                       title: 'Wallet balance',
                       amount: walletFormatted,
+                      iconPath: walletIconAsset,
                       onTap: () =>
                           Navigator.pushNamed(context, Routes.walletScreen),
                     ),
@@ -259,6 +260,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                     child: HeroMetricCardWidget(
                       title: 'Total paid',
                       amount: totalPaidFormatted,
+                      iconPath: paidMediaIconAsset,
                       onTap: () => InvoicesReceiptsScreen.open(
                         context,
                         initialTab: 'Receipts',

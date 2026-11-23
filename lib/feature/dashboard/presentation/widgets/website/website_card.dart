@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 import '../../../../../constants/color.dart';
 import '../../../../../helpers/ui_helpers.dart';
@@ -61,7 +62,7 @@ class WebsiteListItem {
   }
 }
 
-/// Website card: globe icon, name/host, status pill, account and connection.
+/// Website card matching the invoice/order card design pattern.
 class WebsiteCard extends StatelessWidget {
   final WebsiteListItem item;
 
@@ -75,119 +76,175 @@ class WebsiteCard extends StatelessWidget {
 
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
-      padding: EdgeInsets.all(14.w),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
         color: AppColorsTheme.cardBg(context),
-        borderRadius: BorderRadius.circular(16.r),
+        borderRadius: BorderRadius.circular(18.r),
         border: Border.all(
-          color: AppColorsTheme.borderColor(context),
+          color: isDark ? const Color(0xFF374151) : primaryOrange.withValues(alpha: 0.22),
           width: 1.w,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
-            blurRadius: 8.r,
+            color: primaryOrange.withValues(alpha: isDark ? 0.08 : 0.05),
+            blurRadius: 10.r,
             offset: const Offset(0, 3),
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Stack(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: EdgeInsets.all(10.w),
-                decoration: BoxDecoration(
-                  color: primaryOrange.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12.r),
-                ),
-                child: Icon(Icons.language_rounded, color: primaryOrange, size: 20.sp),
-              ),
-              UIHelper.horizontalSpace(12.w),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          // Left vertical accent indicator bar
+          Positioned(
+            left: 0,
+            top: 0,
+            bottom: 0,
+            child: Container(
+              width: 4.w,
+              color: primaryOrange,
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.fromLTRB(16.w, 14.w, 14.w, 14.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Top Row: Icon + Name + Status Pill
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
-                      item.name,
-                      style: TextStyle(
-                        fontSize: 14.5.sp,
-                        fontWeight: FontWeight.bold,
-                        color: AppColorsTheme.textMainColor(context),
+                    Container(
+                      padding: EdgeInsets.all(8.w),
+                      decoration: BoxDecoration(
+                        color: primaryOrange.withValues(alpha: 0.14),
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      child: Icon(Icons.language_rounded, color: primaryOrange, size: 18.sp),
+                    ),
+                    UIHelper.horizontalSpace(10.w),
+                    Expanded(
+                      child: Text(
+                        item.name,
+                        style: TextStyle(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w900,
+                          color: AppColorsTheme.textMainColor(context),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
-                    UIHelper.verticalSpace(2.h),
-                    Text(
-                      item.host,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        color: AppColorsTheme.textMutedColor(context),
-                        fontFamily: 'monospace',
-                      ),
-                    ),
+                    _WebsiteStatusPill(status: item.status),
                   ],
                 ),
-              ),
-              _WebsiteStatusPill(status: item.status),
-            ],
-          ),
-          UIHelper.verticalSpace(12.h),
-          Divider(color: AppColorsTheme.borderColor(context)),
-          UIHelper.verticalSpace(8.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const _CapsLabel('ACCOUNT'),
-                  UIHelper.verticalSpace(2.h),
-                  Text(
-                    item.account,
-                    style: TextStyle(
-                      fontSize: 12.5.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColorsTheme.textMainColor(context),
+                UIHelper.verticalSpace(12.h),
+
+                // Inner Tinted Container for Host
+                Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(10.w),
+                  decoration: BoxDecoration(
+                    color: isDark ? AppColorsTheme.innerCardBg(context) : const Color(0xFFFFF6F0),
+                    borderRadius: BorderRadius.circular(12.r),
+                    border: Border.all(
+                      color: primaryOrange.withValues(alpha: 0.15),
+                      width: 1.w,
                     ),
                   ),
-                ],
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  const _CapsLabel('CONNECTION'),
-                  UIHelper.verticalSpace(2.h),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
+                  child: Row(
                     children: [
-                      Icon(
-                        isHealthy ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
-                        size: 12.sp,
-                        color: connectionColor,
-                      ),
-                      UIHelper.horizontalSpace(4.w),
-                      Text(
-                        item.connection,
-                        style: TextStyle(
-                          fontSize: 11.5.sp,
-                          fontWeight: FontWeight.w600,
-                          color: connectionColor,
+                      Icon(Icons.link_rounded, size: 14.sp, color: primaryOrange),
+                      UIHelper.horizontalSpace(6.w),
+                      Expanded(
+                        child: Text(
+                          item.host,
+                          style: TextStyle(
+                            fontSize: 12.sp,
+                            fontWeight: FontWeight.w600,
+                            color: AppColorsTheme.textMainColor(context),
+                            fontFamily: 'monospace',
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ],
                   ),
-                  Text(
-                    item.lastSynced,
-                    style: TextStyle(
-                      fontSize: 10.sp,
-                      color: AppColorsTheme.textMutedColor(context),
+                ),
+                UIHelper.verticalSpace(12.h),
+
+                // Bottom Row: Account / Connection + Action Button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const _CapsLabel('ACCOUNT'),
+                          UIHelper.verticalSpace(2.h),
+                          Text(
+                            item.account,
+                            style: TextStyle(
+                              fontSize: 12.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColorsTheme.textMainColor(context),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          UIHelper.verticalSpace(4.h),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                isHealthy ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                                size: 11.sp,
+                                color: connectionColor,
+                              ),
+                              UIHelper.horizontalSpace(3.w),
+                              Text(
+                                item.connection,
+                                style: TextStyle(
+                                  fontSize: 10.5.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: connectionColor,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    UIHelper.horizontalSpace(8.w),
+                    ElevatedButton.icon(
+                      onPressed: () {
+                        // Action / Manage Website
+                      },
+                      icon: Icon(Icons.arrow_forward_rounded, size: 14.sp, color: Colors.white),
+                      label: Text(
+                        'Manage'.tr,
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryOrange,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+                        elevation: 0,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),

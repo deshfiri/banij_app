@@ -121,17 +121,22 @@ class WalletBalanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: AppColorsTheme.cardBg(context),
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: primaryOrange.withValues(alpha: 0.2)),
+        color: isDark ? AppColorsTheme.cardBg(context) : const Color(0xFFFFF7F2),
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(
+          color: isDark ? const Color(0xFF374151) : primaryOrange.withValues(alpha: 0.22),
+          width: 1.w,
+        ),
         boxShadow: [
           BoxShadow(
-            color: primaryOrange.withValues(alpha: 0.04),
+            color: primaryOrange.withValues(alpha: isDark ? 0.08 : 0.05),
             blurRadius: 10.r,
-            offset: const Offset(0, 4),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -145,14 +150,18 @@ class WalletBalanceCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: TextStyle(fontSize: 11.5.sp, color: AppColorsTheme.textMutedColor(context)),
+                  style: TextStyle(
+                    fontSize: 11.5.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColorsTheme.textMutedColor(context),
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               Container(
                 padding: EdgeInsets.all(6.w),
                 decoration: BoxDecoration(
-                  color: primaryOrange.withValues(alpha: 0.12),
+                  color: primaryOrange.withValues(alpha: 0.14),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: primaryOrange, size: 14.sp),
@@ -164,13 +173,20 @@ class WalletBalanceCard extends StatelessWidget {
             children: [
               Text(
                 amount,
-                style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: AppColorsTheme.textMainColor(context)),
+                style: TextStyle(
+                  fontSize: 17.sp,
+                  fontWeight: FontWeight.w900,
+                  color: AppColorsTheme.textMainColor(context),
+                ),
                 overflow: TextOverflow.ellipsis,
               ),
               UIHelper.verticalSpace(2.h),
               Text(
                 subtitle,
-                style: TextStyle(fontSize: 10.5.sp, color: AppColorsTheme.textMutedColor(context)),
+                style: TextStyle(
+                  fontSize: 10.sp,
+                  color: AppColorsTheme.textMutedColor(context),
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),

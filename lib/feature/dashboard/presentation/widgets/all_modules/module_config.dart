@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import '../../../../../constants/image_const.dart';
 import '../../orders_screen.dart';
 import '../../products_screen.dart';
-import '../website_sheet.dart';
+import '../../website_screen.dart';
 
 /// Module groups shown as filter chips and section headers.
 enum ModuleCategory {
@@ -91,7 +91,7 @@ class ModuleConfig {
       titleKey: 'hub_my_websites',
       category: ModuleCategory.sales,
       iconAsset: websiteIconAsset,
-      open: (context) => WebsiteSheet.show(context),
+      open: (context) => WebsiteScreen.open(context),
     ),
   ];
 }
