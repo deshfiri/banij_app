@@ -60,9 +60,15 @@ final class WholesaleCheckoutRx extends RxResponseInt<WholesaleCheckoutResponseM
     }
   }
 
-  Future<WholesaleCheckoutResponseModel> confirmOrder() async {
+  Future<WholesaleCheckoutResponseModel> confirmOrder({
+    required String paymentMethod,
+    required String fingerprint,
+  }) async {
     try {
-      WholesaleCheckoutResponseModel data = await _api.confirmOrder();
+      WholesaleCheckoutResponseModel data = await _api.confirmOrder(
+        paymentMethod: paymentMethod,
+        fingerprint: fingerprint,
+      );
       return handleSuccessWithReturn(data);
     } catch (error) {
       return handleErrorWithReturn(error);

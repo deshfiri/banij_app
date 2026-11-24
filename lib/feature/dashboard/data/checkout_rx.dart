@@ -21,9 +21,10 @@ final class CheckoutRx extends RxResponseInt<CheckoutModel> {
 
   ValueStream get getCheckoutData => dataFetcher.stream;
 
-  Future<CheckoutResponseModel> fetchCheckoutDetails() async {
+  /// `GET /checkout`, optionally previewing [coupon].
+  Future<CheckoutResponseModel> fetchCheckoutDetails({String? coupon}) async {
     try {
-      CheckoutResponseModel data = await _api.getCheckout();
+      CheckoutResponseModel data = await _api.getCheckout(coupon: coupon);
       checkoutDataFetcher.sink.add(data);
       return data;
     } catch (error) {
@@ -59,9 +60,10 @@ final class CheckoutRx extends RxResponseInt<CheckoutModel> {
     }
   }
 
-  Future<CheckoutModel> verify(Map<String, dynamic> body) async {
+  /// `POST /checkout/payment/verify` (no body).
+  Future<CheckoutModel> verify() async {
     try {
-      CheckoutModel data = await _api.verifyPayment(body);
+      CheckoutModel data = await _api.verifyPayment();
       return handleSuccessWithReturn(data);
     } catch (error) {
       return handleErrorWithReturn(error);

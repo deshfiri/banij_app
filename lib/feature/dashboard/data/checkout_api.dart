@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:dio/dio.dart';
 
 import '../../../networks/dio/dio.dart';
@@ -12,9 +13,14 @@ final class CheckoutApi {
   CheckoutApi._internal();
   static CheckoutApi get instance => _singleton;
 
-  Future<CheckoutResponseModel> getCheckout() async {
+  /// `GET /checkout` — the quote for the chosen package. Pass [coupon] to
+  /// preview the total with that code (nothing is stored).
+  Future<CheckoutResponseModel> getCheckout({String? coupon}) async {
     try {
-      Response response = await getHttp(EndPoints.checkout());
+      final path = coupon == null || coupon.trim().isEmpty
+          ? EndPoints.checkout()
+          : '${EndPoints.checkout()}?coupon=${Uri.encodeQueryComponent(coupon.trim())}';
+      Response response = await getHttp(path);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (response.data is Map<String, dynamic>) {
@@ -27,6 +33,9 @@ final class CheckoutApi {
       } else {
         throw DataSource.DEFAULT.getFailure();
       }
+    } on DioException catch (dioError) {
+      _handleDioError(dioError);
+      rethrow;
     } catch (error) {
       rethrow;
     }
@@ -60,14 +69,19 @@ final class CheckoutApi {
     try {
       Response response = await getHttp(EndPoints.checkoutPayment());
       return _parseResponse(response);
+    } on DioException catch (dioError) {
+      _handleDioError(dioError);
+      rethrow;
     } catch (error) {
       rethrow;
     }
   }
 
-  Future<CheckoutModel> verifyPayment(Map<String, dynamic> body) async {
+  /// `POST /checkout/payment/verify` — no body; asks the gateway about the
+  /// open payment by our own reference. Answers like `GET /checkout/payment`.
+  Future<CheckoutModel> verifyPayment() async {
     try {
-      Response response = await postHttp(EndPoints.checkoutPaymentVerify(), body);
+      Response response = await postHttp(EndPoints.checkoutPaymentVerify());
       return _parseResponse(response);
     } on DioException catch (dioError) {
       _handleDioError(dioError);
@@ -91,10 +105,18 @@ final class CheckoutApi {
     }
   }
 
+  /// Turns an API error into an `Exception(message)`. Prefers the first
+  /// field error (e.g. 422 on `gateway` / `coupon`), then `message`/`error`.
   void _handleDioError(DioException dioError) {
     if (dioError.response?.data != null) {
       final data = dioError.response?.data;
       if (data is Map) {
+        final errors = data['errors'];
+        if (errors is Map && errors.isNotEmpty) {
+          final first = errors.values.first;
+          final text = first is List && first.isNotEmpty ? first.first.toString() : first?.toString();
+          if (text != null && text.isNotEmpty) throw Exception(text);
+        }
         if (data.containsKey('message')) {
           throw Exception(data['message'].toString());
         } else if (data.containsKey('error')) {

@@ -75,8 +75,50 @@ class CheckoutPaymentSection extends StatelessWidget {
     );
   }
 
-  /// Methods from the API, or the built-in defaults when the API returned none.
+  /// Gateways from `GET /checkout` first; otherwise saved methods from the
+  /// API, otherwise the built-in defaults.
   List<_PaymentOption> _options(BuildContext context) {
+    final gateways = dashboardProvider.checkoutGateways.where((g) => g.isAvailable).toList();
+    if (gateways.isNotEmpty) {
+      return gateways
+          .map((gateway) => _PaymentOption(
+                title: gateway.label,
+                subtitle: gateway.description,
+                icon: _iconFor(gateway.value),
+                iconColor: _colorFor(gateway.value),
+                value: gateway.value,
+              ))
+          .toList();
+    }
+
+    // Package checkout without a gateway list: SSLCommerz handles every
+    // method (bKash, Nagad, cards, net banking) on its own page.
+    if (dashboardProvider.isPackageCheckout) {
+      return [
+        _PaymentOption(
+          title: 'SSLCommerz',
+          subtitle: 'bKash, Nagad, Rocket, Visa, MasterCard, AMEX & net banking'.tr,
+          icon: Icons.verified_user_rounded,
+          iconColor: infoBlue,
+          value: DashboardProvider.sslCommerzGateway,
+        ),
+      ];
+    }
+
+    // Wholesale order: the methods `GET /wholesale/checkout` accepts.
+    final wholesaleMethods = dashboardProvider.wholesalePaymentMethods;
+    if (wholesaleMethods.isNotEmpty) {
+      return wholesaleMethods
+          .map((method) => _PaymentOption(
+                title: method.label,
+                subtitle: method.description,
+                icon: _iconFor(method.value),
+                iconColor: _colorFor(method.value),
+                value: method.value,
+              ))
+          .toList();
+    }
+
     final apiMethods = dashboardProvider.paymentResponseModel?.data ?? [];
     if (apiMethods.isNotEmpty) {
       return apiMethods.map((method) {
@@ -93,6 +135,13 @@ class CheckoutPaymentSection extends StatelessWidget {
 
     // Titles/subtitles are display-only (translated); [value]s are unchanged.
     return [
+      _PaymentOption(
+        title: 'SSLCommerz',
+        subtitle: 'bKash, Nagad, Rocket, Visa, MasterCard, AMEX & net banking'.tr,
+        icon: Icons.verified_user_rounded,
+        iconColor: infoBlue,
+        value: DashboardProvider.sslCommerzGateway,
+      ),
       _PaymentOption(
         title: 'bKash',
         subtitle: 'bKash Online Payment'.tr,
@@ -135,13 +184,13 @@ class CheckoutPaymentSection extends StatelessWidget {
     final lower = val.toLowerCase();
     if (lower.contains('bkash')) return bkashPink;
     if (lower.contains('nagad')) return nagadRed;
-    if (lower.contains('card') || lower.contains('visa')) return infoBlue;
+    if (lower.contains('card') || lower.contains('visa') || lower.contains('ssl')) return infoBlue;
     return primaryOrange;
   }
 
   static IconData _iconFor(String val) {
     final lower = val.toLowerCase();
-    if (lower.contains('card') || lower.contains('visa') || lower.contains('master')) {
+    if (lower.contains('card') || lower.contains('visa') || lower.contains('master') || lower.contains('ssl')) {
       return Icons.credit_card_rounded;
     }
     if (lower.contains('bkash')) return Icons.account_balance_wallet_rounded;

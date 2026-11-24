@@ -39,6 +39,23 @@ class CartProvider extends ChangeNotifier {
 
   List<WholesaleCartLine> get cartLines => _cartModel?.data?.lines ?? [];
 
+  /// Server says the cart cannot go to checkout yet (problems, changed
+  /// prices or not ready) — `GET /wholesale/checkout` answers `cart_not_ready`.
+  bool get needsAttention {
+    final data = _cartModel?.data;
+    if (data == null || cartLines.isEmpty) return false;
+    return data.readyForCheckout == false || data.hasProblems == true || data.hasPriceChanges == true;
+  }
+
+  /// Some prices changed since they were added; they must be accepted.
+  bool get hasPriceChanges => _cartModel?.data?.hasPriceChanges == true;
+
+  /// Lines with a problem, a changed price or that can no longer be bought.
+  List<WholesaleCartLine> get problemLines => cartLines
+      .where((line) =>
+          (line.problems?.isNotEmpty ?? false) || line.priceChanged == true || line.purchasable == false)
+      .toList();
+
   int get totalItemsCount {
     if (_cartModel?.data?.lines != null && _cartModel!.data!.lines!.isNotEmpty) {
       return _cartModel!.data!.lines!.fold(0, (sum, line) => sum + (line.quantity ?? 0));

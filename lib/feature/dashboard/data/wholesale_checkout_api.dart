@@ -84,9 +84,17 @@ final class WholesaleCheckoutApi {
     }
   }
 
-  Future<WholesaleCheckoutResponseModel> confirmOrder() async {
+  /// `POST /wholesale/checkout/confirmation` with the chosen
+  /// [paymentMethod] and the quote [fingerprint] (both required).
+  Future<WholesaleCheckoutResponseModel> confirmOrder({
+    required String paymentMethod,
+    required String fingerprint,
+  }) async {
     try {
-      Response response = await postHttp(EndPoints.wholesaleCheckoutConfirmation());
+      Response response = await postHttp(EndPoints.wholesaleCheckoutConfirmation(), {
+        'payment_method': paymentMethod,
+        'fingerprint': fingerprint,
+      });
       return _parseResponse(response);
     } on DioException catch (dioError) {
       _handleDioError(dioError);

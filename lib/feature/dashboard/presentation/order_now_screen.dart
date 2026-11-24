@@ -13,13 +13,20 @@ import '../../../providers/cart_provider.dart';
 import '../../../providers/dashboard_provider.dart';
 import '../model/my_product_model.dart';
 import 'widgets/checkout/checkout_address_card.dart';
+import 'widgets/checkout/checkout_attention_card.dart';
 import 'widgets/checkout/checkout_bottom_bar.dart';
 import 'widgets/checkout/checkout_delivery_banner.dart';
 import 'widgets/checkout/checkout_header_widgets.dart';
 import 'widgets/checkout/checkout_order_items.dart';
+import 'widgets/checkout/checkout_payment_flow.dart';
 import 'widgets/checkout/checkout_payment_section.dart';
 import 'widgets/checkout/checkout_ui.dart';
 import 'widgets/checkout/checkout_voucher_section.dart';
+import 'widgets/checkout/sslcommerz_widgets.dart';
+import '../../../constants/app_constants.dart';
+import '../../../constants/sslcommerz_config.dart';
+import '../../../helpers/di.dart';
+import '../model/sslcommerz_models.dart';
 
 class OrderNowScreen extends StatefulWidget {
   final ProductItemModel? product;
@@ -32,6 +39,7 @@ class OrderNowScreen extends StatefulWidget {
 
 class _OrderNowScreenState extends State<OrderNowScreen> {
   final TextEditingController _couponController = TextEditingController();
+  bool _isFixingCart = false;
 
   @override
   void initState() {
@@ -39,6 +47,30 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final dashboardProvider = context.read<DashboardProvider>();
       dashboardProvider.fetchCheckoutState();
+      // Fresh cart so problems / changed prices are known before checkout.
+      context.read<CartProvider>().fetchCart();
+    });
+  }
+
+  /// Reloads the cart and the checkout quote together.
+  Future<void> _refreshCartAndCheckout() async {
+    await Future.wait([
+      context.read<CartProvider>().fetchCart(),
+      context.read<DashboardProvider>().fetchCheckoutState(),
+    ]);
+  }
+
+  Future<void> _acceptNewPrices() async {
+    setState(() => _isFixingCart = true);
+    await context.read<CartProvider>().acceptPrices();
+    if (!mounted) return;
+    await _refreshCartAndCheckout();
+    if (mounted) setState(() => _isFixingCart = false);
+  }
+
+  void _reviewCart() {
+    Navigator.pushNamed(context, Routes.cartScreen).then((_) {
+      if (mounted) _refreshCartAndCheckout();
     });
   }
 
@@ -105,6 +137,21 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
     }
 
     // Sections, built once and placed in one or two columns below.
+    // Wholesale cart the server will not quote yet (cart_not_ready).
+    final cartBlocked = !dashboardProvider.isPackageCheckout &&
+        cartProvider.cartLines.isNotEmpty &&
+        (cartProvider.needsAttention || dashboardProvider.wholesaleCheckoutError != null);
+    final attentionCard = cartBlocked
+        ? CheckoutAttentionCard(
+            message: dashboardProvider.wholesaleCheckoutError ?? 'Your cart needs attention before checkout.'.tr,
+            problemLines: cartProvider.problemLines,
+            hasPriceChanges: cartProvider.hasPriceChanges,
+            isBusy: _isFixingCart,
+            onAcceptPrices: _acceptNewPrices,
+            onReviewCart: _reviewCart,
+          )
+        : null;
+
     final packageBanner = dashboardProvider.checkoutResponseModel?.data?.package != null
         ? CheckoutPackageBanner(package: dashboardProvider.checkoutResponseModel!.data!.package!)
         : null;
@@ -179,13 +226,20 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                                 children: [
                                   Expanded(
                                     flex: 3,
-                                    child: column([packageBanner, addressCard, deliveryCard, itemsCard]),
+                                    child: column([
+                                      attentionCard,
+                                      packageBanner,
+                                      addressCard,
+                                      deliveryCard,
+                                      itemsCard,
+                                    ]),
                                   ),
                                   const SizedBox(width: 16),
                                   Expanded(flex: 2, child: column([voucherCard, paymentCard, summaryCard])),
                                 ],
                               )
                             : column([
+                                attentionCard,
                                 packageBanner,
                                 addressCard,
                                 deliveryCard,
@@ -206,7 +260,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
           totalText: orderTotalText,
           subtotalText: subtotalText,
           shippingText: shippingText,
-          isLoading: dashboardProvider.isLoadingCheckout,
+          isLoading: dashboardProvider.isLoadingCheckout || dashboardProvider.isPaying,
           hasAddress: dashboardProvider.selectedAddress != null,
           onPrimaryPressed: () async {
             if (dashboardProvider.selectedAddress == null) {
@@ -216,9 +270,92 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
               return;
             }
 
+            // Package checkout: pay through the gateway (POST /checkout).
+            if (dashboardProvider.isPackageCheckout) {
+              final paid = await CheckoutPaymentFlow.run(
+                context,
+                dashboardProvider,
+                coupon: dashboardProvider.checkoutCoupon,
+              );
+              if (!context.mounted || !paid) return;
+              cartProvider.clearCart();
+              CheckoutSuccessDialog.show(context);
+              return;
+            }
+
+            // Wholesale cart that the server will not quote yet: fix it first.
+            if (cartBlocked) {
+              ToastUtil.showErrorMessage(
+                dashboardProvider.wholesaleCheckoutError ?? 'Your cart needs attention before checkout.'.tr,
+              );
+              _reviewCart();
+              return;
+            }
+
+            // Wholesale cart order.
+            final usesSsl = dashboardProvider.selectedPaymentMethod.toLowerCase().contains('ssl');
+            // Amount and items are read before confirming (confirm replaces the quote).
+            final payAmount =
+                double.tryParse(dashboardProvider.wholesaleCheckoutModel?.data?.total?.amount ?? '') ?? grandTotalBdt;
+            final itemNames = cartProvider.cartLines.map((l) => l.product?.name).whereType<String>().toList();
+
+            // 1. Review the SSLCommerz payment before creating the order.
+            if (usesSsl) {
+              final proceed = await SslCommerzReviewSheet.show(
+                context,
+                amountText: orderTotalText,
+                description: '${itemNames.length} ${itemNames.length == 1 ? 'item' : 'items'}',
+              );
+              if (!proceed || !context.mounted) return;
+            }
+
+            // 2. Create the order on the server.
             final success = await dashboardProvider.confirmWholesaleOrder();
             if (!context.mounted || !success) return;
-            cartProvider.clearCart();
+            cartProvider.clearCart(); // The order exists now, paid or not.
+
+            // 3a. Server returned an SSLCommerz page: pay it.
+            final paymentUrl = dashboardProvider.wholesalePaymentUrl;
+            if (paymentUrl != null) {
+              final paid = await CheckoutPaymentFlow.payWholesaleOrder(context, paymentUrl);
+              if (!context.mounted) return;
+              if (!paid) {
+                Navigator.pushReplacementNamed(context, Routes.dashboardScreen);
+                return;
+              }
+              CheckoutSuccessDialog.show(context);
+              return;
+            }
+
+            // 3b. No payment link from the server: pay through SSLCommerz sandbox directly.
+            if (usesSsl && SslCommerzConfig.directSandboxEnabled) {
+              final address = dashboardProvider.selectedAddress;
+              final transaction = await CheckoutPaymentFlow.payDirectWithSslCommerz(
+                context,
+                SslCommerzPaymentRequest(
+                  transactionId: 'BBN${DateTime.now().millisecondsSinceEpoch}',
+                  amount: payAmount,
+                  productName: itemNames.isEmpty ? 'Wholesale order' : itemNames.take(3).join(', '),
+                  customerName: address?.contactName ?? appData.read(KkName)?.toString() ?? 'Customer',
+                  customerEmail: appData.read(KkUserEmail)?.toString() ?? 'customer@example.com',
+                  customerPhone: address?.phone.isNotEmpty == true ? address!.phone : '01700000000',
+                  customerAddress: address?.fullAddressFormatted.isNotEmpty == true
+                      ? address!.fullAddressFormatted
+                      : 'Dhaka',
+                  customerCity: address?.location?.district?.nameEn ?? 'Dhaka',
+                  customerPostcode: address?.postcode?.isNotEmpty == true ? address!.postcode! : '1000',
+                ),
+              );
+              if (!context.mounted) return;
+              if (transaction == null) {
+                Navigator.pushReplacementNamed(context, Routes.dashboardScreen);
+                return;
+              }
+              SslCommerzReceiptDialog.show(context, transaction: transaction, amountText: orderTotalText);
+              return;
+            }
+
+            // Pay-later method.
             CheckoutSuccessDialog.show(context);
           },
         ),

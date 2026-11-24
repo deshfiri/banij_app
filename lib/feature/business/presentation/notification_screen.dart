@@ -17,6 +17,9 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
+  /// Display filter only; the list itself comes from the provider.
+  bool _showUnreadOnly = false;
+
   @override
   void initState() {
     super.initState();
@@ -30,6 +33,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
     final notificationProvider = context.watch<NotificationProvider>();
     final notifications = notificationProvider.notifications;
     final unreadCount = notificationProvider.unreadCount;
+    final visible = _showUnreadOnly ? notifications.where((n) => !n.isRead).toList() : notifications;
 
     return Scaffold(
       backgroundColor: AppColorsTheme.background(context),
@@ -64,7 +68,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                       children: [
                         if (notificationProvider.isLoading &&
                             notifications.isEmpty)
-                          const _NotificationsLoading()
+                          const NotificationListShimmer()
                         else if (notificationProvider.error != null &&
                             notifications.isEmpty)
                           _NotificationsError(
@@ -87,14 +91,24 @@ class _NotificationScreenState extends State<NotificationScreen> {
                               message: notificationProvider.error!,
                             ),
                           ],
-                          SizedBox(height: 16.h),
-                          for (final item in notifications)
-                            NotificationTile(
-                              item: item,
-                              onTap: () => context
-                                  .read<NotificationProvider>()
-                                  .markAsRead(item.id),
-                            ),
+                          SizedBox(height: 12.h),
+                          NotificationFilterBar(
+                            showUnreadOnly: _showUnreadOnly,
+                            totalCount: notifications.length,
+                            unreadCount: unreadCount,
+                            onChanged: (value) => setState(() => _showUnreadOnly = value),
+                          ),
+                          SizedBox(height: 14.h),
+                          if (visible.isEmpty)
+                            const _AllCaughtUp()
+                          else
+                            for (final item in visible)
+                              NotificationTile(
+                                item: item,
+                                onTap: () => context
+                                    .read<NotificationProvider>()
+                                    .markAsRead(item.id),
+                              ),
                         ],
                       ],
                     );
@@ -131,6 +145,15 @@ class _NotificationsSummary extends StatelessWidget {
       ),
       child: Row(
         children: [
+          Container(
+            padding: EdgeInsets.all(9.w),
+            decoration: BoxDecoration(
+              color: primaryOrange.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
+            child: Icon(Icons.notifications_active_outlined, size: 20.sp, color: primaryOrange),
+          ),
+          SizedBox(width: 12.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -155,15 +178,19 @@ class _NotificationsSummary extends StatelessWidget {
             ),
           ),
           if (onMarkAllRead != null)
-            TextButton(
+            TextButton.icon(
               onPressed: onMarkAllRead,
+              icon: Icon(Icons.done_all_rounded, size: 15.sp),
+              label: Text(
+                'mark_all_read'.tr,
+                style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800),
+              ),
               style: TextButton.styleFrom(
                 foregroundColor: primaryOrange,
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
-              ),
-              child: Text(
-                'mark_all_read'.tr,
-                style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w700),
+                backgroundColor: primaryOrange.withValues(alpha: 0.1),
+                padding: EdgeInsets.symmetric(horizontal: 10.w),
+                minimumSize: Size(0, 32.h),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
               ),
             )
           else if (unreadCount == 0)
@@ -174,27 +201,32 @@ class _NotificationsSummary extends StatelessWidget {
   }
 }
 
-class _NotificationsLoading extends StatelessWidget {
-  const _NotificationsLoading();
+/// Shown under the "Unread" filter when everything has been read.
+class _AllCaughtUp extends StatelessWidget {
+  const _AllCaughtUp();
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 80.h),
-      child: Center(
-        child: Column(
-          children: [
-            const CircularProgressIndicator(color: primaryOrange),
-            SizedBox(height: 16.h),
-            Text(
-              'loading_notifications'.tr,
-              style: TextStyle(
-                fontSize: 13.sp,
-                color: AppColorsTheme.textMutedColor(context),
-              ),
+      padding: EdgeInsets.symmetric(vertical: 40.h),
+      child: Column(
+        children: [
+          Icon(Icons.mark_email_read_outlined, size: 40.sp, color: primaryOrange),
+          SizedBox(height: 12.h),
+          Text(
+            'All caught up'.tr,
+            style: TextStyle(
+              fontSize: 15.sp,
+              fontWeight: FontWeight.w800,
+              color: AppColorsTheme.textMainColor(context),
             ),
-          ],
-        ),
+          ),
+          SizedBox(height: 4.h),
+          Text(
+            'You have no unread notifications.'.tr,
+            style: TextStyle(fontSize: 12.5.sp, color: AppColorsTheme.textMutedColor(context)),
+          ),
+        ],
       ),
     );
   }

@@ -12,16 +12,16 @@ class CheckoutVoucherSection extends StatelessWidget {
   final DashboardProvider dashboardProvider;
   final TextEditingController couponController;
 
-  const CheckoutVoucherSection({
-    super.key,
-    required this.dashboardProvider,
-    required this.couponController,
-  });
+  const CheckoutVoucherSection({super.key, required this.dashboardProvider, required this.couponController});
 
   @override
   Widget build(BuildContext context) {
-    final appliedCouponText =
-        dashboardProvider.wholesaleCheckoutModel?.data?.appliedCoupon ?? dashboardProvider.checkoutResponseModel?.data?.coupon;
+    // Package checkout uses /checkout/coupon; the wholesale cart its own endpoint.
+    final isPackage = dashboardProvider.isPackageCheckout;
+    final appliedCouponText = isPackage
+        ? dashboardProvider.checkoutCoupon
+        : (dashboardProvider.wholesaleCheckoutModel?.data?.appliedCoupon ??
+              dashboardProvider.checkoutResponseModel?.data?.coupon);
     final hasCoupon = appliedCouponText != null && appliedCouponText.isNotEmpty;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isApplying = dashboardProvider.isApplyingCoupon;
@@ -64,13 +64,27 @@ class CheckoutVoucherSection extends StatelessWidget {
             ),
             if (hasCoupon)
               TextButton(
-                onPressed: isApplying ? null : () => dashboardProvider.removeWholesaleCoupon(),
+                onPressed: isApplying
+                    ? null
+                    : () {
+                        couponController.clear();
+                        isPackage
+                            ? dashboardProvider.removeCheckoutCoupon()
+                            : dashboardProvider.removeWholesaleCoupon();
+                      },
                 style: TextButton.styleFrom(foregroundColor: errorRed),
-                child: Text('Remove'.tr, style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w800)),
+                child: Text(
+                  'Remove'.tr,
+                  style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w800),
+                ),
               )
             else
               CheckoutPillButton(
-                onTap: isApplying ? null : () => dashboardProvider.applyWholesaleCoupon(couponController.text),
+                onTap: isApplying
+                    ? null
+                    : () => isPackage
+                          ? dashboardProvider.applyCheckoutCoupon(couponController.text)
+                          : dashboardProvider.applyWholesaleCoupon(couponController.text),
                 child: isApplying
                     ? SizedBox(
                         width: 16.w,

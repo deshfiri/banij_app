@@ -28,6 +28,9 @@ class CheckoutData {
   final String? deadline;
   final dynamic gateways;
 
+  /// [gateways] as a typed list (accepts strings, objects or a key→label map).
+  List<CheckoutGateway> get gatewayList => CheckoutGateway.listFrom(gateways);
+
   CheckoutData({
     this.package,
     this.quote,
@@ -55,6 +58,58 @@ class CheckoutData {
         "deadline": deadline,
         "gateways": gateways,
       };
+}
+
+/// A payment gateway offered by `GET /checkout`; [value] is what
+/// `POST /checkout` expects in `gateway`.
+class CheckoutGateway {
+  final String value;
+  final String label;
+  final String? description;
+  final bool isAvailable;
+
+  const CheckoutGateway({
+    required this.value,
+    required this.label,
+    this.description,
+    this.isAvailable = true,
+  });
+
+  static List<CheckoutGateway> listFrom(dynamic raw) {
+    if (raw is List) {
+      return raw.map(_fromEntry).whereType<CheckoutGateway>().toList();
+    }
+    if (raw is Map) {
+      return raw.entries.map((entry) {
+        final value = entry.value;
+        if (value is Map) return _fromEntry({'value': entry.key, ...value});
+        if (value is bool) {
+          return CheckoutGateway(value: entry.key.toString(), label: _humanize(entry.key.toString()), isAvailable: value);
+        }
+        return CheckoutGateway(value: entry.key.toString(), label: value?.toString() ?? _humanize(entry.key.toString()));
+      }).whereType<CheckoutGateway>().toList();
+    }
+    return const [];
+  }
+
+  static CheckoutGateway? _fromEntry(dynamic item) {
+    if (item is String && item.isNotEmpty) return CheckoutGateway(value: item, label: _humanize(item));
+    if (item is! Map) return null;
+    final value = (item['value'] ?? item['key'] ?? item['code'] ?? item['slug'] ?? item['id'] ?? item['name'])?.toString();
+    if (value == null || value.isEmpty) return null;
+    final available = item['available'] ?? item['is_available'] ?? item['enabled'] ?? item['is_enabled'];
+    return CheckoutGateway(
+      value: value,
+      label: (item['label'] ?? item['name'] ?? item['title'])?.toString() ?? _humanize(value),
+      description: (item['description'] ?? item['hint'] ?? item['unavailable_reason'])?.toString(),
+      isAvailable: available is bool ? available : true,
+    );
+  }
+
+  static String _humanize(String value) {
+    final text = value.replaceAll(RegExp(r'[_-]+'), ' ').trim();
+    return text.isEmpty ? text : text[0].toUpperCase() + text.substring(1);
+  }
 }
 
 class CheckoutPackage {

@@ -8,12 +8,7 @@ import '../../../common_widget/hero_page_header.dart';
 import '../../../constants/color.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../../providers/invoice_provider.dart';
-import 'invoice_details_screen.dart';
-import '../model/invoice_list_model.dart';
-import '../model/receipt_list_model.dart';
-import 'widgets/finance_shared/finance_widgets.dart';
-import 'widgets/invoice_receipt_preview_modal.dart';
-import 'widgets/invoices/finance_document_card.dart';
+import 'widgets/invoices/finance_list_cards.dart';
 
 class InvoicesReceiptsScreen extends StatefulWidget {
   final String initialTab; // 'Invoices' or 'Receipts'
@@ -72,115 +67,6 @@ class _InvoicesReceiptsScreenState extends State<InvoicesReceiptsScreen>
     _tabController.dispose();
     _searchController.dispose();
     super.dispose();
-  }
-
-  Widget _buildInvoiceCard(BuildContext context, InvoiceItemModel invoice) {
-    final status = invoice.displayStatus;
-    final statusColor = financeStatusColor(status.toUpperCase());
-    final muted = AppColorsTheme.textMutedColor(context);
-    final paidAt = invoice.paidDateLabel;
-    final paymentMeta = paidAt != '—'
-        ? 'Paid: $paidAt'
-        : invoice.paymentReference == null
-        ? null
-        : 'Payment ref: ${invoice.paymentReference}';
-
-    return FinanceDocumentCard(
-      icon: Icons.receipt_long_rounded,
-      iconColor: primaryOrange,
-      number: invoice.number ?? invoice.id ?? 'Invoice',
-      status: status.toUpperCase(),
-      statusColor: statusColor,
-      badgeHorizontalPadding: 7,
-      badgeRadius: 10,
-      shadowOffsetY: 2,
-      detailTitle: invoice.displayPurpose,
-      detailGap: 2,
-      detailMeta: Row(
-        children: [
-          FinanceMetaItem(
-            icon: Icons.calendar_today_rounded,
-            iconColor: muted,
-            text: 'Issued: ${invoice.issuedDateLabel}',
-            weight: FontWeight.w500,
-            textColor: muted,
-          ),
-          if (paymentMeta != null) ...[
-            UIHelper.horizontalSpace(8.w),
-            FinanceMetaItem(
-              icon: Icons.payments_outlined,
-              iconColor: statusColor,
-              text: paymentMeta,
-              weight: FontWeight.w700,
-              textColor: statusColor,
-            ),
-          ],
-        ],
-      ),
-      amountLabel: 'Total Amount',
-      amountLabelSize: 9,
-      amount: invoice.displayTotal,
-      amountColor: primaryOrange,
-      buttonColor: primaryOrange,
-      onCardTap: () => _openInvoiceDetails(context, invoice),
-      onPreview: () => _openInvoiceDetails(context, invoice),
-    );
-  }
-
-  void _openInvoiceDetails(BuildContext context, InvoiceItemModel invoice) {
-    if (invoice.id?.trim().isNotEmpty != true) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invoice ID is unavailable')),
-      );
-      return;
-    }
-    InvoiceDetailsScreen.open(context, invoice: invoice);
-  }
-
-  Widget _buildReceiptCard(BuildContext context, ReceiptItemModel receipt) {
-    final status = receipt.displayStatus;
-    final statusColor = financeStatusColor(status.toUpperCase());
-    final muted = AppColorsTheme.textMutedColor(context);
-
-    return FinanceDocumentCard(
-      icon: Icons.payments_rounded,
-      iconColor: statusColor,
-      number: receipt.displayNumber,
-      status: status.toUpperCase(),
-      statusColor: statusColor,
-      badgeHorizontalPadding: 8,
-      badgeRadius: 12,
-      shadowOffsetY: 3,
-      detailTitle: receipt.displayGateway,
-      detailGap: 3,
-      detailMeta: Row(
-        children: [
-          FinanceMetaItem(
-            icon: Icons.access_time_rounded,
-            iconColor: muted,
-            text: receipt.displayDate,
-            weight: FontWeight.w500,
-            textColor: muted,
-          ),
-        ],
-      ),
-      amountLabel: 'Verified Amount',
-      amountLabelSize: 9.5,
-      amount: receipt.displayAmount,
-      amountColor: statusColor,
-      buttonColor: statusColor,
-      onPreview: () => InvoiceReceiptPreviewModal.show(
-        context,
-        title: 'Receipt',
-        docNo: receipt.displayNumber,
-        clientOrGateway: receipt.displayGateway,
-        date: receipt.displayDate,
-        dueDateOrTime: receipt.displayDate,
-        amount: receipt.displayAmount,
-        status: status,
-        isInvoice: false,
-      ),
-    );
   }
 
   Widget _buildList<T>({
@@ -383,10 +269,7 @@ class _InvoicesReceiptsScreenState extends State<InvoicesReceiptsScreen>
                                 ? 'No invoices found'
                                 : 'No matching invoices found',
                             onRetry: () => provider.fetchInvoices(force: true),
-                            itemBuilder: (context, index) => _buildInvoiceCard(
-                              context,
-                              filteredInvoices[index],
-                            ),
+                            itemBuilder: (context, index) => InvoiceListCard(invoice: filteredInvoices[index]),
                           ),
                           _buildList(
                             isLoading: provider.isLoadingReceipts,
@@ -396,10 +279,7 @@ class _InvoicesReceiptsScreenState extends State<InvoicesReceiptsScreen>
                                 ? 'No receipts found'
                                 : 'No matching receipts found',
                             onRetry: () => provider.fetchReceipts(force: true),
-                            itemBuilder: (context, index) => _buildReceiptCard(
-                              context,
-                              filteredReceipts[index],
-                            ),
+                            itemBuilder: (context, index) => ReceiptListCard(receipt: filteredReceipts[index]),
                           ),
                         ],
                       ),
