@@ -9,7 +9,7 @@ import '../../../../../providers/kyc_verification_provider.dart';
 import 'kyc_common_widgets.dart';
 import 'kyc_document_box.dart';
 
-/// Intro text, "verification batch" + draft pill, and the identity heading.
+/// Identity introduction and the current draft label.
 class KycIntroSection extends StatelessWidget {
   const KycIntroSection({super.key});
 
@@ -17,58 +17,72 @@ class KycIntroSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'kyc_header_desc'.tr,
-          style: TextStyle(
-            fontSize: 13.sp,
-            fontWeight: FontWeight.w500,
-            color: AppColorsTheme.textMutedColor(context),
-            height: 1.4,
-          ),
-        ),
-        UIHelper.verticalSpace(20.h),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'verification_batch'.tr,
-              style: TextStyle(
-                fontSize: 11.sp,
-                fontWeight: FontWeight.w700,
-                color: primaryOrange,
-                letterSpacing: 1.0,
+    return KycSectionCard(
+      withShadow: true,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44.w,
+                height: 44.w,
+                decoration: BoxDecoration(
+                  color: primaryOrange.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(14.r),
+                ),
+                child: Icon(Icons.verified_user_outlined, color: primaryOrange, size: 23.sp),
               ),
-            ),
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-              decoration: BoxDecoration(
-                color: isDark ? primaryOrange.withValues(alpha: 0.15) : const Color(0xFFFFECE0),
-                borderRadius: BorderRadius.circular(20.r),
-                border: Border.all(color: primaryOrange.withValues(alpha: 0.3)),
-              ),
-              child: Text(
-                'draft'.tr,
-                style: TextStyle(
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.bold,
-                  color: primaryOrange,
+              UIHelper.horizontalSpace(12.w),
+              Expanded(
+                child: KycTitleBlock(
+                  title: 'identity_verification'.tr,
+                  description: 'identity_verification_desc'.tr,
+                  titleSize: 17.sp,
+                  descriptionSize: 12.sp,
+                  descriptionHeight: 1.4,
                 ),
               ),
-            ),
-          ],
-        ),
-        UIHelper.verticalSpace(6.h),
-        KycTitleBlock(
-          title: 'identity_verification'.tr,
-          description: 'identity_verification_desc'.tr,
-          titleSize: 20.sp,
-          descriptionSize: 13.sp,
-          descriptionHeight: 1.4,
-        ),
-      ],
+            ],
+          ),
+          UIHelper.verticalSpace(14.h),
+          Divider(height: 1, color: AppColorsTheme.borderColor(context)),
+          UIHelper.verticalSpace(12.h),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'verification_batch'.tr,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w700,
+                    color: primaryOrange,
+                    letterSpacing: 0.7,
+                  ),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                decoration: BoxDecoration(
+                  color: isDark ? primaryOrange.withValues(alpha: 0.15) : const Color(0xFFFFECE0),
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(color: primaryOrange.withValues(alpha: 0.3)),
+                ),
+                child: Text(
+                  'draft'.tr,
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.bold,
+                    color: primaryOrange,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -80,7 +94,6 @@ class KycDocumentsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final kycProvider = context.watch<KycVerificationProvider>();
 
     return KycSectionCard(
@@ -96,20 +109,22 @@ class KycDocumentsCard extends StatelessWidget {
             descriptionHeight: 1.3,
           ),
           UIHelper.verticalSpace(14.h),
-          Row(
+          Wrap(
+            spacing: 8.w,
+            runSpacing: 8.h,
             children: [
               const _RequiredBadge(),
-              UIHelper.horizontalSpace(8.w),
               KycStatusBadge(statusKey: kycProvider.overallStatusKey),
             ],
           ),
           UIHelper.verticalSpace(18.h),
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 child: Text(
                   'complete_every_option'.tr,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
@@ -117,12 +132,18 @@ class KycDocumentsCard extends StatelessWidget {
                   ),
                 ),
               ),
-              Text(
-                '${kycProvider.uploadedRequiredCount} of 3 ${'completed'.tr}',
-                style: TextStyle(
-                  fontSize: 12.sp,
-                  fontWeight: FontWeight.bold,
-                  color: primaryOrange,
+              SizedBox(width: 8.w),
+              Flexible(
+                child: Text(
+                  '${kycProvider.uploadedRequiredCount} of 3 ${'completed'.tr}',
+                  maxLines: 2,
+                  textAlign: TextAlign.end,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.bold,
+                    color: primaryOrange,
+                  ),
                 ),
               ),
             ],
@@ -133,7 +154,7 @@ class KycDocumentsCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: kycProvider.progressRatio,
               minHeight: 8.h,
-              backgroundColor: isDark ? const Color(0xFF2A2A2D) : const Color(0xFFE5E7EB),
+              backgroundColor: AppColorsTheme.borderColor(context),
               valueColor: const AlwaysStoppedAnimation<Color>(primaryOrange),
             ),
           ),
@@ -374,7 +395,7 @@ class _StillNeededRow extends StatelessWidget {
       padding: EdgeInsets.only(bottom: 6.h),
       child: Row(
         children: [
-          Icon(Icons.cancel_outlined, color: Colors.redAccent, size: 15.sp),
+          Icon(Icons.cancel_outlined, color: errorRed, size: 15.sp),
           UIHelper.horizontalSpace(8.w),
           Expanded(
             child: Text(

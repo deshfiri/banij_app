@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../../../constants/color.dart';
 import '../../../../../helpers/ui_helpers.dart';
+import 'kyc_common_widgets.dart';
 
 /// One required file document in the KYC form. [docKey] is the value passed
 /// to `KycVerificationProvider.pickFile`.
@@ -73,35 +74,46 @@ class KycDocumentBox extends StatelessWidget {
         color: AppColorsTheme.background(context),
         borderRadius: BorderRadius.circular(14.r),
         border: Border.all(
-          color: isComplete ? Colors.green.withValues(alpha: 0.5) : AppColorsTheme.borderColor(context),
+          color: isComplete
+              ? kycSuccessGreen.withValues(alpha: 0.5)
+              : AppColorsTheme.borderColor(context),
         ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppColorsTheme.textMainColor(context),
+              Expanded(
+                child: Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColorsTheme.textMainColor(context),
+                  ),
                 ),
               ),
+              UIHelper.horizontalSpace(8.w),
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
                 decoration: BoxDecoration(
-                  color: isComplete ? Colors.green.withValues(alpha: 0.12) : AppColorsTheme.cardBg(context),
+                  color: isComplete
+                      ? kycSuccessGreen.withValues(alpha: 0.12)
+                      : AppColorsTheme.cardBg(context),
                   borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: Text(
                   countText,
+                  maxLines: 1,
                   style: TextStyle(
                     fontSize: 10.5.sp,
                     fontWeight: FontWeight.bold,
-                    color: isComplete ? Colors.green : AppColorsTheme.textMutedColor(context),
+                    color: isComplete
+                        ? kycSuccessGreen
+                        : AppColorsTheme.textMutedColor(context),
                   ),
                 ),
               ),
@@ -148,16 +160,20 @@ class KycFileSelector extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w700,
-                color: AppColorsTheme.textMainColor(context),
+            Expanded(
+              child: Text(
+                label,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w700,
+                  color: AppColorsTheme.textMainColor(context),
+                ),
               ),
             ),
+            UIHelper.horizontalSpace(8.w),
             Text(
               'required'.tr,
               style: TextStyle(
@@ -191,13 +207,17 @@ class KycFileSelector extends StatelessWidget {
                 style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold),
               ),
               style: ElevatedButton.styleFrom(
-                backgroundColor: isUploaded ? Colors.green : AppColorsTheme.cardBg(context),
+                backgroundColor: isUploaded
+                    ? kycSuccessGreen
+                    : AppColorsTheme.cardBg(context),
                 foregroundColor: isUploaded ? Colors.white : AppColorsTheme.textMainColor(context),
                 padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 10.h),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10.r),
                   side: BorderSide(
-                    color: isUploaded ? Colors.green : AppColorsTheme.borderColor(context),
+                    color: isUploaded
+                        ? kycSuccessGreen
+                        : AppColorsTheme.borderColor(context),
                   ),
                 ),
                 elevation: 0,
@@ -212,7 +232,7 @@ class KycFileSelector extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 11.5.sp,
-                    color: Colors.green,
+                    color: kycSuccessGreen,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
