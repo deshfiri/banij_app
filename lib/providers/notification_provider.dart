@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../feature/notification/model/notification_model.dart';
+import '../helpers/error_message.dart';
 import '../networks/api_access.dart';
 
 class NotificationItem {
@@ -24,36 +25,41 @@ class NotificationItem {
 class NotificationProvider extends ChangeNotifier {
   List<NotificationItem> _notifications = [];
   bool _isLoading = false;
+  String? _error;
 
   List<NotificationItem> get notifications => _notifications;
   bool get isLoading => _isLoading;
-
-  NotificationProvider() {
-    fetchNotifications();
-  }
+  String? get error => _error;
 
   Future<void> fetchNotifications() async {
+    if (_isLoading) return;
     _isLoading = true;
+    _error = null;
     notifyListeners();
 
     try {
-      NotificationResponseModel res = await notificationRxObj.fetchNotifications();
-      if (res.data != null && res.data!.isNotEmpty) {
-        _notifications = res.data!.map((item) {
-          return NotificationItem(
-            id: item.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-            title: item.title ?? 'Notification',
-            message: item.description ?? item.message ?? '',
-            time: item.createdAtHuman ?? item.time ?? '',
-            isRead: item.isRead ?? false,
-            iconData: Icons.notifications_active_outlined,
-          );
-        }).toList();
+      final NotificationResponseModel res = await notificationRxObj
+          .fetchNotifications();
+      if (res.success == false) {
+        throw Exception(res.message ?? 'Failed to load notifications');
       }
-    } catch (_) {}
 
-    _isLoading = false;
-    notifyListeners();
+      _notifications = (res.data ?? const []).map((item) {
+        return NotificationItem(
+          id: item.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
+          title: item.title ?? 'Notification',
+          message: item.description ?? item.message ?? '',
+          time: item.createdAtHuman ?? item.time ?? '',
+          isRead: item.isRead ?? false,
+          iconData: Icons.notifications_active_outlined,
+        );
+      }).toList();
+    } catch (error) {
+      _error = error.apiErrorMessage;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   int get unreadCount => _notifications.where((n) => !n.isRead).length;
