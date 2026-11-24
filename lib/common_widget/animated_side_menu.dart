@@ -3,8 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../constants/color.dart';
 
-/// 3D sidebar: the [menu] sits behind while the [child] screen slides right,
-/// scales down, tilts on the Y axis and gets rounded corners.
+/// Flat (2D) sidebar: the [menu] sits behind while the [child] screen slides
+/// right, scales down, tilts slightly (Z-axis rotation, no perspective) and gets
+/// rounded corners. Two coloured "cards" fan out behind the screen.
 ///
 /// Open/close it through a `GlobalKey<AnimatedSideMenuState>`:
 /// `key.currentState?.open()`, `close()` or `toggle()`.
@@ -28,7 +29,8 @@ class AnimatedSideMenu extends StatefulWidget {
 class AnimatedSideMenuState extends State<AnimatedSideMenu> with SingleTickerProviderStateMixin {
   static const Duration _duration = Duration(milliseconds: 380);
   static const double _minScale = 0.8;
-  static const double _tiltRadians = 0.3; // ~17°, right edge tilts away
+  static const double _tiltRadians = 0.16; // ~9° counter-clockwise tilt
+  static const double _cardTiltStep = 0.09; // extra tilt per background card
   static const double _edgeDragWidth = 24;
   static const double _flingVelocity = 365;
 
@@ -66,6 +68,35 @@ class AnimatedSideMenuState extends State<AnimatedSideMenu> with SingleTickerPro
     } else {
       _controller.value > 0.5 ? open() : close();
     }
+  }
+
+  /// 2D transform for the screen ([layer] 0) and the cards behind it
+  /// (layer 1, 2…): each deeper card is shifted a bit left and tilted more.
+  Matrix4 _cardTransform(double t, {required int layer}) {
+    final scale = 1 - (1 - _minScale) * t;
+    final dx = (_menuWidth * 0.85 - layer * 18.w) * t;
+    final angle = -(_tiltRadians + layer * _cardTiltStep) * t;
+    return Matrix4.identity()
+      ..translateByDouble(dx, 0, 0, 1)
+      ..rotateZ(angle)
+      ..scaleByDouble(scale, scale, 1, 1);
+  }
+
+  Widget _backgroundCard(double t, {required int layer, required Color color}) {
+    return Positioned.fill(
+      child: IgnorePointer(
+        child: Transform(
+          alignment: Alignment.center,
+          transform: _cardTransform(t, layer: layer),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(28.r * t),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -110,21 +141,23 @@ class AnimatedSideMenuState extends State<AnimatedSideMenu> with SingleTickerPro
                     ),
                   ),
 
-                  // Main screen: slide + scale + 3D tilt + rounded corners.
+                  // Background cards fanned out behind the screen.
+                  if (t > 0) ...[
+                    _backgroundCard(t, layer: 2, color: primaryOrange.withValues(alpha: 0.25)),
+                    _backgroundCard(t, layer: 1, color: primaryOrange.withValues(alpha: 0.85)),
+                  ],
+
+                  // Main screen: slide + scale + flat tilt + rounded corners.
                   Transform(
                     alignment: Alignment.center,
-                    transform: Matrix4.identity()
-                      ..setEntry(3, 2, 0.001) // perspective
-                      ..translateByDouble(_menuWidth * 0.82 * t, 0, 0, 1)
-                      ..rotateY(-_tiltRadians * t)
-                      ..scaleByDouble(1 - (1 - _minScale) * t, 1 - (1 - _minScale) * t, 1, 1),
+                    transform: _cardTransform(t, layer: 0),
                     child: DecoratedBox(
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(28.r * t),
                         boxShadow: [
                           if (t > 0)
                             BoxShadow(
-                              color: (isDark ? Colors.black : primaryOrange).withValues(alpha: 0.25 * t),
+                              color: Colors.black.withValues(alpha: (isDark ? 0.4 : 0.18) * t),
                               blurRadius: 30,
                               offset: const Offset(-8, 12),
                             ),
