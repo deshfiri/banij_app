@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
-import '../../../common_widget/pill_chip.dart';
 import '../../../constants/color.dart';
 import '../../../helpers/all_routes.dart';
 import '../../../helpers/di.dart';
@@ -20,10 +19,12 @@ import 'widgets/account_hero_header.dart';
 import 'widgets/account_package_section.dart';
 import 'widgets/account_profile_section.dart';
 import 'widgets/account_security_section.dart';
+import 'widgets/account_menu.dart';
 
-/// Account tab. Users get tabbed sections (Profile, Security, Package,
-/// Invoices, Receipts, Appearance); suppliers (`initialTab == 'supplier'`)
-/// get Profile + Appearance on one page.
+/// Account tab. Users get a settings-style list (Profile, Security, Package,
+/// Invoices, Receipts, Appearance); tapping a row opens that section on its
+/// own screen. Suppliers (`initialTab == 'supplier'`) get Profile +
+/// Appearance on one page.
 class AccountScreenBody extends StatefulWidget {
   final String? initialTab;
   final VoidCallback? onOpenDrawer;
@@ -38,26 +39,30 @@ class AccountScreenBody extends StatefulWidget {
   State<AccountScreenBody> createState() => _AccountScreenBodyState();
 }
 
-/// Tab id (kept as the original strings), label key and chip icon.
+/// Section id (kept as the original strings), label key, description key,
+/// icon and accent colour.
 class _AccountTab {
   final String id;
   final String labelKey;
+  final String descKey;
   final IconData icon;
+  final Color color;
 
-  const _AccountTab(this.id, this.labelKey, this.icon);
+  const _AccountTab(this.id, this.labelKey, this.descKey, this.icon, this.color);
 
-  static const List<_AccountTab> all = [
-    _AccountTab('Profile', 'profile', Icons.person_outline_rounded),
-    _AccountTab('Security', 'security', Icons.shield_outlined),
-    _AccountTab('Package', 'package_tab', Icons.workspace_premium_outlined),
-    _AccountTab('Invoices', 'invoices_tab', Icons.receipt_long_outlined),
-    _AccountTab('Receipts', 'receipts_tab', Icons.payments_outlined),
-    _AccountTab('Appearance', 'appearance_tab', Icons.palette_outlined),
-  ];
+  static const profile = _AccountTab('Profile', 'profile', 'profile_desc', Icons.person_outline_rounded, primaryOrange);
+  static const security = _AccountTab('Security', 'security', 'security_desc', Icons.shield_outlined, Color(0xFF3B82F6));
+  static const package = _AccountTab('Package', 'package_tab', 'package_desc', Icons.workspace_premium_outlined, Color(0xFF8B5CF6));
+  static const invoices = _AccountTab('Invoices', 'invoices_tab', 'invoices_desc', Icons.receipt_long_outlined, Color(0xFF10B981));
+  static const receipts = _AccountTab('Receipts', 'receipts_tab', 'receipts_desc', Icons.payments_outlined, Color(0xFF14B8A6));
+  static const appearance = _AccountTab('Appearance', 'appearance_tab', 'appearance_desc', Icons.palette_outlined, Color(0xFFF59E0B));
+
+  static const List<_AccountTab> all = [profile, security, package, invoices, receipts, appearance];
 }
 
 class _AccountScreenBodyState extends State<AccountScreenBody> {
-  late String _selectedTab;
+  /// Notifies open section screens to rebuild after this state changes.
+  final ValueNotifier<int> _sectionRefresh = ValueNotifier<int>(0);
 
   late bool _isBengali;
   SecurityModel? _securityModel;
@@ -69,10 +74,46 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
   @override
   void initState() {
     super.initState();
-    _selectedTab = widget.initialTab == 'supplier' ? 'Profile' : (widget.initialTab ?? 'Profile');
+    // A specific section was requested (e.g. 'Package'): open it on top.
+    if (!_isSupplier && widget.initialTab != null) {
+      final requested = _AccountTab.all.where((tab) => tab.id == widget.initialTab);
+      if (requested.isNotEmpty) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) _openSection(requested.first);
+        });
+      }
+    }
     _isBengali = appData.read('isBengali') ?? false;
     _fetchSecurityData();
     _fetchLanguageLocale();
+  }
+
+  @override
+  void dispose() {
+    _sectionRefresh.dispose();
+    super.dispose();
+  }
+
+  /// Same as [setState], and also refreshes any open section screen.
+  @override
+  void setState(VoidCallback fn) {
+    super.setState(fn);
+    _sectionRefresh.value++;
+  }
+
+  void _openSection(_AccountTab tab) {
+    AccountSectionScreen.open(
+      context,
+      title: tab.labelKey.tr,
+      subtitle: tab.descKey.tr,
+      refresh: _sectionRefresh,
+      // Provider data is watched from the section's own context.
+      builder: (sectionContext) => _buildTabContent(
+        tab.id,
+        sectionContext.watch<ThemeProvider>(),
+        sectionContext.watch<AccountProvider>(),
+      ),
+    );
   }
 
   Future<void> _fetchLanguageLocale() async {
@@ -171,30 +212,55 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
             fallbackName: accountProvider.nameController.text,
             fallbackEmail: accountProvider.emailController.text,
           ),
-          if (!_isSupplier) ...[
-            UIHelper.verticalSpace(14.h),
-            PillChipBar(
-              chips: [
-                for (final tab in _AccountTab.all)
-                  PillChip(
-                    label: tab.labelKey.tr,
-                    icon: tab.icon,
-                    isSelected: _selectedTab == tab.id,
-                    onTap: () => setState(() => _selectedTab = tab.id),
-                  ),
-              ],
-            ),
-          ],
           Expanded(
-            child: SingleChildScrollView(
-              padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 100.h),
-              child: _isSupplier
-                  ? _buildSupplierContent(themeProvider, accountProvider)
-                  : _buildTabContent(themeProvider, accountProvider),
+            child: AccountPageBody(
+              child: _isSupplier ? _buildSupplierContent(themeProvider, accountProvider) : _buildMenu(),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  /// Settings-style list of sections; each row opens its own screen.
+  Widget _buildMenu() {
+    AccountMenuItem item(_AccountTab tab) => AccountMenuItem(
+          icon: tab.icon,
+          color: tab.color,
+          title: tab.labelKey.tr,
+          subtitle: tab.descKey.tr,
+          onTap: () => _openSection(tab),
+        );
+
+    return Column(
+      children: [
+        AccountMenuGroup(
+          title: 'profile'.tr,
+          items: [item(_AccountTab.profile), item(_AccountTab.security)],
+        ),
+        UIHelper.verticalSpace(18.h),
+        AccountMenuGroup(
+          title: 'package_tab'.tr,
+          items: [item(_AccountTab.package), item(_AccountTab.invoices), item(_AccountTab.receipts)],
+        ),
+        UIHelper.verticalSpace(18.h),
+        AccountMenuGroup(
+          title: 'appearance_tab'.tr,
+          items: [item(_AccountTab.appearance)],
+        ),
+        UIHelper.verticalSpace(18.h),
+        AccountMenuGroup(
+          items: [
+            AccountMenuItem(
+              icon: Icons.logout_rounded,
+              title: 'logout'.tr,
+              subtitle: 'logout_subtitle'.tr,
+              isDanger: true,
+              onTap: () => LogoutConfirmationDialog.show(context),
+            ),
+          ],
+        ),
+      ],
     );
   }
 
@@ -216,17 +282,14 @@ class _AccountScreenBodyState extends State<AccountScreenBody> {
     );
   }
 
-  Widget _buildTabContent(ThemeProvider themeProvider, AccountProvider accountProvider) {
-    switch (_selectedTab) {
+  Widget _buildTabContent(String tabId, ThemeProvider themeProvider, AccountProvider accountProvider) {
+    switch (tabId) {
       case 'Profile':
         return AccountProfileSection(accountProvider: accountProvider);
       case 'Security':
         return AccountSecuritySection(isLoading: _isLoadingSecurity, securityModel: _securityModel);
       case 'Package':
-        return AccountPackageSection(
-          packages: accountProvider.packageResponse?.data ?? [],
-          selectedSlug: accountProvider.packageResponse?.selectedSlug,
-        );
+        return const AccountPackageSection();
       case 'Invoices':
         return const AccountInvoicesSection();
       case 'Receipts':

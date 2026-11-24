@@ -33,7 +33,7 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   Future<void> _refresh() => context.read<SubscriptionProvider>().fetchSubscription(force: true);
 
   void _openPackages() {
-    Navigator.pushNamed(context, Routes.accountScreen, arguments: 'Package').then((_) {
+    Navigator.pushNamed(context, Routes.packagesScreen).then((_) {
       if (mounted) _refresh();
     });
   }

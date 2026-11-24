@@ -23,4 +23,7 @@ final class PackageRx extends RxResponseInt<PackageResponseModel> {
       return handleErrorWithReturn(error);
     }
   }
+
+  /// `POST /packages/{slug}/select`; throws with the API message on failure.
+  Future<PackageSelectResultModel> selectPackage(String slug) => _api.selectPackage(slug);
 }

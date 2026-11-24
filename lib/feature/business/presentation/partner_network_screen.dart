@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../common_widget/hero_page_header.dart';
 import '../../../constants/color.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../../networks/api_access.dart';
@@ -44,53 +46,47 @@ class _PartnerNetworkScreenState extends State<PartnerNetworkScreen> {
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Scaffold(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
         backgroundColor: AppColorsTheme.background(context),
-        appBar: partnerNetworkAppBar(context, isLoading: true),
-        body: const PartnerNetworkShimmer(),
-      );
-    }
-
-    final partnerCode = _referralsModel?.code ?? 'CGKRRMKR';
-    final partnerLink = _referralsModel?.link ?? 'https://staging.deshfiri.com/register?ref=$partnerCode';
-
-    return Scaffold(
-      backgroundColor: AppColorsTheme.background(context),
-      appBar: partnerNetworkAppBar(context, isLoading: false),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        body: Column(
           children: [
-            Text(
-              'Partner Network',
-              style: TextStyle(
-                fontSize: 22.sp,
-                fontWeight: FontWeight.w900,
-                color: AppColorsTheme.textMainColor(context),
-              ),
+            const HeroPageHeader(
+              title: 'Partner Network',
+              subtitle:
+                  'Your partner code, the businesses in your Partner Network, and what you have earned from the Partner Network programme.',
             ),
-            UIHelper.verticalSpace(4.h),
-            Text(
-              'Your partner code, the businesses in your Partner Network, and what you have earned from the Partner Network programme.',
-              style: TextStyle(
-                fontSize: 13.sp,
-                color: AppColorsTheme.textMutedColor(context),
-                height: 1.4,
-              ),
-            ),
-            UIHelper.verticalSpace(20.h),
-            PartnerCodeCard(code: partnerCode, link: partnerLink),
-            UIHelper.verticalSpace(20.h),
-            PartnerStatsGrid(summary: _referralsModel?.summary),
-            UIHelper.verticalSpace(24.h),
-            PartnerMembersCard(members: _referralsModel?.direct?.data ?? []),
-            UIHelper.verticalSpace(20.h),
-            PartnerEarningsCard(earnings: _referralsModel?.earnings?.data ?? []),
+            Expanded(child: _isLoading ? const PartnerNetworkShimmer() : _buildContent()),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildContent() {
+    final partnerCode = _referralsModel?.code ?? 'CGKRRMKR';
+    final partnerLink = _referralsModel?.link ?? 'https://staging.deshfiri.com/register?ref=$partnerCode';
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Keep content readable on tablets.
+        final side = constraints.maxWidth > 760 ? (constraints.maxWidth - 720) / 2 : 16.w;
+        return SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(side, 18.h, side, 28.h),
+          child: Column(
+            children: [
+              PartnerCodeCard(code: partnerCode, link: partnerLink),
+              UIHelper.verticalSpace(16.h),
+              PartnerStatsGrid(summary: _referralsModel?.summary),
+              UIHelper.verticalSpace(16.h),
+              PartnerMembersCard(members: _referralsModel?.direct?.data ?? []),
+              UIHelper.verticalSpace(16.h),
+              PartnerEarningsCard(earnings: _referralsModel?.earnings?.data ?? []),
+            ],
+          ),
+        );
+      },
     );
   }
 }

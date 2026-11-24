@@ -40,4 +40,24 @@ final class PackageApi {
       rethrow;
     }
   }
+
+  /// Switches the account to [slug] (`POST /packages/{slug}/select`).
+  /// Throws with the API's message on failure.
+  Future<PackageSelectResultModel> selectPackage(String slug) async {
+    try {
+      final response = await postHttp(EndPoints.selectPackage(slug));
+      if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 204) {
+        throw DataSource.DEFAULT.getFailure();
+      }
+      final data = response.data is String && (response.data as String).isNotEmpty
+          ? json.decode(response.data)
+          : response.data;
+      return PackageSelectResultModel.fromJson(data);
+    } on DioException catch (dioError) {
+      final data = dioError.response?.data;
+      if (data is Map && data['message'] != null) throw Exception(data['message'].toString());
+      if (data is Map && data['error'] != null) throw Exception(data['error'].toString());
+      rethrow;
+    }
+  }
 }

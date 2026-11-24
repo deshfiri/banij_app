@@ -11,7 +11,10 @@ class AccountSectionCard extends StatelessWidget {
   final String? subtitle;
   final Widget child;
 
-  const AccountSectionCard({super.key, required this.title, this.subtitle, required this.child});
+  /// Optional widget at the right of the title row (e.g. an Edit button).
+  final Widget? trailing;
+
+  const AccountSectionCard({super.key, required this.title, this.subtitle, required this.child, this.trailing});
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +25,17 @@ class AccountSectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AccountSectionTitle(title: title, subtitle: subtitle),
+          if (trailing == null)
+            AccountSectionTitle(title: title, subtitle: subtitle)
+          else
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: AccountSectionTitle(title: title, subtitle: subtitle)),
+                UIHelper.horizontalSpace(8.w),
+                trailing!,
+              ],
+            ),
           UIHelper.verticalSpace(16.h),
           child,
         ],

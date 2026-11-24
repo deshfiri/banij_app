@@ -96,7 +96,8 @@ class AccountProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> saveProfile(BuildContext context) async {
+  /// Saves name + email. Returns true when the API accepted the change.
+  Future<bool> saveProfile(BuildContext context) async {
     try {
       final Map<String, dynamic> updateData = {
         "name": nameController.text.trim(),
@@ -117,12 +118,14 @@ class AccountProvider extends ChangeNotifier {
       }
 
       ToastUtil.showSuccessMessage('profile_updated_success'.tr);
+      return true;
     } catch (e) {
       String errorMsg = e.apiErrorMessage;
       if (errorMsg.contains('Failure')) {
         errorMsg = 'Failed to update profile. Please check your details and network connection.';
       }
       ToastUtil.showErrorMessage(errorMsg);
+      return false;
     }
   }
 

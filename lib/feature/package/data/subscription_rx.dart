@@ -24,10 +24,6 @@ final class SubscriptionRx extends RxResponseInt<SubscriptionResponseModel> {
     }
   }
 
-  Future<bool> selectPackage(String slug) async {
-    return await _api.selectPackage(slug);
-  }
-
   Future<void> cancelSubscription() => _api.cancelSubscription();
 
   Future<bool> changeSubscription(String slug) async {

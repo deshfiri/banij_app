@@ -41,15 +41,6 @@ final class SubscriptionApi {
     }
   }
 
-  Future<bool> selectPackage(String packageSlug) async {
-    try {
-      Response response = await postHttp(EndPoints.selectPackage(packageSlug));
-      return response.statusCode == 200 || response.statusCode == 201;
-    } catch (_) {
-      return false;
-    }
-  }
-
   /// Cancels the current subscription. Throws with the API message on failure.
   Future<void> cancelSubscription() => _postAction(EndPoints.subscriptionCancel());
 

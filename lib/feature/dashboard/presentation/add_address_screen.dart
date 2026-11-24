@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
+import '../../../common_widget/hero_page_header.dart';
 import '../../../constants/color.dart';
 import '../../../helpers/toast.dart';
 import '../../../helpers/ui_helpers.dart';
@@ -319,186 +320,198 @@ class _AddAddressScreenState extends State<AddAddressScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final mainColor = AppColorsTheme.textMainColor(context);
+    final isEdit = widget.address != null;
 
-    return Scaffold(
-      backgroundColor: AppColorsTheme.background(context),
-      appBar: AppBar(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
         backgroundColor: AppColorsTheme.background(context),
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded, color: mainColor),
-          onPressed: () => Navigator.pop(context),
+        body: Column(
+          children: [
+            HeroPageHeader(
+              title: isEdit ? 'Edit Address'.tr : 'Add New Address'.tr,
+              subtitle: isEdit ? 'Update the contact and location details.' : 'Add a business, operational or shipping address.',
+            ),
+            Expanded(
+              child: _isLoadingLocations
+                  ? const Center(child: CircularProgressIndicator(color: primaryOrange))
+                  : GestureDetector(
+                      onTap: () => FocusScope.of(context).unfocus(),
+                      child: SingleChildScrollView(
+                        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                        padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 24.h),
+                        child: AddressContentFrame(
+                          child: Column(
+                            children: [
+                              AddressFormSection(
+                                title: 'Address Type',
+                                icon: Icons.category_outlined,
+                                children: [
+                                  AddressTypeChips(
+                                    types: _addressTypes,
+                                    selectedType: _selectedType,
+                                    onSelected: (type) => setState(() => _selectedType = type),
+                                  ),
+                                ],
+                              ),
+                              UIHelper.verticalSpace(14.h),
+                              _buildContactSection(),
+                              UIHelper.verticalSpace(14.h),
+                              _buildLocationSection(),
+                              UIHelper.verticalSpace(14.h),
+                              _buildDetailsSection(),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+            ),
+          ],
         ),
-        title: Text(
-          widget.address != null ? 'Edit Address'.tr : 'Add New Address'.tr,
-          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: mainColor),
-        ),
+        bottomNavigationBar: _isLoadingLocations
+            ? null
+            : AddressBottomBar(
+                label: isEdit ? 'Update Address' : 'Save Address',
+                icon: Icons.check_circle_outline_rounded,
+                isLoading: _isLoading,
+                onPressed: _submitAddress,
+              ),
       ),
-      body: SafeArea(
-        child: _isLoadingLocations
-            ? const Center(child: CircularProgressIndicator(color: primaryOrange))
-            : SingleChildScrollView(
-                padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-                child: Column(
+    );
+  }
+
+  Widget _buildContactSection() {
+    return AddressFormSection(
+      title: 'Contact',
+      subtitle: 'Who should we reach at this address?',
+      icon: Icons.person_outline_rounded,
+      children: [
+        AddressLabeledField(
+          label: 'Contact Name *',
+          field: AddressTextField(
+            controller: _nameController,
+            hint: 'e.g. Mohammad Rahim',
+            icon: Icons.person_outline_rounded,
+          ),
+        ),
+        AddressLabeledField(
+          label: 'Contact Mobile *',
+          isLast: true,
+          field: AddressTextField(
+            controller: _mobileController,
+            hint: '+8801711111111',
+            icon: Icons.phone_outlined,
+            keyboardType: TextInputType.phone,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildLocationSection() {
+    return AddressFormSection(
+      title: 'Location',
+      subtitle: 'Choose each level in order.',
+      icon: Icons.map_outlined,
+      children: [
+        AddressLabeledField(
+          label: 'Division *',
+          field: LocationDropdown(
+            hint: 'Search & select Division',
+            icon: Icons.public_rounded,
+            items: _divisions,
+            selectedValue: _selectedDivision,
+            onChanged: _onDivisionChanged,
+            searchController: _divisionSearchController,
+          ),
+        ),
+        AddressLabeledField(
+          label: 'District *',
+          field: LocationDropdown(
+            hint: _selectedDivision == null ? 'Select Division first' : 'Search & select District',
+            icon: Icons.location_city_rounded,
+            items: _districts,
+            selectedValue: _selectedDistrict,
+            onChanged: _selectedDivision == null ? null : _onDistrictChanged,
+            searchController: _districtSearchController,
+          ),
+        ),
+        AddressLabeledField(
+          label: 'Upazila / Thana *',
+          field: LocationDropdown(
+            hint: _selectedDistrict == null ? 'Select District first' : 'Search & select Upazila',
+            icon: Icons.apartment_rounded,
+            items: _upazilas,
+            selectedValue: _selectedUpazila,
+            onChanged: _selectedDistrict == null ? null : _onUpazilaChanged,
+            searchController: _upazilaSearchController,
+          ),
+        ),
+        AddressLabeledField(
+          label: 'Union (Optional)',
+          isLast: true,
+          field: LocationDropdown(
+            hint: _selectedUpazila == null ? 'Select Upazila first' : 'Search & select Union (Optional)',
+            icon: Icons.holiday_village_outlined,
+            items: _unions,
+            selectedValue: _selectedUnion,
+            onChanged: _selectedUpazila == null ? null : _onUnionChanged,
+            searchController: _unionSearchController,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetailsSection() {
+    final landmark = AddressLabeledField(
+      label: 'Landmark',
+      isLast: true,
+      field: AddressTextField(
+        controller: _landmarkController,
+        hint: 'e.g. Near City Hospital',
+        icon: Icons.near_me_outlined,
+      ),
+    );
+    final postcode = AddressLabeledField(
+      label: 'Postcode',
+      isLast: true,
+      field: AddressTextField(
+        controller: _postcodeController,
+        hint: 'e.g. 1207',
+        icon: Icons.markunread_mailbox_outlined,
+        keyboardType: TextInputType.number,
+        textInputAction: TextInputAction.done,
+      ),
+    );
+
+    return AddressFormSection(
+      title: 'Address Details',
+      icon: Icons.home_work_outlined,
+      children: [
+        AddressLabeledField(
+          label: 'Detailed Address *',
+          field: AddressTextField(
+            controller: _detailedAddressController,
+            hint: 'e.g. House 42, Road 11, Mohammadpur, Dhaka',
+            icon: Icons.location_on_outlined,
+            maxLines: 3,
+          ),
+        ),
+        // Side by side when there is room, stacked on narrow phones.
+        LayoutBuilder(
+          builder: (context, constraints) => constraints.maxWidth < 320
+              ? Column(children: [landmark, UIHelper.verticalSpace(14.h), postcode])
+              : Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Address Type',
-                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold, color: mainColor),
-                    ),
-                    UIHelper.verticalSpace(8.h),
-                    AddressTypeChips(
-                      types: _addressTypes,
-                      selectedType: _selectedType,
-                      onSelected: (type) => setState(() => _selectedType = type),
-                    ),
-                    UIHelper.verticalSpace(20.h),
-                    _buildFormCard(context),
-                    UIHelper.verticalSpace(24.h),
-                    _buildSubmitButton(),
+                    Expanded(flex: 3, child: landmark),
+                    UIHelper.horizontalSpace(12.w),
+                    Expanded(flex: 2, child: postcode),
                   ],
                 ),
-              ),
-      ),
-    );
-  }
-
-  Widget _buildFormCard(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        color: AppColorsTheme.cardBg(context),
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: AppColorsTheme.borderColor(context), width: 1.w),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AddressLabeledField(
-            label: 'Contact Name *',
-            field: AddressTextField(
-              controller: _nameController,
-              hint: 'e.g. Mohammad Rahim',
-              icon: Icons.person_outline_rounded,
-            ),
-          ),
-          UIHelper.verticalSpace(16.h),
-          AddressLabeledField(
-            label: 'Contact Mobile *',
-            field: AddressTextField(
-              controller: _mobileController,
-              hint: '+8801711111111',
-              icon: Icons.phone_outlined,
-              keyboardType: TextInputType.phone,
-            ),
-          ),
-          UIHelper.verticalSpace(16.h),
-          AddressLabeledField(
-            label: 'Division *',
-            field: LocationDropdown(
-              hint: 'Search & select Division',
-              items: _divisions,
-              selectedValue: _selectedDivision,
-              onChanged: _onDivisionChanged,
-              searchController: _divisionSearchController,
-            ),
-          ),
-          UIHelper.verticalSpace(16.h),
-          AddressLabeledField(
-            label: 'District *',
-            field: LocationDropdown(
-              hint: _selectedDivision == null ? 'Select Division first' : 'Search & select District',
-              items: _districts,
-              selectedValue: _selectedDistrict,
-              onChanged: _selectedDivision == null ? null : _onDistrictChanged,
-              searchController: _districtSearchController,
-            ),
-          ),
-          UIHelper.verticalSpace(16.h),
-          AddressLabeledField(
-            label: 'Upazila / Thana *',
-            field: LocationDropdown(
-              hint: _selectedDistrict == null ? 'Select District first' : 'Search & select Upazila',
-              items: _upazilas,
-              selectedValue: _selectedUpazila,
-              onChanged: _selectedDistrict == null ? null : _onUpazilaChanged,
-              searchController: _upazilaSearchController,
-            ),
-          ),
-          UIHelper.verticalSpace(16.h),
-          AddressLabeledField(
-            label: 'Union (Optional)',
-            field: LocationDropdown(
-              hint: _selectedUpazila == null ? 'Select Upazila first' : 'Search & select Union (Optional)',
-              items: _unions,
-              selectedValue: _selectedUnion,
-              onChanged: _selectedUpazila == null ? null : _onUnionChanged,
-              searchController: _unionSearchController,
-            ),
-          ),
-          UIHelper.verticalSpace(16.h),
-          AddressLabeledField(
-            label: 'Detailed Address *',
-            field: AddressTextField(
-              controller: _detailedAddressController,
-              hint: 'e.g. House 42, Road 11, Mohammadpur, Dhaka',
-              icon: Icons.location_on_outlined,
-              maxLines: 2,
-            ),
-          ),
-          UIHelper.verticalSpace(16.h),
-          Row(
-            children: [
-              Expanded(
-                child: AddressLabeledField(
-                  label: 'Landmark',
-                  field: AddressTextField(
-                    controller: _landmarkController,
-                    hint: 'e.g. Near City Hospital',
-                    icon: Icons.near_me_outlined,
-                  ),
-                ),
-              ),
-              UIHelper.horizontalSpace(12.w),
-              Expanded(
-                child: AddressLabeledField(
-                  label: 'Postcode',
-                  field: AddressTextField(
-                    controller: _postcodeController,
-                    hint: 'e.g. 1207',
-                    icon: Icons.markunread_mailbox_outlined,
-                    keyboardType: TextInputType.number,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSubmitButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: _isLoading ? null : _submitAddress,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: primaryOrange,
-          foregroundColor: Colors.white,
-          padding: EdgeInsets.symmetric(vertical: 15.h),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-          elevation: 0,
         ),
-        child: _isLoading
-            ? SizedBox(
-                height: 20.h,
-                width: 20.w,
-                child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-              )
-            : Text('Save Address', style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold)),
-      ),
+      ],
     );
   }
 }

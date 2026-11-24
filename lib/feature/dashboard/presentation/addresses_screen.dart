@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../common_widget/hero_page_header.dart';
 import '../../../constants/color.dart';
 import '../../../helpers/all_routes.dart';
 import '../../../helpers/toast.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../../networks/api_access.dart';
 import '../model/address_model.dart';
+import 'widgets/commerce/address_form_widgets.dart';
 import 'widgets/commerce/address_widgets.dart';
 
 class AddressesScreen extends StatefulWidget {
@@ -112,84 +115,53 @@ class _AddressesScreenState extends State<AddressesScreen> {
   Widget build(BuildContext context) {
     final apiAddresses = _addressResponseModel?.data ?? [];
     final hasApiAddresses = apiAddresses.isNotEmpty;
-    final mainColor = AppColorsTheme.textMainColor(context);
+    final count = hasApiAddresses ? apiAddresses.length : _dummyAddresses.length;
 
-    return Scaffold(
-      backgroundColor: AppColorsTheme.background(context),
-      appBar: AppBar(
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
         backgroundColor: AppColorsTheme.background(context),
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back_rounded, color: mainColor),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Text(
-          'Addresses',
-          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: mainColor),
-        ),
-        actions: [
-          Padding(
-            padding: EdgeInsets.only(right: 12.w),
-            child: Center(
-              child: ElevatedButton.icon(
-                onPressed: () => _navigateToAddAddress(),
-                icon: Icon(Icons.add_rounded, size: 16.sp),
-                label: Text('Add address', style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold)),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryOrange,
-                  foregroundColor: Colors.white,
-                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                  elevation: 0,
-                ),
+        body: Column(
+          children: [
+            HeroPageHeader(
+              title: 'Addresses',
+              subtitle: 'Your business and operational addresses.',
+              trailing: HeroIconButton(
+                icon: Icons.add_location_alt_rounded,
+                onTap: () => _navigateToAddAddress(),
               ),
             ),
-          ),
-        ],
-      ),
-      body: _isLoading
-          ? const AddressListShimmer()
-          : SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 20.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Addresses',
-                    style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w900, color: mainColor),
-                  ),
-                  UIHelper.verticalSpace(4.h),
-                  Text(
-                    'Your business and operational addresses.',
-                    style: TextStyle(fontSize: 13.sp, color: AppColorsTheme.textMutedColor(context)),
-                  ),
-                  UIHelper.verticalSpace(16.h),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton.icon(
-                      onPressed: () => _navigateToAddAddress(),
-                      icon: Icon(Icons.add_location_alt_rounded, size: 18.sp),
-                      label: Text('Add address', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: primaryOrange,
-                        foregroundColor: Colors.white,
-                        padding: EdgeInsets.symmetric(vertical: 14.h),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                        elevation: 0,
+            Expanded(
+              child: _isLoading
+                  ? const AddressListShimmer()
+                  : SingleChildScrollView(
+                      padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 24.h),
+                      child: AddressContentFrame(
+                        maxWidth: 1000,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            AddressCountHeader(count: count),
+                            UIHelper.verticalSpace(12.h),
+                            ResponsiveCardGrid(
+                              children: [
+                                for (var index = 0; index < count; index++)
+                                  hasApiAddresses ? _apiAddressCard(apiAddresses[index]) : _sampleAddressCard(index),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                  UIHelper.verticalSpace(20.h),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: hasApiAddresses ? apiAddresses.length : _dummyAddresses.length,
-                    itemBuilder: (context, index) =>
-                        hasApiAddresses ? _apiAddressCard(apiAddresses[index]) : _sampleAddressCard(index),
-                  ),
-                ],
-              ),
             ),
+          ],
+        ),
+        bottomNavigationBar: AddressBottomBar(
+          label: 'Add address',
+          icon: Icons.add_location_alt_rounded,
+          onPressed: () => _navigateToAddAddress(),
+        ),
+      ),
     );
   }
 }
