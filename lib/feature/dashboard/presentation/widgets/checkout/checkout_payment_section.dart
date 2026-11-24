@@ -38,6 +38,7 @@ class CheckoutPaymentSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return CheckoutSectionCard(
       title: 'Payment method'.tr,
+      icon: Icons.account_balance_wallet_outlined,
       child: dashboardProvider.isLoadingCheckout ? const _PaymentShimmer() : _buildPaymentList(context),
     );
   }

@@ -27,6 +27,7 @@ class CheckoutDeliveryBanner extends StatelessWidget {
 
     return CheckoutSectionCard(
       title: 'Delivery'.tr,
+      icon: Icons.local_shipping_outlined,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

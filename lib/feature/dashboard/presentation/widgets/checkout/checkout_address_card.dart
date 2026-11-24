@@ -51,6 +51,7 @@ class CheckoutAddressCard extends StatelessWidget {
 
     return CheckoutSectionCard(
       title: 'Shipping address'.tr,
+      icon: Icons.location_on_outlined,
       onTap: dashboardProvider.isLoadingCheckout
           ? null
           : () {
@@ -62,9 +63,16 @@ class CheckoutAddressCard extends StatelessWidget {
             },
       trailing: dashboardProvider.isLoadingCheckout
           ? null
-          : Text(
-              (selectedAddress == null ? 'Add' : 'Change').tr,
-              style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800, color: primaryOrange),
+          : Container(
+              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+              decoration: BoxDecoration(
+                color: primaryOrange.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(20.r),
+              ),
+              child: Text(
+                (selectedAddress == null ? 'Add' : 'Change').tr,
+                style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w800, color: primaryOrange),
+              ),
             ),
       child: dashboardProvider.isLoadingCheckout
           ? const _AddressShimmer()

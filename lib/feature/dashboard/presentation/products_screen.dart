@@ -21,6 +21,7 @@ import 'widgets/products/product_filters.dart';
 import 'widgets/products/product_grid_card.dart';
 import 'widgets/products/product_grid_shimmer.dart';
 import 'widgets/products/product_list_type.dart';
+import 'widgets/products/product_type_tab_bar.dart';
 
 /// Products (catalog) and My Products, styled like the dashboard:
 /// hero header with search + filters, type tabs, category chips, product grid.
@@ -174,16 +175,9 @@ class _ProductsScreenState extends State<ProductsScreen> {
               ),
             ),
             UIHelper.verticalSpace(14.h),
-            PillChipBar(
-              chips: [
-                for (final type in ProductListType.values)
-                  PillChip(
-                    label: type.labelKey.tr,
-                    icon: type.icon,
-                    isSelected: type == _type,
-                    onTap: () => _changeType(type),
-                  ),
-              ],
+            ProductTypeTabBar(
+              selectedType: _type,
+              onSelected: _changeType,
             ),
             if (data.categories.isNotEmpty) ...[
               UIHelper.verticalSpace(10.h),

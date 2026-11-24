@@ -28,6 +28,7 @@ class CheckoutVoucherSection extends StatelessWidget {
 
     return CheckoutSectionCard(
       title: 'Apply Voucher'.tr,
+      icon: Icons.local_offer_outlined,
       child: Container(
         padding: EdgeInsets.fromLTRB(12.w, 6.h, 6.w, 6.h),
         decoration: BoxDecoration(

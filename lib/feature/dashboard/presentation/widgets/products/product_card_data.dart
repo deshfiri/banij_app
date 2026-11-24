@@ -38,6 +38,8 @@ class ProductCardData {
     final category = p.category ?? '';
     final imageUrl = p.image?.url;
     final minQty = p.wholesale?.minOrderQuantity ?? 1;
+    final wholesale = p.wholesale;
+    final partnerSelling = p.partnerSelling;
     final priceText = _firstNonEmpty([
           p.wholesale?.price?.formatted,
           p.partnerSelling?.suggestedSellingPrice?.formatted,
@@ -58,15 +60,43 @@ class ProductCardData {
         name: name,
         sku: p.sku,
         category: category,
-        image: imageUrl != null ? ProductImageModel(url: imageUrl, alt: name) : null,
-        wholesale: WholesaleModel(
-          price: PriceModel(
-            amount: priceText.replaceAll(RegExp(r'[^0-9.]'), ''),
-            currency: 'BDT',
-            formatted: priceText,
-          ),
-          minOrderQuantity: minQty,
-        ),
+        brand: p.brand,
+        shortDescription: p.shortDescription,
+        packageScope: p.packageScope,
+        isFeatured: p.isFeatured,
+        purchased: p.purchased,
+        ownership: p.ownership,
+        variantCount: p.variantCount,
+        image: imageUrl != null
+            ? ProductImageModel(url: imageUrl, alt: p.image?.alt ?? name)
+            : null,
+        wholesale: wholesale == null
+            ? null
+            : WholesaleModel(
+                price: wholesale.price == null
+                    ? null
+                    : PriceModel(
+                        amount: wholesale.price!.amount,
+                        currency: wholesale.price!.currency,
+                        formatted: wholesale.price!.formatted,
+                      ),
+                minOrderQuantity: wholesale.minOrderQuantity,
+                maxOrderQuantity: wholesale.maxOrderQuantity,
+                inStock: wholesale.inStock,
+              ),
+        partnerSelling: partnerSelling == null
+            ? null
+            : PartnerSellingModel(
+                suggestedSellingPrice: _mapPrice(
+                  partnerSelling.suggestedSellingPrice,
+                ),
+                minimumSellingPrice: _mapPrice(
+                  partnerSelling.minimumSellingPrice,
+                ),
+                maximumSellingPrice: _mapPrice(
+                  partnerSelling.maximumSellingPrice,
+                ),
+              ),
       ),
     );
   }
@@ -94,6 +124,14 @@ class ProductCardData {
     }
     return null;
   }
+
+  static PriceModel? _mapPrice(PriceAmountInfo? price) => price == null
+      ? null
+      : PriceModel(
+          amount: price.amount,
+          currency: price.currency,
+          formatted: price.formatted,
+        );
 }
 
 /// A category option from either API shape (value is sent, label is shown).

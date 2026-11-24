@@ -55,76 +55,102 @@ class _CheckoutBottomBarState extends State<CheckoutBottomBar> {
       ),
       child: SafeArea(
         top: false,
-        child: Padding(
-          padding: EdgeInsets.fromLTRB(18.w, 14.h, 18.w, 12.h),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              InkWell(
-                onTap: () => setState(() => _isSummaryExpanded = !_isSummaryExpanded),
-                borderRadius: BorderRadius.circular(10.r),
-                child: Row(
-                  children: [
-                    Text(
-                      'Total'.tr,
-                      style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: muted),
-                    ),
-                    UIHelper.horizontalSpace(8.w),
-                    Expanded(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          widget.totalText,
-                          maxLines: 1,
-                          style: TextStyle(fontSize: 19.sp, fontWeight: FontWeight.w900, color: primaryOrange),
+        child: Center(
+          heightFactor: 1,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 720),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(18.w, 14.h, 18.w, 12.h),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  InkWell(
+                    onTap: () => setState(() => _isSummaryExpanded = !_isSummaryExpanded),
+                    borderRadius: BorderRadius.circular(10.r),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Total'.tr,
+                          style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: muted),
                         ),
-                      ),
-                    ),
-                    AnimatedRotation(
-                      turns: _isSummaryExpanded ? 0.5 : 0,
-                      duration: const Duration(milliseconds: 200),
-                      child: Container(
-                        padding: EdgeInsets.all(3.w),
-                        decoration: BoxDecoration(
-                          color: primaryOrange.withValues(alpha: 0.12),
-                          shape: BoxShape.circle,
+                        UIHelper.horizontalSpace(8.w),
+                        Expanded(
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              widget.totalText,
+                              maxLines: 1,
+                              style: TextStyle(fontSize: 19.sp, fontWeight: FontWeight.w900, color: primaryOrange),
+                            ),
+                          ),
                         ),
-                        child: Icon(Icons.keyboard_arrow_up_rounded, color: primaryOrange, size: 20.sp),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              AnimatedSize(
-                duration: const Duration(milliseconds: 200),
-                curve: Curves.easeOut,
-                child: _isSummaryExpanded
-                    ? Container(
-                        margin: EdgeInsets.only(top: 10.h),
-                        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
-                        decoration: BoxDecoration(
-                          color: isDark ? AppColorsTheme.innerCardBg(context) : lightBackground,
-                          borderRadius: BorderRadius.circular(12.r),
+                        AnimatedRotation(
+                          turns: _isSummaryExpanded ? 0.5 : 0,
+                          duration: const Duration(milliseconds: 200),
+                          child: Container(
+                            padding: EdgeInsets.all(3.w),
+                            decoration: BoxDecoration(
+                              color: primaryOrange.withValues(alpha: 0.12),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(Icons.keyboard_arrow_up_rounded, color: primaryOrange, size: 20.sp),
+                          ),
                         ),
-                        child: Column(
+                      ],
+                    ),
+                  ),
+                  AnimatedSize(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeOut,
+                    child: _isSummaryExpanded
+                        ? Container(
+                            margin: EdgeInsets.only(top: 10.h),
+                            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+                            decoration: BoxDecoration(
+                              color: isDark ? AppColorsTheme.innerCardBg(context) : lightBackground,
+                              borderRadius: BorderRadius.circular(12.r),
+                            ),
+                            child: Column(
+                              children: [
+                                _SummaryRow(label: 'Items Subtotal'.tr, value: widget.subtotalText),
+                                UIHelper.verticalSpace(6.h),
+                                _SummaryRow(label: 'Shipping Fee'.tr, value: widget.shippingText),
+                              ],
+                            ),
+                          )
+                        : const SizedBox(width: double.infinity),
+                  ),
+                  UIHelper.verticalSpace(12.h),
+                  GradientButton(
+                    label: widget.hasAddress ? 'Place Order'.tr : 'Add address'.tr,
+                    trailingIcon: widget.hasAddress ? Icons.arrow_forward_rounded : Icons.add_location_alt_rounded,
+                    isLoading: widget.isLoading,
+                    onPressed: widget.onPrimaryPressed,
+                  ),
+                  UIHelper.verticalSpace(8.h),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.lock_outline_rounded, size: 12.sp, color: muted),
+                      UIHelper.horizontalSpace(4.w),
+                      Text.rich(
+                        TextSpan(
                           children: [
-                            _SummaryRow(label: 'Items Subtotal'.tr, value: widget.subtotalText),
-                            UIHelper.verticalSpace(6.h),
-                            _SummaryRow(label: 'Shipping Fee'.tr, value: widget.shippingText),
+                            TextSpan(text: '${'Protected by'.tr} '),
+                            TextSpan(
+                              text: 'Trade Assurance'.tr,
+                              style: const TextStyle(fontWeight: FontWeight.w800),
+                            ),
                           ],
                         ),
-                      )
-                    : const SizedBox(width: double.infinity),
+                        style: TextStyle(fontSize: 10.5.sp, color: muted),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-              UIHelper.verticalSpace(12.h),
-              GradientButton(
-                label: widget.hasAddress ? 'Place Order'.tr : 'Add address'.tr,
-                trailingIcon: widget.hasAddress ? Icons.arrow_forward_rounded : Icons.add_location_alt_rounded,
-                isLoading: widget.isLoading,
-                onPressed: widget.onPrimaryPressed,
-              ),
-            ],
+            ),
           ),
         ),
       ),
@@ -143,11 +169,18 @@ class _SummaryRow extends StatelessWidget {
     return Row(
       children: [
         Expanded(
-          child: Text(label, style: TextStyle(fontSize: 12.sp, color: AppColorsTheme.textMutedColor(context))),
+          child: Text(
+            label,
+            style: TextStyle(fontSize: 12.sp, color: AppColorsTheme.textMutedColor(context)),
+          ),
         ),
         Text(
           value,
-          style: TextStyle(fontSize: 12.5.sp, fontWeight: FontWeight.w800, color: AppColorsTheme.textMainColor(context)),
+          style: TextStyle(
+            fontSize: 12.5.sp,
+            fontWeight: FontWeight.w800,
+            color: AppColorsTheme.textMainColor(context),
+          ),
         ),
       ],
     );

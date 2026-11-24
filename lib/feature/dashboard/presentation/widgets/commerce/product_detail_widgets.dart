@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 
 import '../../../../../constants/color.dart';
 import '../../../../../helpers/ui_helpers.dart';
-import '../../../../../providers/cart_provider.dart';
+import '../../../model/my_product_model.dart';
 
 /// Small rounded pill with an icon and label.
 class ProductInfoBadge extends StatelessWidget {
@@ -43,61 +44,42 @@ class ProductInfoBadge extends StatelessWidget {
         children: [
           Icon(icon, size: 13.sp, color: textColor),
           UIHelper.horizontalSpace(4.w),
-          Text(label, style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.bold, color: textColor)),
+          Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 10.5.sp,
+              fontWeight: FontWeight.bold,
+              color: textColor,
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-/// App bar cart icon with the item-count badge.
-class ProductCartAction extends StatelessWidget {
-  final VoidCallback onTap;
-
-  const ProductCartAction({super.key, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final count = context.select<CartProvider, int>((cart) => cart.totalItemsCount);
-
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        IconButton(
-          icon: Icon(Icons.shopping_bag_outlined, color: AppColorsTheme.textMainColor(context)),
-          onPressed: onTap,
-        ),
-        Positioned(
-          right: 8.w,
-          top: 8.h,
-          child: count == 0
-              ? const SizedBox.shrink()
-              : Container(
-                  padding: EdgeInsets.all(4.w),
-                  decoration: const BoxDecoration(color: primaryOrange, shape: BoxShape.circle),
-                  constraints: BoxConstraints(minWidth: 16.w, minHeight: 16.h),
-                  child: Text(
-                    '$count',
-                    style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.bold, color: Colors.white),
-                    textAlign: TextAlign.center,
-                  ),
-                ),
-        ),
-      ],
-    );
-  }
-}
-
-/// Large product image with the green category tag in the corner.
+/// Product image with optional category and featured tags.
 class ProductHeroImage extends StatelessWidget {
-  final String imageUrl;
-  final String categoryName;
+  final String? imageUrl;
+  final String? imageAlt;
+  final String? categoryName;
+  final bool isFeatured;
 
-  const ProductHeroImage({super.key, required this.imageUrl, required this.categoryName});
+  const ProductHeroImage({
+    super.key,
+    required this.imageUrl,
+    required this.imageAlt,
+    required this.categoryName,
+    this.isFeatured = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final image = imageUrl?.trim();
+    final category = categoryName?.trim();
 
     return Stack(
       children: [
@@ -118,37 +100,61 @@ class ProductHeroImage extends StatelessWidget {
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(20.r),
-            child: Image.network(
-              imageUrl,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Center(child: Icon(Icons.inventory_2_outlined, size: 64.sp, color: primaryOrange));
-              },
-            ),
+            child: image == null || image.isEmpty
+                ? _ProductImagePlaceholder()
+                : Image.network(
+                    image,
+                    fit: BoxFit.cover,
+                    semanticLabel: imageAlt,
+                    errorBuilder: (_, _, _) => _ProductImagePlaceholder(),
+                  ),
           ),
         ),
-        Positioned(
-          top: 12.h,
-          left: 12.w,
-          child: Container(
-            padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-            decoration: BoxDecoration(
-              color: successGreen,
-              borderRadius: BorderRadius.circular(12.r),
-              boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 6.r)],
-            ),
-            child: Text(
-              categoryName.toUpperCase(),
-              style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 0.6),
+        if (category != null && category.isNotEmpty)
+          Positioned(
+            top: 12.h,
+            left: 12.w,
+            right: isFeatured ? 88.w : 12.w,
+            child: Align(
+              alignment: Alignment.topLeft,
+              child: ProductInfoBadge.tinted(
+                icon: Icons.category_outlined,
+                label: category,
+                color: primaryOrange,
+              ),
             ),
           ),
-        ),
+        if (isFeatured)
+          Positioned(
+            top: 12.h,
+            right: 12.w,
+            child: ProductInfoBadge.tinted(
+              icon: Icons.star_rounded,
+              label: 'Featured'.tr,
+              color: warningYellow,
+            ),
+          ),
       ],
     );
   }
 }
 
-/// White rounded card used for the price/stock and order sections.
+class _ProductImagePlaceholder extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: AppColorsTheme.innerCardBg(context),
+      alignment: Alignment.center,
+      child: Icon(
+        Icons.inventory_2_outlined,
+        size: 56.sp,
+        color: primaryOrange.withValues(alpha: 0.7),
+      ),
+    );
+  }
+}
+
+/// Rounded card used for product pricing and availability details.
 class ProductSectionCard extends StatelessWidget {
   final Widget child;
 
@@ -169,65 +175,157 @@ class ProductSectionCard extends StatelessWidget {
   }
 }
 
-/// Wholesale price, stock status and order-quantity range.
+/// Displays only pricing, stock, and order limits supplied by the product.
 class ProductPriceStockCard extends StatelessWidget {
-  final String wholesalePrice;
-  final String availableStock;
+  final ProductItemModel product;
 
-  const ProductPriceStockCard({super.key, required this.wholesalePrice, required this.availableStock});
+  const ProductPriceStockCard({super.key, required this.product});
 
   @override
   Widget build(BuildContext context) {
-    final mutedLabel = TextStyle(
-      fontSize: 12.sp,
-      fontWeight: FontWeight.w500,
-      color: AppColorsTheme.textMutedColor(context),
-    );
-    final mainColor = AppColorsTheme.textMainColor(context);
+    final wholesale = product.wholesale;
+    final partner = product.partnerSelling;
+    final stock = wholesale?.inStock?.trim();
+    final stockCount = int.tryParse(stock ?? '');
+    final stockColor = stockCount == null
+        ? AppColorsTheme.textMutedColor(context)
+        : stockCount > 0
+            ? successGreen
+            : errorRed;
+    final prices = <(String, PriceModel?)>[
+      ('Wholesale price'.tr, wholesale?.price),
+      ('Suggested selling price'.tr, partner?.suggestedSellingPrice),
+      ('Minimum selling price'.tr, partner?.minimumSellingPrice),
+      ('Maximum selling price'.tr, partner?.maximumSellingPrice),
+    ].where((entry) => _priceText(entry.$2) != null).toList();
+    final hasStock = stock != null && stock.isNotEmpty;
+    final minOrder = wholesale?.minOrderQuantity;
+    final maxOrder = wholesale?.maxOrderQuantity;
+    final rangeText = _orderRangeText(minOrder, maxOrder);
+
+    if (prices.isEmpty && !hasStock && rangeText == null) {
+      return const SizedBox.shrink();
+    }
 
     return ProductSectionCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Wholesale price', style: mutedLabel),
-          UIHelper.verticalSpace(4.h),
-          Text(
-            wholesalePrice,
-            style: TextStyle(fontSize: 26.sp, fontWeight: FontWeight.w900, color: primaryOrange),
-          ),
-          UIHelper.verticalSpace(16.h),
-          Text('Stock', style: mutedLabel),
-          UIHelper.verticalSpace(6.h),
-          Row(
-            children: [
-              ProductInfoBadge.tinted(icon: Icons.check_circle_outline_rounded, label: 'In stock', color: successGreen),
-              UIHelper.horizontalSpace(8.w),
-              Text(
-                '$availableStock available to order',
-                style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w500, color: mainColor),
+          for (var index = 0; index < prices.length; index++) ...[
+            if (index > 0) UIHelper.verticalSpace(14.h),
+            Text(
+              prices[index].$1,
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColorsTheme.textMutedColor(context),
               ),
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              _priceText(prices[index].$2)!,
+              style: TextStyle(
+                fontSize: index == 0 ? 26.sp : 18.sp,
+                fontWeight: FontWeight.w900,
+                color: index == 0 ? primaryOrange : AppColorsTheme.textMainColor(context),
+              ),
+            ),
+          ],
+          if (hasStock) ...[
+            if (prices.isNotEmpty) UIHelper.verticalSpace(16.h),
+            Text(
+              'Stock'.tr,
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColorsTheme.textMutedColor(context),
+              ),
+            ),
+            SizedBox(height: 6.h),
+            Row(
+              children: [
+                Icon(
+                  stockCount != null && stockCount <= 0
+                      ? Icons.remove_circle_outline
+                      : Icons.inventory_2_outlined,
+                  size: 17.sp,
+                  color: stockColor,
+                ),
+                SizedBox(width: 8.w),
+                Expanded(
+                  child: Text(
+                    stockCount == null
+                        ? stock
+                        : '$stock ${'available to order'.tr}',
+                    style: TextStyle(
+                      fontSize: 13.sp,
+                      fontWeight: FontWeight.w600,
+                      color: stockColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          if (rangeText != null) ...[
+            if (prices.isNotEmpty || hasStock) ...[
+              SizedBox(height: 14.h),
+              Divider(color: AppColorsTheme.borderColor(context)),
             ],
-          ),
-          UIHelper.verticalSpace(14.h),
-          Text('Order quantity', style: mutedLabel),
-          UIHelper.verticalSpace(4.h),
-          Text(
-            'Between 10 and 28 units in one order',
-            style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w600, color: mainColor),
-          ),
+            SizedBox(height: 4.h),
+            Text(
+              'Order quantity'.tr,
+              style: TextStyle(
+                fontSize: 12.sp,
+                fontWeight: FontWeight.w500,
+                color: AppColorsTheme.textMutedColor(context),
+              ),
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              rangeText,
+              style: TextStyle(
+                fontSize: 13.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColorsTheme.textMainColor(context),
+              ),
+            ),
+          ],
         ],
       ),
     );
+  }
+
+  static String? _priceText(PriceModel? price) {
+    final formatted = price?.formatted?.trim();
+    if (formatted != null && formatted.isNotEmpty) return formatted;
+    final amount = price?.amount?.trim();
+    if (amount == null || amount.isEmpty) return null;
+    final currency = price?.currency?.trim();
+    return currency == null || currency.isEmpty ? amount : '$currency $amount';
+  }
+
+  static String? _orderRangeText(int? min, int? max) {
+    if (min != null && max != null) {
+      return 'Between @min and @max units'.trParams({
+        'min': '$min',
+        'max': '$max',
+      });
+    }
+    if (min != null) return 'Minimum order: @min units'.trParams({'min': '$min'});
+    if (max != null) return 'Maximum order: @max units'.trParams({'max': '$max'});
+    return null;
   }
 }
 
 /// "Order this product" card: quantity stepper + Order now / Add to cart / View cart.
 class ProductOrderCard extends StatelessWidget {
-  static const Color _darkOutlinedFill = Color(0xFF1E1E1E);
-
   final TextEditingController quantityController;
+  final int? minOrderQuantity;
+  final int? maxOrderQuantity;
   final VoidCallback onDecrement;
   final VoidCallback onIncrement;
+  final VoidCallback onQuantitySubmitted;
   final VoidCallback onOrderNow;
   final VoidCallback onAddToCart;
   final VoidCallback onViewCart;
@@ -235,8 +333,11 @@ class ProductOrderCard extends StatelessWidget {
   const ProductOrderCard({
     super.key,
     required this.quantityController,
+    required this.minOrderQuantity,
+    required this.maxOrderQuantity,
     required this.onDecrement,
     required this.onIncrement,
+    required this.onQuantitySubmitted,
     required this.onOrderNow,
     required this.onAddToCart,
     required this.onViewCart,
@@ -244,9 +345,12 @@ class ProductOrderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final mainColor = AppColorsTheme.textMainColor(context);
     final mutedColor = AppColorsTheme.textMutedColor(context);
+    final rangeText = ProductPriceStockCard._orderRangeText(
+      minOrderQuantity,
+      maxOrderQuantity,
+    );
     final fieldDecoration = BoxDecoration(
       color: AppColorsTheme.background(context),
       borderRadius: BorderRadius.circular(10.r),
@@ -258,24 +362,12 @@ class ProductOrderCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Order this product',
+            'Order this product'.tr,
             style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w900, color: mainColor),
           ),
-          UIHelper.verticalSpace(4.h),
-          Text(
-            'Buy in bulk for yourself, receive the goods, and resell them wherever you sell.',
-            style: TextStyle(fontSize: 12.sp, color: mutedColor, height: 1.3),
-          ),
-          UIHelper.verticalSpace(14.h),
-          Divider(color: AppColorsTheme.borderColor(context)),
           UIHelper.verticalSpace(12.h),
           Text(
-            'WHAT YOU ARE BUYING',
-            style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.w800, color: mutedColor, letterSpacing: 0.8),
-          ),
-          UIHelper.verticalSpace(6.h),
-          Text(
-            'Quantity to order',
+            'Quantity to order'.tr,
             style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700, color: mainColor),
           ),
           UIHelper.verticalSpace(8.h),
@@ -290,6 +382,12 @@ class ProductOrderCard extends StatelessWidget {
                   child: TextField(
                     controller: quantityController,
                     keyboardType: TextInputType.number,
+                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    textInputAction: TextInputAction.done,
+                    onEditingComplete: () {
+                      onQuantitySubmitted();
+                      FocusScope.of(context).unfocus();
+                    },
                     textAlign: TextAlign.center,
                     style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.bold, color: mainColor),
                     decoration: const InputDecoration(border: InputBorder.none),
@@ -300,8 +398,10 @@ class ProductOrderCard extends StatelessWidget {
               _StepButton(icon: Icons.add_rounded, decoration: fieldDecoration, onTap: onIncrement),
             ],
           ),
-          UIHelper.verticalSpace(6.h),
-          Text('Between 10 and 28', style: TextStyle(fontSize: 11.sp, color: mutedColor)),
+          if (rangeText != null) ...[
+            UIHelper.verticalSpace(6.h),
+            Text(rangeText, style: TextStyle(fontSize: 11.sp, color: mutedColor)),
+          ],
           UIHelper.verticalSpace(20.h),
           Wrap(
             spacing: 10.w,
@@ -311,7 +411,7 @@ class ProductOrderCard extends StatelessWidget {
               ElevatedButton.icon(
                 onPressed: onOrderNow,
                 icon: Icon(Icons.bolt_rounded, size: 16.sp),
-                label: Text('Order now', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold)),
+                label: Text('Order now'.tr, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primaryOrange,
                   foregroundColor: Colors.white,
@@ -323,9 +423,9 @@ class ProductOrderCard extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: onAddToCart,
                 icon: Icon(Icons.shopping_bag_outlined, size: 16.sp),
-                label: Text('Add to cart', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold)),
+                label: Text('Add to cart'.tr, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold)),
                 style: OutlinedButton.styleFrom(
-                  backgroundColor: isDark ? _darkOutlinedFill : Colors.white,
+                  backgroundColor: AppColorsTheme.cardBg(context),
                   foregroundColor: mainColor,
                   padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
                   side: BorderSide(color: AppColorsTheme.borderColor(context)),
@@ -335,7 +435,7 @@ class ProductOrderCard extends StatelessWidget {
               GestureDetector(
                 onTap: onViewCart,
                 child: Text(
-                  'View cart',
+                  'View cart'.tr,
                   style: TextStyle(
                     fontSize: 13.sp,
                     fontWeight: FontWeight.w700,
@@ -345,11 +445,6 @@ class ProductOrderCard extends StatelessWidget {
                 ),
               ),
             ],
-          ),
-          UIHelper.verticalSpace(14.h),
-          Text(
-            'Order now goes straight to checkout, where you choose how to pay. Add to cart keeps the item for later.',
-            style: TextStyle(fontSize: 11.sp, color: mutedColor, height: 1.35),
           ),
         ],
       ),

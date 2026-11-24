@@ -46,6 +46,7 @@ class CatalogProductData {
   final String? sku;
   final String? category;
   final String? brand;
+  final String? shortDescription;
   final bool? isFeatured;
   final String? purchased;
   final String? ownership;
@@ -62,6 +63,7 @@ class CatalogProductData {
     this.sku,
     this.category,
     this.brand,
+    this.shortDescription,
     this.isFeatured,
     this.purchased,
     this.ownership,
@@ -80,6 +82,8 @@ class CatalogProductData {
         sku: json["sku"]?.toString(),
         category: json["category"]?.toString(),
         brand: json["brand"]?.toString(),
+        shortDescription: json["short_description"]?.toString() ??
+            json["description"]?.toString(),
         isFeatured: json["is_featured"] is bool ? json["is_featured"] : null,
         purchased: json["purchased"]?.toString(),
         ownership: json["ownership"]?.toString(),
@@ -107,6 +111,7 @@ class CatalogProductData {
         "sku": sku,
         "category": category,
         "brand": brand,
+        "short_description": shortDescription,
         "is_featured": isFeatured,
         "purchased": purchased,
         "ownership": ownership,

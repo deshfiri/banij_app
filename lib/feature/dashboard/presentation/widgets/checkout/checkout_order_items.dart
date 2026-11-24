@@ -27,13 +27,25 @@ class _ProductImage extends StatelessWidget {
         width: size,
         height: size,
         color: primaryOrange.withValues(alpha: isDark ? 0.14 : 0.08),
-        child: Image.network(
-          url,
-          fit: BoxFit.cover,
-          errorBuilder: (_, _, _) => Center(
-            child: Icon(Icons.inventory_2_outlined, color: primaryOrange, size: size * 0.4),
-          ),
-        ),
+        child: url.isEmpty
+            ? Center(
+                child: Icon(
+                  Icons.inventory_2_outlined,
+                  color: primaryOrange,
+                  size: size * 0.4,
+                ),
+              )
+            : Image.network(
+                url,
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => Center(
+                  child: Icon(
+                    Icons.inventory_2_outlined,
+                    color: primaryOrange,
+                    size: size * 0.4,
+                  ),
+                ),
+              ),
       ),
     );
   }
@@ -77,7 +89,10 @@ class CheckoutCartLineTile extends StatelessWidget {
                 UIHelper.verticalSpace(3.h),
                 Text(
                   '${line.quantity ?? 1} × ${line.unitPrice?.formatted ?? ''}',
-                  style: TextStyle(fontSize: 11.5.sp, color: AppColorsTheme.textMutedColor(context)),
+                  style: TextStyle(
+                    fontSize: 11.5.sp,
+                    color: AppColorsTheme.textMutedColor(context),
+                  ),
                 ),
               ],
             ),
@@ -85,7 +100,11 @@ class CheckoutCartLineTile extends StatelessWidget {
           UIHelper.horizontalSpace(8.w),
           Text(
             line.lineTotal?.formatted ?? '',
-            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: primaryOrange),
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w900,
+              color: primaryOrange,
+            ),
           ),
         ],
       ),
@@ -132,7 +151,10 @@ class CheckoutSingleProductCard extends StatelessWidget {
                   left: 5.w,
                   right: 5.w,
                   child: Container(
-                    padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 2.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 5.w,
+                      vertical: 2.h,
+                    ),
                     decoration: BoxDecoration(
                       color: textMain.withValues(alpha: 0.75),
                       borderRadius: BorderRadius.circular(6.r),
@@ -142,7 +164,11 @@ class CheckoutSingleProductCard extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.center,
-                      style: TextStyle(fontSize: 8.sp, color: Colors.white, fontWeight: FontWeight.w800),
+                      style: TextStyle(
+                        fontSize: 8.sp,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ),
@@ -155,27 +181,44 @@ class CheckoutSingleProductCard extends StatelessWidget {
                 children: [
                   Text(
                     productTitle,
-                    style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800, color: mainColor),
+                    style: TextStyle(
+                      fontSize: 13.5.sp,
+                      fontWeight: FontWeight.w800,
+                      color: mainColor,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   UIHelper.verticalSpace(4.h),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 7.w,
+                      vertical: 2.h,
+                    ),
                     decoration: BoxDecoration(
                       color: primaryOrange.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(6.r),
                     ),
                     child: Text(
-                      (minOrder > 1 ? 'Min. order: @count pieces' : 'Min. order: @count piece')
+                      (minOrder > 1
+                              ? 'Min. order: @count pieces'
+                              : 'Min. order: @count piece')
                           .trParams({'count': '$minOrder'}),
-                      style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w700, color: primaryOrange),
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.w700,
+                        color: primaryOrange,
+                      ),
                     ),
                   ),
                   UIHelper.verticalSpace(8.h),
                   Text(
                     productPrice,
-                    style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: primaryOrange),
+                    style: TextStyle(
+                      fontSize: 15.sp,
+                      fontWeight: FontWeight.w900,
+                      color: primaryOrange,
+                    ),
                   ),
                 ],
               ),
@@ -187,7 +230,8 @@ class CheckoutSingleProductCard extends StatelessWidget {
           children: [
             Expanded(
               child: GestureDetector(
-                onTap: () => ToastUtil.showSuccessMessage('Note dialog opened'.tr),
+                onTap: () =>
+                    ToastUtil.showSuccessMessage('Note dialog opened'.tr),
                 child: Row(
                   children: [
                     Icon(Icons.edit_note_rounded, size: 18.sp, color: muted),
@@ -228,16 +272,19 @@ class _QuantityStepper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget stepButton(IconData icon, VoidCallback onTap) => CheckoutPillButton(
-          onTap: onTap,
-          shape: BoxShape.circle,
-          padding: EdgeInsets.all(6.w),
-          child: Icon(icon, size: 16.sp, color: Colors.white),
-        );
+      onTap: onTap,
+      shape: BoxShape.circle,
+      padding: EdgeInsets.all(6.w),
+      child: Icon(icon, size: 16.sp, color: Colors.white),
+    );
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        stepButton(Icons.remove_rounded, () => context.read<DashboardProvider>().decrementOrderQuantity()),
+        stepButton(
+          Icons.remove_rounded,
+          () => context.read<DashboardProvider>().decrementOrderQuantity(),
+        ),
         SizedBox(
           width: 40.w,
           child: Text(
@@ -250,7 +297,10 @@ class _QuantityStepper extends StatelessWidget {
             ),
           ),
         ),
-        stepButton(Icons.add_rounded, () => context.read<DashboardProvider>().incrementOrderQuantity()),
+        stepButton(
+          Icons.add_rounded,
+          () => context.read<DashboardProvider>().incrementOrderQuantity(),
+        ),
       ],
     );
   }
