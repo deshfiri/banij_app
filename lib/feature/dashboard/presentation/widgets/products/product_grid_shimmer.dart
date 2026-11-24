@@ -6,7 +6,9 @@ import 'product_grid_card.dart';
 
 /// Loading placeholder shaped like the product grid.
 class ProductGridShimmer extends StatelessWidget {
-  const ProductGridShimmer({super.key});
+  final int crossAxisCount;
+
+  const ProductGridShimmer({super.key, this.crossAxisCount = 2});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +21,7 @@ class ProductGridShimmer extends StatelessWidget {
         physics: const NeverScrollableScrollPhysics(),
         padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 24.h),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+          crossAxisCount: crossAxisCount,
           crossAxisSpacing: 12.w,
           mainAxisSpacing: 12.h,
           mainAxisExtent: ProductGridCard.extent,

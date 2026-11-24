@@ -212,7 +212,26 @@ class _ProductsScreenState extends State<ProductsScreen> {
               showClear: _filters.hasAdvanced || _filters.category != null || _filters.search != null,
               onClear: _clearFilters,
             ),
-            Expanded(child: _buildBody(provider.isLoadingProducts, data, products)),
+            Expanded(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final crossAxisCount = constraints.maxWidth >= 1100
+                      ? 4
+                      : constraints.maxWidth >= 720
+                          ? 3
+                          : 2;
+                  return SafeArea(
+                    top: false,
+                    child: _buildBody(
+                      provider.isLoadingProducts,
+                      data,
+                      products,
+                      crossAxisCount: crossAxisCount,
+                    ),
+                  );
+                },
+              ),
+            ),
           ],
         ),
       ),
@@ -239,8 +258,13 @@ class _ProductsScreenState extends State<ProductsScreen> {
     }).toList();
   }
 
-  Widget _buildBody(bool isLoading, _ProductsData data, List<ProductCardData> products) {
-    if (isLoading) return const ProductGridShimmer();
+  Widget _buildBody(
+    bool isLoading,
+    _ProductsData data,
+    List<ProductCardData> products, {
+    required int crossAxisCount,
+  }) {
+    if (isLoading) return ProductGridShimmer(crossAxisCount: crossAxisCount);
 
     final Widget content;
     if (data.products.isEmpty) {
@@ -252,7 +276,7 @@ class _ProductsScreenState extends State<ProductsScreen> {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: EdgeInsets.fromLTRB(20.w, 4.h, 20.w, 24.h),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 2,
+          crossAxisCount: crossAxisCount,
           crossAxisSpacing: 12.w,
           mainAxisSpacing: 12.h,
           mainAxisExtent: ProductGridCard.extent,

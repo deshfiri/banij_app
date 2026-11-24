@@ -19,7 +19,7 @@ class ProductGridCard extends StatelessWidget {
   const ProductGridCard({super.key, required this.product});
 
   /// Height the grid should give each card.
-  static double get extent => 252.h;
+  static double get extent => 260.h;
 
   void _openDetail(BuildContext context) {
     Navigator.pushNamed(context, Routes.productDetailScreen, arguments: product.model);
@@ -48,10 +48,10 @@ class ProductGridCard extends StatelessWidget {
                     children: [
                       Text(
                         product.name,
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontSize: 13.sp,
+                          fontSize: 12.5.sp,
                           fontWeight: FontWeight.w800,
                           color: AppColorsTheme.textMainColor(context),
                         ),
@@ -76,12 +76,22 @@ class ProductGridCard extends StatelessWidget {
                               style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: primaryOrange),
                             ),
                           ),
-                          Text(
-                            'Min: @qty'.trParams({'qty': '${product.minQty}'}),
-                            style: TextStyle(
-                              fontSize: 9.5.sp,
-                              fontWeight: FontWeight.w700,
-                              color: AppColorsTheme.textMutedColor(context),
+                          SizedBox(width: 4.w),
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 3.h),
+                            decoration: BoxDecoration(
+                              color: primaryOrange.withValues(alpha: 0.08),
+                              borderRadius: BorderRadius.circular(8.r),
+                            ),
+                            child: Text(
+                              'Min: @qty'.trParams({'qty': '${product.minQty}'}),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 9.sp,
+                                fontWeight: FontWeight.w700,
+                                color: AppColorsTheme.textMutedColor(context),
+                              ),
                             ),
                           ),
                         ],
@@ -202,7 +212,7 @@ class _AddToCartButtonState extends State<_AddToCartButton> {
       onTap: _added ? null : _addToCart,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 250),
-        height: 32.h,
+        height: 38.h,
         decoration: BoxDecoration(
           gradient: LinearGradient(colors: colors),
           borderRadius: BorderRadius.circular(10.r),
