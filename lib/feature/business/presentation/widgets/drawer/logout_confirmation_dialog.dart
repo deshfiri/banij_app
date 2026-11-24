@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../../constants/color.dart';
-import '../../../../../helpers/ui_helpers.dart';
 import '../../../../../providers/account_provider.dart';
 
 /// "Are you sure you want to logout?" dialog; logs out on Yes.
@@ -12,7 +11,7 @@ class LogoutConfirmationDialog extends StatelessWidget {
   const LogoutConfirmationDialog._();
 
   static Future<void> show(BuildContext context) {
-    // Read the provider from the caller's context before the dialog opens.
+    // Read the provider before the dialog opens.
     final accountProvider = context.read<AccountProvider>();
     return showDialog<bool>(
       context: context,
@@ -27,68 +26,128 @@ class LogoutConfirmationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final buttonShape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r));
-    final buttonPadding = EdgeInsets.symmetric(vertical: 12.h);
-    final buttonText = TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold);
+    final screenSize = MediaQuery.sizeOf(context);
+    final isCompact = screenSize.width < 360;
+    final buttonShape = RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(14.r),
+    );
+    final buttonPadding = EdgeInsets.symmetric(vertical: 14.h);
+    final buttonText = TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w700);
 
-    return AlertDialog(
+    final cancelButton = OutlinedButton(
+      onPressed: () => Navigator.pop(context, false),
+      style: OutlinedButton.styleFrom(
+        padding: buttonPadding,
+        shape: buttonShape,
+        side: BorderSide(color: AppColorsTheme.borderColor(context)),
+        foregroundColor: AppColorsTheme.textMainColor(context),
+      ),
+      child: Text('No'.tr, style: buttonText),
+    );
+    final confirmButton = ElevatedButton.icon(
+      onPressed: () => Navigator.pop(context, true),
+      icon: Icon(Icons.logout_rounded, size: 17.sp),
+      label: Text('Yes'.tr, style: buttonText),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: errorRed,
+        foregroundColor: Colors.white,
+        padding: buttonPadding,
+        shape: buttonShape,
+        elevation: 0,
+      ),
+    );
+
+    return Dialog(
       backgroundColor: AppColorsTheme.cardBg(context),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
-      icon: Container(
-        padding: EdgeInsets.all(12.w),
-        decoration: BoxDecoration(
-          color: errorRed.withValues(alpha: 0.1),
-          shape: BoxShape.circle,
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: isCompact ? 16.w : 24.w,
+        vertical: 24.h,
+      ),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24.r),
+        side: BorderSide(color: AppColorsTheme.borderColor(context)),
+      ),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: 420,
+          maxHeight: screenSize.height * 0.86,
         ),
-        child: Icon(Icons.logout_rounded, color: errorRed, size: 26.sp),
-      ),
-      title: Text(
-        'Are you sure you want to logout?'.tr,
-        textAlign: TextAlign.center,
-        style: TextStyle(
-          fontSize: 17.sp,
-          fontWeight: FontWeight.w900,
-          color: AppColorsTheme.textMainColor(context),
-        ),
-      ),
-      content: Text(
-        'You will need to sign in again to access your account and workspace.'.tr,
-        textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 13.sp, height: 1.4, color: AppColorsTheme.textMutedColor(context)),
-      ),
-      actionsPadding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
-      actions: [
-        Row(
-          children: [
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () => Navigator.pop(context, false),
-                style: OutlinedButton.styleFrom(
-                  padding: buttonPadding,
-                  shape: buttonShape,
-                  side: BorderSide(color: AppColorsTheme.borderColor(context)),
-                  foregroundColor: AppColorsTheme.textMainColor(context),
-                ),
-                child: Text('No'.tr, style: buttonText),
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(24.w, 24.h, 24.w, 20.h),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                children: [
+                  const Spacer(),
+                  IconButton(
+                    tooltip: 'No'.tr,
+                    onPressed: () => Navigator.pop(context, false),
+                    icon: Icon(
+                      Icons.close_rounded,
+                      size: 20.sp,
+                      color: AppColorsTheme.textMutedColor(context),
+                    ),
+                  ),
+                ],
               ),
-            ),
-            UIHelper.horizontalSpace(12.w),
-            Expanded(
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context, true),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primaryOrange,
-                  foregroundColor: Colors.white,
-                  padding: buttonPadding,
-                  shape: buttonShape,
-                  elevation: 0,
+              Container(
+                width: 76.w,
+                height: 76.w,
+                decoration: BoxDecoration(
+                  color: errorRed.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: errorRed.withValues(alpha: 0.18)),
                 ),
-                child: Text('Yes'.tr, style: buttonText),
+                child: Icon(Icons.logout_rounded, color: errorRed, size: 32.sp),
               ),
-            ),
-          ],
+              SizedBox(height: 20.h),
+              Text(
+                'Are you sure you want to logout?'.tr,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 18.sp,
+                  fontWeight: FontWeight.w800,
+                  color: AppColorsTheme.textMainColor(context),
+                ),
+              ),
+              SizedBox(height: 12.h),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(14.w),
+                decoration: BoxDecoration(
+                  color: errorRed.withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(14.r),
+                  border: Border.all(color: errorRed.withValues(alpha: 0.12)),
+                ),
+                child: Text(
+                  'You will need to sign in again to access your account and workspace.'
+                      .tr,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    height: 1.5,
+                    color: AppColorsTheme.textMutedColor(context),
+                  ),
+                ),
+              ),
+              SizedBox(height: 24.h),
+              if (isCompact) ...[
+                SizedBox(width: double.infinity, child: cancelButton),
+                SizedBox(height: 10.h),
+                SizedBox(width: double.infinity, child: confirmButton),
+              ] else
+                Row(
+                  children: [
+                    Expanded(child: cancelButton),
+                    SizedBox(width: 12.w),
+                    Expanded(child: confirmButton),
+                  ],
+                ),
+            ],
+          ),
         ),
-      ],
+      ),
     );
   }
 }
