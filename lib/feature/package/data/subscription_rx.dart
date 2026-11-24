@@ -9,7 +9,7 @@ final class SubscriptionRx extends RxResponseInt<SubscriptionResponseModel> {
 
   SubscriptionRx()
       : super(
-          empty: SubscriptionResponseModel(),
+          empty: const SubscriptionResponseModel(),
           dataFetcher: BehaviorSubject<SubscriptionResponseModel>(),
         );
 
@@ -28,15 +28,11 @@ final class SubscriptionRx extends RxResponseInt<SubscriptionResponseModel> {
     return await _api.selectPackage(slug);
   }
 
-  Future<bool> cancelSubscription() async {
-    return await _api.cancelSubscription();
-  }
+  Future<void> cancelSubscription() => _api.cancelSubscription();
 
   Future<bool> changeSubscription(String slug) async {
     return await _api.changeSubscription(slug);
   }
 
-  Future<bool> renewSubscription() async {
-    return await _api.renewSubscription();
-  }
+  Future<void> renewSubscription() => _api.renewSubscription();
 }

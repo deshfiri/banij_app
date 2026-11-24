@@ -11,6 +11,7 @@ import '../providers/invoice_provider.dart';
 import '../providers/kyc_verification_provider.dart';
 import '../providers/notification_provider.dart';
 import '../providers/sign_up_provider.dart';
+import '../providers/subscription_provider.dart';
 import '../providers/supplier_dashboard_provider.dart';
 import '../providers/supplier_register_provider.dart';
 import '../providers/theme_provider.dart';
@@ -30,4 +31,5 @@ final providers = [
   ChangeNotifierProvider<ChangePassProvider>(create: (_) => ChangePassProvider()),
   ChangeNotifierProvider<NotificationProvider>(create: (_) => NotificationProvider()),
   ChangeNotifierProvider<DeleteAccountProvider>(create: (_) => DeleteAccountProvider()),
+  ChangeNotifierProvider<SubscriptionProvider>(create: (_) => SubscriptionProvider()),
 ];

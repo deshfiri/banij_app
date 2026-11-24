@@ -67,15 +67,15 @@ class VerificationRecordModel {
     return VerificationRecordModel(
       id: json['id']?.toString(),
       status: json['status']?.toString(),
-      statusLabel: json['status_label']?.toString() ?? 'Approved',
+      statusLabel: json['status_label']?.toString(),
       statusTone: json['status_tone']?.toString(),
-      isEditable: json['is_editable'],
+      isEditable: _asBool(json['is_editable']),
       openedAt: json['opened_at']?.toString(),
       submittedAt: json['submitted_at']?.toString(),
       reviewedAt: json['reviewed_at']?.toString(),
       deadlineAt: json['deadline_at']?.toString(),
-      daysRemaining: json['days_remaining'],
-      isOverdue: json['is_overdue'],
+      daysRemaining: _asInt(json['days_remaining']),
+      isOverdue: _asBool(json['is_overdue']),
       requirements: reqList,
     );
   }
@@ -102,8 +102,23 @@ class RequirementModel {
       key: json['key']?.toString(),
       name: json['name']?.toString(),
       instructions: json['instructions']?.toString(),
-      isRequired: json['is_required'],
+      isRequired: _asBool(json['is_required']),
       status: json['status']?.toString(),
     );
   }
+}
+
+int? _asInt(dynamic value) {
+  if (value is num) return value.round();
+  return value == null ? null : num.tryParse(value.toString())?.round();
+}
+
+bool? _asBool(dynamic value) {
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+  return switch (value?.toString().toLowerCase()) {
+    'true' || '1' => true,
+    'false' || '0' => false,
+    _ => null,
+  };
 }

@@ -16,7 +16,7 @@ final class SubscriptionApi {
       Response response = await getHttp(endpoint ?? EndPoints.subscription());
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        if (response.data is Map<String, dynamic>) {
+        if (response.data is Map) {
           return SubscriptionResponseModel.fromJson(response.data);
         } else if (response.data is String) {
           return SubscriptionResponseModel.fromRawJson(response.data);
@@ -50,14 +50,8 @@ final class SubscriptionApi {
     }
   }
 
-  Future<bool> cancelSubscription() async {
-    try {
-      Response response = await postHttp(EndPoints.subscriptionCancel());
-      return response.statusCode == 200 || response.statusCode == 201;
-    } catch (_) {
-      return false;
-    }
-  }
+  /// Cancels the current subscription. Throws with the API message on failure.
+  Future<void> cancelSubscription() => _postAction(EndPoints.subscriptionCancel());
 
   Future<bool> changeSubscription(String newPackageSlug) async {
     try {
@@ -69,12 +63,20 @@ final class SubscriptionApi {
     }
   }
 
-  Future<bool> renewSubscription() async {
+  /// Renews the current subscription. Throws with the API message on failure.
+  Future<void> renewSubscription() => _postAction(EndPoints.subscriptionRenew());
+
+  Future<void> _postAction(String path) async {
     try {
-      Response response = await postHttp(EndPoints.subscriptionRenew());
-      return response.statusCode == 200 || response.statusCode == 201;
-    } catch (_) {
-      return false;
+      final response = await postHttp(path);
+      if (response.statusCode != 200 && response.statusCode != 201 && response.statusCode != 204) {
+        throw DataSource.DEFAULT.getFailure();
+      }
+    } on DioException catch (dioError) {
+      final data = dioError.response?.data;
+      if (data is Map && data['message'] != null) throw Exception(data['message'].toString());
+      if (data is Map && data['error'] != null) throw Exception(data['error'].toString());
+      rethrow;
     }
   }
 }

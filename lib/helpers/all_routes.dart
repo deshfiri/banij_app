@@ -29,6 +29,7 @@ import '../feature/dashboard/presentation/addresses_screen.dart';
 import '../feature/finance/presentation/wallet_screen.dart';
 import '../feature/finance/presentation/withdrawals_screen.dart';
 import '../feature/finance/presentation/payout_methods_screen.dart';
+import '../feature/package/presentation/subscription_screen.dart';
 
 final class Routes {
   static final Routes _routes = Routes._internal();
@@ -44,6 +45,7 @@ final class Routes {
   static const String kycVerificationScreen = '/kycVerificationScreen';
   static const String notificationScreen = '/notificationScreen';
   static const String verificationHistoryScreen = '/verificationHistoryScreen';
+  static const String subscriptionScreen = '/subscriptionScreen';
   static const String accountScreen = '/accountScreen';
   static const String changePasswordScreen = '/changePasswordScreen';
   static const String deleteAccountScreen = '/deleteAccountScreen';
@@ -105,6 +107,10 @@ final class RouteGenerator {
         return Platform.isAndroid
             ? _LightningFastTransitionRoute(widget: const VerificationHistoryScreen(), settings: settings)
             : CupertinoPageRoute(builder: (context) => const VerificationHistoryScreen(), settings: settings);
+      case Routes.subscriptionScreen:
+        return Platform.isAndroid
+            ? _LightningFastTransitionRoute(widget: const SubscriptionScreen(), settings: settings)
+            : CupertinoPageRoute(builder: (context) => const SubscriptionScreen(), settings: settings);
       case Routes.accountScreen:
         final initialTab = settings.arguments as String?;
         return Platform.isAndroid

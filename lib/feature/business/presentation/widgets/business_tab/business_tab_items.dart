@@ -19,12 +19,12 @@ class BusinessTabItem {
     BusinessTabItem(
       titleKey: 'Verification',
       iconAsset: verificationIconAsset,
-      onTap: (ctx) => Navigator.pushNamed(ctx, Routes.kycVerificationScreen),
+      onTap: (ctx) => Navigator.pushNamed(ctx, Routes.verificationHistoryScreen),
     ),
     BusinessTabItem(
       titleKey: 'Subscription',
       iconAsset: subscriptionIconAsset,
-      onTap: (ctx) => Navigator.pushNamed(ctx, Routes.accountScreen, arguments: 'Package'),
+      onTap: (ctx) => Navigator.pushNamed(ctx, Routes.subscriptionScreen),
     ),
     BusinessTabItem(
       titleKey: 'Partner Network',

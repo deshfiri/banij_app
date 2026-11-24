@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 import '../model/invoice_detail_model.dart';
 
@@ -203,22 +204,63 @@ class InvoicePdfService {
     return document.save();
   }
 
-  static Future<File> saveToDevice(InvoiceDetailModel invoice) async {
+  static const _downloadsChannel = MethodChannel('bbnij/downloads');
+  static const _pdfMime = 'application/pdf';
+
+  /// Saves the invoice PDF to the phone's storage:
+  /// * Android: public `Download/BBNIJ` folder (shows in Files / Downloads).
+  /// * iOS: the app's Documents folder (Files app → On My iPhone → bbnij).
+  static Future<SavedInvoicePdf> saveToDevice(InvoiceDetailModel invoice) async {
     final bytes = await generate(invoice);
     final name = fileName(invoice);
-    final downloads = await getDownloadsDirectory();
 
-    if (downloads != null) {
+    if (Platform.isAndroid) {
       try {
-        return await _writeFile(downloads, name, bytes);
-      } on FileSystemException {
-        final appDocuments = await getApplicationDocumentsDirectory();
-        if (appDocuments.path == downloads.path) rethrow;
-        return _writeFile(appDocuments, name, bytes);
+        final result = await _downloadsChannel.invokeMapMethod<String, String>(
+          'saveToDownloads',
+          {'bytes': bytes, 'fileName': name, 'mimeType': _pdfMime},
+        );
+        if (result == null) throw const FileSystemException('No result from storage');
+        return SavedInvoicePdf(
+          location: result['path'] ?? 'Download/BBNIJ/$name',
+          uri: result['uri'],
+          bytes: bytes,
+          fileName: name,
+        );
+      } on PlatformException catch (error) {
+        if (error.code == 'permission_denied') {
+          throw const InvoiceDownloadException(
+            'Storage permission denied. Allow it in Settings to download invoices.',
+          );
+        }
+        throw InvoiceDownloadException(error.message ?? 'Could not save the invoice');
       }
     }
 
-    return _writeFile(await getApplicationDocumentsDirectory(), name, bytes);
+    final file = await _writeFile(
+      await getApplicationDocumentsDirectory(),
+      name,
+      bytes,
+    );
+    return SavedInvoicePdf(
+      location: Platform.isIOS ? 'Files › On My iPhone › bbnij › $name' : file.path,
+      filePath: file.path,
+      bytes: bytes,
+      fileName: name,
+    );
+  }
+
+  /// Opens a saved PDF in the phone's PDF viewer. On iOS (or if no viewer is
+  /// installed) it falls back to the share sheet.
+  static Future<void> openSaved(SavedInvoicePdf saved) async {
+    if (Platform.isAndroid && saved.uri != null) {
+      final opened = await _downloadsChannel.invokeMethod<bool>('openFile', {
+        'uri': saved.uri,
+        'mimeType': _pdfMime,
+      });
+      if (opened == true) return;
+    }
+    await Printing.sharePdf(bytes: saved.bytes, filename: saved.fileName);
   }
 
   static Future<File> _writeFile(
@@ -238,4 +280,32 @@ class InvoicePdfService {
       color: _accent,
     ),
   );
+}
+
+class SavedInvoicePdf {
+  /// Human-readable place where the file was saved.
+  final String location;
+
+  /// Android content URI used to open the file.
+  final String? uri;
+  final String? filePath;
+  final Uint8List bytes;
+  final String fileName;
+
+  const SavedInvoicePdf({
+    required this.location,
+    required this.bytes,
+    required this.fileName,
+    this.uri,
+    this.filePath,
+  });
+}
+
+class InvoiceDownloadException implements Exception {
+  final String message;
+
+  const InvoiceDownloadException(this.message);
+
+  @override
+  String toString() => message;
 }
