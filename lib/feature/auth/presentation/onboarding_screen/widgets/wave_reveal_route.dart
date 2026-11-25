@@ -4,19 +4,16 @@ import 'package:flutter/material.dart';
 /// bottom-center (where the onboarding "Get Started" button sits).
 class WaveRevealRoute<T> extends PageRouteBuilder<T> {
   WaveRevealRoute({required Widget page})
-      : super(
-          pageBuilder: (_, _, _) => page,
-          transitionDuration: const Duration(milliseconds: 1200),
-          reverseTransitionDuration: const Duration(milliseconds: 500),
-          transitionsBuilder: (_, animation, _, child) => AnimatedBuilder(
-            animation: animation,
-            builder: (_, animatedChild) => ClipPath(
-              clipper: _WaveClipper(animation.value),
-              child: animatedChild,
-            ),
-            child: child,
-          ),
-        );
+    : super(
+        pageBuilder: (_, _, _) => page,
+        transitionDuration: const Duration(milliseconds: 1200),
+        reverseTransitionDuration: const Duration(milliseconds: 500),
+        transitionsBuilder: (_, animation, _, child) => AnimatedBuilder(
+          animation: animation,
+          builder: (_, animatedChild) => ClipPath(clipper: _WaveClipper(animation.value), child: animatedChild),
+          child: child,
+        ),
+      );
 }
 
 class _WaveClipper extends CustomClipper<Path> {
@@ -27,11 +24,7 @@ class _WaveClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {
     final radius = progress * size.height * 1.5;
-    return Path()
-      ..addOval(Rect.fromCircle(
-        center: Offset(size.width * 0.5, size.height * 0.85),
-        radius: radius,
-      ));
+    return Path()..addOval(Rect.fromCircle(center: Offset(size.width * 0.5, size.height * 0.85), radius: radius));
   }
 
   @override
