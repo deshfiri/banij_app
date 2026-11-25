@@ -104,12 +104,12 @@ class OrderItemModel {
       id: json['id'],
       orderNumber: json['reference']?.toString() ?? json['order_number']?.toString() ?? json['id']?.toString(),
       reference: json['reference']?.toString(),
-      status: json['status']?.toString() ?? 'Paid',
-      paymentState: json['payment_state']?.toString(),
-      total: json['totals']?['total'] ?? json['total'] ?? json['grand_total'] ?? '150.00',
+      status: json['status']?.toString(),
+      paymentState: (json['payment_state'] ?? json['payment_status'] ?? json['payment'])?.toString(),
+      total: json['totals']?['total'] ?? json['total'] ?? json['grand_total'],
       currency: json['currency']?.toString() ?? '৳',
       createdAt: json['placed_at']?.toString() ?? json['created_at']?.toString(),
-      placedBy: json['placed_by']?.toString() ?? 'Mohammad Ashraf',
+      placedBy: json['placed_by']?.toString(),
       itemCount: json['item_count'] is int ? json['item_count'] : int.tryParse(json['item_count']?.toString() ?? '1'),
       lines: lineItems,
       totals: json['totals'] != null ? OrderTotalsModel.fromJson(json['totals']) : null,
@@ -266,7 +266,7 @@ class OrderInvoiceModel {
     if (json is! Map<String, dynamic>) return OrderInvoiceModel();
     return OrderInvoiceModel(
       id: json['id']?.toString(),
-      number: json['number']?.toString() ?? 'INV-2026-000001',
+      number: (json['number'] ?? json['invoice_no'])?.toString(),
     );
   }
 }

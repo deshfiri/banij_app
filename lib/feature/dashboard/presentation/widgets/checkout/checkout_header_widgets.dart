@@ -100,7 +100,7 @@ class CheckoutPackageBanner extends StatelessWidget {
   }
 }
 
-/// "Payment Successful" dialog; its button closes the dialog and replaces the
+/// "Order placed" dialog (pay-later orders); its button closes the dialog and replaces the
 /// route with the dashboard using [hostContext] (the checkout screen).
 class CheckoutSuccessDialog extends StatelessWidget {
   final BuildContext hostContext;
@@ -145,7 +145,7 @@ class CheckoutSuccessDialog extends StatelessWidget {
             ),
             UIHelper.verticalSpace(18.h),
             Text(
-              'Payment Successful'.tr,
+              'Order placed'.tr,
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 19.sp,
@@ -155,7 +155,7 @@ class CheckoutSuccessDialog extends StatelessWidget {
             ),
             UIHelper.verticalSpace(6.h),
             Text(
-              'Congratulation! Your order has been placed successfully.'.tr,
+              'Your order has been placed. You can follow its payment and delivery in Orders.'.tr,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 13.sp, height: 1.4, color: AppColorsTheme.textMutedColor(context)),
             ),

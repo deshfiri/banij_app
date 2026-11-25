@@ -1,8 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
-import '../../constants/app_constants.dart';
-import '../../helpers/di.dart';
 import '../endpoints.dart';
 import 'log.dart';
 
@@ -15,11 +13,15 @@ final class DioSingleton {
 
   late Dio dio;
 
+  /// Fail fast on a dead connection; allow slower responses (PDFs, lists).
+  static const Duration _connectTimeout = Duration(seconds: 30);
+  static const Duration _receiveTimeout = Duration(seconds: 60);
+
   void create() {
     BaseOptions options = BaseOptions(
       baseUrl: url,
-      connectTimeout: const Duration(milliseconds: 100000),
-      receiveTimeout: const Duration(milliseconds: 100000),
+      connectTimeout: _connectTimeout,
+      receiveTimeout: _receiveTimeout,
       headers: {NetworkConstants.ACCEPT: NetworkConstants.ACCEPT_TYPE},
     );
     dio = Dio(options)..interceptors.add(Logger());
@@ -27,7 +29,7 @@ final class DioSingleton {
 
   void update(String auth) {
     if (kDebugMode) {
-      print("Dio update");
+      debugPrint("Dio update");
     }
 
     BaseOptions options = BaseOptions(
@@ -37,26 +39,8 @@ final class DioSingleton {
         NetworkConstants.ACCEPT: NetworkConstants.ACCEPT_TYPE,
         NetworkConstants.AUTHORIZATION: "Bearer $auth",
       },
-      connectTimeout: const Duration(milliseconds: 100000),
-      receiveTimeout: const Duration(milliseconds: 100000),
-    );
-    dio = Dio(options)..interceptors.add(Logger());
-  }
-
-  void updateLanguage(String countryCode) {
-    if (kDebugMode) {
-      print("Dio update $countryCode");
-    }
-    BaseOptions options = BaseOptions(
-      baseUrl: url,
-      responseType: ResponseType.json,
-      headers: {
-        NetworkConstants.ACCEPT: NetworkConstants.ACCEPT_TYPE,
-        NetworkConstants.AUTHORIZATION:
-            "Bearer ${appData.read(kKeyAccessToken)} ",
-      },
-      connectTimeout: const Duration(milliseconds: 100000),
-      receiveTimeout: const Duration(milliseconds: 100000),
+      connectTimeout: _connectTimeout,
+      receiveTimeout: _receiveTimeout,
     );
     dio = Dio(options)..interceptors.add(Logger());
   }

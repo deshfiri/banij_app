@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'payment_status.dart';
+
 /// Response of the `/checkout` actions (pay, coupon, payment status, verify).
 ///
 /// `POST /checkout` answers with a [redirectUrl] to open in a browser view;
@@ -92,6 +94,40 @@ class CheckoutModel {
         data?["payment_status"],
       ]),
     );
+  }
+
+  /// The backend's payment state as a [PaymentStatus]. Settlement flags win
+  /// over the status word; an open attempt that is not paid is processing.
+  PaymentStatus get paymentStatus {
+    if (isPaid) return PaymentStatus.paid;
+    final mapped = PaymentStatus.fromBackend(status);
+    if (mapped.isFinal) return mapped;
+    if (isReconciling == true) return PaymentStatus.processing;
+    if (isOpen == true) return mapped == PaymentStatus.unknown ? PaymentStatus.pending : mapped;
+    return mapped == PaymentStatus.unknown && isOpen == false ? PaymentStatus.failed : mapped;
+  }
+
+  /// Our payment reference, when the backend includes one.
+  String? get reference {
+    for (final source in [data, data?['payment']]) {
+      if (source is! Map) continue;
+      for (final key in const ['reference', 'tran_id', 'transaction_id', 'id', 'number']) {
+        final value = source[key]?.toString();
+        if (value != null && value.isNotEmpty) return value;
+      }
+    }
+    return null;
+  }
+
+  /// Amount of the attempt as formatted text, when the backend includes it.
+  String? get amountText {
+    for (final source in [data, data?['payment']]) {
+      if (source is! Map) continue;
+      final amount = source['amount'] ?? source['total'];
+      if (amount is Map) return (amount['formatted'] ?? amount['amount'])?.toString();
+      if (amount != null) return amount.toString();
+    }
+    return null;
   }
 
   /// True when the payment went through (settled, or a paid-like [status]).

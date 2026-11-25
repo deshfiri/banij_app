@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -134,7 +135,7 @@ class _ProductImage extends StatelessWidget {
             color: primaryOrange.withValues(alpha: isDark ? 0.12 : 0.06),
             child: url == null || url.isEmpty
                 ? placeholder
-                : Image.network(url, fit: BoxFit.cover, errorBuilder: (_, _, _) => placeholder),
+                : CachedNetworkImage(imageUrl: url, fit: BoxFit.cover, errorWidget: (_, _, _) => placeholder),
           ),
         ),
         if (product.isFeatured)

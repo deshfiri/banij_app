@@ -112,7 +112,9 @@ class CartProvider extends ChangeNotifier {
     try {
       final model = await wholesaleCartRxObj.fetchCart();
       _cartModel = model;
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('CartProvider.fetchCart failed: $e');
+    }
 
     _isLoading = false;
     notifyListeners();
@@ -212,7 +214,9 @@ class CartProvider extends ChangeNotifier {
       final model = await wholesaleCartRxObj.deleteCartItem(lineItemId);
       _cartModel = model;
       notifyListeners();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('CartProvider.deleteLineItem failed: $e');
+    }
   }
 
   Future<void> acceptPrices() async {
@@ -220,7 +224,9 @@ class CartProvider extends ChangeNotifier {
       final model = await wholesaleCartRxObj.acceptCartPrices();
       _cartModel = model;
       notifyListeners();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('CartProvider.acceptPrices failed: $e');
+    }
   }
 
   Future<void> addToCart(ProductItemModel product, {int quantity = 1}) async {

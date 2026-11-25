@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter/services.dart';
@@ -102,11 +103,14 @@ class ProductHeroImage extends StatelessWidget {
             borderRadius: BorderRadius.circular(20.r),
             child: image == null || image.isEmpty
                 ? _ProductImagePlaceholder()
-                : Image.network(
-                    image,
-                    fit: BoxFit.cover,
-                    semanticLabel: imageAlt,
-                    errorBuilder: (_, _, _) => _ProductImagePlaceholder(),
+                : Semantics(
+                    label: imageAlt,
+                    image: true,
+                    child: CachedNetworkImage(
+                      imageUrl: image,
+                      fit: BoxFit.cover,
+                      errorWidget: (_, _, _) => _ProductImagePlaceholder(),
+                    ),
                   ),
           ),
         ),

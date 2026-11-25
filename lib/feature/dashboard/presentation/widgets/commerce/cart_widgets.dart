@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -55,10 +56,10 @@ class CartItemCard extends StatelessWidget {
                         size: 26.sp,
                       ),
                     )
-                  : Image.network(
-                      imageUrl,
+                  : CachedNetworkImage(
+                      imageUrl: imageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Center(
+                      errorWidget: (context, url, error) => Center(
                         child: Icon(
                           Icons.inventory_2_outlined,
                           color: primaryOrange,

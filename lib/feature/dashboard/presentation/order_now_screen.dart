@@ -22,11 +22,6 @@ import 'widgets/checkout/checkout_payment_flow.dart';
 import 'widgets/checkout/checkout_payment_section.dart';
 import 'widgets/checkout/checkout_ui.dart';
 import 'widgets/checkout/checkout_voucher_section.dart';
-import 'widgets/checkout/sslcommerz_widgets.dart';
-import '../../../constants/app_constants.dart';
-import '../../../constants/sslcommerz_config.dart';
-import '../../../helpers/di.dart';
-import '../model/sslcommerz_models.dart';
 
 class OrderNowScreen extends StatefulWidget {
   final ProductItemModel? product;
@@ -49,6 +44,8 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
       dashboardProvider.fetchCheckoutState();
       // Fresh cart so problems / changed prices are known before checkout.
       context.read<CartProvider>().fetchCart();
+      // An activation payment left open (app closed mid-payment) can be resumed.
+      dashboardProvider.loadLatestPayment();
     });
   }
 
@@ -152,6 +149,25 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
           )
         : null;
 
+    final openPaymentCard = dashboardProvider.hasOpenPayment
+        ? CheckoutOpenPaymentCard(
+            status: dashboardProvider.latestPayment?.status,
+            onCheckStatus: () async {
+              final paid = await CheckoutPaymentFlow.resumeActivationPayment(
+                context,
+                dashboardProvider,
+                amountText: orderTotalText,
+              );
+              if (!context.mounted) return;
+              if (paid) {
+                Navigator.pushReplacementNamed(context, Routes.dashboardScreen);
+              } else {
+                dashboardProvider.loadLatestPayment();
+              }
+            },
+          )
+        : null;
+
     final packageBanner = dashboardProvider.checkoutResponseModel?.data?.package != null
         ? CheckoutPackageBanner(package: dashboardProvider.checkoutResponseModel!.data!.package!)
         : null;
@@ -227,6 +243,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                                   Expanded(
                                     flex: 3,
                                     child: column([
+                                      openPaymentCard,
                                       attentionCard,
                                       packageBanner,
                                       addressCard,
@@ -239,6 +256,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                                 ],
                               )
                             : column([
+                                openPaymentCard,
                                 attentionCard,
                                 packageBanner,
                                 addressCard,
@@ -270,16 +288,18 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
               return;
             }
 
-            // Package checkout: pay through the gateway (POST /checkout).
+            // Package activation: pay with SSLCommerz through the backend
+            // (POST /checkout → hosted page → verify / status → result).
             if (dashboardProvider.isPackageCheckout) {
-              final paid = await CheckoutPaymentFlow.run(
+              final paid = await CheckoutPaymentFlow.runActivationPayment(
                 context,
                 dashboardProvider,
                 coupon: dashboardProvider.checkoutCoupon,
+                amountText: orderTotalText,
               );
               if (!context.mounted || !paid) return;
               cartProvider.clearCart();
-              CheckoutSuccessDialog.show(context);
+              Navigator.pushReplacementNamed(context, Routes.dashboardScreen);
               return;
             }
 
@@ -292,66 +312,17 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
               return;
             }
 
-            // Wholesale cart order.
-            final usesSsl = dashboardProvider.selectedPaymentMethod.toLowerCase().contains('ssl');
-            // Amount and items are read before confirming (confirm replaces the quote).
-            final payAmount =
-                double.tryParse(dashboardProvider.wholesaleCheckoutModel?.data?.total?.amount ?? '') ?? grandTotalBdt;
-            final itemNames = cartProvider.cartLines.map((l) => l.product?.name).whereType<String>().toList();
-
-            // 1. Review the SSLCommerz payment before creating the order.
-            if (usesSsl) {
-              final proceed = await SslCommerzReviewSheet.show(
-                context,
-                amountText: orderTotalText,
-                description: '${itemNames.length} ${itemNames.length == 1 ? 'item' : 'items'}',
-              );
-              if (!proceed || !context.mounted) return;
-            }
-
-            // 2. Create the order on the server.
+            // Wholesale cart order: the backend creates the order and, for an
+            // online method, returns the SSLCommerz page to pay it on.
             final success = await dashboardProvider.confirmWholesaleOrder();
             if (!context.mounted || !success) return;
             cartProvider.clearCart(); // The order exists now, paid or not.
 
-            // 3a. Server returned an SSLCommerz page: pay it.
             final paymentUrl = dashboardProvider.wholesalePaymentUrl;
             if (paymentUrl != null) {
-              final paid = await CheckoutPaymentFlow.payWholesaleOrder(context, paymentUrl);
+              await CheckoutPaymentFlow.payWholesaleOrder(context, paymentUrl, amountText: orderTotalText);
               if (!context.mounted) return;
-              if (!paid) {
-                Navigator.pushReplacementNamed(context, Routes.dashboardScreen);
-                return;
-              }
-              CheckoutSuccessDialog.show(context);
-              return;
-            }
-
-            // 3b. No payment link from the server: pay through SSLCommerz sandbox directly.
-            if (usesSsl && SslCommerzConfig.directSandboxEnabled) {
-              final address = dashboardProvider.selectedAddress;
-              final transaction = await CheckoutPaymentFlow.payDirectWithSslCommerz(
-                context,
-                SslCommerzPaymentRequest(
-                  transactionId: 'BBN${DateTime.now().millisecondsSinceEpoch}',
-                  amount: payAmount,
-                  productName: itemNames.isEmpty ? 'Wholesale order' : itemNames.take(3).join(', '),
-                  customerName: address?.contactName ?? appData.read(KkName)?.toString() ?? 'Customer',
-                  customerEmail: appData.read(KkUserEmail)?.toString() ?? 'customer@example.com',
-                  customerPhone: address?.phone.isNotEmpty == true ? address!.phone : '01700000000',
-                  customerAddress: address?.fullAddressFormatted.isNotEmpty == true
-                      ? address!.fullAddressFormatted
-                      : 'Dhaka',
-                  customerCity: address?.location?.district?.nameEn ?? 'Dhaka',
-                  customerPostcode: address?.postcode?.isNotEmpty == true ? address!.postcode! : '1000',
-                ),
-              );
-              if (!context.mounted) return;
-              if (transaction == null) {
-                Navigator.pushReplacementNamed(context, Routes.dashboardScreen);
-                return;
-              }
-              SslCommerzReceiptDialog.show(context, transaction: transaction, amountText: orderTotalText);
+              Navigator.pushReplacementNamed(context, Routes.dashboardScreen);
               return;
             }
 

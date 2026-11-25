@@ -201,7 +201,9 @@ class DashboardProvider extends ChangeNotifier {
       try {
         wholesaleCheckoutModel = await wholesaleCheckoutRxObj.selectAddress(address.id.toString());
         ToastUtil.showSuccessMessage('Address updated for checkout');
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('DashboardProvider.selectWholesaleAddress failed: $e');
+      }
     }
   }
 
@@ -299,6 +301,21 @@ class DashboardProvider extends ChangeNotifier {
       _isPaying = false;
       notifyListeners();
     }
+  }
+
+  /// Latest activation payment attempt (`GET /checkout/payment`), loaded when
+  /// checkout opens so an attempt left open (app closed mid-payment) can be
+  /// resumed. Null when unknown.
+  CheckoutModel? latestPayment;
+
+  /// An attempt is still open or being reconciled on the backend.
+  bool get hasOpenPayment =>
+      latestPayment != null && (latestPayment!.isOpen == true || latestPayment!.isReconciling == true);
+
+  /// Loads [latestPayment]; failures (e.g. no attempt yet) are ignored.
+  Future<void> loadLatestPayment() async {
+    latestPayment = await fetchCheckoutPaymentStatus();
+    notifyListeners();
   }
 
   /// `GET /checkout/payment`. Returns null when the request itself failed.
@@ -425,6 +442,8 @@ class DashboardProvider extends ChangeNotifier {
 
   Future<void> fetchOrderDetail(String orderId) async {
     _isLoadingOrderDetail = true;
+    // Drop the previously opened order so its data never shows for this one.
+    if (selectedOrderModel?.id?.toString() != orderId) selectedOrderModel = null;
     notifyListeners();
     try {
       selectedOrderModel = await orderRxObj.fetchOrderDetail(orderId);
@@ -552,7 +571,9 @@ class DashboardProvider extends ChangeNotifier {
         }
       }
       notifyListeners();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('DashboardProvider.fetchDashboard failed: $e');
+    }
   }
 
   Future<void> fetchPackages() async {
@@ -567,7 +588,9 @@ class DashboardProvider extends ChangeNotifier {
         }
       }
       notifyListeners();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('DashboardProvider.fetchPackages failed: $e');
+    }
   }
 
   Future<void> fetchProfile() async {
@@ -580,7 +603,9 @@ class DashboardProvider extends ChangeNotifier {
         }
       }
       notifyListeners();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('DashboardProvider.fetchProfile failed: $e');
+    }
   }
 
   void setBottomNavIndex(int index) {
@@ -628,6 +653,8 @@ class DashboardProvider extends ChangeNotifier {
         }
       }
       notifyListeners();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('DashboardProvider.fetchOnboardingStatus failed: $e');
+    }
   }
 }

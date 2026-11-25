@@ -8,7 +8,6 @@ import '../helpers/di.dart';
 import '../helpers/navigation_service.dart';
 
 import '../feature/account/model/account_model.dart';
-import '../feature/package/model/package_model.dart';
 import '../helpers/loading_helper.dart';
 import '../helpers/toast.dart';
 import '../networks/api_access.dart';
@@ -17,7 +16,6 @@ class AccountProvider extends ChangeNotifier {
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
 
-  PackageResponseModel? packageResponse;
   AccountDeletionInfoModel? deletionInfo;
 
   late bool _isBengali;
@@ -27,15 +25,7 @@ class AccountProvider extends ChangeNotifier {
   AccountProvider() {
     _isBengali = appData.read('isBengali') ?? false;
     fetchUserProfile();
-    fetchPackages();
     fetchDeletionInfo();
-  }
-
-  Future<void> fetchPackages() async {
-    try {
-      packageResponse = await packageRxObj.fetchPackages();
-      notifyListeners();
-    } catch (_) {}
   }
 
   Future<void> fetchDeletionInfo() async {
@@ -58,7 +48,9 @@ class AccountProvider extends ChangeNotifier {
       }
 
       notifyListeners();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('AccountProvider.fetchDeletionInfo failed: $e');
+    }
   }
 
   Future<void> fetchUserProfile() async {
@@ -139,7 +131,9 @@ class AccountProvider extends ChangeNotifier {
   Future<void> logout(BuildContext context) async {
     try {
       await logoutRxObj.userLogout().waitingForSucess();
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('AccountProvider.logout failed: $e');
+    }
 
     await appData.remove(kKeyAccessToken);
     await appData.write(kKeyIsLoggedIn, false);

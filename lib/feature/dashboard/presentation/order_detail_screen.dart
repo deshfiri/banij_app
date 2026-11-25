@@ -30,7 +30,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<DashboardProvider>().fetchOrderDetail(widget.orderId);
+      if (mounted) context.read<DashboardProvider>().fetchOrderDetail(widget.orderId);
     });
   }
 
@@ -62,10 +62,13 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           OrderSectionTitle('Order progress'.tr),
-                          const OrderProgressCard(),
+                          OrderProgressCard(status: order?.status, paymentState: order?.paymentState),
                           UIHelper.verticalSpace(14.h),
-                          PaymentReceivedBanner(date: data.date),
-                          UIHelper.verticalSpace(22.h),
+                          if (order?.paymentState != null) ...[
+                            OrderPaymentBanner(paymentState: order?.paymentState, date: data.date),
+                            UIHelper.verticalSpace(22.h),
+                          ] else
+                            UIHelper.verticalSpace(8.h),
                           OrderSectionTitle('Products'.tr),
                           OrderLinesSection(lines: order?.lines ?? const [], fallbackTotal: data.displayTotal),
                           UIHelper.verticalSpace(12.h),
@@ -81,7 +84,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                           OrderSummaryCard(totals: order?.totals, data: data),
                           UIHelper.verticalSpace(22.h),
                           OrderSectionTitle('Invoice & Billing'.tr),
-                          OrderInvoiceCard(data: data),
+                          OrderInvoiceCard(data: data, invoice: order?.invoice),
                         ],
                       ),
                     ),

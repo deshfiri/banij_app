@@ -37,7 +37,9 @@ class AuthProvider extends ChangeNotifier {
         emailController.text = box.get('email', defaultValue: '') as String;
         passwordController.text = box.get('password', defaultValue: '') as String;
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('AuthProvider._loadSavedCredentials failed: $e');
+    }
   }
 
   void _autoSaveCredentials() {
@@ -46,7 +48,9 @@ class AuthProvider extends ChangeNotifier {
         final box = Hive.box('auth_box');
         box.put('email', emailController.text.trim());
         box.put('password', passwordController.text);
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('AuthProvider._autoSaveCredentials failed: $e');
+      }
     }
   }
 
@@ -68,7 +72,9 @@ class AuthProvider extends ChangeNotifier {
         box.put('email', emailController.text.trim());
         box.put('password', passwordController.text);
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('AuthProvider.toggleRememberMe failed: $e');
+    }
     notifyListeners();
   }
 
@@ -106,7 +112,9 @@ class AuthProvider extends ChangeNotifier {
         box.delete('email');
         box.delete('password');
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint('AuthProvider.handleSignIn failed: $e');
+    }
 
     try {
       LoginResponse response = await loginRxObj.userLogin(

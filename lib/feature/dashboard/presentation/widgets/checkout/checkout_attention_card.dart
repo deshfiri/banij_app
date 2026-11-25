@@ -132,6 +132,65 @@ class CheckoutAttentionCard extends StatelessWidget {
   }
 }
 
+/// Shown when `GET /checkout/payment` reports an attempt still open (e.g.
+/// the app was closed during payment): lets the user check its status
+/// instead of paying twice.
+class CheckoutOpenPaymentCard extends StatelessWidget {
+  final String? status;
+  final VoidCallback onCheckStatus;
+
+  const CheckoutOpenPaymentCard({super.key, required this.status, required this.onCheckStatus});
+
+  @override
+  Widget build(BuildContext context) {
+    const blue = Color(0xFF3B82F6);
+    return Container(
+      padding: EdgeInsets.all(14.w),
+      decoration: BoxDecoration(
+        color: blue.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(color: blue.withValues(alpha: 0.4)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.all(8.w),
+            decoration: BoxDecoration(color: blue.withValues(alpha: 0.15), borderRadius: BorderRadius.circular(10.r)),
+            child: Icon(Icons.sync_rounded, size: 18.sp, color: blue),
+          ),
+          UIHelper.horizontalSpace(10.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'A payment is in progress'.tr,
+                  style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800, color: AppColorsTheme.textMainColor(context)),
+                ),
+                UIHelper.verticalSpace(2.h),
+                Text(
+                  'Check its status before paying again.'.tr,
+                  style: TextStyle(fontSize: 11.5.sp, color: AppColorsTheme.textMutedColor(context)),
+                ),
+              ],
+            ),
+          ),
+          UIHelper.horizontalSpace(8.w),
+          TextButton(
+            onPressed: onCheckStatus,
+            style: TextButton.styleFrom(
+              foregroundColor: blue,
+              backgroundColor: blue.withValues(alpha: 0.12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
+            ),
+            child: Text('Check status'.tr, style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w800)),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// One problem line: product name and readable reasons.
 class _ProblemLine extends StatelessWidget {
   final WholesaleCartLine line;

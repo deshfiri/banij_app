@@ -6,6 +6,7 @@ import '../../../../../constants/color.dart';
 import '../../../../../helpers/all_routes.dart';
 import '../../../../../helpers/ui_helpers.dart';
 import '../../../model/order_model.dart';
+import '../../../../../common_widget/payment_status_badge.dart';
 import 'order_status_style.dart';
 
 /// Order card in the orders list: number, date, status pill, total, and the
@@ -156,6 +157,13 @@ class OrderItemCard extends StatelessWidget {
                         ),
                       ],
                     ),
+                    if (order.paymentState != null) ...[
+                      UIHelper.verticalSpace(6.h),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: PaymentStatusBadge(rawStatus: order.paymentState, compact: true),
+                      ),
+                    ],
                     UIHelper.verticalSpace(8.h),
                     Container(
                       width: double.infinity,

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -35,10 +36,10 @@ class _ProductImage extends StatelessWidget {
                   size: size * 0.4,
                 ),
               )
-            : Image.network(
-                url,
+            : CachedNetworkImage(
+                imageUrl: url,
                 fit: BoxFit.cover,
-                errorBuilder: (_, _, _) => Center(
+                errorWidget: (_, _, _) => Center(
                   child: Icon(
                     Icons.inventory_2_outlined,
                     color: primaryOrange,

@@ -4,10 +4,13 @@ import 'package:get/get.dart';
 
 import '../../../../../constants/color.dart';
 import '../../../../../helpers/ui_helpers.dart';
-import '../../../../finance/presentation/widgets/invoice_receipt_preview_modal.dart';
+import '../../../../finance/model/invoice_list_model.dart';
+import '../../../../finance/presentation/invoice_details_screen.dart';
 import '../../../model/order_model.dart';
+import '../../../model/payment_status.dart';
 import '../dashboard_card_decoration.dart';
 import '../quick_access_section_widget.dart';
+import '../../../../../common_widget/payment_status_badge.dart';
 import 'order_status_style.dart';
 import 'sheet_parts.dart';
 
@@ -22,7 +25,11 @@ class OrderDetailData {
   final String invoiceNumber;
   final String displayTotal;
 
+  /// Payment state from the order API (`payment_state`); null when not sent.
+  final String? paymentState;
+
   const OrderDetailData({
+    this.paymentState,
     required this.orderNumber,
     required this.status,
     required this.currency,
@@ -35,21 +42,22 @@ class OrderDetailData {
   factory OrderDetailData.from(OrderItemModel? order, String fallbackId) {
     final currency = order?.currency ?? '৳';
 
-    String totalText = '150.00';
+    String totalText = '—';
     final totalVal = order?.totals?.total?.formatted ?? order?.total;
     if (totalVal is Map) {
-      totalText = totalVal['formatted']?.toString() ?? totalVal['amount']?.toString() ?? '150.00';
+      totalText = totalVal['formatted']?.toString() ?? totalVal['amount']?.toString() ?? '—';
     } else if (totalVal != null) {
       totalText = totalVal.toString();
     }
 
     return OrderDetailData(
       orderNumber: order?.orderNumber ?? order?.reference ?? 'ORD-${order?.id ?? fallbackId}',
-      status: order?.status ?? 'Paid',
+      status: order?.status ?? 'Unknown',
+      paymentState: order?.paymentState,
       currency: currency,
-      date: order?.createdAt ?? '11/18/2026',
-      placedBy: order?.placedBy ?? 'Mohammad Ashraf',
-      invoiceNumber: order?.invoice?.number ?? 'INV-2026-000001',
+      date: order?.createdAt ?? '—',
+      placedBy: order?.placedBy ?? '—',
+      invoiceNumber: order?.invoice?.number ?? '—',
       displayTotal: totalText.startsWith('৳') || totalText.startsWith(currency) ? totalText : '$currency $totalText',
     );
   }
@@ -128,6 +136,14 @@ class OrderDetailHeroSummary extends StatelessWidget {
               Flexible(child: OrderStatusPill(status: data.status, onHero: true)),
             ],
           ),
+          if (data.paymentState != null) ...[
+            UIHelper.verticalSpace(6.h),
+            Container(
+              padding: EdgeInsets.all(2.w),
+              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20.r)),
+              child: PaymentStatusBadge(rawStatus: data.paymentState),
+            ),
+          ],
           UIHelper.verticalSpace(4.h),
           Text(
             'Placed on @date by @name'.trParams({'date': data.date, 'name': data.placedBy}),
@@ -166,25 +182,36 @@ class OrderDetailHeroSummary extends StatelessWidget {
   }
 }
 
-/// Placed → Paid → Shipped → Delivered stepper.
+/// Placed → Paid → Shipped → Delivered stepper, from the order's real
+/// `status` and `payment_state`.
 class OrderProgressCard extends StatelessWidget {
-  const OrderProgressCard({super.key});
+  final String? status;
+  final String? paymentState;
 
-  static const List<(String, bool)> _steps = [('Placed', true), ('Paid', true), ('Shipped', false), ('Delivered', false)];
+  const OrderProgressCard({super.key, required this.status, required this.paymentState});
+
+  List<(String, bool)> get _computedSteps {
+    final s = status?.toLowerCase() ?? '';
+    final delivered = s.contains('deliver') || s.contains('complet');
+    final shipped = delivered || s.contains('ship') || s.contains('dispatch') || s.contains('transit');
+    final paid = shipped || PaymentStatus.fromBackend(paymentState) == PaymentStatus.paid || s.contains('paid');
+    return [('Placed', true), ('Paid', paid), ('Shipped', shipped), ('Delivered', delivered)];
+  }
 
   @override
   Widget build(BuildContext context) {
+    final steps = _computedSteps;
     return OrderDetailCard(
       padding: 14,
       child: Row(
         children: [
-          for (int i = 0; i < _steps.length; i++)
+          for (int i = 0; i < steps.length; i++)
             Expanded(
               child: _ProgressStep(
-                label: _steps[i].$1.tr,
-                isDone: _steps[i].$2,
-                lineBefore: i == 0 ? null : _steps[i].$2,
-                lineAfter: i == _steps.length - 1 ? null : _steps[i + 1].$2,
+                label: steps[i].$1.tr,
+                isDone: steps[i].$2,
+                lineBefore: i == 0 ? null : steps[i].$2,
+                lineAfter: i == steps.length - 1 ? null : steps[i + 1].$2,
               ),
             ),
         ],
@@ -259,29 +286,45 @@ class _ProgressStep extends StatelessWidget {
   }
 }
 
-/// Green "Payment received" notice.
-class PaymentReceivedBanner extends StatelessWidget {
+/// Payment notice from the order's real `payment_state`: green when paid,
+/// orange when pending / unpaid, red when failed, blue when refunded.
+/// Hidden when the API sends no payment state.
+class OrderPaymentBanner extends StatelessWidget {
+  final String? paymentState;
   final String date;
 
-  const PaymentReceivedBanner({super.key, required this.date});
+  const OrderPaymentBanner({super.key, required this.paymentState, required this.date});
 
   @override
   Widget build(BuildContext context) {
+    if (paymentState == null || paymentState!.trim().isEmpty) return const SizedBox.shrink();
+    final status = PaymentStatus.fromBackend(paymentState);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final color = status.color;
+
+    final (String title, String message) = switch (status) {
+      PaymentStatus.paid => ('Payment received', 'Paid on @date. The stock for this order is set aside for you.'.trParams({'date': date})),
+      PaymentStatus.failed => ('Payment failed', 'The payment for this order did not go through.'),
+      PaymentStatus.cancelled => ('Payment cancelled', 'The payment for this order was cancelled.'),
+      PaymentStatus.refunded || PaymentStatus.partiallyRefunded => ('Payment refunded', 'This order\'s payment was refunded.'),
+      PaymentStatus.processing => ('Payment processing', 'The payment is being confirmed.'),
+      PaymentStatus.unknown => ('Payment', paymentState!),
+      _ => ('Payment pending', 'This order has not been paid yet.'),
+    };
 
     return Container(
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: isDark ? successGreen.withValues(alpha: 0.12) : successGreenLight.withValues(alpha: 0.6),
+        color: color.withValues(alpha: isDark ? 0.12 : 0.08),
         borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: successGreen.withValues(alpha: 0.35)),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
       ),
       child: Row(
         children: [
           Container(
             padding: EdgeInsets.all(8.w),
-            decoration: BoxDecoration(color: successGreen.withValues(alpha: 0.18), shape: BoxShape.circle),
-            child: Icon(Icons.verified_rounded, color: successGreen, size: 20.sp),
+            decoration: BoxDecoration(color: color.withValues(alpha: 0.18), shape: BoxShape.circle),
+            child: Icon(status == PaymentStatus.paid ? Icons.verified_rounded : status.icon, color: color, size: 20.sp),
           ),
           UIHelper.horizontalSpace(12.w),
           Expanded(
@@ -289,7 +332,7 @@ class PaymentReceivedBanner extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Payment received'.tr,
+                  title.tr,
                   style: TextStyle(
                     fontSize: 13.5.sp,
                     fontWeight: FontWeight.w800,
@@ -298,12 +341,14 @@ class PaymentReceivedBanner extends StatelessWidget {
                 ),
                 UIHelper.verticalSpace(2.h),
                 Text(
-                  'Paid on @date. The stock for this order is set aside for you.'.trParams({'date': date}),
+                  message.tr,
                   style: TextStyle(fontSize: 11.5.sp, height: 1.35, color: AppColorsTheme.textMutedColor(context)),
                 ),
               ],
             ),
           ),
+          UIHelper.horizontalSpace(8.w),
+          PaymentStatusBadge(rawStatus: paymentState, compact: true),
         ],
       ),
     );
@@ -670,19 +715,19 @@ class _SummaryRow extends StatelessWidget {
 class OrderInvoiceCard extends StatelessWidget {
   final OrderDetailData data;
 
-  const OrderInvoiceCard({super.key, required this.data});
+  /// The order's invoice (`invoice` in the order API). Null = none issued yet.
+  final OrderInvoiceModel? invoice;
 
-  void _openPreview(BuildContext context) {
-    InvoiceReceiptPreviewModal.show(
+  const OrderInvoiceCard({super.key, required this.data, required this.invoice});
+
+  bool get _hasInvoice => invoice?.id?.trim().isNotEmpty == true;
+
+  /// Opens Invoice Details, which loads `GET /invoices/{id}` (lines, totals,
+  /// payment) with PDF preview / print / download.
+  void _openInvoice(BuildContext context) {
+    InvoiceDetailsScreen.open(
       context,
-      title: 'Invoice'.tr,
-      docNo: data.invoiceNumber,
-      clientOrGateway: data.placedBy,
-      date: data.date,
-      dueDateOrTime: 'Net 30',
-      amount: data.displayTotal,
-      status: data.status.toUpperCase(),
-      isInvoice: true,
+      invoice: InvoiceItemModel(id: invoice!.id, number: invoice!.number),
     );
   }
 
@@ -719,7 +764,7 @@ class OrderInvoiceCard extends StatelessWidget {
                 ),
                 UIHelper.verticalSpace(2.h),
                 Text(
-                  data.invoiceNumber,
+                  _hasInvoice ? (invoice!.number ?? data.invoiceNumber) : 'No invoice issued yet'.tr,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(fontSize: 11.sp, color: AppColorsTheme.textMutedColor(context)),
@@ -729,8 +774,10 @@ class OrderInvoiceCard extends StatelessWidget {
           ),
           UIHelper.horizontalSpace(8.w),
           GestureDetector(
-            onTap: () => _openPreview(context),
-            child: Container(
+            onTap: _hasInvoice ? () => _openInvoice(context) : null,
+            child: Opacity(
+              opacity: _hasInvoice ? 1 : 0.45,
+              child: Container(
               padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 9.h),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(colors: [primaryOrange, secondaryOrange]),
@@ -750,6 +797,7 @@ class OrderInvoiceCard extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
             ),
           ),
         ],

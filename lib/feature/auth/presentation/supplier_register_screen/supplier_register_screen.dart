@@ -39,23 +39,23 @@ class _SupplierStep {
 }
 
 class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
+  late final SupplierRegisterProvider _formProvider;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      try {
-        context.read<SupplierRegisterProvider>().resetSupplierForm();
-      } catch (_) {}
-    });
+    // Looked up once here: providers cannot be read from a disposed context.
+    _formProvider = context.read<SupplierRegisterProvider>();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _formProvider.resetSupplierForm());
   }
 
   @override
   void dispose() {
-    try {
-      context.read<SupplierRegisterProvider>().resetSupplierForm();
-    } catch (_) {}
+    // Reset after this frame: notifying listeners while the tree is being
+    // torn down would throw.
+    final provider = _formProvider;
+    WidgetsBinding.instance.addPostFrameCallback((_) => provider.resetSupplierForm());
     super.dispose();
   }
 
