@@ -25,9 +25,19 @@ class HeroMetricCardWidget extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
-          color: Colors.white.withValues(alpha: 0.18),
+          color: Colors.white.withValues(alpha: 0.22),
           borderRadius: BorderRadius.circular(18.r),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+          border: Border.all(
+            color: Colors.white.withValues(alpha: 0.38),
+            width: 1.w,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.08),
+              blurRadius: 10.r,
+              offset: const Offset(0, 3),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,8 +73,8 @@ class HeroMetricCardWidget extends StatelessWidget {
                     title,
                     style: TextStyle(
                       fontSize: 10.5.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white.withValues(alpha: 0.88),
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white.withValues(alpha: 0.92),
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

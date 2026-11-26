@@ -6,11 +6,13 @@ import '../../../../../constants/color.dart';
 import '../../../../../constants/image_const.dart';
 import '../../../../../helpers/all_routes.dart';
 import '../../../../../helpers/ui_helpers.dart';
+import '../../../../dashboard/presentation/all_modules_screen.dart';
+import '../../../../dashboard/presentation/widgets/hero_metric_card_widget.dart';
 import '../../../../dashboard/presentation/widgets/quick_access_section_widget.dart';
 import '../application_status_card_widget.dart';
 
 /// Supplier dashboard home (index 0): logo header, metrics, application
-/// status and quick shortcuts.
+/// status and quick shortcuts matching the exact User Dashboard layout.
 class SupplierHomeTab extends StatelessWidget {
   final VoidCallback onOpenDrawer;
   final VoidCallback onOpenAccount;
@@ -45,7 +47,7 @@ class SupplierHomeTab extends StatelessWidget {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: EdgeInsets.fromLTRB(12.w, 4.h, 12.w, 20.h),
+          padding: EdgeInsets.fromLTRB(16.w, 4.h, 16.w, 18.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -107,59 +109,84 @@ class SupplierHomeTab extends StatelessWidget {
                   ),
                 ],
               ),
-              UIHelper.verticalSpace(12.h),
+              UIHelper.verticalSpace(10.h),
 
-              // Supplier Title & Hub Badge
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8.w),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'supplier_dashboard'.tr,
-                            style: TextStyle(
-                              fontSize: 22.sp,
-                              fontWeight: FontWeight.w900,
-                              color: Colors.white,
-                            ),
+              // Supplier Greeting & Active Status Badge
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'supplier_dashboard'.tr,
+                          style: TextStyle(
+                            fontSize: 17.sp,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.white,
                           ),
-                          UIHelper.verticalSpace(2.h),
-                          Text(
-                            'Manage your workspace & requisitions',
-                            style: TextStyle(
-                              fontSize: 11.5.sp,
-                              color: Colors.white.withValues(alpha: 0.88),
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
-                      ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        UIHelper.verticalSpace(2.h),
+                      ],
                     ),
-                    UIHelper.horizontalSpace(8.w),
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.22),
-                        borderRadius: BorderRadius.circular(20.r),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
-                      ),
-                      child: Text(
-                        'Supplier Hub',
-                        style: TextStyle(
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.bold,
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF10B981).withValues(alpha: 0.28),
+                      borderRadius: BorderRadius.circular(16.r),
+                      border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.check_circle_rounded,
+                          size: 12.sp,
                           color: Colors.white,
                         ),
-                      ),
+                        UIHelper.horizontalSpace(4.w),
+                        Text(
+                          'Active'.tr,
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+              UIHelper.verticalSpace(16.h),
+
+              // Embedded Inner Metric Cards Row INSIDE the Hero Header Container
+              Row(
+                children: [
+                  Expanded(
+                    child: HeroMetricCardWidget(
+                      title: 'Total Earnings',
+                      amount: '৳0.00',
+                      iconPath: walletIconAsset,
+                      onTap: () => Navigator.pushNamed(context, Routes.walletScreen),
+                    ),
+                  ),
+                  UIHelper.horizontalSpace(10.w),
+                  Expanded(
+                    child: HeroMetricCardWidget(
+                      title: 'Active Orders',
+                      amount: '0',
+                      iconPath: paidMediaIconAsset,
+                      onTap: () => Navigator.pushNamed(context, Routes.verificationHistoryScreen),
+                    ),
+                  ),
+                ],
+              ),
+              UIHelper.verticalSpace(12.h),
             ],
           ),
         ),
@@ -169,27 +196,14 @@ class SupplierHomeTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final shortcuts = [
-      _Shortcut(
-        'KYC & Business Verification',
-        Icons.shield_outlined,
-        () => Navigator.pushNamed(context, Routes.kycVerificationScreen),
-      ),
-      _Shortcut(
-        'Verification History',
-        Icons.history_rounded,
-        () => Navigator.pushNamed(context, Routes.verificationHistoryScreen),
-      ),
-      _Shortcut('Account Settings & Profile', Icons.settings_outlined, onOpenAccount),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildIntegratedHeroHeader(context),
-        Expanded(
-          child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildIntegratedHeroHeader(context),
+          UIHelper.verticalSpace(16.h),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -197,15 +211,7 @@ class SupplierHomeTab extends StatelessWidget {
                   children: [
                     Expanded(child: SupplierMetricCard(metric: SupplierMetric.verification)),
                     _MetricGap(),
-                    Expanded(child: SupplierMetricCard(metric: SupplierMetric.activeOrders)),
-                  ],
-                ),
-                UIHelper.verticalSpace(12.h),
-                const Row(
-                  children: [
                     Expanded(child: SupplierMetricCard(metric: SupplierMetric.requisitions)),
-                    _MetricGap(),
-                    Expanded(child: SupplierMetricCard(metric: SupplierMetric.earnings)),
                   ],
                 ),
                 UIHelper.verticalSpace(22.h),
@@ -213,28 +219,39 @@ class SupplierHomeTab extends StatelessWidget {
                   onOpenApplication: () => Navigator.pushNamed(context, Routes.kycVerificationScreen),
                 ),
                 UIHelper.verticalSpace(24.h),
-                DashboardSectionHeader(title: 'Quick Shortcuts'.tr),
+                DashboardSectionHeader(
+                  title: 'Quick Access'.tr,
+                  actionLabel: 'See All'.tr,
+                  onAction: () => AllModulesScreen.open(context),
+                ),
                 UIHelper.verticalSpace(12.h),
-                for (int i = 0; i < shortcuts.length; i++) ...[
-                  if (i > 0) UIHelper.verticalSpace(10.h),
-                  SupplierShortcutTile(title: shortcuts[i].title, icon: shortcuts[i].icon, onTap: shortcuts[i].onTap),
-                ],
+                QuickAccessGrid(
+                  tiles: [
+                    QuickAccessTile(
+                      title: 'KYC Verification',
+                      iconAsset: verificationIconAsset,
+                      onTap: () => Navigator.pushNamed(context, Routes.kycVerificationScreen),
+                    ),
+                    QuickAccessTile(
+                      title: 'History',
+                      iconAsset: addressesIconAsset,
+                      onTap: () => Navigator.pushNamed(context, Routes.verificationHistoryScreen),
+                    ),
+                    QuickAccessTile(
+                      title: 'Account',
+                      iconAsset: subscriptionIconAsset,
+                      onTap: onOpenAccount,
+                    ),
+                  ],
+                ),
                 UIHelper.verticalSpace(100.h),
               ],
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
-}
-
-class _Shortcut {
-  final String title;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _Shortcut(this.title, this.icon, this.onTap);
 }
 
 class _MetricGap extends StatelessWidget {
@@ -247,9 +264,7 @@ class _MetricGap extends StatelessWidget {
 /// The four supplier summary metrics.
 enum SupplierMetric {
   verification('Verification', 'Pending', Icons.verified_user_outlined, infoBlue),
-  activeOrders('Active Orders', '0', Icons.inventory_2_outlined, primaryOrange),
-  requisitions('Requisitions', '0 Active', Icons.receipt_long_outlined, successGreen),
-  earnings('Earnings', '৳ 0.00', Icons.account_balance_wallet_outlined, purpleAccent);
+  requisitions('Requisitions', '0 Active', Icons.receipt_long_outlined, successGreen);
 
   final String title;
   final String value;
@@ -325,64 +340,6 @@ class SupplierMetricCard extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Tappable shortcut row: orange icon, title, chevron.
-class SupplierShortcutTile extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const SupplierShortcutTile({super.key, required this.title, required this.icon, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(18.r),
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
-        decoration: BoxDecoration(
-          color: isDark ? AppColorsTheme.cardBg(context) : const Color(0xFFFFF7F2),
-          borderRadius: BorderRadius.circular(18.r),
-          border: Border.all(
-            color: isDark ? const Color(0xFF374151) : primaryOrange.withValues(alpha: 0.22),
-            width: 1.w,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: primaryOrange.withValues(alpha: isDark ? 0.08 : 0.05),
-              blurRadius: 10.r,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Icon(icon, color: primaryOrange, size: 20.sp),
-            UIHelper.horizontalSpace(10.w),
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w700,
-                  color: AppColorsTheme.textMainColor(context),
-                ),
-              ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios_rounded,
-              size: 13.sp,
-              color: primaryOrange,
-            ),
-          ],
-        ),
       ),
     );
   }
