@@ -1,10 +1,9 @@
+import '../helpers/auth_routing.dart';
 import 'package:flutter/material.dart';
 
 import '../helpers/error_message.dart';
-import '../constants/app_constants.dart';
 import '../feature/account/data/account_api.dart';
 import '../helpers/all_routes.dart';
-import '../helpers/di.dart';
 import '../helpers/loading_helper.dart';
 import '../helpers/navigation_service.dart';
 import '../helpers/toast.dart';
@@ -42,11 +41,7 @@ class DeleteAccountProvider extends ChangeNotifier {
       _isLoading = false;
       notifyListeners();
 
-      await appData.remove(kKeyAccessToken);
-      await appData.write(kKeyIsLoggedIn, false);
-      await appData.remove(KkName);
-      await appData.remove(KkUserEmail);
-      await appData.remove(KkID);
+      await AuthRouting.clearSession();
 
       ToastUtil.showSuccessMessage('Account deleted successfully');
       resetForm();

@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 
+import '../../../helpers/helpers_method.dart';
 import '../../../networks/dio/dio.dart';
 import '../../../networks/endpoints.dart';
 import '../../../networks/exception_handler/data_source.dart';
@@ -18,11 +19,11 @@ final class LoginApi {
     bool isSupplier = false,
   }) async {
     try {
-      Map<String, dynamic> data = {
+      // Exactly the LoginRequest fields of the API.
+      final data = <String, dynamic>{
         "email": email,
-        "userId": email,
         "password": password,
-        "device_name": "mobile",
+        "device_name": await deviceLabel(),
       };
 
       final endpoint = isSupplier ? EndPoints.suplierLogin() : EndPoints.login();
@@ -40,15 +41,23 @@ final class LoginApi {
         throw DataSource.DEFAULT.getFailure();
       }
     } on DioException catch (dioError) {
-      if (dioError.response?.data != null) {
-        final data = dioError.response?.data;
-        if (data is Map && data.containsKey('message')) {
-          throw Exception(data['message'].toString());
-        } else if (data is Map && data.containsKey('error')) {
-          throw Exception(data['error'].toString());
-        }
+      final status = dioError.response?.statusCode;
+      final data = dioError.response?.data;
+      if (data is Map && data.containsKey('message')) {
+        throw LoginFailure(data['message'].toString(), statusCode: status);
+      } else if (data is Map && data.containsKey('error')) {
+        throw LoginFailure(data['error'].toString(), statusCode: status);
       }
-      rethrow;
+      if (status != null) throw LoginFailure('Login failed ($status).', statusCode: status);
+      // No answer from the server: a readable reason instead of Dio's text.
+      throw LoginFailure(switch (dioError.type) {
+        DioExceptionType.connectionTimeout ||
+        DioExceptionType.receiveTimeout ||
+        DioExceptionType.sendTimeout =>
+          'The server took too long to answer. Please try again.',
+        DioExceptionType.connectionError => 'No internet connection. Please check your network and try again.',
+        _ => 'Could not reach the server. Please try again.',
+      });
     } catch (error) {
       rethrow;
     }

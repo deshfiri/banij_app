@@ -5,7 +5,14 @@ import 'package:get/get.dart';
 class AuthValidators {
   AuthValidators._();
 
-  static final RegExp _emailRegex = RegExp(r'^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$');
+  /// Local part with the usual characters (incl. `+` and `'`), a domain of
+  /// dot-separated labels and a letters-only top-level domain of 2+ letters
+  /// (so `.online`, `.agency` … are accepted). No leading / trailing / double
+  /// dots.
+  static final RegExp _emailRegex = RegExp(
+    r"^[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+(\.[A-Za-z0-9!#$%&'*+/=?^_`{|}~-]+)*"
+    r'@([A-Za-z0-9]([A-Za-z0-9-]*[A-Za-z0-9])?\.)+[A-Za-z]{2,}$',
+  );
   static final RegExp _upper = RegExp(r'[A-Z]');
   static final RegExp _lower = RegExp(r'[a-z]');
   static final RegExp _digit = RegExp(r'[0-9]');
@@ -17,7 +24,9 @@ class AuthValidators {
     String invalidKey = 'err_valid_email',
   }) {
     if (value == null || value.trim().isEmpty) return emptyKey.tr;
-    if (!_emailRegex.hasMatch(value.trim())) return invalidKey.tr;
+    final email = value.trim();
+    // 254 is the longest address mail systems accept.
+    if (email.length > 254 || !_emailRegex.hasMatch(email)) return invalidKey.tr;
     return null;
   }
 
@@ -25,10 +34,12 @@ class AuthValidators {
   static String? required(String? value, String messageKey) =>
       (value == null || value.trim().isEmpty) ? messageKey.tr : null;
 
-  /// Sign-in password: required, at least 6 characters.
+  /// Sign-in password: required, at least 6 characters, at most 128 (the
+  /// server decides whether it is right — it is never trimmed).
   static String? loginPassword(String? value) {
     if (value == null || value.isEmpty) return 'err_enter_password'.tr;
     if (value.length < 6) return 'err_password_length'.tr;
+    if (value.length > 128) return 'Password is too long'.tr;
     return null;
   }
 

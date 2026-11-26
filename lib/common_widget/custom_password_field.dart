@@ -11,6 +11,7 @@ class CustomPasswordField extends StatelessWidget {
   final VoidCallback onToggleObscure;
   final String? Function(String?)? validator;
   final Function(String)? onChanged;
+  final Function(String)? onFieldSubmitted;
   final FocusNode? focusNode;
   final TextInputAction? textInputAction;
   final List<String>? autofillHints;
@@ -23,6 +24,7 @@ class CustomPasswordField extends StatelessWidget {
     required this.onToggleObscure,
     this.validator,
     this.onChanged,
+    this.onFieldSubmitted,
     this.focusNode,
     this.textInputAction = TextInputAction.next,
     this.autofillHints,
@@ -38,6 +40,7 @@ class CustomPasswordField extends StatelessWidget {
       focusNode: focusNode,
       textInputAction: textInputAction,
       onChanged: onChanged,
+      onFieldSubmitted: onFieldSubmitted,
       autofillHints: autofillHints,
       suffixIcon: IconButton(
         icon: Icon(

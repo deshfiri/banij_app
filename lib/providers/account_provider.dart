@@ -1,3 +1,4 @@
+import '../helpers/auth_routing.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -36,11 +37,7 @@ class AccountProvider extends ChangeNotifier {
       final msg = deletionInfo?.message?.toLowerCase() ?? '';
 
       if (status == 'accepted' || msg.contains('accepted')) {
-        await appData.remove(kKeyAccessToken);
-        await appData.write(kKeyIsLoggedIn, false);
-        await appData.remove(KkName);
-        await appData.remove(KkUserEmail);
-        await appData.remove(KkID);
+        await AuthRouting.clearSession();
 
         ToastUtil.showSuccessMessage('Your account deletion request has been accepted.');
         NavigationService.navigateToReplacementUntil(Routes.onboardingScreen);
@@ -59,11 +56,7 @@ class AccountProvider extends ChangeNotifier {
       if (accountModel.deletionRequest != null) {
         final status = accountModel.deletionRequest!.status?.toLowerCase() ?? '';
         if (status == 'accepted') {
-          await appData.remove(kKeyAccessToken);
-          await appData.write(kKeyIsLoggedIn, false);
-          await appData.remove(KkName);
-          await appData.remove(KkUserEmail);
-          await appData.remove(KkID);
+          await AuthRouting.clearSession();
 
           ToastUtil.showSuccessMessage('Your account deletion request has been accepted.');
           NavigationService.navigateToReplacementUntil(Routes.onboardingScreen);
@@ -135,11 +128,7 @@ class AccountProvider extends ChangeNotifier {
       debugPrint('AccountProvider.logout failed: $e');
     }
 
-    await appData.remove(kKeyAccessToken);
-    await appData.write(kKeyIsLoggedIn, false);
-    await appData.remove(KkName);
-    await appData.remove(KkUserEmail);
-    await appData.remove(KkID);
+    await AuthRouting.clearSession();
 
     ToastUtil.showSuccessMessage('Logged out successfully');
     NavigationService.navigateToReplacementUntil(Routes.onboardingScreen);

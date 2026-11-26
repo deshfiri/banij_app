@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
 
 import '../../../common_widget/gradient_button.dart';
 import '../../../constants/color.dart';
-import '../../../helpers/all_routes.dart';
+import '../../../helpers/helpers_method.dart';
 import '../../../helpers/toast.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../../networks/api_access.dart';
+import '../../../providers/auth_provider.dart';
+import '../model/response_model.dart';
 import 'widgets/auth_components.dart';
 import 'widgets/auth_form_card.dart';
 import 'widgets/auth_scaffold.dart';
@@ -29,6 +32,15 @@ class _TwoFactorChallengeScreenState extends State<TwoFactorChallengeScreen> {
   final TextEditingController _codeController = TextEditingController();
   final TextEditingController _recoveryCodeController = TextEditingController();
   final TextEditingController _deviceNameController = TextEditingController(text: 'Mobile Device');
+
+  @override
+  void initState() {
+    super.initState();
+    // Prefill with this phone's name (shown in the signed-in devices list).
+    deviceLabel().then((label) {
+      if (mounted && _deviceNameController.text == 'Mobile Device') _deviceNameController.text = label;
+    });
+  }
 
   bool _isUsingRecoveryCode = false;
   bool _isLoading = false;
@@ -72,13 +84,27 @@ class _TwoFactorChallengeScreenState extends State<TwoFactorChallengeScreen> {
 
       final res = await twoFactorChallengeRxObj.verifyTwoFactor(body);
       if (!mounted) return;
-      ToastUtil.showSuccessMessage('Two-factor authentication successful!'.tr);
-      final bool isActivated = res.user?.businessAccount?.isActivated ?? true;
-      if (isActivated) {
-        Navigator.pushNamedAndRemoveUntil(context, Routes.dashboardScreen, (route) => false);
-      } else {
-        Navigator.pushNamedAndRemoveUntil(context, Routes.kycVerificationScreen, (route) => false);
+      final token = res.accessToken;
+      if (token == null || token.isEmpty) {
+        ToastUtil.showErrorMessage(res.message ?? 'Verification did not return a session. Please sign in again.'.tr);
+        return;
       }
+      // `user` arrives as JSON: parse it (reading fields off the raw map would crash).
+      final rawUser = res.user;
+      final user = rawUser is Map ? UserModel.fromJson(Map<String, dynamic>.from(rawUser)) : null;
+      // Same checks as the password step (account present, active).
+      final problem = loginResponseProblem(LoginResponse(token: token, user: user));
+      if (problem != null) {
+        ToastUtil.showErrorMessage(problem);
+        return;
+      }
+      final authProvider = context.read<AuthProvider>();
+      ToastUtil.showSuccessMessage('Two-factor authentication successful!'.tr);
+      await authProvider.completeSignIn(
+        token: token,
+        user: user,
+        isSupplier: authProvider.isSupplierLogin || (user?.isSupplier ?? false),
+      );
     } catch (e) {
       String err = e.toString().replaceAll('Exception: ', '');
       ToastUtil.showErrorMessage(err.isNotEmpty ? err : 'Invalid 2FA verification code'.tr);

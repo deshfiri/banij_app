@@ -16,6 +16,9 @@ final class AppRegExpText {
 
 const String kKeyAccessToken = "kKeyAccessToken";
 const String kKeyIsLoggedIn = "kKeyIsLoggedIn";
+
+/// The signed-in account is a supplier (opens the supplier dashboard).
+const String kKeyIsSupplier = "kKeyIsSupplier";
 const String kKeyDeviceID = "kKeyDeviceID";
 const String kKeyFCMToken = "kKeyFCMToken";
 const String kKeyIsFirstTime = "kKeyIsFirstTime";

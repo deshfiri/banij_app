@@ -28,6 +28,7 @@ final class EndPoints {
   static String signup() => "/register";
   static String profile() => "/profile";
   static String suplierLogin() => "/supplier/auth/login";
+  static String supplierLogout() => "/supplier/auth/logout";
   static String package() => "/packages";
   static String selectPackage(String slug) => "/packages/$slug/select";
   static String subscription() => "/subscription";

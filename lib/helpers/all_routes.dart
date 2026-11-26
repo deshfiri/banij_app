@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 
+import 'auth_routing.dart';
 import '../feature/account/presentation/account_screen_wrapper.dart';
 import '../feature/account/presentation/change_password_screen.dart';
 import '../feature/account/presentation/delete_account_screen.dart';
@@ -69,11 +70,37 @@ final class Routes {
 }
 
 final class RouteGenerator {
+  /// Login instead of a dashboard when there is no session, and the
+  /// account's own dashboard when the other kind is asked for.
+  static Route<dynamic>? _sessionGuard(RouteSettings settings) {
+    final name = settings.name;
+    if (name != Routes.dashboardScreen && name != Routes.supplierDashboardScreen) return null;
+    if (!AuthRouting.hasSession) {
+      const login = RouteSettings(name: Routes.loginScreen);
+      return Platform.isAndroid
+          ? _AdvancedTransitionRoute(widget: const LoginScreen(), settings: login)
+          : CupertinoPageRoute(builder: (context) => const LoginScreen(), settings: login);
+    }
+    final isSupplier = AuthRouting.hasSupplierSession;
+    if (name == Routes.supplierDashboardScreen && !isSupplier) {
+      return generateRoute(RouteSettings(name: Routes.dashboardScreen, arguments: settings.arguments));
+    }
+    if (name == Routes.dashboardScreen && isSupplier) {
+      return generateRoute(RouteSettings(name: Routes.supplierDashboardScreen, arguments: settings.arguments));
+    }
+    return null;
+  }
+
   static final RouteGenerator _routeGenerator = RouteGenerator._internal();
   RouteGenerator._internal();
   static RouteGenerator get instance => _routeGenerator;
 
   static Route<dynamic>? generateRoute(RouteSettings settings) {
+    // Dashboards never open without a real signed-in session of the right
+    // kind — whatever screen or flow asks for them.
+    final guarded = _sessionGuard(settings);
+    if (guarded != null) return guarded;
+
     switch (settings.name) {
       case Routes.onboardingScreen:
         return Platform.isAndroid

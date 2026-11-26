@@ -1,5 +1,7 @@
 import 'package:dio/dio.dart';
 
+import '../../../constants/app_constants.dart';
+import '../../../helpers/di.dart';
 import '../../../networks/dio/dio.dart';
 import '../../../networks/endpoints.dart';
 import '../../../networks/exception_handler/data_source.dart';
@@ -12,7 +14,9 @@ final class LogoutApi {
 
   Future<RegisterResponse> logout() async {
     try {
-      Response response = await postHttp(EndPoints.logout());
+      // A supplier session is revoked on the supplier endpoint.
+      final isSupplier = appData.read(kKeyIsSupplier) == true;
+      Response response = await postHttp(isSupplier ? EndPoints.supplierLogout() : EndPoints.logout());
 
       if (response.statusCode == 200 || response.statusCode == 201 || response.statusCode == 204) {
         if (response.data != null && response.data is Map<String, dynamic>) {

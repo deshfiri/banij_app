@@ -86,6 +86,9 @@ final class CustomFormField extends StatelessWidget {
         cursorColor: primaryOrange,
         focusNode: focusNode,
         obscureText: isPass ? isObsecure : false,
+        // Never let the keyboard learn or suggest passwords / email addresses.
+        autocorrect: !isPass && inputType != TextInputType.emailAddress,
+        enableSuggestions: !isPass,
         textInputAction: textInputAction,
         autovalidateMode:
             validation == true

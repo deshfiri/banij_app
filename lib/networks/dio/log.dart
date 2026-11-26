@@ -1,3 +1,4 @@
+import '../../helpers/auth_routing.dart';
 import 'dart:convert';
 import 'dart:developer';
 
@@ -28,7 +29,7 @@ final class Logger extends Interceptor {
     if (kDebugMode) {
       log("= = = Dio Request = = =");
       log("${_maskedHeaders(options.headers)}");
-      log("${options.data}");
+      log("${_maskedBody(options.data)}");
       log("${options.contentType}");
       log("${options.baseUrl}${options.path}");
     }
@@ -58,11 +59,7 @@ final class Logger extends Interceptor {
     }
 
     if (_isSessionExpired(err)) {
-      appData.remove(kKeyAccessToken);
-      appData.write(kKeyIsLoggedIn, false);
-      appData.remove(KkName);
-      appData.remove(KkUserEmail);
-      appData.remove(KkID);
+      AuthRouting.clearSession();
 
       ToastUtil.showErrorMessage('Session expired. Please log in again.');
       NavigationService.navigateToReplacementUntil(Routes.onboardingScreen);
@@ -80,6 +77,17 @@ final class Logger extends Interceptor {
     final path = err.requestOptions.path;
     if (_authPaths.any(path.contains)) return false;
     return err.requestOptions.headers[NetworkConstants.AUTHORIZATION] != null;
+  }
+
+  /// Request body with passwords, codes and tokens hidden (debug logs get
+  /// copied and shared).
+  static Object? _maskedBody(Object? data) {
+    if (data is! Map) return data;
+    const secret = ['password', 'code', 'recovery_code', 'challenge_token', 'token', 'secret'];
+    return data.map((key, value) {
+      final name = key.toString().toLowerCase();
+      return MapEntry(key, secret.any(name.contains) && value != null ? '••••••' : value);
+    });
   }
 
   /// Headers with the bearer token shortened so it never lands in logs.

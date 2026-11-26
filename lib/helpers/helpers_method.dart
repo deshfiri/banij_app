@@ -36,3 +36,27 @@ void rotation() {
     DeviceOrientation.portraitDown,
   ]);
 }
+
+String? _deviceLabel;
+
+/// A readable name for this phone ("Samsung SM-A515F · Android 13",
+/// "iPhone15,2 · iOS 17.2"), sent as `device_name` on login so the person
+/// can recognise it in their signed-in devices list.
+Future<String> deviceLabel() async {
+  if (_deviceLabel != null) return _deviceLabel!;
+  var label = 'Mobile device';
+  try {
+    final info = DeviceInfoPlugin();
+    if (Platform.isAndroid) {
+      final android = await info.androidInfo;
+      final brand = android.brand.isEmpty ? '' : '${android.brand[0].toUpperCase()}${android.brand.substring(1)} ';
+      label = '$brand${android.model} · Android ${android.version.release}';
+    } else if (Platform.isIOS) {
+      final ios = await info.iosInfo;
+      label = '${ios.utsname.machine} · iOS ${ios.systemVersion}';
+    }
+  } catch (_) {
+    // Keep the generic label.
+  }
+  return _deviceLabel = label.length > 100 ? label.substring(0, 100) : label;
+}

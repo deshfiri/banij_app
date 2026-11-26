@@ -1,3 +1,4 @@
+import 'helpers/auth_routing.dart';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -119,9 +120,10 @@ class _SplashScreenState extends State<SplashScreen>
       overlays: SystemUiOverlay.values,
     );
     bool isLoggedIn = appData.read(kKeyIsLoggedIn) ?? false;
+    // Signed in: the saved account type picks supplier vs user dashboard.
     Navigator.pushReplacementNamed(
       context,
-      isLoggedIn ? Routes.dashboardScreen : Routes.onboardingScreen,
+      isLoggedIn ? AuthRouting.savedHomeRoute : Routes.onboardingScreen,
     );
   }
 

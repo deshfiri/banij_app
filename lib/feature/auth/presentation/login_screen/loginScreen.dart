@@ -139,6 +139,9 @@ class _LoginScreenState extends State<LoginScreen> {
               onToggleObscure: authProvider.toggleObscurePassword,
               autofillHints: const [AutofillHints.password],
               validator: AuthValidators.loginPassword,
+              // The keyboard's Done key signs in.
+              textInputAction: TextInputAction.done,
+              onFieldSubmitted: (_) => authProvider.handleSignIn(context, _formKey),
             ),
             UIHelper.verticalSpace(12.h),
 
