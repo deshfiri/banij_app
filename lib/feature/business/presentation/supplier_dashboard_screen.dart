@@ -46,6 +46,7 @@ class _SupplierDashboardScreenState extends State<SupplierDashboardScreen> {
         onCloseDrawer: () => _closeDrawer(context),
       ),
       body: SafeArea(
+        top: false,
         child: IndexedStack(
           index: provider.currentIndex,
           children: [

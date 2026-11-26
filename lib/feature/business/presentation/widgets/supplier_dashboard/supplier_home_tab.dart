@@ -6,6 +6,7 @@ import '../../../../../constants/color.dart';
 import '../../../../../constants/image_const.dart';
 import '../../../../../helpers/all_routes.dart';
 import '../../../../../helpers/ui_helpers.dart';
+import '../../../../dashboard/presentation/widgets/quick_access_section_widget.dart';
 import '../application_status_card_widget.dart';
 
 /// Supplier dashboard home (index 0): logo header, metrics, application
@@ -15,6 +16,156 @@ class SupplierHomeTab extends StatelessWidget {
   final VoidCallback onOpenAccount;
 
   const SupplierHomeTab({super.key, required this.onOpenDrawer, required this.onOpenAccount});
+
+  Widget _buildIntegratedHeroHeader(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDark
+              ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
+              : [primaryOrange, secondaryOrange],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32.r),
+          bottomRight: Radius.circular(32.r),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: primaryOrange.withValues(alpha: isDark ? 0.2 : 0.28),
+            blurRadius: 18.r,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(12.w, 4.h, 12.w, 20.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top Bar: Drawer Menu, White Logo & Notifications / Profile Icons
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    onPressed: onOpenDrawer,
+                    icon: Icon(
+                      Icons.menu_rounded,
+                      color: Colors.white,
+                      size: 24.sp,
+                    ),
+                  ),
+                  Image.asset(
+                    whiteLogo,
+                    width: 105.w,
+                    height: 34.h,
+                    fit: BoxFit.contain,
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        onPressed: () => Navigator.pushNamed(context, Routes.notificationScreen),
+                        icon: Stack(
+                          clipBehavior: Clip.none,
+                          children: [
+                            Icon(
+                              Icons.notifications_none_rounded,
+                              color: Colors.white,
+                              size: 22.sp,
+                            ),
+                            Positioned(
+                              top: -2.h,
+                              right: -2.w,
+                              child: Container(
+                                width: 8.w,
+                                height: 8.h,
+                                decoration: const BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: onOpenAccount,
+                        icon: Icon(
+                          Icons.person_outline_rounded,
+                          color: Colors.white,
+                          size: 22.sp,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              UIHelper.verticalSpace(12.h),
+
+              // Supplier Title & Hub Badge
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.w),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'supplier_dashboard'.tr,
+                            style: TextStyle(
+                              fontSize: 22.sp,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.white,
+                            ),
+                          ),
+                          UIHelper.verticalSpace(2.h),
+                          Text(
+                            'Manage your workspace & requisitions',
+                            style: TextStyle(
+                              fontSize: 11.5.sp,
+                              color: Colors.white.withValues(alpha: 0.88),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
+                    ),
+                    UIHelper.horizontalSpace(8.w),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 5.h),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.22),
+                        borderRadius: BorderRadius.circular(20.r),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.4)),
+                      ),
+                      child: Text(
+                        'Supplier Hub',
+                        style: TextStyle(
+                          fontSize: 11.sp,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,15 +186,13 @@ class SupplierHomeTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SupplierHomeHeader(onOpenDrawer: onOpenDrawer, onProfileTap: onOpenAccount),
+        _buildIntegratedHeroHeader(context),
         Expanded(
           child: SingleChildScrollView(
             padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const _WelcomeBanner(),
-                UIHelper.verticalSpace(20.h),
                 const Row(
                   children: [
                     Expanded(child: SupplierMetricCard(metric: SupplierMetric.verification)),
@@ -64,14 +213,7 @@ class SupplierHomeTab extends StatelessWidget {
                   onOpenApplication: () => Navigator.pushNamed(context, Routes.kycVerificationScreen),
                 ),
                 UIHelper.verticalSpace(24.h),
-                Text(
-                  'Quick Shortcuts',
-                  style: TextStyle(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w800,
-                    color: AppColorsTheme.textMainColor(context),
-                  ),
-                ),
+                DashboardSectionHeader(title: 'Quick Shortcuts'.tr),
                 UIHelper.verticalSpace(12.h),
                 for (int i = 0; i < shortcuts.length; i++) ...[
                   if (i > 0) UIHelper.verticalSpace(10.h),
@@ -102,136 +244,7 @@ class _MetricGap extends StatelessWidget {
   Widget build(BuildContext context) => UIHelper.horizontalSpace(12.w);
 }
 
-/// Logo centered, drawer button left, notifications + profile right.
-class _SupplierHomeHeader extends StatelessWidget {
-  final VoidCallback onOpenDrawer;
-  final VoidCallback onProfileTap;
-
-  const _SupplierHomeHeader({required this.onOpenDrawer, required this.onProfileTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final iconColor = AppColorsTheme.textMainColor(context);
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-      decoration: BoxDecoration(
-        color: AppColorsTheme.background(context),
-        border: Border(
-          bottom: BorderSide(
-            color: AppColorsTheme.borderColor(context),
-            width: 1.w,
-          ),
-        ),
-      ),
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Center(
-            child: Image.asset(
-              isDark ? whiteLogo : logo,
-              width: 110.w,
-              height: 36.h,
-              fit: BoxFit.contain,
-            ),
-          ),
-          Positioned(
-            left: 0,
-            child: IconButton(
-              onPressed: onOpenDrawer,
-              icon: Icon(Icons.menu_rounded, color: iconColor, size: 24.sp),
-            ),
-          ),
-          Positioned(
-            right: 0,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                IconButton(
-                  onPressed: () => Navigator.pushNamed(context, Routes.notificationScreen),
-                  icon: Stack(
-                    clipBehavior: Clip.none,
-                    children: [
-                      Icon(Icons.notifications_none_rounded, color: iconColor, size: 22.sp),
-                      Positioned(
-                        top: -2.h,
-                        right: -2.w,
-                        child: Container(
-                          width: 8.w,
-                          height: 8.h,
-                          decoration: const BoxDecoration(shape: BoxShape.circle, color: primaryOrange),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  onPressed: onProfileTap,
-                  icon: Icon(Icons.person_outline_rounded, color: iconColor, size: 22.sp),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _WelcomeBanner extends StatelessWidget {
-  const _WelcomeBanner();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'supplier_dashboard'.tr,
-              style: TextStyle(
-                fontSize: 22.sp,
-                fontWeight: FontWeight.w900,
-                color: AppColorsTheme.textMainColor(context),
-                letterSpacing: 0.2,
-              ),
-            ),
-            UIHelper.verticalSpace(2.h),
-            Text(
-              'Manage your workspace & requisitions',
-              style: TextStyle(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w500,
-                color: AppColorsTheme.textMutedColor(context),
-              ),
-            ),
-          ],
-        ),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-          decoration: BoxDecoration(
-            color: primaryOrange.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(20.r),
-          ),
-          child: Text(
-            'Supplier Hub',
-            style: TextStyle(
-              fontSize: 11.sp,
-              fontWeight: FontWeight.bold,
-              color: primaryOrange,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-/// The four (currently static) supplier summary metrics.
+/// The four supplier summary metrics.
 enum SupplierMetric {
   verification('Verification', 'Pending', Icons.verified_user_outlined, infoBlue),
   activeOrders('Active Orders', '0', Icons.inventory_2_outlined, primaryOrange),
@@ -259,17 +272,17 @@ class SupplierMetricCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(14.w),
       decoration: BoxDecoration(
-        color: AppColorsTheme.cardBg(context),
-        borderRadius: BorderRadius.circular(16.r),
+        color: isDark ? AppColorsTheme.cardBg(context) : const Color(0xFFFFF7F2),
+        borderRadius: BorderRadius.circular(18.r),
         border: Border.all(
-          color: AppColorsTheme.borderColor(context),
+          color: isDark ? const Color(0xFF374151) : primaryOrange.withValues(alpha: 0.22),
           width: 1.w,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
+            color: primaryOrange.withValues(alpha: isDark ? 0.08 : 0.05),
             blurRadius: 10.r,
-            offset: const Offset(0, 4),
+            offset: const Offset(0, 3),
           ),
         ],
       ),
@@ -278,7 +291,7 @@ class SupplierMetricCard extends StatelessWidget {
           Container(
             padding: EdgeInsets.all(10.w),
             decoration: BoxDecoration(
-              color: metric.color.withValues(alpha: 0.12),
+              color: metric.color.withValues(alpha: 0.14),
               borderRadius: BorderRadius.circular(12.r),
             ),
             child: Icon(metric.icon, color: metric.color, size: 20.sp),
@@ -331,20 +344,21 @@ class SupplierShortcutTile extends StatelessWidget {
 
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(14.r),
+      borderRadius: BorderRadius.circular(18.r),
       child: Container(
         padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
         decoration: BoxDecoration(
-          color: AppColorsTheme.cardBg(context),
-          borderRadius: BorderRadius.circular(14.r),
+          color: isDark ? AppColorsTheme.cardBg(context) : const Color(0xFFFFF7F2),
+          borderRadius: BorderRadius.circular(18.r),
           border: Border.all(
-            color: AppColorsTheme.borderColor(context),
+            color: isDark ? const Color(0xFF374151) : primaryOrange.withValues(alpha: 0.22),
             width: 1.w,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.03),
-              blurRadius: 8.r,
+              color: primaryOrange.withValues(alpha: isDark ? 0.08 : 0.05),
+              blurRadius: 10.r,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
@@ -365,7 +379,7 @@ class SupplierShortcutTile extends StatelessWidget {
             Icon(
               Icons.arrow_forward_ios_rounded,
               size: 13.sp,
-              color: AppColorsTheme.textMutedColor(context),
+              color: primaryOrange,
             ),
           ],
         ),

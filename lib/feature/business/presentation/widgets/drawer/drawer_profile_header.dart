@@ -32,7 +32,9 @@ class DrawerProfileHeader extends StatelessWidget {
           padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 18.h),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: AppColorsTheme.heroGradient(context),
+              colors: isDark
+                  ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
+                  : [primaryOrange, secondaryOrange],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
