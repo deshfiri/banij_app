@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
+import '../../../common_widget/animated_side_menu.dart';
 import '../../../constants/color.dart';
 import '../../../providers/supplier_dashboard_provider.dart';
 import '../../account/presentation/account_screen.dart';
@@ -19,15 +20,11 @@ class SupplierDashboardScreen extends StatefulWidget {
 }
 
 class _SupplierDashboardScreenState extends State<SupplierDashboardScreen> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final GlobalKey<AnimatedSideMenuState> _sideMenuKey = GlobalKey<AnimatedSideMenuState>();
 
-  void _openDrawer() => _scaffoldKey.currentState?.openDrawer();
+  void _openDrawer() => _sideMenuKey.currentState?.open();
 
-  void _closeDrawer(BuildContext context) {
-    if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
-      Navigator.pop(context);
-    }
-  }
+  void _closeDrawer() => _sideMenuKey.currentState?.close();
 
   void _openAccountTab() => context.read<SupplierDashboardProvider>().setBottomNavIndex(4);
 
@@ -35,58 +32,60 @@ class _SupplierDashboardScreenState extends State<SupplierDashboardScreen> {
   Widget build(BuildContext context) {
     final provider = context.watch<SupplierDashboardProvider>();
 
-    return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: AppColorsTheme.background(context),
-      drawer: SupplierDrawerWidget(
+    return AnimatedSideMenu(
+      key: _sideMenuKey,
+      menu: SupplierDrawerWidget(
         activeDrawerItem: provider.activeDrawerItem,
         onItemSelect: (item) {
           provider.setActiveDrawerItem(item);
         },
-        onCloseDrawer: () => _closeDrawer(context),
+        onCloseDrawer: _closeDrawer,
       ),
-      body: SafeArea(
-        top: false,
-        child: IndexedStack(
-          index: provider.currentIndex,
-          children: [
-            // Index 0: Supplier Dashboard Home View
-            SupplierHomeTab(onOpenDrawer: _openDrawer, onOpenAccount: _openAccountTab),
+      child: Scaffold(
+        backgroundColor: AppColorsTheme.background(context),
+        body: SafeArea(
+          top: false,
+          child: IndexedStack(
+            index: provider.currentIndex,
+            children: [
+              // Index 0: Supplier Dashboard Home View
+              SupplierHomeTab(onOpenDrawer: _openDrawer, onOpenAccount: _openAccountTab),
 
-            // Index 1: Finance Tab
-            FinanceScreenBody(onOpenDrawer: _openDrawer, onProfileTap: _openAccountTab),
+              // Index 1: Finance Tab
+              FinanceScreenBody(onOpenDrawer: _openDrawer, onProfileTap: _openAccountTab),
 
-            // Index 2: Quick Action Placeholder
-            const SizedBox.shrink(),
+              // Index 2: Quick Action Placeholder
+              const SizedBox.shrink(),
 
-            // Index 3: Business Tab
-            BusinessScreenBody(onOpenDrawer: _openDrawer, onProfileTap: _openAccountTab),
+              // Index 3: Business Tab
+              BusinessScreenBody(onOpenDrawer: _openDrawer, onProfileTap: _openAccountTab),
 
-            // Index 4: Account Tab
-            AccountScreenBody(
-              initialTab: 'supplier',
-              onOpenDrawer: _openDrawer,
-            ),
-          ],
-        ),
-      ),
-
-      // Matching Custom Bottom Navigation Bar
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: provider.currentIndex == 2 ? 0 : provider.currentIndex,
-        onTap: (index) {
-          if (index == 2) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text('quick_action_clicked'.tr),
-                backgroundColor: primaryOrange,
-                duration: const Duration(milliseconds: 800),
+              // Index 4: Account Tab
+              AccountScreenBody(
+                initialTab: 'supplier',
+                onOpenDrawer: _openDrawer,
               ),
-            );
-            return;
-          }
-          provider.setBottomNavIndex(index);
-        },
+            ],
+          ),
+        ),
+
+        // Matching Custom Bottom Navigation Bar
+        bottomNavigationBar: CustomBottomNavBar(
+          currentIndex: provider.currentIndex == 2 ? 0 : provider.currentIndex,
+          onTap: (index) {
+            if (index == 2) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('quick_action_clicked'.tr),
+                  backgroundColor: primaryOrange,
+                  duration: const Duration(milliseconds: 800),
+                ),
+              );
+              return;
+            }
+            provider.setBottomNavIndex(index);
+          },
+        ),
       ),
     );
   }
