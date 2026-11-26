@@ -6,10 +6,10 @@ import 'package:provider/provider.dart';
 import '../../../../common_widget/custom_field_label.dart';
 import '../../../../common_widget/custom_form_field.dart';
 import '../../../../common_widget/custom_password_field.dart';
-import '../../../../common_widget/gradient_button.dart';
 import '../../../../constants/color.dart';
 import '../../../../helpers/ui_helpers.dart';
 import '../../../../providers/supplier_register_provider.dart';
+import '../widgets/auth_bottom_navigation_bar.dart';
 import '../widgets/auth_components.dart';
 import '../widgets/auth_form_card.dart';
 import '../widgets/auth_scaffold.dart';
@@ -67,6 +67,12 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
     return AuthScaffold(
       heroHeight: 260,
       onBack: () => provider.handleBack(context),
+      bottomNavigationBar: AuthBottomNavigationBar(
+        continueLabel: provider.currentStep == 3 ? 'create_supplier_account'.tr : 'continue'.tr,
+        isLoading: provider.isLoading,
+        onBack: () => provider.handleBack(context),
+        onContinue: () => provider.handleContinue(context, _formKey),
+      ),
       body: AuthScrollBody(
         children: [
           AuthHeroTag(label: 'supplier_registration'.tr.toUpperCase()),
@@ -91,27 +97,6 @@ class _SupplierRegisterScreenState extends State<SupplierRegisterScreen> {
                   if (provider.currentStep == 1) ..._businessFields(provider),
                   if (provider.currentStep == 2) ..._contactFields(provider),
                   if (provider.currentStep == 3) ..._securityFields(provider),
-                  UIHelper.verticalSpace(26.h),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: AuthOutlinedButton(
-                          label: 'back'.tr,
-                          icon: Icons.arrow_back_rounded,
-                          onPressed: () => provider.handleBack(context),
-                        ),
-                      ),
-                      UIHelper.horizontalSpace(12.w),
-                      Expanded(
-                        flex: 2,
-                        child: GradientButton(
-                          label: provider.currentStep == 3 ? 'create_supplier_account'.tr : 'continue'.tr,
-                          isLoading: provider.isLoading,
-                          onPressed: () => provider.handleContinue(context, _formKey),
-                        ),
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),

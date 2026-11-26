@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 
 import '../../../../../constants/color.dart';
 import '../../../../../helpers/ui_helpers.dart';
+import '../../../../../helpers/all_routes.dart';
+import '../../../../../providers/dashboard_provider.dart';
 import '../../../../../providers/packages_provider.dart';
 import '../../../../../providers/subscription_provider.dart';
 import '../../../model/package_model.dart';
@@ -68,10 +70,15 @@ class _PackagePlansListState extends State<PackagePlansList> {
       success ? 'pkg_selected'.trParams({'package': pkg.name ?? ''}) : (error ?? 'pkg_select_failed'.tr),
       success,
     );
-    if (success) {
-      // Keep the Subscription screen in sync.
-      context.read<SubscriptionProvider>().fetchSubscription(force: true);
-    }
+    if (!success) return;
+    // Keep the Subscription screen in sync.
+    context.read<SubscriptionProvider>().fetchSubscription(force: true);
+
+    // When the chosen package has an activation fee, continue to pay it.
+    final dashboard = context.read<DashboardProvider>();
+    await dashboard.fetchActivationCheckout();
+    if (!mounted || !dashboard.hasPayableActivation) return;
+    Navigator.pushNamed(context, Routes.activationCheckoutScreen);
   }
 
   Future<bool> _confirm(PackageItemModel pkg) async {

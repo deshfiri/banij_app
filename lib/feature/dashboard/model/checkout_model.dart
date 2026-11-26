@@ -60,13 +60,16 @@ class CheckoutModel {
       return null;
     }
 
+    // Booleans only. A number is accepted solely for `is_*` keys (1 / 0):
+    // a plain key such as `paid` may be an amount (`"paid": 1500`), which
+    // must never be read as "settled".
     bool? flag(List<String> keys) {
       for (final source in [json, data, payment]) {
         if (source == null) continue;
         for (final key in keys) {
           final value = source[key];
           if (value is bool) return value;
-          if (value is num) return value != 0;
+          if (value is num && key.startsWith('is_')) return value != 0;
           if (value is String && (value == 'true' || value == 'false')) return value == 'true';
         }
       }

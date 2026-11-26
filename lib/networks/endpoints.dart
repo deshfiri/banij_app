@@ -27,6 +27,7 @@ final class EndPoints {
 
   static String signup() => "/register";
   static String profile() => "/profile";
+  static String suplierLogin() => "/supplier/auth/login";
   static String package() => "/packages";
   static String selectPackage(String slug) => "/packages/$slug/select";
   static String subscription() => "/subscription";
@@ -83,6 +84,9 @@ final class EndPoints {
   static String otpVerify() => "/verify-otp";
   static String resendOtp() => "/resend-otp";
   static String resetPassword() => "/password/reset";
+    static String damageList() => "/damages";
+
+
   static String changepassword() => "/security/password";
   static String partnerInformation() => "/partner-information";
   static String language() => "/locale";

@@ -19,6 +19,7 @@ import 'auth_top_bar.dart';
 /// confirmation snackbars.
 class AuthScaffold extends StatefulWidget {
   final Widget body;
+  final Widget? bottomNavigationBar;
   final double heroHeight;
   final VoidCallback? onBack;
   final bool showToggles;
@@ -27,6 +28,7 @@ class AuthScaffold extends StatefulWidget {
   const AuthScaffold({
     super.key,
     required this.body,
+    this.bottomNavigationBar,
     this.heroHeight = 250,
     this.onBack,
     this.showToggles = true,
@@ -75,6 +77,7 @@ class _AuthScaffoldState extends State<AuthScaffold> {
       value: SystemUiOverlayStyle.light,
       child: Scaffold(
         backgroundColor: AppColorsTheme.background(context),
+        bottomNavigationBar: widget.bottomNavigationBar,
         body: Stack(
           children: [
             AuthHeroBackdrop(height: widget.heroHeight.h),

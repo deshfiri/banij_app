@@ -19,6 +19,10 @@ enum PaymentStatus {
   partiallyRefunded,
   unknown;
 
+  static final RegExp _negated = RegExp(
+    r'(^|_)(un|in|non_?|not_?)(paid|success\w*|succeed\w*|complete\w*|settled|verified|captured|valid\w*)',
+  );
+
   static PaymentStatus fromBackend(String? raw) {
     final s = raw?.toLowerCase().replaceAll(RegExp(r'[\s-]+'), '_') ?? '';
     if (s.isEmpty) return PaymentStatus.unknown;
@@ -27,6 +31,15 @@ enum PaymentStatus {
     if (s.contains('cancel')) return PaymentStatus.cancelled;
     if (s.contains('fail') || s.contains('declin') || s.contains('reject') || s.contains('expire') || s.contains('error')) {
       return PaymentStatus.failed;
+    }
+    // Negated words ("unsuccessful", "incomplete", "unsettled", "invalid",
+    // "not_paid") must never be read as their positive form below.
+    final negated = _negated.firstMatch(s);
+    if (negated != null) {
+      final word = negated.group(3)!;
+      if (word == 'paid') return PaymentStatus.unpaid;
+      if (word.startsWith('succe') || word.startsWith('valid')) return PaymentStatus.failed;
+      return PaymentStatus.pending;
     }
     if (s == 'unpaid' || s.contains('not_paid') || s.contains('awaiting') || s.contains('due')) {
       return PaymentStatus.unpaid;

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../common_widget/hero_page_header.dart';
 import '../../../constants/color.dart';
+import '../../auth/presentation/widgets/auth_bottom_navigation_bar.dart';
 import 'widgets/kyc_verification/kyc_sections.dart';
 
 /// Application & KYC: identity intro, document uploads and submit-for-review.
@@ -14,6 +15,19 @@ class KycVerificationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColorsTheme.background(context),
+      bottomNavigationBar: AuthBottomNavigationBar(
+        continueLabel: 'submit_kyc'.tr,
+        onBack: () => Navigator.pop(context),
+        onContinue: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('kyc_submitted_success'.tr),
+              backgroundColor: primaryOrange,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        },
+      ),
       body: Column(
         children: [
           HeroPageHeader(

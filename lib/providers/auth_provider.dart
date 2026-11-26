@@ -120,6 +120,7 @@ class AuthProvider extends ChangeNotifier {
       LoginResponse response = await loginRxObj.userLogin(
         email: emailController.text.trim(),
         password: passwordController.text,
+        isSupplier: _isSupplierRegister || _isSupplierMode,
       ).waitingForSucess();
 
       _isLoading = false;

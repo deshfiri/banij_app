@@ -21,6 +21,7 @@ import '../feature/dashboard/model/my_product_model.dart';
 import '../feature/dashboard/presentation/dashboard_screen.dart';
 import '../feature/dashboard/presentation/product_detail_screen.dart';
 import '../feature/dashboard/presentation/cart_screen.dart';
+import '../feature/dashboard/presentation/activation_checkout_screen.dart';
 import '../feature/dashboard/presentation/order_now_screen.dart';
 import '../feature/dashboard/presentation/order_detail_screen.dart';
 import '../feature/dashboard/presentation/add_website_screen.dart';
@@ -48,6 +49,7 @@ final class Routes {
   static const String verificationHistoryScreen = '/verificationHistoryScreen';
   static const String subscriptionScreen = '/subscriptionScreen';
   static const String packagesScreen = '/packagesScreen';
+  static const String activationCheckoutScreen = '/activationCheckoutScreen';
   static const String accountScreen = '/accountScreen';
   static const String changePasswordScreen = '/changePasswordScreen';
   static const String deleteAccountScreen = '/deleteAccountScreen';
@@ -113,6 +115,10 @@ final class RouteGenerator {
         return Platform.isAndroid
             ? _LightningFastTransitionRoute(widget: const SubscriptionScreen(), settings: settings)
             : CupertinoPageRoute(builder: (context) => const SubscriptionScreen(), settings: settings);
+      case Routes.activationCheckoutScreen:
+        return Platform.isAndroid
+            ? _LightningFastTransitionRoute(widget: const ActivationCheckoutScreen(), settings: settings)
+            : CupertinoPageRoute(builder: (context) => const ActivationCheckoutScreen(), settings: settings);
       case Routes.packagesScreen:
         return Platform.isAndroid
             ? _LightningFastTransitionRoute(widget: const PackagesScreen(), settings: settings)

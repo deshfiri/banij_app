@@ -44,8 +44,6 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
       dashboardProvider.fetchCheckoutState();
       // Fresh cart so problems / changed prices are known before checkout.
       context.read<CartProvider>().fetchCart();
-      // An activation payment left open (app closed mid-payment) can be resumed.
-      dashboardProvider.loadLatestPayment();
     });
   }
 
@@ -113,19 +111,15 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
         ? (unitPriceNum * dashboardProvider.orderQuantity)
         : (cartProvider.subtotal > 0 ? cartProvider.subtotal : 0.0);
     final double grandTotalBdt = itemSubtotal + shippingFee;
-    final double grandTotalUsd = grandTotalBdt / 115.0;
 
-    final appliedCouponText =
-        dashboardProvider.wholesaleCheckoutModel?.data?.appliedCoupon ??
-        dashboardProvider.checkoutResponseModel?.data?.coupon;
+    // This screen is the wholesale cart order only: every amount comes from
+    // the wholesale quote (or the cart estimate while it loads) — never from
+    // the package activation quote.
+    final appliedCouponText = dashboardProvider.wholesaleCheckoutModel?.data?.appliedCoupon;
     final orderTotalText =
-        dashboardProvider.wholesaleCheckoutModel?.data?.total?.formatted ??
-        dashboardProvider.checkoutResponseModel?.data?.quote?.total?.formatted ??
-        'USD ${grandTotalUsd.toStringAsFixed(2)}';
+        dashboardProvider.wholesaleCheckoutModel?.data?.total?.formatted ?? 'BDT ${grandTotalBdt.toStringAsFixed(2)}';
     final subtotalText =
-        dashboardProvider.wholesaleCheckoutModel?.data?.subtotal?.formatted ??
-        dashboardProvider.checkoutResponseModel?.data?.quote?.subtotal?.formatted ??
-        'BDT ${itemSubtotal.toStringAsFixed(2)}';
+        dashboardProvider.wholesaleCheckoutModel?.data?.subtotal?.formatted ?? 'BDT ${itemSubtotal.toStringAsFixed(2)}';
     final shippingText =
         dashboardProvider.wholesaleCheckoutModel?.data?.shipping?.formatted ?? 'BDT ${shippingFee.toStringAsFixed(2)}';
 
@@ -135,8 +129,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
 
     // Sections, built once and placed in one or two columns below.
     // Wholesale cart the server will not quote yet (cart_not_ready).
-    final cartBlocked = !dashboardProvider.isPackageCheckout &&
-        cartProvider.cartLines.isNotEmpty &&
+    final cartBlocked = cartProvider.cartLines.isNotEmpty &&
         (cartProvider.needsAttention || dashboardProvider.wholesaleCheckoutError != null);
     final attentionCard = cartBlocked
         ? CheckoutAttentionCard(
@@ -149,28 +142,6 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
           )
         : null;
 
-    final openPaymentCard = dashboardProvider.hasOpenPayment
-        ? CheckoutOpenPaymentCard(
-            status: dashboardProvider.latestPayment?.status,
-            onCheckStatus: () async {
-              final paid = await CheckoutPaymentFlow.resumeActivationPayment(
-                context,
-                dashboardProvider,
-                amountText: orderTotalText,
-              );
-              if (!context.mounted) return;
-              if (paid) {
-                Navigator.pushReplacementNamed(context, Routes.dashboardScreen);
-              } else {
-                dashboardProvider.loadLatestPayment();
-              }
-            },
-          )
-        : null;
-
-    final packageBanner = dashboardProvider.checkoutResponseModel?.data?.package != null
-        ? CheckoutPackageBanner(package: dashboardProvider.checkoutResponseModel!.data!.package!)
-        : null;
     final addressCard = CheckoutAddressCard(dashboardProvider: dashboardProvider);
     final deliveryCard = CheckoutDeliveryBanner(dashboardProvider: dashboardProvider, shippingFee: shippingFee);
     final itemsCard = cartProvider.cartLines.isNotEmpty
@@ -243,9 +214,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                                   Expanded(
                                     flex: 3,
                                     child: column([
-                                      openPaymentCard,
                                       attentionCard,
-                                      packageBanner,
                                       addressCard,
                                       deliveryCard,
                                       itemsCard,
@@ -256,9 +225,7 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
                                 ],
                               )
                             : column([
-                                openPaymentCard,
                                 attentionCard,
-                                packageBanner,
                                 addressCard,
                                 deliveryCard,
                                 itemsCard,
@@ -288,21 +255,6 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
               return;
             }
 
-            // Package activation: pay with SSLCommerz through the backend
-            // (POST /checkout → hosted page → verify / status → result).
-            if (dashboardProvider.isPackageCheckout) {
-              final paid = await CheckoutPaymentFlow.runActivationPayment(
-                context,
-                dashboardProvider,
-                coupon: dashboardProvider.checkoutCoupon,
-                amountText: orderTotalText,
-              );
-              if (!context.mounted || !paid) return;
-              cartProvider.clearCart();
-              Navigator.pushReplacementNamed(context, Routes.dashboardScreen);
-              return;
-            }
-
             // Wholesale cart that the server will not quote yet: fix it first.
             if (cartBlocked) {
               ToastUtil.showErrorMessage(
@@ -322,7 +274,8 @@ class _OrderNowScreenState extends State<OrderNowScreen> {
             if (paymentUrl != null) {
               await CheckoutPaymentFlow.payWholesaleOrder(context, paymentUrl, amountText: orderTotalText);
               if (!context.mounted) return;
-              Navigator.pushReplacementNamed(context, Routes.dashboardScreen);
+              // Back to a single dashboard (no checkout / product pages below it).
+              Navigator.pushNamedAndRemoveUntil(context, Routes.dashboardScreen, (route) => false);
               return;
             }
 

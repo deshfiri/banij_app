@@ -18,9 +18,14 @@ final class LoginRx extends RxResponseInt<LoginResponse> {
   Future<LoginResponse> userLogin({
     required String email,
     required String password,
+    bool isSupplier = false,
   }) async {
     try {
-      LoginResponse data = await _api.login(email: email, password: password);
+      LoginResponse data = await _api.login(
+        email: email,
+        password: password,
+        isSupplier: isSupplier,
+      );
       return handleSuccessWithReturn(data);
     } catch (error) {
       return handleErrorWithReturn(error);

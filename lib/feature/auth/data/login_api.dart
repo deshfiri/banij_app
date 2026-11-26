@@ -15,6 +15,7 @@ final class LoginApi {
   Future<LoginResponse> login({
     required String email,
     required String password,
+    bool isSupplier = false,
   }) async {
     try {
       Map<String, dynamic> data = {
@@ -24,7 +25,8 @@ final class LoginApi {
         "device_name": "mobile",
       };
 
-      Response response = await postHttp(EndPoints.login(), data);
+      final endpoint = isSupplier ? EndPoints.suplierLogin() : EndPoints.login();
+      Response response = await postHttp(endpoint, data);
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         if (response.data is Map<String, dynamic>) {

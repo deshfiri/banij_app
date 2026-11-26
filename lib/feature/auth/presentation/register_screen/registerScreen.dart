@@ -10,13 +10,13 @@ import '../../../../common_widget/custom_dropdown_field.dart';
 import '../../../../common_widget/custom_field_label.dart';
 import '../../../../common_widget/custom_form_field.dart';
 import '../../../../common_widget/custom_password_field.dart';
-import '../../../../common_widget/gradient_button.dart';
 import '../../../../common_widget/or_divider.dart';
 import '../../../../constants/color.dart';
 import '../../../../helpers/all_routes.dart';
 import '../../../../helpers/navigation_service.dart';
 import '../../../../helpers/ui_helpers.dart';
 import '../../../../providers/sign_up_provider.dart';
+import '../widgets/auth_bottom_navigation_bar.dart';
 import '../widgets/auth_components.dart';
 import '../widgets/auth_form_card.dart';
 import '../widgets/auth_scaffold.dart';
@@ -99,6 +99,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return AuthScaffold(
       heroHeight: 270,
       onBack: () => Navigator.pop(context),
+      bottomNavigationBar: AuthBottomNavigationBar(
+        continueLabel: 'create_account'.tr,
+        isLoading: provider.isLoading,
+        onBack: () => Navigator.pop(context),
+        onContinue: () => _createAccount(provider),
+      ),
       body: AuthScrollBody(
         children: [
           const AuthHeroIcon(icon: Icons.person_add_alt_1_rounded),
@@ -127,13 +133,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     value: provider.acceptPrivacy,
                     onChanged: provider.setAcceptPrivacy,
                     label: 'accept_privacy'.tr,
-                  ),
-                  UIHelper.verticalSpace(24.h),
-                  GradientButton(
-                    label: 'create_account'.tr,
-                    trailingIcon: Icons.arrow_forward_rounded,
-                    isLoading: provider.isLoading,
-                    onPressed: () => _createAccount(provider),
                   ),
                 ],
               ),

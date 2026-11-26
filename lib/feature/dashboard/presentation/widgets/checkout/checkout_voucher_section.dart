@@ -7,21 +7,27 @@ import '../../../../../helpers/ui_helpers.dart';
 import '../../../../../providers/dashboard_provider.dart';
 import 'checkout_ui.dart';
 
-/// Coupon input with Apply (or Remove when a coupon is applied).
+/// Coupon input with Apply (or Remove when a coupon is applied), for the
+/// wholesale cart (`/wholesale/checkout/coupon`) or, with [forActivation],
+/// the package activation (`GET /checkout?coupon=`).
 class CheckoutVoucherSection extends StatelessWidget {
   final DashboardProvider dashboardProvider;
   final TextEditingController couponController;
+  final bool forActivation;
 
-  const CheckoutVoucherSection({super.key, required this.dashboardProvider, required this.couponController});
+  const CheckoutVoucherSection({
+    super.key,
+    required this.dashboardProvider,
+    required this.couponController,
+    this.forActivation = false,
+  });
 
   @override
   Widget build(BuildContext context) {
-    // Package checkout uses /checkout/coupon; the wholesale cart its own endpoint.
-    final isPackage = dashboardProvider.isPackageCheckout;
+    final isPackage = forActivation;
     final appliedCouponText = isPackage
         ? dashboardProvider.checkoutCoupon
-        : (dashboardProvider.wholesaleCheckoutModel?.data?.appliedCoupon ??
-              dashboardProvider.checkoutResponseModel?.data?.coupon);
+        : dashboardProvider.wholesaleCheckoutModel?.data?.appliedCoupon;
     final hasCoupon = appliedCouponText != null && appliedCouponText.isNotEmpty;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isApplying = dashboardProvider.isApplyingCoupon;

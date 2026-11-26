@@ -57,7 +57,8 @@ class PaymentProcessingScreen extends StatefulWidget {
   }
 
   @override
-  State<PaymentProcessingScreen> createState() => _PaymentProcessingScreenState();
+  State<PaymentProcessingScreen> createState() =>
+      _PaymentProcessingScreenState();
 }
 
 class _PaymentProcessingScreenState extends State<PaymentProcessingScreen>
@@ -65,8 +66,10 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen>
   static const _interval = Duration(seconds: 4);
   static const _maxWait = Duration(minutes: 5);
 
-  late final AnimationController _pulse =
-      AnimationController(vsync: this, duration: const Duration(milliseconds: 1400))..repeat(reverse: true);
+  late final AnimationController _pulse = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 1400),
+  )..repeat(reverse: true);
   Timer? _timer;
   bool _checking = false;
   bool _done = false;
@@ -134,7 +137,12 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen>
     setState(() => _latest = result);
     final status = result.paymentStatus;
     if (status.isFinal || result.isFinal) {
-      _finish(PaymentResultData(status.isFinal ? status : PaymentStatus.failed, payment: result));
+      _finish(
+        PaymentResultData(
+          status.isFinal ? status : PaymentStatus.failed,
+          payment: result,
+        ),
+      );
       return true;
     }
     return false;
@@ -172,7 +180,8 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen>
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) _finish(PaymentResultData(PaymentStatus.pending, payment: _latest));
+        if (!didPop)
+          _finish(PaymentResultData(PaymentStatus.pending, payment: _latest));
       },
       child: AnnotatedRegion<SystemUiOverlayStyle>(
         value: SystemUiOverlayStyle.light,
@@ -183,7 +192,9 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen>
               HeroPageHeader(
                 title: 'Payment'.tr,
                 subtitle: 'Secured by SSLCommerz'.tr,
-                onBack: () => _finish(PaymentResultData(PaymentStatus.pending, payment: _latest)),
+                onBack: () => _finish(
+                  PaymentResultData(PaymentStatus.pending, payment: _latest),
+                ),
               ),
               Expanded(
                 child: SafeArea(
@@ -198,7 +209,10 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen>
                             // Pulsing processing illustration.
                             ScaleTransition(
                               scale: Tween(begin: 0.92, end: 1.06).animate(
-                                CurvedAnimation(parent: _pulse, curve: Curves.easeInOut),
+                                CurvedAnimation(
+                                  parent: _pulse,
+                                  curve: Curves.easeInOut,
+                                ),
                               ),
                               child: Container(
                                 width: 120.w,
@@ -213,10 +227,17 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen>
                                     height: 84.w,
                                     decoration: const BoxDecoration(
                                       shape: BoxShape.circle,
-                                      gradient: LinearGradient(colors: [primaryOrange, secondaryOrange]),
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          primaryOrange,
+                                          secondaryOrange,
+                                        ],
+                                      ),
                                     ),
                                     child: Icon(
-                                      _timedOut ? Icons.hourglass_bottom_rounded : Icons.shield_rounded,
+                                      _timedOut
+                                          ? Icons.hourglass_bottom_rounded
+                                          : Icons.shield_rounded,
                                       color: Colors.white,
                                       size: 40.sp,
                                     ),
@@ -226,7 +247,10 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen>
                             ),
                             UIHelper.verticalSpace(22.h),
                             Text(
-                              (_timedOut ? 'Still confirming your payment' : 'Confirming your payment').tr,
+                              (_timedOut
+                                      ? 'Still confirming your payment'
+                                      : 'Confirming your payment')
+                                  .tr,
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 19.sp,
@@ -239,10 +263,16 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen>
                               'We are checking with SSLCommerz. This usually takes a few seconds — please keep the app open.'
                                   .tr,
                               textAlign: TextAlign.center,
-                              style: TextStyle(fontSize: 12.5.sp, height: 1.5, color: muted),
+                              style: TextStyle(
+                                fontSize: 12.5.sp,
+                                height: 1.5,
+                                color: muted,
+                              ),
                             ),
                             UIHelper.verticalSpace(18.h),
-                            PaymentStatusBadge(rawStatus: _latest?.status ?? status.label),
+                            PaymentStatusBadge(
+                              rawStatus: _latest?.status ?? status.label,
+                            ),
                             UIHelper.verticalSpace(22.h),
                             _Steps(gatewayDone: true, confirming: !_timedOut),
                             UIHelper.verticalSpace(26.h),
@@ -253,21 +283,30 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen>
                                 icon: _checking
                                     ? SizedBox.square(
                                         dimension: 16.sp,
-                                        child: const CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                        child: const CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          color: Colors.white,
+                                        ),
                                       )
                                     : Icon(Icons.refresh_rounded, size: 18.sp),
                                 label: Text(
                                   'Check status now'.tr,
-                                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800),
+                                  style: TextStyle(
+                                    fontSize: 14.sp,
+                                    fontWeight: FontWeight.w800,
+                                  ),
                                 ),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: primaryOrange,
                                   foregroundColor: Colors.white,
-                                  disabledBackgroundColor: primaryOrange.withValues(alpha: 0.6),
+                                  disabledBackgroundColor: primaryOrange
+                                      .withValues(alpha: 0.6),
                                   disabledForegroundColor: Colors.white,
                                   elevation: 0,
                                   minimumSize: Size(0, 50.h),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(14.r),
+                                  ),
                                 ),
                               ),
                             ),
@@ -275,14 +314,26 @@ class _PaymentProcessingScreenState extends State<PaymentProcessingScreen>
                               UIHelper.verticalSpace(8.h),
                               TextButton.icon(
                                 onPressed: _reopenGateway,
-                                icon: Icon(Icons.open_in_new_rounded, size: 16.sp),
+                                icon: Icon(
+                                  Icons.open_in_new_rounded,
+                                  size: 16.sp,
+                                ),
                                 label: Text('Reopen payment page'.tr),
-                                style: TextButton.styleFrom(foregroundColor: primaryOrange),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: primaryOrange,
+                                ),
                               ),
                             ],
                             TextButton(
-                              onPressed: () => _finish(PaymentResultData(PaymentStatus.pending, payment: _latest)),
-                              style: TextButton.styleFrom(foregroundColor: muted),
+                              onPressed: () => _finish(
+                                PaymentResultData(
+                                  PaymentStatus.pending,
+                                  payment: _latest,
+                                ),
+                              ),
+                              style: TextButton.styleFrom(
+                                foregroundColor: muted,
+                              ),
                               child: Text("I'll check later".tr),
                             ),
                           ],
@@ -310,7 +361,9 @@ class _Steps extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget step(String label, {required bool done, required bool active}) {
-      final color = done ? const Color(0xFF10B981) : (active ? primaryOrange : AppColorsTheme.textMutedColor(context));
+      final color = done
+          ? const Color(0xFF10B981)
+          : (active ? primaryOrange : AppColorsTheme.textMutedColor(context));
       return Padding(
         padding: EdgeInsets.symmetric(vertical: 6.h),
         child: Row(
@@ -319,7 +372,13 @@ class _Steps extends StatelessWidget {
               dimension: 22.sp,
               child: active && !done
                   ? CircularProgressIndicator(strokeWidth: 2.2, color: color)
-                  : Icon(done ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded, color: color, size: 22.sp),
+                  : Icon(
+                      done
+                          ? Icons.check_circle_rounded
+                          : Icons.radio_button_unchecked_rounded,
+                      color: color,
+                      size: 22.sp,
+                    ),
             ),
             UIHelper.horizontalSpace(12.w),
             Expanded(
@@ -327,8 +386,12 @@ class _Steps extends StatelessWidget {
                 label,
                 style: TextStyle(
                   fontSize: 13.sp,
-                  fontWeight: done || active ? FontWeight.w700 : FontWeight.w500,
-                  color: done || active ? AppColorsTheme.textMainColor(context) : AppColorsTheme.textMutedColor(context),
+                  fontWeight: done || active
+                      ? FontWeight.w700
+                      : FontWeight.w500,
+                  color: done || active
+                      ? AppColorsTheme.textMainColor(context)
+                      : AppColorsTheme.textMutedColor(context),
                 ),
               ),
             ),
@@ -346,8 +409,16 @@ class _Steps extends StatelessWidget {
       ),
       child: Column(
         children: [
-          step('Payment submitted on SSLCommerz'.tr, done: gatewayDone, active: false),
-          step('Confirming with the gateway'.tr, done: false, active: confirming),
+          step(
+            'Payment submitted on SSLCommerz'.tr,
+            done: gatewayDone,
+            active: false,
+          ),
+          step(
+            'Confirming with the gateway'.tr,
+            done: false,
+            active: confirming,
+          ),
           step('Order / package updated'.tr, done: false, active: false),
         ],
       ),

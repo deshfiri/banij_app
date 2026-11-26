@@ -46,7 +46,10 @@ class CheckoutData {
         quote: json["quote"] != null && json["quote"] is Map<String, dynamic>
             ? CheckoutQuote.fromJson(json["quote"])
             : null,
-        coupon: json["coupon"]?.toString(),
+        // The coupon may come as a code or as an object ({code, ...}).
+        coupon: json["coupon"] is Map
+            ? ((json["coupon"] as Map)["code"] ?? (json["coupon"] as Map)["name"])?.toString()
+            : json["coupon"]?.toString(),
         deadline: json["deadline"]?.toString(),
         gateways: json["gateways"],
       );
@@ -137,7 +140,11 @@ class CheckoutPackage {
 }
 
 class CheckoutQuote {
+  /// Lines as text (kept for compatibility). Prefer [lineItems] for display.
   final List<String>? lines;
+
+  /// Lines with a label and an amount, whether the API sends text or objects.
+  final List<CheckoutQuoteLine> lineItems;
   final WholesalePrice? subtotal;
   final WholesalePrice? total;
   final bool? isPayable;
@@ -146,6 +153,7 @@ class CheckoutQuote {
 
   CheckoutQuote({
     this.lines,
+    this.lineItems = const [],
     this.subtotal,
     this.total,
     this.isPayable,
@@ -157,13 +165,22 @@ class CheckoutQuote {
         lines: json["lines"] != null && json["lines"] is List
             ? List<String>.from((json["lines"] as List).map((x) => x.toString()))
             : null,
+        lineItems: json["lines"] is List
+            ? (json["lines"] as List).map(CheckoutQuoteLine.fromJson).whereType<CheckoutQuoteLine>().toList()
+            : const [],
         subtotal: json["subtotal"] != null && json["subtotal"] is Map<String, dynamic>
             ? WholesalePrice.fromJson(json["subtotal"])
             : null,
         total: json["total"] != null && json["total"] is Map<String, dynamic>
             ? WholesalePrice.fromJson(json["total"])
             : null,
-        isPayable: json["is_payable"] as bool?,
+        isPayable: switch (json["is_payable"]) {
+          final bool value => value,
+          final num value => value != 0,
+          'true' || '1' => true,
+          'false' || '0' => false,
+          _ => null,
+        },
         tax: json["tax"] != null && json["tax"] is List
             ? List<String>.from((json["tax"] as List).map((x) => x.toString()))
             : null,
@@ -180,4 +197,29 @@ class CheckoutQuote {
         "tax": tax,
         "tax_included": taxIncluded?.toJson(),
       };
+}
+
+/// One quote line: a label and its amount (either may be missing).
+class CheckoutQuoteLine {
+  final String label;
+  final String? amount;
+
+  const CheckoutQuoteLine({required this.label, this.amount});
+
+  static CheckoutQuoteLine? fromJson(dynamic input) {
+    if (input == null) return null;
+    if (input is! Map) {
+      final text = input.toString().trim();
+      return text.isEmpty ? null : CheckoutQuoteLine(label: text);
+    }
+    final label = (input['label'] ?? input['description'] ?? input['name'] ?? input['title'] ?? input['key'])
+        ?.toString()
+        .trim();
+    final rawAmount = input['amount'] ?? input['total'] ?? input['price'] ?? input['value'];
+    final amount = rawAmount is Map
+        ? (rawAmount['formatted'] ?? rawAmount['amount'])?.toString()
+        : rawAmount?.toString();
+    if ((label == null || label.isEmpty) && amount == null) return null;
+    return CheckoutQuoteLine(label: label?.isNotEmpty == true ? label! : '—', amount: amount);
+  }
 }

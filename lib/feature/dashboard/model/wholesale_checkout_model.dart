@@ -68,7 +68,9 @@ class WholesaleCheckoutResponseModel {
         ? (data["payment"] ?? json["payment"] ?? order["payment"]) as Map
         : const {};
     for (final source in [json, data, payment, order]) {
-      for (final key in const ["redirect_url", "payment_url", "gateway_url", "url"]) {
+      // Payment-specific keys only: a generic `url` is usually the order's own
+      // link and must not be opened as a payment page.
+      for (final key in const ["redirect_url", "payment_url", "gateway_url"]) {
         final value = source[key]?.toString().trim();
         if (value != null && value.startsWith('http')) return value;
       }

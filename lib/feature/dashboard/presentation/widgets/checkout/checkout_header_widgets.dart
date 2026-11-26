@@ -165,7 +165,8 @@ class CheckoutSuccessDialog extends StatelessWidget {
               trailingIcon: Icons.arrow_forward_rounded,
               onPressed: () {
                 Navigator.pop(ctx);
-                Navigator.pushReplacementNamed(context, Routes.dashboardScreen);
+                // Back to a single dashboard (no checkout / product pages below it).
+                Navigator.pushNamedAndRemoveUntil(context, Routes.dashboardScreen, (route) => false);
               },
             ),
           ],

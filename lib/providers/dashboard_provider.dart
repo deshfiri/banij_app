@@ -10,7 +10,6 @@ import '../feature/dashboard/model/dashboard_model.dart';
 import '../feature/dashboard/model/my_product_model.dart';
 import '../feature/dashboard/model/onboarding_model.dart';
 import '../feature/dashboard/model/order_model.dart';
-import '../feature/dashboard/model/payment_model.dart';
 import '../feature/dashboard/model/wholesale_checkout_model.dart';
 import '../feature/package/model/package_model.dart';
 import '../helpers/toast.dart';
@@ -39,9 +38,11 @@ class DashboardProvider extends ChangeNotifier {
   /// Message when `GET /wholesale/checkout` refused to quote (e.g. the cart
   /// needs attention). Null when the quote loaded.
   String? wholesaleCheckoutError;
-  PaymentMethodResponseModel? paymentResponseModel;
   AddressResponseModel? addressResponseModel;
   AddressItemModel? selectedAddress;
+
+  /// Package activation quote (`GET /checkout`). Used only by the activation
+  /// checkout — never by the wholesale cart checkout.
   CheckoutResponseModel? checkoutResponseModel;
 
   bool _isLoadingCheckout = false;
@@ -50,9 +51,10 @@ class DashboardProvider extends ChangeNotifier {
   bool _isApplyingCoupon = false;
   bool get isApplyingCoupon => _isApplyingCoupon;
 
-  /// Gateway value sent to `POST /checkout`. SSLCommerz by default; replaced
-  /// by the first gateway `GET /checkout` offers when it lists any.
   static const String sslCommerzGateway = 'sslcommerz';
+
+  /// Wholesale order `payment_method`. SSLCommerz by default; replaced by an
+  /// accepted method when `GET /wholesale/checkout` lists them.
   String _selectedPaymentMethod = sslCommerzGateway;
   String get selectedPaymentMethod => _selectedPaymentMethod;
 
@@ -108,13 +110,16 @@ class DashboardProvider extends ChangeNotifier {
     }
   }
 
+  /// Loads the wholesale cart checkout: the quote (`GET /wholesale/checkout`)
+  /// and the saved addresses. The package activation quote is separate —
+  /// see [fetchActivationCheckout].
   Future<void> fetchCheckoutState() async {
     _isLoadingCheckout = true;
     notifyListeners();
 
     try {
-      final results = await Future.wait([
-        wholesaleCheckoutRxObj.fetchCheckout().then((value) {
+      final results = await Future.wait<Object?>([
+        wholesaleCheckoutRxObj.fetchCheckout().then<Object?>((value) {
           wholesaleCheckoutError = null;
           return value;
         }).catchError((Object e) {
@@ -122,11 +127,11 @@ class DashboardProvider extends ChangeNotifier {
           wholesaleCheckoutError = e.apiErrorMessage;
           return WholesaleCheckoutResponseModel();
         }),
-        paymentRxObj.fetchPaymentMethods().catchError((_) => PaymentMethodResponseModel(data: [])),
-        addressRxObj.fetchAddresses().catchError((_) => AddressResponseModel(data: [])),
-        checkoutRxObj
-            .fetchCheckoutDetails(coupon: _checkoutCouponCode)
-            .catchError((_) => CheckoutResponseModel()),
+        // null = request failed: keep the addresses already shown.
+        addressRxObj.fetchAddresses().then<Object?>((value) => value).catchError((Object e) {
+          debugPrint('DashboardProvider.fetchCheckoutState addresses failed: $e');
+          return null;
+        }),
       ]);
 
       if (results[0] is WholesaleCheckoutResponseModel) {
@@ -137,32 +142,34 @@ class DashboardProvider extends ChangeNotifier {
       if (wholesaleMethods.isNotEmpty && !wholesaleMethods.any((m) => m.value == _selectedPaymentMethod)) {
         _selectedPaymentMethod = _preferredMethod(wholesaleMethods).value;
       }
-      if (results[1] is PaymentMethodResponseModel) {
-        paymentResponseModel = results[1] as PaymentMethodResponseModel;
+      if (results[1] is AddressResponseModel) {
+        addressResponseModel = results[1] as AddressResponseModel;
+        selectedAddress = _resolveSelectedAddress(addressResponseModel?.data ?? const []);
       }
-      if (results[2] is AddressResponseModel) {
-        addressResponseModel = results[2] as AddressResponseModel;
-        final addresses = addressResponseModel?.data ?? [];
-        if (addresses.isNotEmpty) {
-          selectedAddress = addresses.firstWhere(
-            (a) => a.isDefault == true,
-            orElse: () => addresses.first,
-          );
-        }
-      }
-      if (results[3] is CheckoutResponseModel) {
-        checkoutResponseModel = results[3] as CheckoutResponseModel;
-        // Default to the first available gateway offered by /checkout.
-        final available = checkoutGateways.where((g) => g.isAvailable).toList();
-        if (available.isNotEmpty && !available.any((g) => g.value == _selectedPaymentMethod)) {
-          _selectedPaymentMethod = available.first.value;
-        }
-      }
-    } catch (_) {
+    } catch (e) {
+      debugPrint('DashboardProvider.fetchCheckoutState failed: $e');
     } finally {
       _isLoadingCheckout = false;
       notifyListeners();
     }
+  }
+
+  /// Keeps the address the checkout already uses instead of jumping back to
+  /// the default on every refresh: the server's shipping address first, then
+  /// the one picked in the app, then the default, then the first.
+  AddressItemModel? _resolveSelectedAddress(List<AddressItemModel> addresses) {
+    if (addresses.isEmpty) return null;
+    AddressItemModel? byId(String? id) {
+      if (id == null || id.isEmpty) return null;
+      for (final address in addresses) {
+        if (address.id?.toString() == id) return address;
+      }
+      return null;
+    }
+
+    return byId(wholesaleCheckoutModel?.data?.shippingAddress?.id?.toString()) ??
+        byId(selectedAddress?.id?.toString()) ??
+        addresses.firstWhere((a) => a.isDefault == true, orElse: () => addresses.first);
   }
 
   Future<void> applyWholesaleCoupon(String couponCode) async {
@@ -260,28 +267,90 @@ class DashboardProvider extends ChangeNotifier {
   }
 
   // ---------------------------------------------------------------------------
-  // Package checkout payment (POST /checkout → gateway → GET /checkout/payment)
+  // Package activation payment (the `/checkout` APIs):
+  // GET /checkout → POST /checkout → SSLCommerz → verify / GET /checkout/payment
   // ---------------------------------------------------------------------------
 
   bool _isPaying = false;
   bool get isPaying => _isPaying;
 
+  bool _isLoadingActivation = false;
+  bool get isLoadingActivation => _isLoadingActivation;
+
+  /// Why `GET /checkout` gave no quote (e.g. 409 no_package_selected).
+  String? activationError;
+
+  /// Gateway sent as `gateway` to `POST /checkout` — kept apart from the
+  /// wholesale [selectedPaymentMethod] so the two checkouts never mix.
+  String _activationGateway = sslCommerzGateway;
+  String get selectedActivationGateway => _activationGateway;
+
+  void setActivationGateway(String gateway) {
+    _activationGateway = gateway;
+    notifyListeners();
+  }
+
   /// Gateways offered by `GET /checkout`.
   List<CheckoutGateway> get checkoutGateways => checkoutResponseModel?.data?.gatewayList ?? const [];
 
-  /// True when `GET /checkout` returned a package to pay for, so "Place
-  /// Order" must go through the payment gateway.
-  bool get isPackageCheckout => checkoutResponseModel?.data?.package != null;
+  /// There is a package activation to pay (a quote that is payable and not
+  /// zero).
+  bool get hasPayableActivation {
+    final data = checkoutResponseModel?.data;
+    if (data?.package == null) return false;
+    if (data!.quote?.isPayable == false) return false;
+    final amount = double.tryParse(data.quote?.total?.amount ?? '');
+    return amount == null || amount > 0;
+  }
+
+  /// Loads the activation quote (keeping a coupon only if it still applies)
+  /// and the latest payment attempt, so one left open can be resumed.
+  Future<void> fetchActivationCheckout() async {
+    _isLoadingActivation = true;
+    notifyListeners();
+    try {
+      try {
+        checkoutResponseModel = await checkoutRxObj.fetchCheckoutDetails(coupon: _checkoutCouponCode);
+      } catch (e) {
+        if (_checkoutCouponCode == null) rethrow;
+        // The coupon stopped applying (e.g. its last slot went): drop it.
+        _checkoutCouponCode = null;
+        ToastUtil.showErrorMessage('Your coupon is no longer available and was removed.');
+        checkoutResponseModel = await checkoutRxObj.fetchCheckoutDetails();
+      }
+      activationError = null;
+      _syncActivationGateway();
+    } catch (e) {
+      checkoutResponseModel = null;
+      final message = e.apiErrorMessage;
+      activationError = message.isEmpty ? 'Could not load the package payment.' : message;
+    }
+    latestPayment = await fetchCheckoutPaymentStatus();
+    _isLoadingActivation = false;
+    notifyListeners();
+  }
+
+  /// Keeps the selected gateway valid: SSLCommerz when the quote lists no
+  /// gateways, otherwise a listed one (SSLCommerz first when offered).
+  void _syncActivationGateway() {
+    final available = checkoutGateways.where((g) => g.isAvailable).toList();
+    if (available.isEmpty) {
+      _activationGateway = sslCommerzGateway;
+    } else if (!available.any((g) => g.value == _activationGateway)) {
+      _activationGateway = _preferredMethod(available).value;
+    }
+  }
 
   /// `POST /checkout` with the selected gateway (and coupon, if any).
-  /// Returns the gateway `redirect_url`, or null after showing the error.
+  /// Returns the gateway `redirect_url`, `''` when there is nothing to open
+  /// (already settled), or null after showing the error.
   Future<String?> startCheckoutPayment({String? coupon}) async {
     if (_isPaying) return null;
     _isPaying = true;
     notifyListeners();
     try {
       final body = <String, dynamic>{
-        'gateway': _selectedPaymentMethod,
+        'gateway': _activationGateway,
         if (coupon != null && coupon.trim().isNotEmpty) 'coupon': coupon.trim(),
       };
       final result = await checkoutRxObj.pay(body);
@@ -290,6 +359,12 @@ class DashboardProvider extends ChangeNotifier {
         // Nothing to open: either already settled or the API did not send a URL.
         if (result.isPaid) return '';
         ToastUtil.showErrorMessage(result.message ?? 'Payment page is not available. Please try again.');
+        return null;
+      }
+      // Only ever load a web page in the payment view.
+      final uri = Uri.tryParse(url);
+      if (uri == null || !(uri.scheme == 'https' || uri.scheme == 'http') || uri.host.isEmpty) {
+        ToastUtil.showErrorMessage('The payment link is not valid. Please try again.');
         return null;
       }
       return url;
@@ -303,9 +378,20 @@ class DashboardProvider extends ChangeNotifier {
     }
   }
 
-  /// Latest activation payment attempt (`GET /checkout/payment`), loaded when
-  /// checkout opens so an attempt left open (app closed mid-payment) can be
-  /// resumed. Null when unknown.
+  /// After the backend confirmed the activation payment: forget the quote and
+  /// coupon and reload what the payment unlocks (dashboard, setup steps,
+  /// profile).
+  Future<void> onActivationPaid() async {
+    _checkoutCouponCode = null;
+    checkoutResponseModel = null;
+    latestPayment = null;
+    notifyListeners();
+    await Future.wait([fetchDashboard(), fetchOnboardingStatus(), fetchProfile()]);
+  }
+
+  /// Latest activation payment attempt (`GET /checkout/payment`), loaded with
+  /// the activation checkout so an attempt left open (app closed
+  /// mid-payment) can be resumed. Null when unknown.
   CheckoutModel? latestPayment;
 
   /// An attempt is still open or being reconciled on the backend.
@@ -356,8 +442,17 @@ class DashboardProvider extends ChangeNotifier {
     _isApplyingCoupon = true;
     notifyListeners();
     try {
-      checkoutResponseModel = await checkoutRxObj.fetchCheckoutDetails(coupon: code.trim());
+      final quote = await checkoutRxObj.fetchCheckoutDetails(coupon: code.trim());
+      // If the API echoes the applied coupon and it is not this code, the
+      // code was not applied — keep the previous quote.
+      final echoed = quote.data?.coupon?.trim();
+      if (echoed != null && echoed.isNotEmpty && echoed != 'null' && echoed.toLowerCase() != code.trim().toLowerCase()) {
+        ToastUtil.showErrorMessage('This coupon could not be applied.');
+        return;
+      }
+      checkoutResponseModel = quote;
       _checkoutCouponCode = code.trim();
+      _syncActivationGateway();
       ToastUtil.showSuccessMessage('Coupon applied successfully');
     } catch (e) {
       final err = e.apiErrorMessage;

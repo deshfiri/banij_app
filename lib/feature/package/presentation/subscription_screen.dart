@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 import '../../../common_widget/hero_page_header.dart';
 import '../../../constants/color.dart';
 import '../../../helpers/all_routes.dart';
+import '../../../providers/dashboard_provider.dart';
 import '../../../providers/subscription_provider.dart';
 import 'widgets/subscription/current_subscription_card.dart';
 import 'widgets/subscription/previous_terms_section.dart';
@@ -26,11 +27,23 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) context.read<SubscriptionProvider>().fetchSubscription(force: true);
+      if (!mounted) return;
+      context.read<SubscriptionProvider>().fetchSubscription(force: true);
+      // Is an activation payment due (or one left open)?
+      context.read<DashboardProvider>().fetchActivationCheckout();
     });
   }
 
-  Future<void> _refresh() => context.read<SubscriptionProvider>().fetchSubscription(force: true);
+  Future<void> _refresh() => Future.wait([
+        context.read<SubscriptionProvider>().fetchSubscription(force: true),
+        context.read<DashboardProvider>().fetchActivationCheckout(),
+      ]);
+
+  void _openActivation() {
+    Navigator.pushNamed(context, Routes.activationCheckoutScreen).then((_) {
+      if (mounted) _refresh();
+    });
+  }
 
   void _openPackages() {
     Navigator.pushNamed(context, Routes.packagesScreen).then((_) {
@@ -113,9 +126,23 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
     }
 
     final current = data.current;
+    final dashboard = context.watch<DashboardProvider>();
+    // Only for an account that has not activated yet: an active plan's
+    // renewal is handled by Renew, not by the activation checkout.
+    final activationDue = (current == null || !current.isActive) &&
+        (dashboard.hasPayableActivation || dashboard.hasOpenPayment);
     final previous = data.previousTerms;
 
     return [
+      if (activationDue) ...[
+        _ActivationDueCard(
+          packageName: dashboard.checkoutResponseModel?.data?.package?.name,
+          amountText: dashboard.checkoutResponseModel?.data?.quote?.total?.formatted,
+          inProgress: dashboard.hasOpenPayment,
+          onTap: _openActivation,
+        ),
+        SizedBox(height: 16.h),
+      ],
       if (current == null)
         SubscriptionMessageView(
           icon: Icons.workspace_premium_outlined,
@@ -140,5 +167,75 @@ class _SubscriptionScreenState extends State<SubscriptionScreen> {
         PreviousTermsSection(terms: previous),
       ],
     ];
+  }
+}
+
+/// "Complete your activation" call-to-action shown above the plan.
+class _ActivationDueCard extends StatelessWidget {
+  final String? packageName;
+  final String? amountText;
+  final bool inProgress;
+  final VoidCallback onTap;
+
+  const _ActivationDueCard({
+    required this.packageName,
+    required this.amountText,
+    required this.inProgress,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final details = [packageName, amountText].whereType<String>().join(' · ');
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16.r),
+        child: Ink(
+          padding: EdgeInsets.all(14.w),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(colors: AppColorsTheme.heroGradient(context)),
+            borderRadius: BorderRadius.circular(16.r),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: EdgeInsets.all(9.w),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Icon(
+                  inProgress ? Icons.sync_rounded : Icons.lock_open_rounded,
+                  color: Colors.white,
+                  size: 20.sp,
+                ),
+              ),
+              SizedBox(width: 12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      (inProgress ? 'Activation payment in progress' : 'Complete your activation').tr,
+                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: Colors.white),
+                    ),
+                    if (details.isNotEmpty)
+                      Text(
+                        details,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 11.5.sp, color: Colors.white.withValues(alpha: 0.9)),
+                      ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, color: Colors.white, size: 22.sp),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

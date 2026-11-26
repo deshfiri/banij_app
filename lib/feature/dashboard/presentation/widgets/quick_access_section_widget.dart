@@ -69,7 +69,6 @@ class QuickAccessSectionWidget extends StatelessWidget {
   }
 }
 
-/// Section title with an orange accent bar and an optional trailing action.
 class DashboardSectionHeader extends StatelessWidget {
   final String title;
   final String? actionLabel;
@@ -140,12 +139,10 @@ class DashboardSectionHeader extends StatelessWidget {
   }
 }
 
-/// Square shortcut tile: icon in a circle, title below, chevron in the corner.
 class QuickAccessTile extends StatelessWidget {
   final String title;
   final String iconAsset;
 
-  /// Null shows the tile without any tap action.
   final VoidCallback? onTap;
 
   const QuickAccessTile({

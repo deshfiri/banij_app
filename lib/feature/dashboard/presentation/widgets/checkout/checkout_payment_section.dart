@@ -5,6 +5,7 @@ import 'package:shimmer/shimmer.dart';
 
 import '../../../../../constants/color.dart';
 import '../../../../../providers/dashboard_provider.dart';
+import '../../../model/checkout_response_model.dart';
 import 'checkout_shimmer.dart';
 import 'checkout_ui.dart';
 
@@ -25,41 +26,58 @@ class _PaymentOption {
   });
 }
 
-/// Payment method section: API methods (or built-in defaults) as selectable tiles.
+/// Payment method section as selectable tiles, for one of the two checkouts:
+///
+/// * wholesale cart ([forActivation] false): the methods
+///   `GET /wholesale/checkout` accepts, else the built-in list;
+/// * package activation ([forActivation] true): the gateways `GET /checkout`
+///   offers, else SSLCommerz.
+///
+/// Each checkout keeps its own selection in [DashboardProvider].
 class CheckoutPaymentSection extends StatelessWidget {
   final DashboardProvider dashboardProvider;
+  final bool forActivation;
 
   const CheckoutPaymentSection({
     super.key,
     required this.dashboardProvider,
+    this.forActivation = false,
   });
+
+  bool get _isLoading =>
+      forActivation ? dashboardProvider.isLoadingActivation : dashboardProvider.isLoadingCheckout;
+
+  String get _selected =>
+      forActivation ? dashboardProvider.selectedActivationGateway : dashboardProvider.selectedPaymentMethod;
+
+  void _select(String value) => forActivation
+      ? dashboardProvider.setActivationGateway(value)
+      : dashboardProvider.setSelectedPaymentMethod(value);
 
   @override
   Widget build(BuildContext context) {
     return CheckoutSectionCard(
       title: 'Payment method'.tr,
       icon: Icons.account_balance_wallet_outlined,
-      child: dashboardProvider.isLoadingCheckout ? const _PaymentShimmer() : _buildPaymentList(context),
+      child: _isLoading ? const _PaymentShimmer() : _buildPaymentList(context),
     );
   }
 
   Widget _buildPaymentList(BuildContext context) {
     final options = _options(context);
-    final selected = dashboardProvider.selectedPaymentMethod;
+    final selected = _selected;
 
     return RadioGroup<String>(
       groupValue: selected,
       onChanged: (val) {
-        if (val != null) {
-          dashboardProvider.setSelectedPaymentMethod(val);
-        }
+        if (val != null) _select(val);
       },
       child: Column(
         children: [
           for (final option in options)
             CheckoutOptionTile(
               isSelected: option.value == selected,
-              onTap: () => dashboardProvider.setSelectedPaymentMethod(option.value),
+              onTap: () => _select(option.value),
               leading: CheckoutIconBadge(icon: option.icon, color: option.iconColor ?? primaryOrange, size: 38.w),
               title: option.title,
               subtitle: option.subtitle,
@@ -75,73 +93,37 @@ class CheckoutPaymentSection extends StatelessWidget {
     );
   }
 
-  /// Gateways from `GET /checkout` first; otherwise saved methods from the
-  /// API, otherwise the built-in defaults.
-  List<_PaymentOption> _options(BuildContext context) {
-    final gateways = dashboardProvider.checkoutGateways.where((g) => g.isAvailable).toList();
-    if (gateways.isNotEmpty) {
-      return gateways
-          .map((gateway) => _PaymentOption(
-                title: gateway.label,
-                subtitle: gateway.description,
-                icon: _iconFor(gateway.value),
-                iconColor: _colorFor(gateway.value),
-                value: gateway.value,
-              ))
-          .toList();
-    }
+  static _PaymentOption _fromGateway(CheckoutGateway gateway) => _PaymentOption(
+        title: gateway.label,
+        subtitle: gateway.description,
+        icon: _iconFor(gateway.value),
+        iconColor: _colorFor(gateway.value),
+        value: gateway.value,
+      );
 
-    // Package checkout without a gateway list: SSLCommerz handles every
-    // method (bKash, Nagad, cards, net banking) on its own page.
-    if (dashboardProvider.isPackageCheckout) {
-      return [
-        _PaymentOption(
-          title: 'SSLCommerz',
-          subtitle: 'bKash, Nagad, Rocket, Visa, MasterCard, AMEX & net banking'.tr,
-          icon: Icons.verified_user_rounded,
-          iconColor: infoBlue,
-          value: DashboardProvider.sslCommerzGateway,
-        ),
-      ];
-    }
-
-    // Wholesale order: the methods `GET /wholesale/checkout` accepts.
-    final wholesaleMethods = dashboardProvider.wholesalePaymentMethods;
-    if (wholesaleMethods.isNotEmpty) {
-      return wholesaleMethods
-          .map((method) => _PaymentOption(
-                title: method.label,
-                subtitle: method.description,
-                icon: _iconFor(method.value),
-                iconColor: _colorFor(method.value),
-                value: method.value,
-              ))
-          .toList();
-    }
-
-    final apiMethods = dashboardProvider.paymentResponseModel?.data ?? [];
-    if (apiMethods.isNotEmpty) {
-      return apiMethods.map((method) {
-        final name = method.typeLabel ?? method.name ?? 'Payment Method';
-        return _PaymentOption(
-          title: name,
-          subtitle: method.maskedNumber != null ? '${method.label ?? ''} ${method.maskedNumber}' : method.description,
-          icon: _iconFor(name),
-          iconColor: _colorFor(name),
-          value: method.code ?? method.type ?? method.id ?? name,
-        );
-      }).toList();
-    }
-
-    // Titles/subtitles are display-only (translated); [value]s are unchanged.
-    return [
-      _PaymentOption(
+  static _PaymentOption get _sslCommerz => _PaymentOption(
         title: 'SSLCommerz',
         subtitle: 'bKash, Nagad, Rocket, Visa, MasterCard, AMEX & net banking'.tr,
         icon: Icons.verified_user_rounded,
         iconColor: infoBlue,
         value: DashboardProvider.sslCommerzGateway,
-      ),
+      );
+
+  List<_PaymentOption> _options(BuildContext context) {
+    if (forActivation) {
+      // SSLCommerz handles every method (bKash, Nagad, cards, net banking) on
+      // its own page, so it is the option when no list is sent.
+      final gateways = dashboardProvider.checkoutGateways.where((g) => g.isAvailable).toList();
+      return gateways.isNotEmpty ? gateways.map(_fromGateway).toList() : [_sslCommerz];
+    }
+
+    // Wholesale order: the methods `GET /wholesale/checkout` accepts.
+    final wholesaleMethods = dashboardProvider.wholesalePaymentMethods;
+    if (wholesaleMethods.isNotEmpty) return wholesaleMethods.map(_fromGateway).toList();
+
+    // Titles/subtitles are display-only (translated); [value]s are unchanged.
+    return [
+      _sslCommerz,
       _PaymentOption(
         title: 'bKash',
         subtitle: 'bKash Online Payment'.tr,
