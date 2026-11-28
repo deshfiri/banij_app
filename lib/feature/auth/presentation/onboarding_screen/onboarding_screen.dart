@@ -95,6 +95,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       showToggleSnackBars: true,
       body: Column(
         children: [
+          UIHelper.verticalSpace(100.h),
           Expanded(
             child: NotificationListener<ScrollStartNotification>(
               // A finger drag (not the timer) restarts the auto-slide clock.

@@ -23,7 +23,7 @@ class OnboardingSlideView extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 10.h),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 440),
+          constraints: const BoxConstraints(maxWidth: 500),
           child: AspectRatio(
             aspectRatio: posterAspectRatio,
             child: _PosterCard(imageAsset: slide.imageAsset),
