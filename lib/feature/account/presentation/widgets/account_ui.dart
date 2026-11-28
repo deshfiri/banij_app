@@ -178,8 +178,10 @@ class AccountSettingTile extends StatelessWidget {
               if (hasSwitch)
                 Switch.adaptive(
                   value: switchValue ?? false,
-                  activeThumbColor: primaryOrange,
-                  activeTrackColor: primaryOrange.withValues(alpha: 0.3),
+                  // Solid orange when on (also used by the iOS switch); the
+                  // off state comes from the app's switch theme.
+                  activeThumbColor: Colors.white,
+                  activeTrackColor: primaryOrange,
                   onChanged: onChanged,
                 )
               else

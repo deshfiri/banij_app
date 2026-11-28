@@ -632,15 +632,14 @@ class VerificationHistoryShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     Widget block(double height, {double radius = 18}) => Container(
           height: height,
           decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(radius.r)),
         );
 
     return Shimmer.fromColors(
-      baseColor: isDark ? Colors.grey[800]! : Colors.grey[300]!,
-      highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
+      baseColor: AppColorsTheme.shimmerBase(context),
+      highlightColor: AppColorsTheme.shimmerHighlight(context),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [

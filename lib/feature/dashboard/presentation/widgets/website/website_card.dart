@@ -81,7 +81,8 @@ class WebsiteCard extends StatelessWidget {
         color: AppColorsTheme.cardBg(context),
         borderRadius: BorderRadius.circular(18.r),
         border: Border.all(
-          color: isDark ? const Color(0xFF374151) : primaryOrange.withValues(alpha: 0.22),
+          color: isDark
+              ? darkCardBorderColor : primaryOrange.withValues(alpha: 0.22),
           width: 1.w,
         ),
         boxShadow: [

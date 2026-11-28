@@ -70,11 +70,10 @@ class PackageSelectionWidget extends StatelessWidget {
   }
 
   Widget _buildPackageShimmer(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Shimmer.fromColors(
-      baseColor: isDark ? Colors.grey.shade800 : Colors.grey.shade300,
-      highlightColor: isDark ? Colors.grey.shade700 : Colors.grey.shade100,
+      baseColor: AppColorsTheme.shimmerBase(context),
+      highlightColor: AppColorsTheme.shimmerHighlight(context),
       child: Column(
         children: List.generate(
           2,

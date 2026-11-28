@@ -733,7 +733,6 @@ class PartnerNetworkShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     Widget block(double height, {double? width}) => Container(
           width: width ?? double.infinity,
@@ -742,8 +741,8 @@ class PartnerNetworkShimmer extends StatelessWidget {
         );
 
     return Shimmer.fromColors(
-      baseColor: isDark ? Colors.grey[800]! : Colors.grey[300]!,
-      highlightColor: isDark ? Colors.grey[700]! : Colors.grey[100]!,
+      baseColor: AppColorsTheme.shimmerBase(context),
+      highlightColor: AppColorsTheme.shimmerHighlight(context),
       child: SingleChildScrollView(
         physics: const NeverScrollableScrollPhysics(),
         padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 24.h),

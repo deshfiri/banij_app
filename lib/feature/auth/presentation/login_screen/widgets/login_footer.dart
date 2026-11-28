@@ -48,8 +48,10 @@ class SupplierModeSwitch extends StatelessWidget {
             scale: 0.85,
             child: Switch.adaptive(
               value: value,
-              activeThumbColor: primaryOrange,
-              activeTrackColor: primaryOrange.withValues(alpha: 0.3),
+              // Solid orange when on (also used by the iOS switch); the
+              // off state comes from the app's switch theme.
+              activeThumbColor: Colors.white,
+              activeTrackColor: primaryOrange,
               onChanged: onChanged,
             ),
           ),

@@ -279,9 +279,7 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: isDark
-              ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
-              : [primaryOrange, secondaryOrange],
+          colors: AppColorsTheme.heroGradient(context),
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -711,7 +709,8 @@ BoxDecoration _cardDecoration(BuildContext context, {double radius = 18}) {
     color: isDark ? AppColorsTheme.cardBg(context) : const Color(0xFFFFF7F2),
     borderRadius: BorderRadius.circular(radius.r),
     border: Border.all(
-      color: isDark ? const Color(0xFF374151) : primaryOrange.withValues(alpha: 0.22),
+      color: isDark
+              ? darkCardBorderColor : primaryOrange.withValues(alpha: 0.22),
       width: 1.w,
     ),
     boxShadow: [
@@ -937,7 +936,8 @@ class _TicketDivider extends StatelessWidget {
       color: AppColorsTheme.background(context),
       shape: BoxShape.circle,
       border: Border.all(
-        color: isDark ? const Color(0xFF374151) : primaryOrange.withValues(alpha: 0.3),
+        color: isDark
+              ? darkCardBorderColor : primaryOrange.withValues(alpha: 0.3),
         width: 1.w,
       ),
     );
@@ -1609,7 +1609,6 @@ class _InvoiceDetailsSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     Widget block(double height, {double radius = 18}) => Container(
           height: height,
           width: double.infinity,
@@ -1620,8 +1619,8 @@ class _InvoiceDetailsSkeleton extends StatelessWidget {
         );
 
     return Shimmer.fromColors(
-      baseColor: isDark ? const Color(0xFF1E293B) : const Color(0xFFE5E7EB),
-      highlightColor: isDark ? const Color(0xFF334155) : const Color(0xFFF9FAFB),
+      baseColor: AppColorsTheme.shimmerBase(context),
+      highlightColor: AppColorsTheme.shimmerHighlight(context),
       child: ListView(
         physics: const NeverScrollableScrollPhysics(),
         padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 24.h),

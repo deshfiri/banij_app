@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../../../../../constants/app_constants.dart';
 import '../../../../../constants/color.dart';
+import '../../../../../constants/image_const.dart';
 import '../../../../../helpers/di.dart';
 import '../../../../../helpers/ui_helpers.dart';
 import '../../../../../providers/account_provider.dart';
@@ -76,41 +77,17 @@ class _LogoutConfirmationDialogState extends State<LogoutConfirmationDialog> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Soft red header band with the layered icon.
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.fromLTRB(16.w, 12.h, 8.w, 22.h),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [errorRed.withValues(alpha: 0.12), errorRed.withValues(alpha: 0.0)],
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: IconButton(
-                          tooltip: 'Cancel'.tr,
-                          onPressed: _isLoggingOut ? null : () => Navigator.pop(context),
-                          icon: Icon(Icons.close_rounded, size: 20.sp, color: AppColorsTheme.textMutedColor(context)),
-                        ),
-                      ),
-                      const _LogoutIllustration(),
-                    ],
-                  ),
-                ),
+                _Header(onClose: _isLoggingOut ? null : () => Navigator.pop(context)),
                 Padding(
-                  padding: EdgeInsets.fromLTRB(22.w, 0, 22.w, 22.h),
+                  padding: EdgeInsets.fromLTRB(22.w, 18.h, 22.w, 22.h),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
-                        'Log out?'.tr,
+                        'logout_title'.tr,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          fontSize: 20.sp,
+                          fontSize: 21.sp,
                           fontWeight: FontWeight.w900,
                           color: AppColorsTheme.textMainColor(context),
                         ),
@@ -122,10 +99,12 @@ class _LogoutConfirmationDialogState extends State<LogoutConfirmationDialog> {
                         style: TextStyle(fontSize: 12.5.sp, height: 1.5, color: AppColorsTheme.textMutedColor(context)),
                       ),
                       if (name.isNotEmpty || email.isNotEmpty) ...[
-                        UIHelper.verticalSpace(16.h),
+                        UIHelper.verticalSpace(18.h),
                         _AccountChip(name: name, email: email),
                       ],
-                      UIHelper.verticalSpace(22.h),
+                      UIHelper.verticalSpace(12.h),
+                      const _SafeNote(),
+                      UIHelper.verticalSpace(20.h),
                       _buildButtons(isCompact),
                     ],
                   ),
@@ -139,48 +118,70 @@ class _LogoutConfirmationDialogState extends State<LogoutConfirmationDialog> {
   }
 
   Widget _buildButtons(bool isCompact) {
-    final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.r));
-    final minSize = Size(0, 50.h);
+    final radius = BorderRadius.circular(28.r);
+    final height = 50.h;
     final textStyle = TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800);
 
-    final cancel = OutlinedButton(
-      onPressed: _isLoggingOut ? null : () => Navigator.pop(context),
-      style: OutlinedButton.styleFrom(
-        minimumSize: minSize,
-        shape: shape,
-        side: BorderSide(color: AppColorsTheme.borderColor(context)),
-        foregroundColor: AppColorsTheme.textMainColor(context),
+    final cancel = SizedBox(
+      height: height,
+      child: OutlinedButton(
+        onPressed: _isLoggingOut ? null : () => Navigator.pop(context),
+        style: OutlinedButton.styleFrom(
+          shape: RoundedRectangleBorder(borderRadius: radius),
+          side: BorderSide(color: AppColorsTheme.borderColor(context), width: 1.2),
+          foregroundColor: AppColorsTheme.textMainColor(context),
+        ),
+        child: Text('logout_cancel'.tr, style: textStyle),
       ),
-      child: Text('Cancel'.tr, style: textStyle),
     );
 
-    final confirm = ElevatedButton.icon(
-      onPressed: _isLoggingOut ? null : _logout,
-      icon: _isLoggingOut
-          ? SizedBox.square(
-              dimension: 16.sp,
-              child: const CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-            )
-          : Icon(Icons.logout_rounded, size: 18.sp),
-      label: Text((_isLoggingOut ? 'Logging out…' : 'Log out').tr, style: textStyle),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: errorRed,
-        foregroundColor: Colors.white,
-        disabledBackgroundColor: errorRed.withValues(alpha: 0.7),
-        disabledForegroundColor: Colors.white,
-        minimumSize: minSize,
-        shape: shape,
-        elevation: 0,
+    final confirm = Opacity(
+      opacity: _isLoggingOut ? 0.85 : 1,
+      child: Container(
+        height: height,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(colors: [primaryOrange, secondaryOrange]),
+          borderRadius: radius,
+          boxShadow: [
+            BoxShadow(color: primaryOrange.withValues(alpha: 0.35), blurRadius: 14.r, offset: const Offset(0, 5)),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: _isLoggingOut ? null : _logout,
+            borderRadius: radius,
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_isLoggingOut)
+                      SizedBox.square(
+                        dimension: 16.sp,
+                        child: const CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                      )
+                    else
+                      Icon(Icons.logout_rounded, size: 18.sp, color: Colors.white),
+                    UIHelper.horizontalSpace(8.w),
+                    Text(
+                      (_isLoggingOut ? 'logout_logging_out' : 'logout_confirm').tr,
+                      style: textStyle.copyWith(color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
       ),
     );
 
     if (isCompact) {
       return Column(
-        children: [
-          SizedBox(width: double.infinity, child: confirm),
-          UIHelper.verticalSpace(10.h),
-          SizedBox(width: double.infinity, child: cancel),
-        ],
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [confirm, UIHelper.verticalSpace(10.h), cancel],
       );
     }
     return Row(
@@ -193,33 +194,93 @@ class _LogoutConfirmationDialogState extends State<LogoutConfirmationDialog> {
   }
 }
 
-/// Halo + ring + red gradient disc with the logout icon.
-class _LogoutIllustration extends StatelessWidget {
-  const _LogoutIllustration();
+/// Orange gradient band: white logo, close button and the logout emblem.
+class _Header extends StatelessWidget {
+  final VoidCallback? onClose;
+
+  const _Header({required this.onClose});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 104.w,
-      height: 104.w,
-      decoration: BoxDecoration(shape: BoxShape.circle, color: errorRed.withValues(alpha: 0.08)),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: AppColorsTheme.heroGradient(context),
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+      child: Stack(
+        children: [
+          Positioned(top: -40.h, right: -30.w, child: _circle(130.w, 0.1)),
+          Positioned(bottom: -30.h, left: -20.w, child: _circle(90.w, 0.07)),
+          Padding(
+            padding: EdgeInsets.fromLTRB(18.w, 10.h, 8.w, 22.h),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Image.asset(whiteLogo, width: 70.w, height: 22.h, fit: BoxFit.contain),
+                    const Spacer(),
+                    IconButton(
+                      tooltip: 'logout_cancel'.tr,
+                      onPressed: onClose,
+                      style: IconButton.styleFrom(backgroundColor: Colors.white.withValues(alpha: 0.18)),
+                      icon: Icon(Icons.close_rounded, size: 18.sp, color: Colors.white),
+                    ),
+                  ],
+                ),
+                UIHelper.verticalSpace(6.h),
+                const _LogoutEmblem(),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  static Widget _circle(double size, double alpha) => IgnorePointer(
+        child: Container(
+          width: size,
+          height: size,
+          decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: alpha)),
+        ),
+      );
+}
+
+/// Glass rings around a white disc with the orange logout icon.
+class _LogoutEmblem extends StatelessWidget {
+  const _LogoutEmblem();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 100.w,
+      height: 100.w,
+      decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: 0.12)),
       child: Center(
         child: Container(
-          width: 80.w,
-          height: 80.w,
-          decoration: BoxDecoration(shape: BoxShape.circle, color: errorRed.withValues(alpha: 0.14)),
+          width: 78.w,
+          height: 78.w,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: Colors.white.withValues(alpha: 0.18),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
+          ),
           child: Center(
             child: Container(
-              width: 58.w,
-              height: 58.w,
+              width: 56.w,
+              height: 56.w,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: LinearGradient(colors: [errorRed, Color.lerp(errorRed, Colors.black, 0.18)!]),
+                color: Colors.white,
                 boxShadow: [
-                  BoxShadow(color: errorRed.withValues(alpha: 0.35), blurRadius: 14.r, offset: const Offset(0, 5)),
+                  BoxShadow(color: Colors.black.withValues(alpha: 0.15), blurRadius: 12.r, offset: const Offset(0, 4)),
                 ],
               ),
-              child: Icon(Icons.logout_rounded, color: Colors.white, size: 28.sp),
+              child: Icon(Icons.logout_rounded, color: primaryOrange, size: 27.sp),
             ),
           ),
         ),
@@ -228,72 +289,137 @@ class _LogoutIllustration extends StatelessWidget {
   }
 }
 
-/// The signed-in account: initial avatar, name and email.
+/// The signed-in account: orange left bar, initials avatar, name and email.
 class _AccountChip extends StatelessWidget {
   final String name;
   final String email;
 
   const _AccountChip({required this.name, required this.email});
 
+  String get _initials {
+    final source = name.isNotEmpty ? name : email;
+    final parts = source.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+    if (parts.isEmpty) return '?';
+    final first = parts.first.characters.first;
+    final last = parts.length > 1 ? parts.last.characters.first : '';
+    return (first + last).toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final display = name.isNotEmpty ? name : email;
-    final initial = display.isEmpty ? '?' : display[0].toUpperCase();
+    final radius = BorderRadius.circular(16.r);
 
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(10.w),
       decoration: BoxDecoration(
-        color: AppColorsTheme.innerCardBg(context),
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: AppColorsTheme.borderColor(context)),
+        color: Color.alphaBlend(primaryOrange.withValues(alpha: isDark ? 0.08 : 0.05), AppColorsTheme.cardBg(context)),
+        borderRadius: radius,
+        border: Border.all(color: primaryOrange.withValues(alpha: isDark ? 0.35 : 0.25)),
       ),
-      child: Row(
-        children: [
-          Container(
-            width: 38.w,
-            height: 38.w,
-            alignment: Alignment.center,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(colors: [primaryOrange, secondaryOrange]),
+      child: ClipRRect(
+        borderRadius: radius,
+        child: Stack(
+          children: [
+            Padding(
+              padding: EdgeInsets.fromLTRB(16.w, 10.h, 12.w, 10.h),
+              child: Row(
+                children: [
+                  Container(
+                    width: 42.w,
+                    height: 42.w,
+                    alignment: Alignment.center,
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: LinearGradient(colors: [secondaryOrange, primaryOrange]),
+                    ),
+                    child: Text(
+                      _initials,
+                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: Colors.white),
+                    ),
+                  ),
+                  UIHelper.horizontalSpace(12.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'logout_signed_in_as'.tr.toUpperCase(),
+                          style: TextStyle(
+                            fontSize: 9.5.sp,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 0.8,
+                            color: primaryOrange,
+                          ),
+                        ),
+                        UIHelper.verticalSpace(2.h),
+                        Text(
+                          display,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 13.5.sp,
+                            fontWeight: FontWeight.w800,
+                            color: AppColorsTheme.textMainColor(context),
+                          ),
+                        ),
+                        if (name.isNotEmpty && email.isNotEmpty)
+                          Text(
+                            email,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontSize: 11.sp, color: AppColorsTheme.textMutedColor(context)),
+                          ),
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.verified_user_rounded, size: 18.sp, color: primaryOrange.withValues(alpha: 0.8)),
+                ],
+              ),
             ),
-            child: Text(
-              initial,
-              style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: Colors.white),
-            ),
-          ),
-          UIHelper.horizontalSpace(10.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Signed in as'.tr,
-                  style: TextStyle(fontSize: 10.5.sp, color: AppColorsTheme.textMutedColor(context)),
-                ),
-                Text(
-                  display,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w800,
-                    color: AppColorsTheme.textMainColor(context),
+            Positioned(
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: 4.w,
+              child: const DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [primaryOrange, secondaryOrange],
                   ),
                 ),
-                if (name.isNotEmpty && email.isNotEmpty)
-                  Text(
-                    email,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 11.sp, color: AppColorsTheme.textMutedColor(context)),
-                  ),
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
+    );
+  }
+}
+
+/// Small reassurance line under the account.
+class _SafeNote extends StatelessWidget {
+  const _SafeNote();
+
+  @override
+  Widget build(BuildContext context) {
+    final muted = AppColorsTheme.textMutedColor(context);
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(Icons.lock_outline_rounded, size: 13.sp, color: muted),
+        UIHelper.horizontalSpace(5.w),
+        Flexible(
+          child: Text(
+            'logout_safe_note'.tr,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 11.sp, color: muted),
+          ),
+        ),
+      ],
     );
   }
 }

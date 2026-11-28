@@ -99,9 +99,7 @@ class _PayoutMethodsScreenState extends State<PayoutMethodsScreen> {
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: isDark
-              ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
-              : [primaryOrange, secondaryOrange],
+          colors: AppColorsTheme.heroGradient(context),
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),

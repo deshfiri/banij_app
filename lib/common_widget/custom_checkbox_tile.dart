@@ -28,7 +28,7 @@ class CustomCheckboxTile extends StatelessWidget {
           child: Checkbox(
             value: value,
             activeColor: primaryOrange,
-            side: BorderSide(color: AppColorsTheme.borderColor(context)),
+            side: BorderSide(color: AppColorsTheme.controlOutline(context), width: 1.6),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(4.r),
             ),

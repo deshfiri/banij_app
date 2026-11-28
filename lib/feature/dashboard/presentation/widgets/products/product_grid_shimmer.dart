@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+
+import '../../../../../constants/color.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -12,11 +14,10 @@ class ProductGridShimmer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Shimmer.fromColors(
-      baseColor: isDark ? Colors.grey.shade800 : Colors.grey.shade300,
-      highlightColor: isDark ? Colors.grey.shade700 : Colors.grey.shade100,
+      baseColor: AppColorsTheme.shimmerBase(context),
+      highlightColor: AppColorsTheme.shimmerHighlight(context),
       child: GridView.builder(
         physics: const NeverScrollableScrollPhysics(),
         padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 24.h),

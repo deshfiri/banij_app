@@ -360,8 +360,8 @@ class KycSubmitCard extends StatelessWidget {
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryOrange,
                 foregroundColor: Colors.white,
-                disabledBackgroundColor: isDark ? const Color(0xFF2C2C2E) : const Color(0xFFE5E7EB),
-                disabledForegroundColor: isDark ? const Color(0xFF636366) : const Color(0xFF9CA3AF),
+                disabledBackgroundColor: isDark ? darkSurfaceRaised : const Color(0xFFE5E7EB),
+                disabledForegroundColor: isDark ? darkTextMuted : const Color(0xFF9CA3AF),
                 padding: EdgeInsets.symmetric(vertical: 14.h),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
                 elevation: 0,

@@ -141,16 +141,18 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    // In dark mode the animation starts on the dark page colour instead of
+    // white, so there is no white flash before the orange fill.
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final lightIcons = _isOrangePhase || isDark;
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness:
-            _isOrangePhase ? Brightness.light : Brightness.dark,
-        statusBarBrightness:
-            _isOrangePhase ? Brightness.dark : Brightness.light,
+        statusBarIconBrightness: lightIcons ? Brightness.light : Brightness.dark,
+        statusBarBrightness: lightIcons ? Brightness.dark : Brightness.light,
       ),
       child: Scaffold(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? darkBackground : Colors.white,
         body: Stack(
           children: [
             // 1. Expanding Radial Color Fill Wipe (White -> Primary Orange)

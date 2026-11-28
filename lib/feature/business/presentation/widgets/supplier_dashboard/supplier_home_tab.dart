@@ -26,9 +26,7 @@ class SupplierHomeTab extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: isDark
-              ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
-              : [primaryOrange, secondaryOrange],
+          colors: AppColorsTheme.heroGradient(context),
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -290,7 +288,8 @@ class SupplierMetricCard extends StatelessWidget {
         color: isDark ? AppColorsTheme.cardBg(context) : const Color(0xFFFFF7F2),
         borderRadius: BorderRadius.circular(18.r),
         border: Border.all(
-          color: isDark ? const Color(0xFF374151) : primaryOrange.withValues(alpha: 0.22),
+          color: isDark
+              ? darkCardBorderColor : primaryOrange.withValues(alpha: 0.22),
           width: 1.w,
         ),
         boxShadow: [

@@ -109,7 +109,7 @@ final class CustomFormField extends StatelessWidget {
             horizontal: 16.w,
           ),
           filled: true,
-          fillColor: fillColor ?? AppColorsTheme.cardBg(context),
+          fillColor: fillColor ?? AppColorsTheme.inputFill(context),
           isDense: true,
           suffixIcon: suffixIcon,
           prefixIcon:

@@ -86,9 +86,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
       width: double.infinity,
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: isDark
-              ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
-              : [primaryOrange, secondaryOrange],
+          colors: AppColorsTheme.heroGradient(context),
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -369,7 +367,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
         borderRadius: BorderRadius.circular(20.r),
         border: Border.all(
           color: isDark
-              ? const Color(0xFF374151)
+              ? darkCardBorderColor
               : primaryOrange.withValues(alpha: 0.25),
           width: 1.w,
         ),
@@ -579,7 +577,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
         borderRadius: BorderRadius.circular(20.r),
         border: Border.all(
           color: isDark
-              ? const Color(0xFF374151)
+              ? darkCardBorderColor
               : primaryOrange.withValues(alpha: 0.25),
           width: 1.w,
         ),
@@ -801,7 +799,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
           borderRadius: BorderRadius.circular(18.r),
           border: Border.all(
             color: isDark
-                ? const Color(0xFF374151)
+              ? darkCardBorderColor
                 : primaryOrange.withValues(alpha: 0.25),
             width: 1.w,
           ),
