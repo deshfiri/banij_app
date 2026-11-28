@@ -2,24 +2,23 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../../../common_widget/accent_bar_card.dart';
 import '../../../../../constants/color.dart';
 import '../../../../../helpers/ui_helpers.dart';
 import '../checkout/checkout_shimmer.dart';
 
-const Color _blue = Color(0xFF3B82F6);
-const Color _green = Color(0xFF10B981);
-const Color _red = Color(0xFFEF4444);
-
-/// Icon + accent colour for an address type (business / operational / shipping).
-/// Shared by the address list and the add/edit form.
+/// Icon + accent colour for an address type (business / operational /
+/// shipping). Shared by the address list and the add/edit form; every type
+/// uses the brand orange, the icon tells them apart.
 (IconData, Color) addressTypeStyle(String type) => switch (type.toLowerCase()) {
-      'operational' => (Icons.warehouse_rounded, _blue),
-      'shipping' => (Icons.local_shipping_rounded, _green),
+      'operational' => (Icons.warehouse_rounded, primaryOrange),
+      'shipping' => (Icons.local_shipping_rounded, primaryOrange),
       _ => (Icons.storefront_rounded, primaryOrange),
     };
 
-/// Saved address card: type icon, name (+ DEFAULT tag), type pill, actions
-/// menu, phone + address rows and quick Edit / Set-as-default buttons.
+/// Saved address card: orange left bar (solid outline when it is the
+/// default), type icon, contact name with a DEFAULT tag, type pill, phone
+/// and address rows, and the actions that were provided.
 class AddressCard extends StatelessWidget {
   final String name;
   final String type;
@@ -27,6 +26,8 @@ class AddressCard extends StatelessWidget {
   final String fullAddress;
   final bool isDefault;
   final VoidCallback? onEdit;
+
+  /// Optional; the button / menu entry only shows when set.
   final VoidCallback? onSetDefault;
   final VoidCallback? onArchive;
 
@@ -44,109 +45,89 @@ class AddressCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final mainColor = AppColorsTheme.textMainColor(context);
-    final (typeIcon, typeColor) = addressTypeStyle(type);
-    final border = AppColorsTheme.borderColor(context);
+    final (typeIcon, _) = addressTypeStyle(type);
+    final typeLabel = type.isEmpty ? 'Address' : '${type[0].toUpperCase()}${type.substring(1).toLowerCase()} address';
+    final hasMenu = onArchive != null || (onSetDefault != null && !isDefault);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColorsTheme.cardBg(context),
-        borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: isDefault ? primaryOrange : border, width: isDefault ? 1.5 : 1),
-        boxShadow: [
-          BoxShadow(
-            color: (isDefault ? primaryOrange : Colors.black).withValues(alpha: isDark ? 0.15 : (isDefault ? 0.10 : 0.04)),
-            blurRadius: 12.r,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
+    return AccentBarCard(
+      highlighted: isDefault,
+      padding: EdgeInsets.fromLTRB(14.w, 14.h, 10.w, 14.h),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header: icon, name, type, menu.
-          Padding(
-            padding: EdgeInsets.fromLTRB(14.w, 14.h, 4.w, 10.h),
-            child: Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(10.w),
-                  decoration: BoxDecoration(
-                    color: typeColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
-                  child: Icon(typeIcon, color: typeColor, size: 20.sp),
-                ),
-                UIHelper.horizontalSpace(12.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Flexible(
-                            child: Text(
-                              name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontSize: 14.5.sp, fontWeight: FontWeight.w800, color: mainColor),
+          Row(
+            children: [
+              GradientIconTile(icon: typeIcon, size: 42),
+              UIHelper.horizontalSpace(12.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            name.isEmpty ? 'No contact name' : name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontSize: 14.5.sp,
+                              fontWeight: FontWeight.w800,
+                              color: AppColorsTheme.textMainColor(context),
                             ),
                           ),
-                          if (isDefault) ...[
-                            UIHelper.horizontalSpace(6.w),
-                            const _DefaultTag(),
-                          ],
+                        ),
+                        if (isDefault) ...[
+                          UIHelper.horizontalSpace(6.w),
+                          const _DefaultTag(),
                         ],
-                      ),
-                      UIHelper.verticalSpace(4.h),
-                      _TypePill(label: '${type.toUpperCase()} ADDRESS', color: typeColor),
-                    ],
-                  ),
+                      ],
+                    ),
+                    UIHelper.verticalSpace(4.h),
+                    _TypePill(label: typeLabel),
+                  ],
                 ),
-                _AddressActionsMenu(onEdit: onEdit, onSetDefault: onSetDefault, onArchive: onArchive),
-              ],
-            ),
+              ),
+              if (hasMenu)
+                _AddressActionsMenu(onEdit: onEdit, onSetDefault: isDefault ? null : onSetDefault, onArchive: onArchive),
+            ],
           ),
-          Divider(height: 1, thickness: 1, color: border),
-          // Details.
-          Padding(
-            padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 4.h),
+          UIHelper.verticalSpace(14.h),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+            decoration: BoxDecoration(
+              color: AppColorsTheme.innerCardBg(context).withValues(alpha: 0.7),
+              borderRadius: BorderRadius.circular(12.r),
+            ),
             child: Column(
               children: [
-                if (phone.isNotEmpty) _InfoRow(icon: Icons.phone_android_rounded, text: phone, bold: true),
+                if (phone.isNotEmpty) ...[
+                  _InfoRow(icon: Icons.phone_iphone_rounded, text: phone, bold: true),
+                  Divider(height: 1, thickness: 1, color: AppColorsTheme.borderColor(context).withValues(alpha: 0.7)),
+                ],
                 _InfoRow(
-                  icon: Icons.location_on_outlined,
+                  icon: Icons.location_on_rounded,
                   text: fullAddress.isNotEmpty ? fullAddress : 'No detailed address provided',
+                  muted: fullAddress.isEmpty,
                 ),
               ],
             ),
           ),
-          // Quick actions.
-          Padding(
-            padding: EdgeInsets.fromLTRB(14.w, 2.h, 14.w, 14.h),
-            child: Row(
+          if (onEdit != null || (onSetDefault != null && !isDefault)) ...[
+            UIHelper.verticalSpace(12.h),
+            Row(
               children: [
-                Expanded(
-                  child: _CardActionButton(
-                    icon: Icons.edit_outlined,
-                    label: 'Edit',
-                    onPressed: onEdit,
-                  ),
-                ),
-                if (!isDefault) ...[
+                if (onEdit != null)
+                  Expanded(child: _CardActionButton(icon: Icons.edit_rounded, label: 'Edit address', onPressed: onEdit)),
+                if (onSetDefault != null && !isDefault) ...[
                   UIHelper.horizontalSpace(10.w),
                   Expanded(
-                    child: _CardActionButton(
-                      icon: Icons.star_outline_rounded,
-                      label: 'Set as default',
-                      onPressed: onSetDefault,
-                    ),
+                    child: _CardActionButton(icon: Icons.star_outline_rounded, label: 'Set as default', onPressed: onSetDefault),
                   ),
                 ],
               ],
             ),
-          ),
+          ],
         ],
       ),
     );
@@ -157,26 +138,36 @@ class _InfoRow extends StatelessWidget {
   final IconData icon;
   final String text;
   final bool bold;
+  final bool muted;
 
-  const _InfoRow({required this.icon, required this.text, this.bold = false});
+  const _InfoRow({required this.icon, required this.text, this.bold = false, this.muted = false});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 10.h),
+      padding: EdgeInsets.symmetric(vertical: 9.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 15.sp, color: AppColorsTheme.textMutedColor(context)),
-          UIHelper.horizontalSpace(8.w),
+          Container(
+            width: 26.w,
+            height: 26.w,
+            decoration: BoxDecoration(color: primaryOrange.withValues(alpha: 0.12), shape: BoxShape.circle),
+            child: Icon(icon, size: 14.sp, color: primaryOrange),
+          ),
+          UIHelper.horizontalSpace(10.w),
           Expanded(
-            child: Text(
-              text,
-              style: TextStyle(
-                fontSize: 12.5.sp,
-                height: 1.4,
-                fontWeight: bold ? FontWeight.w700 : FontWeight.w400,
-                color: AppColorsTheme.textMainColor(context),
+            child: Padding(
+              padding: EdgeInsets.only(top: 4.h),
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: 12.5.sp,
+                  height: 1.4,
+                  fontWeight: bold ? FontWeight.w700 : FontWeight.w500,
+                  fontStyle: muted ? FontStyle.italic : FontStyle.normal,
+                  color: muted ? AppColorsTheme.textMutedColor(context) : AppColorsTheme.textMainColor(context),
+                ),
               ),
             ),
           ),
@@ -200,15 +191,16 @@ class _CardActionButton extends StatelessWidget {
       icon: Icon(icon, size: 15.sp),
       label: FittedBox(
         fit: BoxFit.scaleDown,
-        child: Text(label, style: TextStyle(fontSize: 11.5.sp, fontWeight: FontWeight.w700)),
+        child: Text(label, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w800)),
       ),
       style: OutlinedButton.styleFrom(
         foregroundColor: primaryOrange,
+        backgroundColor: primaryOrange.withValues(alpha: 0.06),
         side: BorderSide(color: primaryOrange.withValues(alpha: 0.4)),
-        minimumSize: Size(0, 36.h),
+        minimumSize: Size(0, 38.h),
         padding: EdgeInsets.symmetric(horizontal: 8.w),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.r)),
       ),
     );
   }
@@ -216,21 +208,20 @@ class _CardActionButton extends StatelessWidget {
 
 class _TypePill extends StatelessWidget {
   final String label;
-  final Color color;
 
-  const _TypePill({required this.label, required this.color});
+  const _TypePill({required this.label});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.10),
+        color: primaryOrange.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6.r),
       ),
       child: Text(
-        label,
-        style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w800, color: color, letterSpacing: 0.5),
+        label.toUpperCase(),
+        style: TextStyle(fontSize: 9.sp, fontWeight: FontWeight.w800, color: primaryOrange, letterSpacing: 0.6),
       ),
     );
   }
@@ -244,13 +235,13 @@ class _DefaultTag extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 2.h),
       decoration: BoxDecoration(
-        color: primaryOrange,
+        gradient: const LinearGradient(colors: [primaryOrange, secondaryOrange]),
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.check_circle_rounded, size: 10.sp, color: Colors.white),
+          Icon(Icons.star_rounded, size: 10.sp, color: Colors.white),
           UIHelper.horizontalSpace(3.w),
           Text(
             'DEFAULT',
@@ -262,7 +253,7 @@ class _DefaultTag extends StatelessWidget {
   }
 }
 
-/// ⋮ menu with Edit / Set as default / Archive.
+/// ⋮ menu with the provided actions (Edit / Set as default / Archive).
 class _AddressActionsMenu extends StatelessWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onSetDefault;
@@ -272,6 +263,7 @@ class _AddressActionsMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const red = Color(0xFFEF4444);
     PopupMenuItem<String> item(String value, IconData icon, Color iconColor, String label, {Color? textColor}) {
       return PopupMenuItem(
         value: value,
@@ -289,25 +281,22 @@ class _AddressActionsMenu extends StatelessWidget {
       icon: Icon(Icons.more_vert_rounded, size: 20.sp, color: AppColorsTheme.textMutedColor(context)),
       color: AppColorsTheme.cardBg(context),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-      onSelected: (value) {
-        if (value == 'edit') {
-          onEdit?.call();
-        } else if (value == 'default') {
-          onSetDefault?.call();
-        } else if (value == 'archive') {
-          onArchive?.call();
-        }
+      onSelected: (value) => switch (value) {
+        'edit' => onEdit?.call(),
+        'default' => onSetDefault?.call(),
+        'archive' => onArchive?.call(),
+        _ => null,
       },
       itemBuilder: (context) => [
-        item('edit', Icons.edit_outlined, primaryOrange, 'Edit'),
-        item('default', Icons.star_outline_rounded, Colors.amber, 'Set as default'),
-        item('archive', Icons.archive_outlined, _red, 'Archive', textColor: _red),
+        if (onEdit != null) item('edit', Icons.edit_outlined, primaryOrange, 'Edit'),
+        if (onSetDefault != null) item('default', Icons.star_outline_rounded, primaryOrange, 'Set as default'),
+        if (onArchive != null) item('archive', Icons.archive_outlined, red, 'Archive', textColor: red),
       ],
     );
   }
 }
 
-/// "N saved addresses" line above the list.
+/// "Saved addresses · N" heading above the list.
 class AddressCountHeader extends StatelessWidget {
   final int count;
 
@@ -317,17 +306,71 @@ class AddressCountHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(Icons.bookmark_rounded, size: 16.sp, color: primaryOrange),
-        UIHelper.horizontalSpace(6.w),
+        Container(
+          width: 4.w,
+          height: 17.h,
+          decoration: BoxDecoration(color: primaryOrange, borderRadius: BorderRadius.circular(2.r)),
+        ),
+        UIHelper.horizontalSpace(8.w),
         Text(
-          count == 1 ? '1 saved address' : '$count saved addresses',
+          'Saved addresses',
           style: TextStyle(
-            fontSize: 13.sp,
-            fontWeight: FontWeight.w800,
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w900,
             color: AppColorsTheme.textMainColor(context),
           ),
         ),
+        UIHelper.horizontalSpace(8.w),
+        CountPill(label: '$count'),
       ],
+    );
+  }
+}
+
+/// Shown when the account has no saved addresses.
+class AddressEmptyState extends StatelessWidget {
+  final VoidCallback onAdd;
+
+  const AddressEmptyState({super.key, required this.onAdd});
+
+  @override
+  Widget build(BuildContext context) {
+    return AccentBarCard(
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 30.h),
+      child: Column(
+        children: [
+          const GradientIconTile(icon: Icons.add_location_alt_rounded, size: 64),
+          UIHelper.verticalSpace(16.h),
+          Text(
+            'No addresses yet',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w800,
+              color: AppColorsTheme.textMainColor(context),
+            ),
+          ),
+          UIHelper.verticalSpace(6.h),
+          Text(
+            'Add your business, operational or shipping address so orders and invoices go to the right place.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12.5.sp, height: 1.4, color: AppColorsTheme.textMutedColor(context)),
+          ),
+          UIHelper.verticalSpace(16.h),
+          OutlinedButton.icon(
+            onPressed: onAdd,
+            icon: Icon(Icons.add_rounded, size: 17.sp),
+            label: Text('Add your first address', style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800)),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: primaryOrange,
+              backgroundColor: primaryOrange.withValues(alpha: 0.06),
+              side: BorderSide(color: primaryOrange.withValues(alpha: 0.5)),
+              minimumSize: Size(0, 42.h),
+              padding: EdgeInsets.symmetric(horizontal: 18.w),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

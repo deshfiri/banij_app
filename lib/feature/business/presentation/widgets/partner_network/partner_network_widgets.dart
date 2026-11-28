@@ -1,153 +1,82 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../../../common_widget/accent_bar_card.dart';
+import '../../../../../common_widget/tone_badge_widget.dart';
 import '../../../../../constants/color.dart';
 import '../../../../../helpers/toast.dart';
 import '../../../../../helpers/ui_helpers.dart';
 import '../../../model/referrals_model.dart';
 
-const Color _green = Color(0xFF10B981);
-const Color _amber = Color(0xFFF59E0B);
-const Color _red = Color(0xFFEF4444);
-const Color _blue = Color(0xFF3B82F6);
-
 // -----------------------------------------------------------------------------
 // Building blocks
 // -----------------------------------------------------------------------------
 
-/// Rounded card with a border and soft shadow, used for each section.
-class PartnerSectionCard extends StatelessWidget {
-  final Widget child;
-  final EdgeInsetsGeometry? padding;
+void _copy(String text, String toastMessage) {
+  Clipboard.setData(ClipboardData(text: text));
+  HapticFeedback.selectionClick();
+  ToastUtil.showSuccessMessage(toastMessage);
+}
 
-  const PartnerSectionCard({super.key, required this.child, this.padding});
+/// White "Copy" pill for the orange code card.
+class _CopyPill extends StatelessWidget {
+  final String text;
+  final String toastMessage;
+
+  const _CopyPill({required this.text, required this.toastMessage});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      width: double.infinity,
-      padding: padding ?? EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: AppColorsTheme.cardBg(context),
-        borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: AppColorsTheme.borderColor(context)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.15 : 0.04),
-            blurRadius: 10.r,
-            offset: const Offset(0, 4),
+    return Material(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20.r),
+      child: InkWell(
+        onTap: () => _copy(text, toastMessage),
+        borderRadius: BorderRadius.circular(20.r),
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 6.h),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.copy_rounded, size: 13.sp, color: primaryOrange),
+              UIHelper.horizontalSpace(4.w),
+              Text('Copy', style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: primaryOrange)),
+            ],
           ),
-        ],
+        ),
       ),
-      child: child,
     );
   }
 }
 
-/// Section heading: tinted icon, bold title and an optional trailing widget.
-class PartnerCardTitle extends StatelessWidget {
-  final String text;
-  final IconData icon;
-  final Widget? trailing;
+/// "Section · N" heading with the orange accent bar.
+class _SectionHeading extends StatelessWidget {
+  final String title;
 
-  const PartnerCardTitle(this.text, {super.key, required this.icon, this.trailing});
+  const _SectionHeading(this.title);
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Container(
-          padding: EdgeInsets.all(7.w),
-          decoration: BoxDecoration(
-            color: primaryOrange.withValues(alpha: 0.12),
-            borderRadius: BorderRadius.circular(10.r),
-          ),
-          child: Icon(icon, size: 16.sp, color: primaryOrange),
+          width: 4.w,
+          height: 17.h,
+          decoration: BoxDecoration(color: primaryOrange, borderRadius: BorderRadius.circular(2.r)),
         ),
-        UIHelper.horizontalSpace(10.w),
-        Expanded(
-          child: Text(
-            text,
-            style: TextStyle(
-              fontSize: 14.sp,
-              fontWeight: FontWeight.w800,
-              color: AppColorsTheme.textMainColor(context),
-            ),
+        UIHelper.horizontalSpace(8.w),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w900,
+            color: AppColorsTheme.textMainColor(context),
           ),
         ),
-        ?trailing,
       ],
-    );
-  }
-}
-
-/// Small pill showing how many entries a section has.
-class PartnerCountBadge extends StatelessWidget {
-  final int count;
-
-  const PartnerCountBadge({super.key, required this.count});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 3.h),
-      decoration: BoxDecoration(
-        color: AppColorsTheme.innerCardBg(context),
-        borderRadius: BorderRadius.circular(20.r),
-      ),
-      child: Text(
-        '$count',
-        style: TextStyle(
-          fontSize: 11.sp,
-          fontWeight: FontWeight.w800,
-          color: AppColorsTheme.textMutedColor(context),
-        ),
-      ),
-    );
-  }
-}
-
-/// Copies [text] to the clipboard and shows [toastMessage].
-/// [onHero] styles it for the orange gradient card.
-class PartnerCopyButton extends StatelessWidget {
-  final String text;
-  final String toastMessage;
-  final bool onHero;
-
-  const PartnerCopyButton({
-    super.key,
-    required this.text,
-    required this.toastMessage,
-    this.onHero = false,
-  });
-
-  void _copy() {
-    Clipboard.setData(ClipboardData(text: text));
-    HapticFeedback.selectionClick();
-    ToastUtil.showSuccessMessage(toastMessage);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final foreground = onHero ? primaryOrange : Colors.white;
-    return ElevatedButton.icon(
-      onPressed: _copy,
-      icon: Icon(Icons.copy_rounded, size: 12.sp),
-      label: Text('Copy', style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.w800)),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: onHero ? Colors.white : primaryOrange,
-        foregroundColor: foreground,
-        elevation: 0,
-        minimumSize: Size(0, 28.h),
-        padding: EdgeInsets.symmetric(horizontal: 9.w),
-        visualDensity: VisualDensity.compact,
-        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
-      ),
     );
   }
 }
@@ -156,144 +85,196 @@ class PartnerCopyButton extends StatelessWidget {
 // Partner code
 // -----------------------------------------------------------------------------
 
-/// Hero-gradient card with the partner code and the registration link,
-/// each copyable.
+/// Orange card with the partner code in a coupon-style box and the
+/// registration link, each copyable. Without a code (request failed) it
+/// says so and offers [onRetry] instead of showing a made-up code.
 class PartnerCodeCard extends StatelessWidget {
-  final String code;
-  final String link;
+  final String? code;
+  final String? link;
+  final VoidCallback onRetry;
 
-  const PartnerCodeCard({super.key, required this.code, required this.link});
+  const PartnerCodeCard({super.key, required this.code, required this.link, required this.onRetry});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: AppColorsTheme.heroGradient(context),
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(18.r),
-        boxShadow: [
-          BoxShadow(
-            color: primaryOrange.withValues(alpha: 0.22),
-            blurRadius: 12.r,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(18.r),
-        child: Stack(
-          children: [
-            Positioned(right: -30.w, top: -30.w, child: _circle(100.w, 0.10)),
-            Positioned(left: -24.w, bottom: -40.w, child: _circle(80.w, 0.07)),
-            Padding(
-              padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 14.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: EdgeInsets.all(5.w),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        child: Icon(Icons.qr_code_2_rounded, color: Colors.white, size: 15.sp),
-                      ),
-                      UIHelper.horizontalSpace(8.w),
-                      Text(
-                        'YOUR PARTNER CODE',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.85),
-                          fontSize: 9.sp,
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: 0.8,
-                        ),
-                      ),
-                    ],
-                  ),
-                  UIHelper.verticalSpace(8.h),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            code,
-                            style: TextStyle(
-                              fontSize: 19.sp,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: 2,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                      UIHelper.horizontalSpace(12.w),
-                      PartnerCopyButton(text: code, toastMessage: 'Partner code copied!', onHero: true),
-                    ],
-                  ),
-                  UIHelper.verticalSpace(10.h),
-                  Text(
-                    'Your Partner Network link',
-                    style: TextStyle(fontSize: 9.5.sp, color: Colors.white.withValues(alpha: 0.85)),
-                  ),
-                  UIHelper.verticalSpace(4.h),
-                  Container(
-                    padding: EdgeInsets.fromLTRB(10.w, 4.h, 4.w, 4.h),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.16),
-                      borderRadius: BorderRadius.circular(10.r),
-                      border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+    final code = this.code?.trim();
+    final link = this.link?.trim();
+    final hasCode = code != null && code.isNotEmpty;
+
+    return BrandHeroCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 40.w,
+                height: 40.w,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
+                ),
+                child: Icon(Icons.handshake_rounded, color: Colors.white, size: 21.sp),
+              ),
+              UIHelper.horizontalSpace(10.w),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Your partner code',
+                      style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: Colors.white),
                     ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.link_rounded, size: 13.sp, color: Colors.white),
-                        UIHelper.horizontalSpace(6.w),
-                        Expanded(
-                          child: Text(
-                            link,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 10.5.sp,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                    Text(
+                      'Share it — businesses that join with it are linked to you.',
+                      style: TextStyle(fontSize: 10.5.sp, color: Colors.white.withValues(alpha: 0.85)),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          UIHelper.verticalSpace(14.h),
+          if (!hasCode)
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(12.w),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.16),
+                borderRadius: BorderRadius.circular(12.r),
+                border: Border.all(color: Colors.white.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.cloud_off_rounded, size: 18.sp, color: Colors.white),
+                  UIHelper.horizontalSpace(8.w),
+                  Expanded(
+                    child: Text(
+                      'Your partner code could not be loaded.',
+                      style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: Colors.white),
+                    ),
+                  ),
+                  Material(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20.r),
+                    child: InkWell(
+                      onTap: onRetry,
+                      borderRadius: BorderRadius.circular(20.r),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 11.w, vertical: 6.h),
+                        child: Text(
+                          'Try again',
+                          style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.w800, color: primaryOrange),
                         ),
-                        UIHelper.horizontalSpace(8.w),
-                        PartnerCopyButton(text: link, toastMessage: 'Partner link copied!', onHero: true),
-                      ],
+                      ),
                     ),
                   ),
                 ],
               ),
+            )
+          else ...[
+            // Coupon-style code box.
+            CustomPaint(
+              painter: _DashedBorderPainter(color: Colors.white.withValues(alpha: 0.7), radius: 12.r),
+              child: Container(
+                padding: EdgeInsets.fromLTRB(14.w, 10.h, 8.w, 10.h),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          code,
+                          style: TextStyle(
+                            fontSize: 22.sp,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 3,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                    UIHelper.horizontalSpace(10.w),
+                    _CopyPill(text: code, toastMessage: 'Partner code copied!'),
+                  ],
+                ),
+              ),
             ),
+            if (link != null && link.isNotEmpty) ...[
+              UIHelper.verticalSpace(10.h),
+              Container(
+                padding: EdgeInsets.fromLTRB(10.w, 6.h, 6.w, 6.h),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(12.r),
+                  border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.link_rounded, size: 15.sp, color: Colors.white),
+                    UIHelper.horizontalSpace(6.w),
+                    Expanded(
+                      child: Text(
+                        link,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 11.sp, color: Colors.white, fontWeight: FontWeight.w600),
+                      ),
+                    ),
+                    UIHelper.horizontalSpace(8.w),
+                    _CopyPill(text: link, toastMessage: 'Partner link copied!'),
+                  ],
+                ),
+              ),
+            ],
           ],
-        ),
+        ],
       ),
     );
   }
+}
 
-  Widget _circle(double size, double alpha) => Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: alpha)),
-      );
+/// Rounded dashed outline (coupon edge).
+class _DashedBorderPainter extends CustomPainter {
+  final Color color;
+  final double radius;
+
+  _DashedBorderPainter({required this.color, required this.radius});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.4;
+    final path = Path()..addRRect(RRect.fromRectAndRadius(Offset.zero & size, Radius.circular(radius)));
+    const dash = 6.0;
+    const gap = 4.0;
+    for (final metric in path.computeMetrics()) {
+      var distance = 0.0;
+      while (distance < metric.length) {
+        canvas.drawPath(metric.extractPath(distance, distance + dash), paint);
+        distance += dash + gap;
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DashedBorderPainter old) => old.color != color || old.radius != radius;
 }
 
 // -----------------------------------------------------------------------------
 // Stats
 // -----------------------------------------------------------------------------
 
-/// The five summary stats. Two per row on phones, three on wider screens;
-/// tiles size to their content so long labels never overflow.
+/// Network size (members / active) as two tiles, then an earnings strip:
+/// earned, waiting to be paid, taken back.
 class PartnerStatsGrid extends StatelessWidget {
   final ReferralSummaryModel? summary;
 
@@ -302,82 +283,141 @@ class PartnerStatsGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final summary = this.summary;
-    final stats = [
-      _PartnerStat(Icons.groups_rounded, primaryOrange, 'Direct Partner Network members', '${summary?.direct ?? 0}'),
-      _PartnerStat(Icons.bolt_rounded, _blue, 'Active', '${summary?.directActive ?? 0}'),
-      _PartnerStat(Icons.account_balance_wallet_rounded, _green, 'Earned', summary?.paid?.formatted ?? '৳0.00'),
-      _PartnerStat(Icons.hourglass_top_rounded, _amber, 'Waiting to be paid', summary?.pending?.formatted ?? '৳0.00'),
-      _PartnerStat(Icons.undo_rounded, _red, 'Taken back', summary?.reversed?.formatted ?? '৳0.00'),
-    ];
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columns = constraints.maxWidth >= 600 ? 3 : 2;
-        final spacing = 12.w;
-        final tileWidth = (constraints.maxWidth - spacing * (columns - 1)) / columns;
-        return Wrap(
-          spacing: spacing,
-          runSpacing: spacing,
-          children: [
-            for (final stat in stats) SizedBox(width: tileWidth, child: _PartnerStatCard(stat: stat)),
-          ],
-        );
-      },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        IntrinsicHeight(
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _StatTile(
+                  icon: Icons.groups_rounded,
+                  value: '${summary?.direct ?? 0}',
+                  label: 'Direct members',
+                ),
+              ),
+              UIHelper.horizontalSpace(12.w),
+              Expanded(
+                child: _StatTile(
+                  icon: Icons.bolt_rounded,
+                  value: '${summary?.directActive ?? 0}',
+                  label: 'Active members',
+                ),
+              ),
+            ],
+          ),
+        ),
+        UIHelper.verticalSpace(12.h),
+        AccentBarCard(
+          padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
+          child: IntrinsicHeight(
+            child: Row(
+              children: [
+                Expanded(
+                  child: _MoneyFigure(
+                    label: 'Earned',
+                    value: summary?.paid?.formatted ?? '৳0.00',
+                    highlight: true,
+                  ),
+                ),
+                VerticalDivider(width: 20.w, thickness: 1, color: AppColorsTheme.borderColor(context)),
+                Expanded(child: _MoneyFigure(label: 'Waiting', value: summary?.pending?.formatted ?? '৳0.00')),
+                VerticalDivider(width: 20.w, thickness: 1, color: AppColorsTheme.borderColor(context)),
+                Expanded(child: _MoneyFigure(label: 'Taken back', value: summary?.reversed?.formatted ?? '৳0.00')),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
 
-class _PartnerStat {
+class _StatTile extends StatelessWidget {
   final IconData icon;
-  final Color color;
-  final String title;
   final String value;
+  final String label;
 
-  const _PartnerStat(this.icon, this.color, this.title, this.value);
-}
-
-class _PartnerStatCard extends StatelessWidget {
-  final _PartnerStat stat;
-
-  const _PartnerStatCard({required this.stat});
+  const _StatTile({required this.icon, required this.value, required this.label});
 
   @override
   Widget build(BuildContext context) {
-    return PartnerSectionCard(
+    return AccentBarCard(
       padding: EdgeInsets.all(14.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Container(
-            padding: EdgeInsets.all(7.w),
-            decoration: BoxDecoration(
-              color: stat.color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(10.r),
+          GradientIconTile(icon: icon, size: 40),
+          UIHelper.horizontalSpace(10.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.w900,
+                      color: AppColorsTheme.textMainColor(context),
+                    ),
+                  ),
+                ),
+                Text(
+                  label,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 11.sp, height: 1.25, color: AppColorsTheme.textMutedColor(context)),
+                ),
+              ],
             ),
-            child: Icon(stat.icon, size: 17.sp, color: stat.color),
-          ),
-          UIHelper.verticalSpace(10.h),
-          FittedBox(
-            fit: BoxFit.scaleDown,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              stat.value,
-              style: TextStyle(
-                fontSize: 17.sp,
-                fontWeight: FontWeight.w900,
-                color: AppColorsTheme.textMainColor(context),
-              ),
-            ),
-          ),
-          UIHelper.verticalSpace(2.h),
-          Text(
-            stat.title,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(fontSize: 11.sp, color: AppColorsTheme.textMutedColor(context), height: 1.3),
           ),
         ],
       ),
+    );
+  }
+}
+
+class _MoneyFigure extends StatelessWidget {
+  final String label;
+  final String value;
+  final bool highlight;
+
+  const _MoneyFigure({required this.label, required this.value, this.highlight = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            fontSize: 9.5.sp,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.6,
+            color: AppColorsTheme.textMutedColor(context),
+          ),
+        ),
+        UIHelper.verticalSpace(4.h),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
+            value,
+            style: TextStyle(
+              fontSize: 14.5.sp,
+              fontWeight: FontWeight.w900,
+              color: highlight ? primaryOrange : AppColorsTheme.textMainColor(context),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -386,54 +426,40 @@ class _PartnerStatCard extends StatelessWidget {
 // Lists
 // -----------------------------------------------------------------------------
 
-/// Circle icon + title + description shown when a list is empty.
-class PartnerEmptyState extends StatelessWidget {
+/// Gradient icon + title + description shown when a list is empty.
+class _EmptyState extends StatelessWidget {
   final IconData icon;
   final String title;
   final String message;
-  final double? messageHeight;
 
-  const PartnerEmptyState({
-    super.key,
-    required this.icon,
-    required this.title,
-    required this.message,
-    this.messageHeight,
-  });
+  const _EmptyState({required this.icon, required this.title, required this.message});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 18.h, horizontal: 8.w),
+      padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 8.w),
       child: Column(
         children: [
           Container(
-            padding: EdgeInsets.all(16.w),
-            decoration: BoxDecoration(
-              color: primaryOrange.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, size: 28.sp, color: primaryOrange),
+            padding: EdgeInsets.all(14.w),
+            decoration: BoxDecoration(color: primaryOrange.withValues(alpha: 0.1), shape: BoxShape.circle),
+            child: Icon(icon, size: 26.sp, color: primaryOrange),
           ),
-          UIHelper.verticalSpace(14.h),
+          UIHelper.verticalSpace(12.h),
           Text(
             title,
             textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 14.sp,
+              fontSize: 13.5.sp,
               fontWeight: FontWeight.w800,
               color: AppColorsTheme.textMainColor(context),
             ),
           ),
-          UIHelper.verticalSpace(6.h),
+          UIHelper.verticalSpace(4.h),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12.sp,
-              color: AppColorsTheme.textMutedColor(context),
-              height: messageHeight ?? 1.4,
-            ),
+            style: TextStyle(fontSize: 11.5.sp, height: 1.4, color: AppColorsTheme.textMutedColor(context)),
           ),
         ],
       ),
@@ -441,28 +467,50 @@ class PartnerEmptyState extends StatelessWidget {
   }
 }
 
-/// Bordered row used for list items inside the section cards.
-class PartnerListTile extends StatelessWidget {
-  final Widget child;
+/// Card listing [rows] under a title with a count, or [empty] when there
+/// are none. Rows are separated by hairlines.
+class _ListCard extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final List<Widget> rows;
+  final Widget empty;
 
-  const PartnerListTile({super.key, required this.child});
+  const _ListCard({required this.icon, required this.title, required this.rows, required this.empty});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 10.h),
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: AppColorsTheme.innerCardBg(context),
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: AppColorsTheme.borderColor(context)),
+    return AccentBarCard(
+      padding: EdgeInsets.fromLTRB(14.w, 16.h, 16.w, 6.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          AccentCardTitle(
+            icon: icon,
+            title: title,
+            trailing: rows.isEmpty ? null : CountPill(label: '${rows.length}'),
+          ),
+          UIHelper.verticalSpace(8.h),
+          if (rows.isEmpty)
+            empty
+          else
+            for (var i = 0; i < rows.length; i++) ...[
+              if (i > 0)
+                Divider(
+                  height: 1,
+                  thickness: 1,
+                  indent: 50.w,
+                  color: AppColorsTheme.borderColor(context).withValues(alpha: 0.7),
+                ),
+              rows[i],
+            ],
+          UIHelper.verticalSpace(6.h),
+        ],
       ),
-      child: child,
     );
   }
 }
 
-/// "Businesses in your Partner Network" card: direct members or an empty state.
+/// "Businesses in your Partner Network": direct members or an empty state.
 class PartnerMembersCard extends StatelessWidget {
   final List<ReferralDirectItemModel> members;
 
@@ -470,49 +518,48 @@ class PartnerMembersCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PartnerSectionCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          PartnerCardTitle(
-            'Businesses in your Partner Network',
-            icon: Icons.storefront_outlined,
-            trailing: members.isEmpty ? null : PartnerCountBadge(count: members.length),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const _SectionHeading('Your network'),
+        UIHelper.verticalSpace(12.h),
+        _ListCard(
+          icon: Icons.storefront_rounded,
+          title: 'Businesses in your Partner Network',
+          rows: [for (final member in members) _MemberRow(member: member)],
+          empty: const _EmptyState(
+            icon: Icons.share_outlined,
+            title: 'Nobody is in your Partner Network yet',
+            message: 'Share your link. Businesses that register with it appear here.',
           ),
-          UIHelper.verticalSpace(14.h),
-          if (members.isEmpty)
-            const PartnerEmptyState(
-              icon: Icons.share_outlined,
-              title: 'Nobody is in your Partner Network yet',
-              message: 'Share your link. Businesses that register with it appear here.',
-            )
-          else
-            for (final member in members) _PartnerMemberTile(member: member),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
-class _PartnerMemberTile extends StatelessWidget {
+class _MemberRow extends StatelessWidget {
   final ReferralDirectItemModel member;
 
-  const _PartnerMemberTile({required this.member});
+  const _MemberRow({required this.member});
 
   @override
   Widget build(BuildContext context) {
-    final name = member.name ?? 'Business Member';
-    final initial = name.trim().isEmpty ? 'B' : name.trim()[0].toUpperCase();
+    final name = member.name?.trim().isNotEmpty == true ? member.name!.trim() : 'Business member';
+    final initial = name.characters.first.toUpperCase();
+    final state = member.state?.trim();
+    final active = state == null || state.toLowerCase().contains('active');
 
-    return PartnerListTile(
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 10.h),
       child: Row(
         children: [
           Container(
-            width: 38.sp,
-            height: 38.sp,
+            width: 38.w,
+            height: 38.w,
             alignment: Alignment.center,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(colors: AppColorsTheme.heroGradient(context)),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(colors: [secondaryOrange, primaryOrange]),
               shape: BoxShape.circle,
             ),
             child: Text(
@@ -535,43 +582,26 @@ class _PartnerMemberTile extends StatelessWidget {
                     color: AppColorsTheme.textMainColor(context),
                   ),
                 ),
-                UIHelper.verticalSpace(2.h),
-                Row(
-                  children: [
-                    Icon(Icons.event_outlined, size: 12.sp, color: AppColorsTheme.textMutedColor(context)),
-                    UIHelper.horizontalSpace(4.w),
-                    Flexible(
-                      child: Text(
-                        'Since: ${member.since ?? 'N/A'}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(fontSize: 11.sp, color: AppColorsTheme.textMutedColor(context)),
-                      ),
-                    ),
-                  ],
-                ),
+                if (member.since?.isNotEmpty == true) ...[
+                  UIHelper.verticalSpace(2.h),
+                  Text(
+                    'Joined ${_date(member.since)}',
+                    style: TextStyle(fontSize: 11.sp, color: AppColorsTheme.textMutedColor(context)),
+                  ),
+                ],
               ],
             ),
           ),
           UIHelper.horizontalSpace(8.w),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
-            decoration: BoxDecoration(
-              color: primaryOrange.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(20.r),
-            ),
-            child: Text(
-              member.state ?? 'Active',
-              style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.w800, color: primaryOrange),
-            ),
-          ),
+          ToneBadge(label: _humanize(state ?? 'Active'), tone: active ? 'success' : 'neutral'),
         ],
       ),
     );
   }
 }
 
-/// "Your earnings" card: earnings rows or an empty state.
+/// "Your earnings": one row per earning, or an empty state. Earnings arrive
+/// as loosely shaped maps, so each field is read defensively.
 class PartnerEarningsCard extends StatelessWidget {
   final List<dynamic> earnings;
 
@@ -579,51 +609,118 @@ class PartnerEarningsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return PartnerSectionCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return _ListCard(
+      icon: Icons.payments_rounded,
+      title: 'Your earnings',
+      rows: [for (final earning in earnings) _EarningRow(earning: earning)],
+      empty: const _EmptyState(
+        icon: Icons.savings_outlined,
+        title: 'No earnings yet',
+        message: 'When a business in your chain is activated and the programme pays, each earning appears here with its level.',
+      ),
+    );
+  }
+}
+
+class _EarningRow extends StatelessWidget {
+  final dynamic earning;
+
+  const _EarningRow({required this.earning});
+
+  static String? _pick(Map map, List<String> keys) {
+    for (final key in keys) {
+      final value = map[key];
+      if (value == null) continue;
+      if (value is Map) {
+        final nested = value['formatted'] ?? value['name'] ?? value['label'] ?? value['amount'];
+        if (nested != null && nested.toString().trim().isNotEmpty) return nested.toString().trim();
+        continue;
+      }
+      if (value.toString().trim().isNotEmpty) return value.toString().trim();
+    }
+    return null;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final map = earning is Map ? earning as Map : const {};
+    final title = _pick(map, ['from', 'business', 'business_name', 'member', 'name', 'description']) ??
+        (earning is Map ? 'Partner earning' : earning.toString());
+    final amount = _pick(map, ['amount', 'formatted', 'value']);
+    final level = _pick(map, ['level', 'tier']);
+    final date = _date(_pick(map, ['paid_at', 'created_at', 'date', 'earned_at']));
+    final status = _pick(map, ['status', 'state']);
+    final meta = [if (level != null) 'Level $level', if (date.isNotEmpty) date].join(' · ');
+
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 10.h),
+      child: Row(
         children: [
-          PartnerCardTitle(
-            'Your earnings',
-            icon: Icons.payments_outlined,
-            trailing: earnings.isEmpty ? null : PartnerCountBadge(count: earnings.length),
+          Container(
+            width: 38.w,
+            height: 38.w,
+            decoration: BoxDecoration(
+              color: primaryOrange.withValues(alpha: 0.12),
+              borderRadius: BorderRadius.circular(11.r),
+            ),
+            child: Icon(Icons.trending_up_rounded, size: 19.sp, color: primaryOrange),
           ),
-          UIHelper.verticalSpace(14.h),
-          if (earnings.isEmpty)
-            const PartnerEmptyState(
-              icon: Icons.groups_outlined,
-              title: 'No earnings yet',
-              message:
-                  'When a business in your chain is activated and the programme pays, each earning appears here with its level.',
-              messageHeight: 1.4,
-            )
-          else
-            for (final earning in earnings)
-              PartnerListTile(
-                child: Row(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(8.w),
-                      decoration: BoxDecoration(
-                        color: _green.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(10.r),
-                      ),
-                      child: Icon(Icons.trending_up_rounded, size: 16.sp, color: _green),
-                    ),
-                    UIHelper.horizontalSpace(12.w),
-                    Expanded(
-                      child: Text(
-                        earning.toString(),
-                        style: TextStyle(fontSize: 12.5.sp, color: AppColorsTheme.textMainColor(context)),
-                      ),
-                    ),
-                  ],
+          UIHelper.horizontalSpace(12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13.sp,
+                    fontWeight: FontWeight.w700,
+                    color: AppColorsTheme.textMainColor(context),
+                  ),
                 ),
-              ),
+                if (meta.isNotEmpty) ...[
+                  UIHelper.verticalSpace(2.h),
+                  Text(meta, style: TextStyle(fontSize: 11.sp, color: AppColorsTheme.textMutedColor(context))),
+                ],
+              ],
+            ),
+          ),
+          UIHelper.horizontalSpace(8.w),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              if (amount != null)
+                Text(
+                  amount.startsWith('৳') ? amount : '৳$amount',
+                  style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w900, color: primaryOrange),
+                ),
+              if (status != null) ...[
+                UIHelper.verticalSpace(3.h),
+                Text(
+                  _humanize(status),
+                  style: TextStyle(fontSize: 10.5.sp, color: AppColorsTheme.textMutedColor(context)),
+                ),
+              ],
+            ],
+          ),
         ],
       ),
     );
   }
+}
+
+String _humanize(String value) {
+  final text = value.replaceAll(RegExp(r'[_-]+'), ' ').trim();
+  return text.isEmpty ? value : text[0].toUpperCase() + text.substring(1);
+}
+
+/// "Nov 9, 2026" for ISO dates; other strings as they are.
+String _date(String? raw) {
+  if (raw == null || raw.trim().isEmpty) return '';
+  final parsed = DateTime.tryParse(raw.trim());
+  return parsed == null ? raw.trim() : DateFormat('MMM d, yyyy').format(parsed.toLocal());
 }
 
 // -----------------------------------------------------------------------------
@@ -652,13 +749,13 @@ class PartnerNetworkShimmer extends StatelessWidget {
         padding: EdgeInsets.fromLTRB(16.w, 18.h, 16.w, 24.h),
         child: Column(
           children: [
-            block(130.h),
-            UIHelper.verticalSpace(14.h),
-            Row(children: [Expanded(child: block(100.h)), UIHelper.horizontalSpace(12.w), Expanded(child: block(100.h))]),
+            block(170.h),
+            UIHelper.verticalSpace(16.h),
+            Row(children: [Expanded(child: block(72.h)), UIHelper.horizontalSpace(12.w), Expanded(child: block(72.h))]),
             UIHelper.verticalSpace(12.h),
-            Row(children: [Expanded(child: block(100.h)), UIHelper.horizontalSpace(12.w), Expanded(child: block(100.h))]),
-            UIHelper.verticalSpace(14.h),
-            block(180.h),
+            block(70.h),
+            UIHelper.verticalSpace(22.h),
+            block(200.h),
           ],
         ),
       ),

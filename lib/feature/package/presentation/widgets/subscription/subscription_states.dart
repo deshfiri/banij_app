@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../../../../../common_widget/accent_bar_card.dart';
 import '../../../../../constants/color.dart';
 import '../../../../../helpers/ui_helpers.dart';
 
@@ -29,11 +30,7 @@ class SubscriptionMessageView extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 24.w, vertical: 48.h),
       child: Column(
         children: [
-          Container(
-            padding: EdgeInsets.all(18.w),
-            decoration: BoxDecoration(color: primaryOrange.withValues(alpha: 0.1), shape: BoxShape.circle),
-            child: Icon(icon, size: 36.sp, color: primaryOrange),
-          ),
+          GradientIconTile(icon: icon, size: 64),
           UIHelper.verticalSpace(14.h),
           Text(
             title,
@@ -52,16 +49,26 @@ class SubscriptionMessageView extends StatelessWidget {
           ),
           if (actionLabel != null && onAction != null) ...[
             UIHelper.verticalSpace(16.h),
-            ElevatedButton(
-              onPressed: onAction,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primaryOrange,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                minimumSize: Size(160.w, 44.h),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(colors: [primaryOrange, secondaryOrange]),
+                borderRadius: BorderRadius.circular(24.r),
+                boxShadow: [
+                  BoxShadow(color: primaryOrange.withValues(alpha: 0.3), blurRadius: 12.r, offset: const Offset(0, 4)),
+                ],
               ),
-              child: Text(actionLabel!, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w700)),
+              child: ElevatedButton(
+                onPressed: onAction,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  minimumSize: Size(170.w, 44.h),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
+                ),
+                child: Text(actionLabel!, style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.w800)),
+              ),
             ),
           ],
         ],

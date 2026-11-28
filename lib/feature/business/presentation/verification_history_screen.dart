@@ -79,8 +79,15 @@ class _VerificationHistoryScreenState extends State<VerificationHistoryScreen> {
                           const VerificationHistoryShimmer()
                         else if (_records.isEmpty)
                           const VerificationHistoryEmpty()
-                        else
-                          for (final record in _records) VerificationRecordCard(record: record),
+                        else ...[
+                          // The API lists the latest verification first.
+                          VerificationSummaryBanner(record: _records.first),
+                          SizedBox(height: 22.h),
+                          VerificationSectionHeading(count: _records.length),
+                          SizedBox(height: 12.h),
+                          for (final (index, record) in _records.indexed)
+                            VerificationRecordCard(record: record, highlighted: index == 0),
+                        ],
                       ],
                     );
                   },
@@ -95,10 +102,20 @@ class _VerificationHistoryScreenState extends State<VerificationHistoryScreen> {
   }
 
   Widget _buildSubmitBar() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final radius = BorderRadius.circular(14.r);
     return Container(
       decoration: BoxDecoration(
         color: AppColorsTheme.cardBg(context),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22.r)),
         border: Border(top: BorderSide(color: AppColorsTheme.borderColor(context))),
+        boxShadow: [
+          BoxShadow(
+            color: isDark ? Colors.black.withValues(alpha: 0.4) : primaryOrange.withValues(alpha: 0.1),
+            blurRadius: 18.r,
+            offset: const Offset(0, -4),
+          ),
+        ],
       ),
       child: SafeArea(
         top: false,
@@ -107,22 +124,32 @@ class _VerificationHistoryScreenState extends State<VerificationHistoryScreen> {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 720),
             child: Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 10.h),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _openKyc,
-                  icon: Icon(Icons.verified_user_rounded, size: 18.sp),
-                  label: Text(
-                    'vh_submit_kyc'.tr,
-                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryOrange,
-                    foregroundColor: Colors.white,
-                    minimumSize: Size(0, 48.h),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                    elevation: 0,
+              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 12.h),
+              child: Container(
+                height: 48.h,
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(colors: [primaryOrange, secondaryOrange]),
+                  borderRadius: radius,
+                  boxShadow: [
+                    BoxShadow(color: primaryOrange.withValues(alpha: 0.3), blurRadius: 12.r, offset: const Offset(0, 4)),
+                  ],
+                ),
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: _openKyc,
+                    borderRadius: radius,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.upload_file_rounded, size: 18.sp, color: Colors.white),
+                        SizedBox(width: 8.w),
+                        Text(
+                          'vh_submit_kyc'.tr,
+                          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: Colors.white),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

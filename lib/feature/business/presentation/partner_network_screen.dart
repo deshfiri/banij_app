@@ -27,8 +27,9 @@ class _PartnerNetworkScreenState extends State<PartnerNetworkScreen> {
     _fetchReferrals();
   }
 
-  Future<void> _fetchReferrals() async {
-    setState(() => _isLoading = true);
+  /// [showLoader] is false for pull-to-refresh, which keeps the content.
+  Future<void> _fetchReferrals({bool showLoader = true}) async {
+    if (showLoader) setState(() => _isLoading = true);
     try {
       final res = await referralsRxObj.fetchReferrals();
       if (mounted) {
@@ -65,28 +66,36 @@ class _PartnerNetworkScreenState extends State<PartnerNetworkScreen> {
   }
 
   Widget _buildContent() {
-    final partnerCode = _referralsModel?.code ?? 'CGKRRMKR';
-    final partnerLink = _referralsModel?.link ?? 'https://staging.deshfiri.com/register?ref=$partnerCode';
-
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Keep content readable on tablets.
-        final side = constraints.maxWidth > 760 ? (constraints.maxWidth - 720) / 2 : 16.w;
-        return SingleChildScrollView(
-          padding: EdgeInsets.fromLTRB(side, 18.h, side, 28.h),
-          child: Column(
-            children: [
-              PartnerCodeCard(code: partnerCode, link: partnerLink),
-              UIHelper.verticalSpace(16.h),
-              PartnerStatsGrid(summary: _referralsModel?.summary),
-              UIHelper.verticalSpace(16.h),
-              PartnerMembersCard(members: _referralsModel?.direct?.data ?? []),
-              UIHelper.verticalSpace(16.h),
-              PartnerEarningsCard(earnings: _referralsModel?.earnings?.data ?? []),
-            ],
-          ),
-        );
-      },
+    return RefreshIndicator(
+      color: primaryOrange,
+      onRefresh: () => _fetchReferrals(showLoader: false),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          // Keep content readable on tablets.
+          final side = constraints.maxWidth > 760 ? (constraints.maxWidth - 720) / 2 : 16.w;
+          return SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.fromLTRB(side, 18.h, side, 28.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // No fallback code: a made-up code would be copied and shared.
+                PartnerCodeCard(
+                  code: _referralsModel?.code,
+                  link: _referralsModel?.link,
+                  onRetry: _fetchReferrals,
+                ),
+                UIHelper.verticalSpace(16.h),
+                PartnerStatsGrid(summary: _referralsModel?.summary),
+                UIHelper.verticalSpace(22.h),
+                PartnerMembersCard(members: _referralsModel?.direct?.data ?? []),
+                UIHelper.verticalSpace(14.h),
+                PartnerEarningsCard(earnings: _referralsModel?.earnings?.data ?? []),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }

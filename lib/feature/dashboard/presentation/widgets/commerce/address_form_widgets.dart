@@ -413,10 +413,21 @@ class AddressBottomBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final radius = BorderRadius.circular(14.r);
+    final enabled = onPressed != null && !isLoading;
     return Container(
       decoration: BoxDecoration(
         color: AppColorsTheme.cardBg(context),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22.r)),
         border: Border(top: BorderSide(color: AppColorsTheme.borderColor(context))),
+        boxShadow: [
+          BoxShadow(
+            color: isDark ? Colors.black.withValues(alpha: 0.4) : primaryOrange.withValues(alpha: 0.1),
+            blurRadius: 18.r,
+            offset: const Offset(0, -4),
+          ),
+        ],
       ),
       child: SafeArea(
         top: false,
@@ -425,26 +436,41 @@ class AddressBottomBar extends StatelessWidget {
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 720),
             child: Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 10.h, 16.w, 10.h),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: isLoading ? null : onPressed,
-                  icon: isLoading
-                      ? SizedBox.square(
-                          dimension: 18.sp,
-                          child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
-                        )
-                      : Icon(icon, size: 19.sp),
-                  label: Text(label, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800)),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryOrange,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: primaryOrange.withValues(alpha: 0.6),
-                    disabledForegroundColor: Colors.white,
-                    minimumSize: Size(0, 50.h),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
-                    elevation: 0,
+              padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 12.h),
+              child: Opacity(
+                opacity: enabled || isLoading ? 1 : 0.6,
+                child: Container(
+                  height: 50.h,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: [primaryOrange, secondaryOrange]),
+                    borderRadius: radius,
+                    boxShadow: [
+                      BoxShadow(color: primaryOrange.withValues(alpha: 0.3), blurRadius: 12.r, offset: const Offset(0, 4)),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: enabled ? onPressed : null,
+                      borderRadius: radius,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (isLoading)
+                            SizedBox.square(
+                              dimension: 18.sp,
+                              child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                            )
+                          else
+                            Icon(icon, size: 19.sp, color: Colors.white),
+                          UIHelper.horizontalSpace(8.w),
+                          Text(
+                            label,
+                            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w800, color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
