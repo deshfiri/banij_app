@@ -7,8 +7,8 @@ import 'package:printing/printing.dart';
 import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 
-import '../../../common_widget/hero_page_header.dart';
 import '../../../constants/color.dart';
+import '../../../constants/image_const.dart';
 import '../../../helpers/ui_helpers.dart';
 import '../../../providers/invoice_provider.dart';
 import '../data/invoice_pdf_service.dart';
@@ -272,6 +272,105 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
     );
   }
 
+  Widget _buildHeroHeader(BuildContext context, InvoiceDetailModel? invoice) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: isDark
+              ? [const Color(0xFF1E293B), const Color(0xFF0F172A)]
+              : [primaryOrange, secondaryOrange],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(32.r),
+          bottomRight: Radius.circular(32.r),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: primaryOrange.withValues(alpha: isDark ? 0.2 : 0.28),
+            blurRadius: 18.r,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        bottom: false,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(12.w, 4.h, 12.w, 20.h),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Top Bar: Back Button, White Logo & Share Action
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: Icon(
+                      Icons.arrow_back_rounded,
+                      color: Colors.white,
+                      size: 24.sp,
+                    ),
+                  ),
+                  Image.asset(
+                    whiteLogo,
+                    width: 105.w,
+                    height: 34.h,
+                    fit: BoxFit.contain,
+                  ),
+                  if (invoice != null)
+                    IconButton(
+                      onPressed: () => _sharePdf(invoice),
+                      icon: Icon(
+                        Icons.ios_share_rounded,
+                        color: Colors.white,
+                        size: 22.sp,
+                      ),
+                    )
+                  else
+                    SizedBox(width: 48.w),
+                ],
+              ),
+              UIHelper.verticalSpace(12.h),
+
+              // Title & Subtitle
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8.w),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Invoice Details',
+                      style: TextStyle(
+                        fontSize: 22.sp,
+                        fontWeight: FontWeight.w900,
+                        color: Colors.white,
+                      ),
+                    ),
+                    UIHelper.verticalSpace(2.h),
+                    Text(
+                      widget.invoice.number ?? 'Invoice information',
+                      style: TextStyle(
+                        fontSize: 11.5.sp,
+                        color: Colors.white.withValues(alpha: 0.88),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   // ---------------------------------------------------------------------------
   // Layout
   // ---------------------------------------------------------------------------
@@ -293,16 +392,7 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
         backgroundColor: AppColorsTheme.background(context),
         body: Column(
           children: [
-            HeroPageHeader(
-              title: 'Invoice Details',
-              subtitle: widget.invoice.number ?? 'Invoice information',
-              trailing: invoice == null
-                  ? null
-                  : HeroIconButton(
-                      icon: Icons.ios_share_rounded,
-                      onTap: () => _sharePdf(invoice),
-                    ),
-            ),
+            _buildHeroHeader(context, invoice),
             Expanded(
               child: SafeArea(
                 top: false,
@@ -939,6 +1029,7 @@ class _SectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final divider = Divider(
       height: 1,
       thickness: 1,
@@ -947,14 +1038,17 @@ class _SectionCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: AppColorsTheme.cardBg(context),
+        color: isDark ? AppColorsTheme.cardBg(context) : const Color(0xFFFFF7F2),
         borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(color: AppColorsTheme.borderColor(context)),
+        border: Border.all(
+          color: isDark ? const Color(0xFF374151) : primaryOrange.withValues(alpha: 0.22),
+          width: 1.w,
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: primaryOrange.withValues(alpha: isDark ? 0.08 : 0.05),
             blurRadius: 10.r,
-            offset: const Offset(0, 4),
+            offset: const Offset(0, 3),
           ),
         ],
       ),

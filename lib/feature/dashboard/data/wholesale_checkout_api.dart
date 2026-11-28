@@ -134,6 +134,12 @@ final class WholesaleCheckoutApi {
     if (dioError.response?.data != null) {
       final data = dioError.response?.data;
       if (data is Map) {
+        final errors = data['errors'];
+        if (errors is Map && errors.isNotEmpty) {
+          final first = errors.values.first;
+          final text = first is List && first.isNotEmpty ? first.first.toString() : first?.toString();
+          if (text != null && text.isNotEmpty) throw Exception(text);
+        }
         if (data.containsKey('message')) {
           throw Exception(data['message'].toString());
         } else if (data.containsKey('error')) {

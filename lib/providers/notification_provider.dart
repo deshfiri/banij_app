@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../feature/notification/model/notification_category.dart';
 import '../feature/notification/model/notification_model.dart';
 import '../helpers/error_message.dart';
 import '../networks/api_access.dart';
@@ -8,17 +9,24 @@ class NotificationItem {
   final String id;
   final String title;
   final String message;
+
+  /// Human-readable time from the API ("2 hours ago").
   final String time;
+
+  /// Parsed `created_at` in local time, used for Today/Yesterday grouping.
+  /// Null when the API sends no parseable timestamp.
+  final DateTime? createdAt;
+  final NotificationCategory category;
   bool isRead;
-  final IconData iconData;
 
   NotificationItem({
     required this.id,
     required this.title,
     required this.message,
     required this.time,
+    required this.category,
+    this.createdAt,
     this.isRead = false,
-    required this.iconData,
   });
 }
 
@@ -44,16 +52,10 @@ class NotificationProvider extends ChangeNotifier {
         throw Exception(res.message ?? 'Failed to load notifications');
       }
 
-      _notifications = (res.data ?? const []).map((item) {
-        return NotificationItem(
-          id: item.id ?? DateTime.now().millisecondsSinceEpoch.toString(),
-          title: item.title ?? 'Notification',
-          message: item.description ?? item.message ?? '',
-          time: item.createdAtHuman ?? item.time ?? '',
-          isRead: item.isRead ?? false,
-          iconData: Icons.notifications_active_outlined,
-        );
-      }).toList();
+      final items = res.data ?? const <NotificationItemModel>[];
+      _notifications = [
+        for (var i = 0; i < items.length; i++) _toItem(items[i], i),
+      ];
     } catch (error) {
       _error = error.apiErrorMessage;
     } finally {
@@ -62,7 +64,28 @@ class NotificationProvider extends ChangeNotifier {
     }
   }
 
+  static NotificationItem _toItem(NotificationItemModel item, int index) {
+    final title = item.title ?? 'Notification';
+    final message = item.description ?? item.message ?? '';
+    return NotificationItem(
+      // Index fallback keeps ids unique so markAsRead hits the right item.
+      id: item.id ?? 'local-$index',
+      title: title,
+      message: message,
+      time: item.createdAtHuman ?? item.time ?? '',
+      createdAt: DateTime.tryParse(item.createdAt ?? '')?.toLocal(),
+      category: NotificationCategory.resolve(type: item.type, title: title, message: message),
+      isRead: item.isRead ?? false,
+    );
+  }
+
   int get unreadCount => _notifications.where((n) => !n.isRead).length;
+
+  /// Categories present in the current list, in [NotificationCategory] order.
+  List<NotificationCategory> get categories {
+    final present = _notifications.map((n) => n.category).toSet();
+    return NotificationCategory.values.where(present.contains).toList();
+  }
 
   void markAsRead(String id) {
     final index = _notifications.indexWhere((n) => n.id == id);

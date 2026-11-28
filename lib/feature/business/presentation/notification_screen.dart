@@ -6,9 +6,11 @@ import 'package:provider/provider.dart';
 import '../../../common_widget/hero_page_header.dart';
 import '../../../constants/color.dart';
 import '../../../providers/notification_provider.dart';
+import '../../notification/model/notification_category.dart';
 import 'widgets/notification/notification_tile.dart';
 
-/// Notification inbox with "mark all read".
+/// Notification inbox: All/Unread filter, category chips (Order, Payment,
+/// …), cards styled by category and grouped by day, and "mark all read".
 class NotificationScreen extends StatefulWidget {
   const NotificationScreen({super.key});
 
@@ -17,8 +19,9 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  /// Display filter only; the list itself comes from the provider.
+  /// Display filters only; the list itself comes from the provider.
   bool _showUnreadOnly = false;
+  NotificationCategory? _category;
 
   @override
   void initState() {
@@ -33,7 +36,16 @@ class _NotificationScreenState extends State<NotificationScreen> {
     final notificationProvider = context.watch<NotificationProvider>();
     final notifications = notificationProvider.notifications;
     final unreadCount = notificationProvider.unreadCount;
-    final visible = _showUnreadOnly ? notifications.where((n) => !n.isRead).toList() : notifications;
+    final categories = notificationProvider.categories;
+    // A refresh can remove the selected category; fall back to "All".
+    final category = categories.contains(_category) ? _category : null;
+    final categoryCounts = <NotificationCategory, int>{
+      for (final c in categories) c: notifications.where((n) => n.category == c).length,
+    };
+    final visible = notifications
+        .where((n) => !_showUnreadOnly || !n.isRead)
+        .where((n) => category == null || n.category == category)
+        .toList();
 
     return Scaffold(
       backgroundColor: AppColorsTheme.background(context),
@@ -98,17 +110,20 @@ class _NotificationScreenState extends State<NotificationScreen> {
                             unreadCount: unreadCount,
                             onChanged: (value) => setState(() => _showUnreadOnly = value),
                           ),
-                          SizedBox(height: 14.h),
+                          if (categories.length > 1) ...[
+                            SizedBox(height: 12.h),
+                            NotificationCategoryChips(
+                              categories: categories,
+                              counts: categoryCounts,
+                              selected: category,
+                              onChanged: (value) => setState(() => _category = value),
+                            ),
+                          ],
+                          SizedBox(height: 16.h),
                           if (visible.isEmpty)
                             const _AllCaughtUp()
                           else
-                            for (final item in visible)
-                              NotificationTile(
-                                item: item,
-                                onTap: () => context
-                                    .read<NotificationProvider>()
-                                    .markAsRead(item.id),
-                              ),
+                            ..._groupedTiles(visible),
                         ],
                       ],
                     );
@@ -120,6 +135,41 @@ class _NotificationScreenState extends State<NotificationScreen> {
         ],
       ),
     );
+  }
+
+  /// Tiles under "Today / Yesterday / Earlier" headers. Without any
+  /// parseable timestamps the headers would say nothing, so the list is flat.
+  List<Widget> _groupedTiles(List<NotificationItem> items) {
+    Widget tile(NotificationItem item) => NotificationTile(
+          key: ValueKey(item.id),
+          item: item,
+          onTap: () => context.read<NotificationProvider>().markAsRead(item.id),
+        );
+
+    if (items.every((n) => n.createdAt == null)) return [for (final item in items) tile(item)];
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    // Calendar arithmetic (not Duration) so DST days are still one day.
+    final yesterday = DateTime(now.year, now.month, now.day - 1);
+    final groups = <String, List<NotificationItem>>{'today'.tr: [], 'yesterday'.tr: [], 'earlier'.tr: []};
+    for (final item in items) {
+      final date = item.createdAt;
+      final day = date == null ? null : DateTime(date.year, date.month, date.day);
+      final key = day == null || day.isBefore(yesterday)
+          ? 'earlier'.tr
+          : (day.isBefore(today) ? 'yesterday'.tr : 'today'.tr);
+      groups[key]!.add(item);
+    }
+
+    return [
+      for (final MapEntry(key: label, value: group) in groups.entries)
+        if (group.isNotEmpty) ...[
+          NotificationSectionHeader(label: label, count: group.length),
+          for (final item in group) tile(item),
+          SizedBox(height: 8.h),
+        ],
+    ];
   }
 }
 
@@ -214,7 +264,7 @@ class _AllCaughtUp extends StatelessWidget {
           Icon(Icons.mark_email_read_outlined, size: 40.sp, color: primaryOrange),
           SizedBox(height: 12.h),
           Text(
-            'All caught up'.tr,
+            'all_caught_up'.tr,
             style: TextStyle(
               fontSize: 15.sp,
               fontWeight: FontWeight.w800,
@@ -223,7 +273,7 @@ class _AllCaughtUp extends StatelessWidget {
           ),
           SizedBox(height: 4.h),
           Text(
-            'You have no unread notifications.'.tr,
+            'no_unread_notifications'.tr,
             style: TextStyle(fontSize: 12.5.sp, color: AppColorsTheme.textMutedColor(context)),
           ),
         ],

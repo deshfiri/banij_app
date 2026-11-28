@@ -50,6 +50,10 @@ class NotificationResponseModel {
 
 class NotificationItemModel {
   final String? id;
+
+  /// Server-side kind, e.g. `order_shipped` or a Laravel notification class
+  /// name. Used to pick the category icon/colour; may be null.
+  final String? type;
   final String? title;
   final String? description;
   final String? createdAtHuman;
@@ -59,6 +63,7 @@ class NotificationItemModel {
 
   NotificationItemModel({
     this.id,
+    this.type,
     this.title,
     this.description,
     this.createdAtHuman,
@@ -75,29 +80,35 @@ class NotificationItemModel {
 
   String toRawJson() => json.encode(toJson());
 
-  factory NotificationItemModel.fromJson(Map<String, dynamic> jsonMap) =>
-      NotificationItemModel(
-        id: jsonMap["id"]?.toString(),
-        title: jsonMap["title"]?.toString() ??
-            jsonMap["subject"]?.toString() ??
-            'Notification',
-        description: jsonMap["description"]?.toString() ??
-            jsonMap["message"]?.toString() ??
-            jsonMap["body"]?.toString() ??
-            '',
-        createdAtHuman: jsonMap["created_at_human"]?.toString() ??
-            jsonMap["time"]?.toString() ??
-            jsonMap["created_at"]?.toString() ??
-            '',
-        createdAt: jsonMap["created_at"]?.toString() ?? '',
-        readAt: jsonMap["read_at"]?.toString(),
-        isRead: jsonMap["is_read"] is bool
-            ? jsonMap["is_read"]
-            : (jsonMap["read_at"] != null || jsonMap["isRead"] == true),
-      );
+  factory NotificationItemModel.fromJson(Map<String, dynamic> jsonMap) {
+    // Laravel database notifications keep the payload in a nested `data` map;
+    // flat responses keep it at the top level. Read top level first.
+    final nested = jsonMap["data"] is Map ? jsonMap["data"] as Map : const {};
+    String? pick(List<String> keys) {
+      for (final key in keys) {
+        final value = jsonMap[key] ?? nested[key];
+        if (value != null && value.toString().trim().isNotEmpty) return value.toString();
+      }
+      return null;
+    }
+
+    return NotificationItemModel(
+      id: jsonMap["id"]?.toString(),
+      type: pick(["type", "category", "notification_type", "event"]),
+      title: pick(["title", "subject"]) ?? 'Notification',
+      description: pick(["description", "message", "body"]) ?? '',
+      createdAtHuman: pick(["created_at_human", "time", "created_at"]) ?? '',
+      createdAt: jsonMap["created_at"]?.toString() ?? '',
+      readAt: jsonMap["read_at"]?.toString(),
+      isRead: jsonMap["is_read"] is bool
+          ? jsonMap["is_read"]
+          : (jsonMap["read_at"] != null || jsonMap["isRead"] == true),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
         "id": id,
+        if (type != null) "type": type,
         "title": title,
         "description": description,
         "created_at_human": createdAtHuman,

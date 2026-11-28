@@ -240,7 +240,22 @@ class DashboardProvider extends ChangeNotifier {
     _isLoadingCheckout = true;
     notifyListeners();
     try {
-      // The fingerprint pins the quote being confirmed; reload it if missing.
+      // 1. Ensure a shipping/billing address is attached to the server checkout session
+      if (wholesaleCheckoutModel?.data?.shippingAddress == null) {
+        final addressToUse = selectedAddress ?? _resolveSelectedAddress(addressResponseModel?.data ?? const []);
+        if (addressToUse?.id != null) {
+          try {
+            wholesaleCheckoutModel = await wholesaleCheckoutRxObj.selectAddress(addressToUse!.id.toString());
+          } catch (e) {
+            debugPrint('DashboardProvider.confirmWholesaleOrder selectAddress failed: $e');
+          }
+        } else {
+          ToastUtil.showErrorMessage('Add a billing and a shipping address before confirming.');
+          return false;
+        }
+      }
+
+      // 2. The fingerprint pins the quote being confirmed; reload it if missing.
       var fingerprint = wholesaleCheckoutModel?.fingerprint;
       if (fingerprint == null) {
         wholesaleCheckoutModel = await wholesaleCheckoutRxObj.fetchCheckout();

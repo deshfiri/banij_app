@@ -46,5 +46,4 @@ kotlin {
 
 flutter {
     source = "../.."
-    extraArgs = listOf("--no-tree-shake-icons")
 }
