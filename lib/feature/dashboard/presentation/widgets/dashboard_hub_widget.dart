@@ -726,6 +726,11 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
     return const QuickAccessSectionWidget();
   }
 
+  /// Products / My Products banner art is 1059 x 594. Sizing the cards to
+  /// this ratio shows the whole image on every screen width (a fixed height
+  /// made BoxFit.cover crop the sides, cutting into the banner titles).
+  static const double _bannerAspectRatio = 1059 / 594;
+
   Widget _buildFeaturedModulesList(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 8.h),
@@ -733,8 +738,8 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
         children: [
           Expanded(
             flex: 1,
-            child: SizedBox(
-              height: 102.h,
+            child: AspectRatio(
+              aspectRatio: _bannerAspectRatio,
               child: _buildBannerCard(
                 context: context,
                 imagePath: productsImage,
@@ -750,8 +755,8 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
           UIHelper.horizontalSpace(12.w),
           Expanded(
             flex: 1,
-            child: SizedBox(
-              height: 102.h,
+            child: AspectRatio(
+              aspectRatio: _bannerAspectRatio,
               child: _buildBannerCard(
                 context: context,
                 imagePath: myProductsImage,
@@ -783,27 +788,33 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
         clipBehavior: Clip.antiAlias,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(18.r),
+          boxShadow: [
+            BoxShadow(
+              color: isDark ? Colors.black.withValues(alpha: 0.3) : primaryOrange.withValues(alpha: 0.12),
+              blurRadius: 10.r,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        // Foreground, so the image does not paint over the border.
+        foregroundDecoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(18.r),
           border: Border.all(
             color: isDark
                 ? const Color(0xFF374151)
                 : primaryOrange.withValues(alpha: 0.25),
             width: 1.w,
           ),
-          boxShadow: [
-            BoxShadow(
-              color: primaryOrange.withValues(alpha: isDark ? 0.08 : 0.08),
-              blurRadius: 8.r,
-              offset: const Offset(0, 3),
-            ),
-          ],
         ),
         child: Stack(
           fit: StackFit.expand,
           children: [
             Image.asset(
               imagePath,
+              // Same ratio as the card, so cover fills it without cropping.
               fit: BoxFit.cover,
               alignment: Alignment.center,
+              filterQuality: FilterQuality.medium,
             ),
             Padding(
               padding: EdgeInsets.all(7.w),
@@ -827,6 +838,7 @@ class _DashboardHubWidgetState extends State<DashboardHubWidget> {
                   ),
                   child: Text(
                     buttonText,
+                    maxLines: 1,
                     style: TextStyle(
                       fontSize: 8.5.sp,
                       fontWeight: FontWeight.bold,

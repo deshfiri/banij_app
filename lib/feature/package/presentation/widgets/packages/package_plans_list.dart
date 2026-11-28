@@ -31,7 +31,8 @@ String? currentPackageName(BuildContext context, PackageResponseModel? data) {
 /// Not scrollable itself, so it can sit inside any scroll view (the
 /// Packages screen or Account › Package). Loads the list on first build.
 class PackagePlansList extends StatefulWidget {
-  /// Shows a "Your current plan: …" line above the cards.
+  /// Shows the current-plan banner and an "All plans" heading above the
+  /// cards (Account › Package; the Packages screen has its own header).
   final bool showCurrentPlan;
 
   const PackagePlansList({super.key, this.showCurrentPlan = false});
@@ -150,11 +151,17 @@ class _PackagePlansListState extends State<PackagePlansList> {
       );
     }
 
+    final currentPlan = plans.where((pkg) => _isCurrent(pkg, data, currentName)).firstOrNull;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (widget.showCurrentPlan && currentName != null) ...[
-          _CurrentPlanLine(name: currentName),
+        if (widget.showCurrentPlan) ...[
+          if (currentName != null) ...[
+            _CurrentPlanBanner(name: currentName, plan: currentPlan),
+            UIHelper.verticalSpace(22.h),
+          ],
+          _PlansHeading(count: plans.length),
           UIHelper.verticalSpace(12.h),
         ],
         for (final pkg in plans) ...[
@@ -172,40 +179,218 @@ class _PackagePlansListState extends State<PackagePlansList> {
   }
 }
 
-class _CurrentPlanLine extends StatelessWidget {
+/// Hero-style card at the top of Account › Package: the plan the account is
+/// on, with its price and validity when the plan is in the list.
+class _CurrentPlanBanner extends StatelessWidget {
   final String name;
+  final PackageItemModel? plan;
 
-  const _CurrentPlanLine({required this.name});
+  const _CurrentPlanBanner({required this.name, required this.plan});
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final price = plan?.fee?.formatted ?? plan?.activationTotal?.formatted;
+    final days = plan?.validityDays;
+
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: primaryOrange.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: primaryOrange.withValues(alpha: 0.25)),
+        gradient: LinearGradient(
+          colors: AppColorsTheme.heroGradient(context),
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(20.r),
+        boxShadow: [
+          BoxShadow(
+            color: (isDark ? Colors.black : primaryOrange).withValues(alpha: isDark ? 0.35 : 0.25),
+            blurRadius: 16.r,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
-      child: Row(
+      child: Stack(
         children: [
-          Icon(Icons.workspace_premium_rounded, size: 18.sp, color: primaryOrange),
-          UIHelper.horizontalSpace(8.w),
-          Expanded(
-            child: Text.rich(
-              TextSpan(
-                text: '${'pkg_your_current_plan'.tr}: ',
-                children: [
-                  TextSpan(
-                    text: name,
-                    style: TextStyle(fontWeight: FontWeight.w800, color: AppColorsTheme.textMainColor(context)),
+          Positioned(
+            top: -40.h,
+            right: -30.w,
+            child: _circle(130.w, 0.1),
+          ),
+          Positioned(
+            bottom: -30.h,
+            right: 60.w,
+            child: _circle(70.w, 0.07),
+          ),
+          Padding(
+            padding: EdgeInsets.all(16.w),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 46.w,
+                      height: 46.w,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(14.r),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.35)),
+                      ),
+                      child: Icon(Icons.workspace_premium_rounded, size: 24.sp, color: Colors.white),
+                    ),
+                    UIHelper.horizontalSpace(12.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'pkg_your_current_plan'.tr,
+                            style: TextStyle(
+                              fontSize: 11.5.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white.withValues(alpha: 0.85),
+                            ),
+                          ),
+                          UIHelper.verticalSpace(2.h),
+                          Text(
+                            name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900, color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
+                      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20.r)),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 6.w,
+                            height: 6.w,
+                            decoration: const BoxDecoration(color: successGreen, shape: BoxShape.circle),
+                          ),
+                          UIHelper.horizontalSpace(4.w),
+                          Text(
+                            'active'.tr,
+                            style: TextStyle(fontSize: 10.5.sp, fontWeight: FontWeight.w800, color: successGreenDark),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                if (price != null || days != null) ...[
+                  UIHelper.verticalSpace(14.h),
+                  Wrap(
+                    spacing: 8.w,
+                    runSpacing: 8.h,
+                    children: [
+                      if (price != null) _GlassChip(icon: Icons.payments_outlined, text: price),
+                      if (days != null)
+                        _GlassChip(icon: Icons.schedule_rounded, text: '@days Days'.trParams({'days': days})),
+                    ],
                   ),
                 ],
-              ),
-              style: TextStyle(fontSize: 12.5.sp, color: AppColorsTheme.textMutedColor(context)),
+              ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  static Widget _circle(double size, double alpha) => Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withValues(alpha: alpha)),
+      );
+}
+
+class _GlassChip extends StatelessWidget {
+  final IconData icon;
+  final String text;
+
+  const _GlassChip({required this.icon, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.16),
+        borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.28)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14.sp, color: Colors.white),
+          UIHelper.horizontalSpace(6.w),
+          Text(text, style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w700, color: Colors.white)),
+        ],
+      ),
+    );
+  }
+}
+
+/// "All plans · 3" heading with the compare hint.
+class _PlansHeading extends StatelessWidget {
+  final int count;
+
+  const _PlansHeading({required this.count});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 4.w,
+              height: 17.h,
+              decoration: BoxDecoration(color: primaryOrange, borderRadius: BorderRadius.circular(2.r)),
+            ),
+            UIHelper.horizontalSpace(8.w),
+            Text(
+              'pkg_all_plans'.tr,
+              style: TextStyle(
+                fontSize: 16.sp,
+                fontWeight: FontWeight.w900,
+                color: AppColorsTheme.textMainColor(context),
+              ),
+            ),
+            UIHelper.horizontalSpace(8.w),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 7.w, vertical: 1.h),
+              decoration: BoxDecoration(
+                color: AppColorsTheme.innerCardBg(context),
+                borderRadius: BorderRadius.circular(10.r),
+              ),
+              child: Text(
+                '$count',
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.w800,
+                  color: AppColorsTheme.textMutedColor(context),
+                ),
+              ),
+            ),
+          ],
+        ),
+        UIHelper.verticalSpace(4.h),
+        Padding(
+          padding: EdgeInsets.only(left: 12.w),
+          child: Text(
+            'pkg_subtitle'.tr,
+            style: TextStyle(fontSize: 12.sp, height: 1.4, color: AppColorsTheme.textMutedColor(context)),
+          ),
+        ),
+      ],
     );
   }
 }
