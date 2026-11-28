@@ -14,9 +14,10 @@ import 'widgets/onboarding_slide.dart';
 import 'widgets/onboarding_slide_view.dart';
 import 'widgets/wave_reveal_route.dart';
 
-/// Intro carousel in the dashboard style: hero gradient top with the white
-/// logo and theme/language toggles, auto-sliding illustration pages, and a
-/// gradient "Get Started" button.
+/// Intro carousel: short hero gradient behind the white logo and the
+/// theme/language toggles, auto-sliding poster cards that float over the
+/// hero's curved edge (neighbours peek in at the sides), and a gradient
+/// "Get Started" button.
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -29,15 +30,31 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   static const Duration _slideDuration = Duration(milliseconds: 600);
   static const List<OnboardingSlide> _slides = OnboardingSlide.all;
 
+  /// Below 1 so the previous/next posters peek in at the screen edges.
+  static const double _viewportFraction = 0.88;
+
   late final PageController _pageController;
   Timer? _autoSlideTimer;
   int _currentPage = 0;
+  bool _postersPrecached = false;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: 0);
+    _pageController = PageController(viewportFraction: _viewportFraction);
     _startAutoSlide();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // The posters are large PNGs; decode them up front so an auto-slide
+    // never lands on a blank card while the next image loads.
+    if (_postersPrecached) return;
+    _postersPrecached = true;
+    for (final slide in _slides) {
+      precacheImage(AssetImage(slide.imageAsset), context);
+    }
   }
 
   /// (Re)starts auto-sliding, so a manual swipe gets a full interval
@@ -73,7 +90,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return AuthScaffold(
-      heroHeight: 240,
+      // Keeps the white logo + toggles readable; the cards overlap its edge.
+      heroHeight: 210,
       showToggleSnackBars: true,
       body: Column(
         children: [
@@ -96,7 +114,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               ),
             ),
           ),
-          UIHelper.verticalSpace(4.h),
+          UIHelper.verticalSpace(2.h),
           OnboardingPageIndicator(count: _slides.length, current: _currentPage, onTap: _goToPage),
           _OnboardingActions(onGetStarted: _navigateToLogin, onSkip: _navigateToLogin),
         ],
@@ -105,7 +123,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 }
 
-/// Carousel effect: pages leaving the centre shrink and fade slightly.
+/// Carousel effect: the peeking side cards are smaller and faded, growing
+/// to full size and opacity as they slide into the centre.
 class _CarouselPage extends StatelessWidget {
   final PageController controller;
   final int index;
@@ -125,8 +144,8 @@ class _CarouselPage extends StatelessWidget {
         }
         final distance = (page - index).abs().clamp(0.0, 1.0);
         return Opacity(
-          opacity: 1 - distance * 0.45,
-          child: Transform.scale(scale: 1 - distance * 0.08, child: child),
+          opacity: 1 - distance * 0.5,
+          child: Transform.scale(scale: 1 - distance * 0.1, child: child),
         );
       },
     );
@@ -143,7 +162,7 @@ class _OnboardingActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.fromLTRB(24.w, 20.h, 24.w, 8.h),
+      padding: EdgeInsets.fromLTRB(24.w, 12.h, 24.w, 4.h),
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 480),
         child: Column(
@@ -154,7 +173,7 @@ class _OnboardingActions extends StatelessWidget {
               trailingIcon: Icons.arrow_forward_rounded,
               onPressed: onGetStarted,
             ),
-            UIHelper.verticalSpace(8.h),
+            UIHelper.verticalSpace(4.h),
             TextButton(
               onPressed: onSkip,
               style: TextButton.styleFrom(foregroundColor: AppColorsTheme.textMutedColor(context)),

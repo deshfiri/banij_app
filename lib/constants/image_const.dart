@@ -41,6 +41,9 @@ const String addressesIconAsset = "assets/icons/module_addresses.png";
 
 // Onboarding illustrations
 const String onboardingGlobalImage = "assets/images/onboarding_global.png";
+const String onboardingPost1 = "assets/images/Banij_Facebook_Post-01.png";
+const String onboardingPost2 = "assets/images/Banij_Facebook_Post-02.png";
+const String onboardingPost3 = "assets/images/Banij_Facebook_Post-03.png";
 
 // Bottom navigation icons (Flaticon UIcons Rounded: outline = inactive, solid = active).
 // Single-colour masks, tinted in code.
