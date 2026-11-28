@@ -431,9 +431,8 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
         final hPadding = isWide ? 24.0 : 16.w;
 
         final summary = _SummaryCard(invoice: invoice, onCopy: _copy);
-        final info = _buildInformationCard(invoice);
-        final payment = _buildPaymentCard(invoice);
-        final items = invoice.items.isEmpty ? null : _buildItemsCard(invoice);
+        final details = _buildDetailsCard(invoice);
+        final items = _buildItemsCard(invoice);
 
         final Widget content;
         if (isWide) {
@@ -442,30 +441,15 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
             children: [
               Expanded(
                 flex: 5,
-                child: Column(children: [summary, SizedBox(height: gap), payment]),
+                child: Column(children: [summary, SizedBox(height: gap), details]),
               ),
               SizedBox(width: gap),
-              Expanded(
-                flex: 6,
-                child: Column(
-                  children: [
-                    info,
-                    if (items != null) ...[SizedBox(height: gap), items],
-                  ],
-                ),
-              ),
+              Expanded(flex: 6, child: items),
             ],
           );
         } else {
           content = Column(
-            children: [
-              summary,
-              SizedBox(height: gap),
-              info,
-              SizedBox(height: gap),
-              payment,
-              if (items != null) ...[SizedBox(height: gap), items],
-            ],
+            children: [summary, SizedBox(height: gap), details, SizedBox(height: gap), items],
           );
         }
 
@@ -486,6 +470,8 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
                         SizedBox(height: gap),
                       ],
                       content,
+                      SizedBox(height: 22.h),
+                      const _FooterNote(),
                     ],
                   ),
                 ),
@@ -497,98 +483,73 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
     );
   }
 
-  Widget _buildInformationCard(InvoiceDetailModel invoice) {
+  /// Who it is billed to and the identifiers people copy (number, payment
+  /// reference). Amount, status and dates live in the summary card.
+  Widget _buildDetailsCard(InvoiceDetailModel invoice) {
     return _SectionCard(
-      title: 'Invoice information',
+      title: 'Billing details',
       icon: Icons.description_outlined,
       children: [
+        if (invoice.displayCustomer != '—')
+          _DetailRow(
+            icon: Icons.storefront_outlined,
+            label: 'Billed to',
+            value: invoice.displayCustomer,
+          ),
         _DetailRow(
           icon: Icons.tag_rounded,
           label: 'Invoice number',
           value: invoice.displayNumber,
           onCopy: () => _copy('Invoice number', invoice.displayNumber),
         ),
-        if (invoice.displayCustomer != '—')
-          _DetailRow(
-            icon: Icons.person_outline_rounded,
-            label: 'Billed to',
-            value: invoice.displayCustomer,
-          ),
-        if (invoice.displayPurpose != '—')
-          _DetailRow(
-            icon: Icons.category_outlined,
-            label: 'Purpose',
-            value: invoice.displayPurpose,
-          ),
-        _DetailRow(
-          icon: Icons.event_outlined,
-          label: 'Issued date',
-          value: invoice.issuedDateLabel,
-        ),
-        if (invoice.dueDateLabel != '—')
-          _DetailRow(
-            icon: Icons.event_busy_outlined,
-            label: 'Due date',
-            value: invoice.dueDateLabel,
-          ),
-      ],
-    );
-  }
-
-  Widget _buildPaymentCard(InvoiceDetailModel invoice) {
-    final status = invoice.displayStatus;
-    return _SectionCard(
-      title: 'Payment',
-      icon: Icons.account_balance_wallet_outlined,
-      children: [
-        _DetailRow(
-          icon: Icons.verified_outlined,
-          label: 'Status',
-          valueWidget: _StatusPill(status: status),
-        ),
-        _DetailRow(
-          icon: Icons.payments_outlined,
-          label: 'Amount',
-          value: invoice.displayTotal,
-          emphasize: true,
-        ),
         if (invoice.displayPaymentReference != '—')
           _DetailRow(
             icon: Icons.confirmation_number_outlined,
-            label: 'Reference',
+            label: 'Payment reference',
             value: invoice.displayPaymentReference,
-            onCopy: () =>
-                _copy('Payment reference', invoice.displayPaymentReference),
-          ),
-        if (invoice.paidDateLabel != '—')
-          _DetailRow(
-            icon: Icons.event_available_outlined,
-            label: 'Paid date',
-            value: invoice.paidDateLabel,
+            onCopy: () => _copy('Payment reference', invoice.displayPaymentReference),
           ),
       ],
     );
   }
 
+  /// Line items as a table, then the total and how it was settled. Without
+  /// line items it is just the totals ("Summary").
   Widget _buildItemsCard(InvoiceDetailModel invoice) {
     final items = invoice.items;
     return _SectionCard(
-      title: 'Invoice items',
-      icon: Icons.inventory_2_outlined,
-      trailing: _CountBadge(count: items.length),
+      title: items.isEmpty ? 'Summary' : 'Invoice items',
+      icon: items.isEmpty ? Icons.summarize_outlined : Icons.inventory_2_outlined,
+      trailing: items.isEmpty ? null : _CountBadge(count: items.length),
+      divideChildren: false,
       children: [
-        for (var i = 0; i < items.length; i++)
-          _ItemRow(index: i + 1, item: items[i]),
-        _TotalRow(total: invoice.displayTotal),
+        if (items.isNotEmpty) ...[
+          const _ItemsTableHeader(),
+          for (var i = 0; i < items.length; i++) ...[
+            if (i > 0) Divider(height: 1, thickness: 1, color: AppColorsTheme.borderColor(context)),
+            _ItemRow(index: i + 1, item: items[i]),
+          ],
+        ],
+        _TotalsBlock(invoice: invoice),
       ],
     );
   }
 
   Widget _buildActionBar(InvoiceDetailModel invoice) {
-    return Material(
-      color: AppColorsTheme.cardBg(context),
-      elevation: 12,
-      shadowColor: Colors.black.withValues(alpha: 0.25),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColorsTheme.cardBg(context),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(22.r)),
+        border: Border(top: BorderSide(color: AppColorsTheme.borderColor(context))),
+        boxShadow: [
+          BoxShadow(
+            color: isDark ? Colors.black.withValues(alpha: 0.4) : primaryOrange.withValues(alpha: 0.1),
+            blurRadius: 18.r,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
       child: SafeArea(
         top: false,
         child: Center(
@@ -599,7 +560,7 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
               builder: (context, constraints) {
                 final compact = constraints.maxWidth < _kCompactBreakpoint;
                 return Padding(
-                  padding: EdgeInsets.fromLTRB(14.w, 10.h, 14.w, 10.h),
+                  padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 12.h),
                   child: Row(
                     children: [
                       _SecondaryAction(
@@ -623,29 +584,9 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
                       ),
                       UIHelper.horizontalSpace(10.w),
                       Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed:
-                              _isBusy ? null : () => _downloadPdf(invoice),
-                          icon: _isDownloading
-                              ? SizedBox.square(
-                                  dimension: 16.sp,
-                                  child: const CircularProgressIndicator(
-                                    color: Colors.white,
-                                    strokeWidth: 2,
-                                  ),
-                                )
-                              : Icon(Icons.download_rounded, size: 18.sp),
-                          label: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              _isDownloading ? 'Saving…' : 'Download PDF',
-                              style: TextStyle(
-                                fontSize: 13.sp,
-                                fontWeight: FontWeight.w800,
-                              ),
-                            ),
-                          ),
-                          style: _filledStyle(),
+                        child: _DownloadButton(
+                          isLoading: _isDownloading,
+                          onPressed: _isBusy ? null : () => _downloadPdf(invoice),
                         ),
                       ),
                     ],
@@ -762,6 +703,49 @@ class _InvoiceDetailsScreenState extends State<InvoiceDetailsScreen> {
 // Widgets
 // -----------------------------------------------------------------------------
 
+/// Shared surface for every card on this screen: cream (card colour in dark
+/// mode), soft orange outline and an orange bar on the left.
+BoxDecoration _cardDecoration(BuildContext context, {double radius = 18}) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  return BoxDecoration(
+    color: isDark ? AppColorsTheme.cardBg(context) : const Color(0xFFFFF7F2),
+    borderRadius: BorderRadius.circular(radius.r),
+    border: Border.all(
+      color: isDark ? const Color(0xFF374151) : primaryOrange.withValues(alpha: 0.22),
+      width: 1.w,
+    ),
+    boxShadow: [
+      BoxShadow(
+        color: primaryOrange.withValues(alpha: isDark ? 0.08 : 0.07),
+        blurRadius: 14.r,
+        offset: const Offset(0, 4),
+      ),
+    ],
+  );
+}
+
+/// Orange left-side bar, clipped by the card's rounded corners.
+const double _kBarWidth = 5;
+
+Widget _leftBar() => Positioned(
+      left: 0,
+      top: 0,
+      bottom: 0,
+      width: _kBarWidth.w,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [primaryOrange, primaryOrange.withValues(alpha: 0.55)],
+          ),
+        ),
+      ),
+    );
+
+/// The invoice at a glance: number (tap to copy) and status, the total and
+/// purpose, then — below a perforated "ticket" line — issued / due / paid
+/// dates. Paid and overdue invoices get a rotated stamp.
 class _SummaryCard extends StatelessWidget {
   final InvoiceDetailModel invoice;
   final void Function(String label, String value) onCopy;
@@ -770,204 +754,293 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dates = <(IconData, String, String)>[
-      (Icons.event_outlined, 'Issued', invoice.issuedDateLabel),
-      if (invoice.dueDateLabel != '—')
-        (Icons.event_busy_outlined, 'Due', invoice.dueDateLabel),
-      if (invoice.paidDateLabel != '—')
-        (Icons.event_available_outlined, 'Paid', invoice.paidDateLabel),
+    final muted = AppColorsTheme.textMutedColor(context);
+    final status = invoice.displayStatus.toUpperCase();
+    final dates = <(String, String)>[
+      ('Issued', invoice.issuedDateLabel),
+      if (invoice.dueDateLabel != '—') ('Due', invoice.dueDateLabel),
+      if (invoice.paidDateLabel != '—') ('Paid', invoice.paidDateLabel),
     ];
+    final radius = BorderRadius.circular(22.r);
 
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: AppColorsTheme.heroGradient(context),
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.circular(22.r),
-        boxShadow: [
-          BoxShadow(
-            color: primaryOrange.withValues(alpha: 0.22),
-            blurRadius: 18.r,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
+      decoration: _cardDecoration(context, radius: 22),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(22.r),
+        borderRadius: radius,
         child: Stack(
           children: [
-            // Decorative circles.
-            Positioned(
-              right: -40.w,
-              top: -40.w,
-              child: _circle(140.w, 0.10),
-            ),
-            Positioned(
-              right: 40.w,
-              bottom: -60.w,
-              child: _circle(120.w, 0.07),
-            ),
-            Padding(
-              padding: EdgeInsets.all(18.w),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: EdgeInsets.fromLTRB(_kBarWidth.w + 14.w, 16.h, 16.w, 16.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Container(
-                        padding: EdgeInsets.all(9.w),
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(12.r),
-                        ),
-                        child: Icon(Icons.receipt_long_rounded,
-                            color: Colors.white, size: 20.sp),
-                      ),
-                      UIHelper.horizontalSpace(10.w),
-                      Expanded(
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(8.r),
-                          onTap: () =>
-                              onCopy('Invoice number', invoice.displayNumber),
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 4.h),
-                            child: Row(
+                      Row(
+                        children: [
+                          Container(
+                            width: 42.w,
+                            height: 42.w,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: [secondaryOrange, primaryOrange],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(13.r),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: primaryOrange.withValues(alpha: 0.3),
+                                  blurRadius: 8.r,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            child: Icon(Icons.receipt_long_rounded, color: Colors.white, size: 21.sp),
+                          ),
+                          UIHelper.horizontalSpace(12.w),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Flexible(
-                                  child: Text(
-                                    invoice.displayNumber,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 14.sp,
-                                      fontWeight: FontWeight.w900,
-                                    ),
+                                Text(
+                                  'INVOICE',
+                                  style: TextStyle(
+                                    color: muted,
+                                    fontSize: 10.sp,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: 1.4,
                                   ),
                                 ),
-                                UIHelper.horizontalSpace(6.w),
-                                Icon(Icons.copy_rounded,
-                                    size: 13.sp,
-                                    color:
-                                        Colors.white.withValues(alpha: 0.8)),
+                                UIHelper.verticalSpace(1.h),
+                                InkWell(
+                                  borderRadius: BorderRadius.circular(6.r),
+                                  onTap: () => onCopy('Invoice number', invoice.displayNumber),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Flexible(
+                                        child: Text(
+                                          invoice.displayNumber,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            color: AppColorsTheme.textMainColor(context),
+                                            fontSize: 15.sp,
+                                            fontWeight: FontWeight.w900,
+                                          ),
+                                        ),
+                                      ),
+                                      UIHelper.horizontalSpace(6.w),
+                                      Icon(Icons.copy_rounded, size: 13.sp, color: primaryOrange),
+                                    ],
+                                  ),
+                                ),
                               ],
                             ),
                           ),
+                          UIHelper.horizontalSpace(8.w),
+                          _StatusPill(status: invoice.displayStatus),
+                        ],
+                      ),
+                      UIHelper.verticalSpace(18.h),
+                      Text(
+                        'Total amount',
+                        style: TextStyle(color: muted, fontSize: 11.5.sp, fontWeight: FontWeight.w600),
+                      ),
+                      UIHelper.verticalSpace(2.h),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          invoice.displayTotal,
+                          style: TextStyle(
+                            color: AppColorsTheme.textMainColor(context),
+                            fontSize: 30.sp,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -0.5,
+                            height: 1.15,
+                          ),
                         ),
                       ),
-                      UIHelper.horizontalSpace(8.w),
-                      _StatusPill(status: invoice.displayStatus, onHero: true),
+                      if (invoice.displayPurpose != '—') ...[
+                        UIHelper.verticalSpace(6.h),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
+                          decoration: BoxDecoration(
+                            color: primaryOrange.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8.r),
+                          ),
+                          child: Text(
+                            invoice.displayPurpose,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: primaryOrange,
+                              fontSize: 11.5.sp,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ],
                     ],
                   ),
-                  UIHelper.verticalSpace(20.h),
-                  Text(
-                    'TOTAL AMOUNT',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.8),
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: 1,
+                ),
+                const _TicketDivider(),
+                Padding(
+                  padding: EdgeInsets.fromLTRB(_kBarWidth.w + 14.w, 14.h, 16.w, 16.h),
+                  child: IntrinsicHeight(
+                    child: Row(
+                      children: [
+                        for (var i = 0; i < dates.length; i++) ...[
+                          if (i > 0)
+                            VerticalDivider(
+                              width: 20.w,
+                              thickness: 1,
+                              color: AppColorsTheme.borderColor(context),
+                            ),
+                          Expanded(child: _DateColumn(label: dates[i].$1, value: dates[i].$2)),
+                        ],
+                      ],
                     ),
                   ),
-                  UIHelper.verticalSpace(2.h),
-                  FittedBox(
-                    fit: BoxFit.scaleDown,
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      invoice.displayTotal,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 30.sp,
-                        fontWeight: FontWeight.w900,
-                        height: 1.15,
-                      ),
-                    ),
-                  ),
-                  if (invoice.displayPurpose != '—') ...[
-                    UIHelper.verticalSpace(4.h),
-                    Text(
-                      invoice.displayPurpose,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: Colors.white.withValues(alpha: 0.92),
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                  UIHelper.verticalSpace(16.h),
-                  Wrap(
-                    spacing: 8.w,
-                    runSpacing: 8.h,
-                    children: [
-                      for (final (icon, label, value) in dates)
-                        _HeroDateChip(icon: icon, label: label, value: value),
-                    ],
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
+            _leftBar(),
+            if (status == 'PAID' || status == 'OVERDUE')
+              Positioned(
+                right: 18.w,
+                top: 78.h,
+                child: _Stamp(label: status, color: financeStatusColor(status)),
+              ),
           ],
         ),
       ),
     );
   }
-
-  Widget _circle(double size, double alpha) => Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: Colors.white.withValues(alpha: alpha),
-        ),
-      );
 }
 
-class _HeroDateChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-
-  const _HeroDateChip({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
+/// Dashed line with a half-circle notch at each side, like a tear-off receipt.
+class _TicketDivider extends StatelessWidget {
+  const _TicketDivider();
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.16),
-        borderRadius: BorderRadius.circular(10.r),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final notch = 18.w;
+    // Page colour plus the card's outline, so the cut reads even though the
+    // card and page colours are close.
+    final notchDecoration = BoxDecoration(
+      color: AppColorsTheme.background(context),
+      shape: BoxShape.circle,
+      border: Border.all(
+        color: isDark ? const Color(0xFF374151) : primaryOrange.withValues(alpha: 0.3),
+        width: 1.w,
       ),
+    );
+    return SizedBox(
+      height: notch,
       child: Row(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 13.sp, color: Colors.white),
-          UIHelper.horizontalSpace(5.w),
-          Text(
-            '$label  ',
-            style: TextStyle(
-              color: Colors.white.withValues(alpha: 0.8),
-              fontSize: 10.sp,
+          Transform.translate(
+            offset: Offset(-notch / 2, 0),
+            child: Container(width: notch, height: notch, decoration: notchDecoration),
+          ),
+          Expanded(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                const dash = 6.0;
+                const gap = 4.0;
+                final count = (constraints.maxWidth / (dash + gap)).floor();
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    for (var i = 0; i < count; i++)
+                      Container(width: dash, height: 1.2, color: AppColorsTheme.borderColor(context)),
+                  ],
+                );
+              },
             ),
           ),
-          Text(
+          Transform.translate(
+            offset: Offset(notch / 2, 0),
+            child: Container(width: notch, height: notch, decoration: notchDecoration),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DateColumn extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const _DateColumn({required this.label, required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            color: AppColorsTheme.textMutedColor(context),
+            fontSize: 9.5.sp,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.8,
+          ),
+        ),
+        UIHelper.verticalSpace(4.h),
+        FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.centerLeft,
+          child: Text(
             value,
             style: TextStyle(
-              color: Colors.white,
-              fontSize: 10.5.sp,
+              color: AppColorsTheme.textMainColor(context),
+              fontSize: 12.5.sp,
               fontWeight: FontWeight.w800,
             ),
           ),
-        ],
+        ),
+      ],
+    );
+  }
+}
+
+/// Rotated outlined "PAID" / "OVERDUE" stamp.
+class _Stamp extends StatelessWidget {
+  final String label;
+  final Color color;
+
+  const _Stamp({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return IgnorePointer(
+      child: Transform.rotate(
+        angle: -0.22,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 3.h),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(color: color.withValues(alpha: 0.55), width: 2.2),
+          ),
+          child: Text(
+            label,
+            style: TextStyle(
+              color: color.withValues(alpha: 0.6),
+              fontSize: 17.sp,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 3,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -975,9 +1048,8 @@ class _HeroDateChip extends StatelessWidget {
 
 class _StatusPill extends StatelessWidget {
   final String status;
-  final bool onHero;
 
-  const _StatusPill({required this.status, this.onHero = false});
+  const _StatusPill({required this.status});
 
   IconData get _icon => switch (status.toUpperCase()) {
         'PAID' || 'VERIFIED' => Icons.check_circle_rounded,
@@ -991,8 +1063,9 @@ class _StatusPill extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 9.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: onHero ? Colors.white : color.withValues(alpha: 0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20.r),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1014,107 +1087,104 @@ class _StatusPill extends StatelessWidget {
   }
 }
 
+/// Titled card with the screen's shared surface and orange left bar.
+/// Children are separated by hairlines unless [divideChildren] is false.
 class _SectionCard extends StatelessWidget {
   final String title;
   final IconData icon;
   final Widget? trailing;
   final List<Widget> children;
+  final bool divideChildren;
 
   const _SectionCard({
     required this.title,
     required this.icon,
     required this.children,
     this.trailing,
+    this.divideChildren = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final divider = Divider(
       height: 1,
       thickness: 1,
       color: AppColorsTheme.borderColor(context),
     );
+    final radius = BorderRadius.circular(18.r);
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
-        color: isDark ? AppColorsTheme.cardBg(context) : const Color(0xFFFFF7F2),
-        borderRadius: BorderRadius.circular(18.r),
-        border: Border.all(
-          color: isDark ? const Color(0xFF374151) : primaryOrange.withValues(alpha: 0.22),
-          width: 1.w,
+      decoration: _cardDecoration(context),
+      child: ClipRRect(
+        borderRadius: radius,
+        child: Stack(
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: EdgeInsets.fromLTRB(_kBarWidth.w + 12.w, 14.h, 16.w, 12.h),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(7.w),
+                        decoration: BoxDecoration(
+                          color: primaryOrange.withValues(alpha: 0.12),
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        child: Icon(icon, size: 16.sp, color: primaryOrange),
+                      ),
+                      UIHelper.horizontalSpace(10.w),
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: TextStyle(
+                            color: AppColorsTheme.textMainColor(context),
+                            fontSize: 14.sp,
+                            fontWeight: FontWeight.w800,
+                          ),
+                        ),
+                      ),
+                      ?trailing,
+                    ],
+                  ),
+                ),
+                divider,
+                Padding(
+                  padding: EdgeInsets.fromLTRB(_kBarWidth.w + 12.w, 4.h, 16.w, 4.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      for (var i = 0; i < children.length; i++) ...[
+                        children[i],
+                        if (divideChildren && i != children.length - 1) divider,
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            _leftBar(),
+          ],
         ),
-        boxShadow: [
-          BoxShadow(
-            color: primaryOrange.withValues(alpha: isDark ? 0.08 : 0.05),
-            blurRadius: 10.r,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 12.h),
-            child: Row(
-              children: [
-                Container(
-                  padding: EdgeInsets.all(7.w),
-                  decoration: BoxDecoration(
-                    color: primaryOrange.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10.r),
-                  ),
-                  child: Icon(icon, size: 16.sp, color: primaryOrange),
-                ),
-                UIHelper.horizontalSpace(10.w),
-                Expanded(
-                  child: Text(
-                    title,
-                    style: TextStyle(
-                      color: AppColorsTheme.textMainColor(context),
-                      fontSize: 13.5.sp,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
-                ?trailing,
-              ],
-            ),
-          ),
-          divider,
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-            child: Column(
-              children: [
-                for (var i = 0; i < children.length; i++) ...[
-                  children[i],
-                  if (i != children.length - 1) divider,
-                ],
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
 }
 
+/// Label on the left, value on the right; tap (or long-press) copies when
+/// [onCopy] is set.
 class _DetailRow extends StatelessWidget {
   final IconData icon;
   final String label;
-  final String? value;
-  final Widget? valueWidget;
+  final String value;
   final VoidCallback? onCopy;
-  final bool emphasize;
 
   const _DetailRow({
     required this.icon,
     required this.label,
-    this.value,
-    this.valueWidget,
+    required this.value,
     this.onCopy,
-    this.emphasize = false,
   });
 
   @override
@@ -1124,48 +1194,37 @@ class _DetailRow extends StatelessWidget {
       onTap: onCopy,
       onLongPress: onCopy,
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 11.h),
+        padding: EdgeInsets.symmetric(vertical: 12.h),
         child: Row(
           children: [
             Icon(icon, size: 16.sp, color: muted),
             UIHelper.horizontalSpace(10.w),
             Expanded(
               flex: 4,
-              child: Text(
-                label,
-                style: TextStyle(color: muted, fontSize: 12.sp),
-              ),
+              child: Text(label, style: TextStyle(color: muted, fontSize: 12.sp)),
             ),
             UIHelper.horizontalSpace(10.w),
             Expanded(
               flex: 5,
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: valueWidget ??
-                    Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            value ?? '—',
-                            textAlign: TextAlign.end,
-                            style: TextStyle(
-                              color: emphasize
-                                  ? primaryOrange
-                                  : AppColorsTheme.textMainColor(context),
-                              fontSize: emphasize ? 13.5.sp : 12.sp,
-                              fontWeight:
-                                  emphasize ? FontWeight.w900 : FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        if (onCopy != null) ...[
-                          UIHelper.horizontalSpace(6.w),
-                          Icon(Icons.copy_rounded,
-                              size: 13.sp, color: primaryOrange),
-                        ],
-                      ],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  Flexible(
+                    child: Text(
+                      value,
+                      textAlign: TextAlign.end,
+                      style: TextStyle(
+                        color: AppColorsTheme.textMainColor(context),
+                        fontSize: 12.5.sp,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
+                  ),
+                  if (onCopy != null) ...[
+                    UIHelper.horizontalSpace(6.w),
+                    Icon(Icons.copy_rounded, size: 13.sp, color: primaryOrange),
+                  ],
+                ],
               ),
             ),
           ],
@@ -1219,7 +1278,8 @@ class _ItemRow extends StatelessWidget {
                 : null;
 
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 12.h),
+      // Horizontal inset matches _ItemsTableHeader so the columns line up.
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1289,41 +1349,205 @@ class _ItemRow extends StatelessWidget {
   }
 }
 
-class _TotalRow extends StatelessWidget {
-  final String total;
-
-  const _TotalRow({required this.total});
+/// Column captions above the line items.
+class _ItemsTableHeader extends StatelessWidget {
+  const _ItemsTableHeader();
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 12.h),
+    final style = TextStyle(
+      color: AppColorsTheme.textMutedColor(context),
+      fontSize: 9.5.sp,
+      fontWeight: FontWeight.w800,
+      letterSpacing: 0.8,
+    );
+    return Container(
+      margin: EdgeInsets.only(top: 10.h, bottom: 2.h),
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+      decoration: BoxDecoration(
+        color: AppColorsTheme.innerCardBg(context),
+        borderRadius: BorderRadius.circular(10.r),
+      ),
       child: Row(
         children: [
-          Text(
-            'Total',
-            style: TextStyle(
-              color: AppColorsTheme.textMainColor(context),
-              fontSize: 13.5.sp,
-              fontWeight: FontWeight.w900,
+          // Same widths as _ItemRow: index badge + gap.
+          SizedBox(width: 26.sp + 10.w, child: Text('#', style: style)),
+          Expanded(child: Text('ITEM', style: style)),
+          Text('AMOUNT', style: style),
+        ],
+      ),
+    );
+  }
+}
+
+/// Highlighted total, then "Paid in full" (with the paid date) or
+/// "Amount due" (with the due date).
+class _TotalsBlock extends StatelessWidget {
+  final InvoiceDetailModel invoice;
+
+  const _TotalsBlock({required this.invoice});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final status = invoice.displayStatus.toUpperCase();
+    final isPaid = invoice.isPaid == true || status == 'PAID' || status == 'VERIFIED';
+    final isOverdue = status == 'OVERDUE';
+    final settleColor = isPaid
+        ? financeStatusColor('PAID')
+        : (isOverdue ? financeStatusColor('OVERDUE') : primaryOrange);
+    final settleDate = isPaid ? invoice.paidDateLabel : invoice.dueDateLabel;
+
+    return Padding(
+      padding: EdgeInsets.only(top: 10.h, bottom: 12.h),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  primaryOrange.withValues(alpha: isDark ? 0.2 : 0.12),
+                  primaryOrange.withValues(alpha: isDark ? 0.08 : 0.04),
+                ],
+              ),
+              borderRadius: BorderRadius.circular(12.r),
+              border: Border.all(color: primaryOrange.withValues(alpha: 0.25)),
+            ),
+            child: Row(
+              children: [
+                Text(
+                  'Total',
+                  style: TextStyle(
+                    color: AppColorsTheme.textMainColor(context),
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                UIHelper.horizontalSpace(12.w),
+                Expanded(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerRight,
+                    child: Text(
+                      invoice.displayTotal,
+                      style: TextStyle(
+                        color: primaryOrange,
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          UIHelper.horizontalSpace(12.w),
-          Expanded(
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              alignment: Alignment.centerRight,
-              child: Text(
-                total,
-                style: TextStyle(
-                  color: primaryOrange,
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.w900,
+          UIHelper.verticalSpace(10.h),
+          Row(
+            children: [
+              Icon(
+                isPaid ? Icons.check_circle_rounded : (isOverdue ? Icons.error_rounded : Icons.schedule_rounded),
+                size: 16.sp,
+                color: settleColor,
+              ),
+              UIHelper.horizontalSpace(6.w),
+              Text(
+                isPaid ? 'Paid in full' : 'Amount due',
+                style: TextStyle(color: settleColor, fontSize: 12.5.sp, fontWeight: FontWeight.w800),
+              ),
+              const Spacer(),
+              if (settleDate != '—')
+                Text(
+                  isPaid ? 'on $settleDate' : 'by $settleDate',
+                  style: TextStyle(color: AppColorsTheme.textMutedColor(context), fontSize: 11.5.sp),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Faded wordmark and a thank-you line closing the invoice.
+class _FooterNote extends StatelessWidget {
+  const _FooterNote();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Opacity(
+      opacity: 0.6,
+      child: Column(
+        children: [
+          Image.asset(isDark ? whiteLogo : blackLogo, width: 70.w, height: 22.h, fit: BoxFit.contain),
+          UIHelper.verticalSpace(6.h),
+          Text(
+            'Thank you for your business',
+            style: TextStyle(
+              color: AppColorsTheme.textMutedColor(context),
+              fontSize: 11.sp,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Primary "Download PDF" button on the orange gradient.
+class _DownloadButton extends StatelessWidget {
+  final bool isLoading;
+  final VoidCallback? onPressed;
+
+  const _DownloadButton({required this.isLoading, required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(14.r);
+    final enabled = onPressed != null;
+    return Opacity(
+      opacity: enabled || isLoading ? 1 : 0.55,
+      child: Container(
+        height: 48.h,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(colors: [primaryOrange, secondaryOrange]),
+          borderRadius: radius,
+          boxShadow: [
+            BoxShadow(color: primaryOrange.withValues(alpha: 0.3), blurRadius: 12.r, offset: const Offset(0, 4)),
+          ],
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: onPressed,
+            borderRadius: radius,
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isLoading)
+                      SizedBox.square(
+                        dimension: 16.sp,
+                        child: const CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                      )
+                    else
+                      Icon(Icons.download_rounded, size: 18.sp, color: Colors.white),
+                    UIHelper.horizontalSpace(8.w),
+                    Text(
+                      isLoading ? 'Saving…' : 'Download PDF',
+                      style: TextStyle(fontSize: 13.5.sp, fontWeight: FontWeight.w800, color: Colors.white),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }
@@ -1358,7 +1582,8 @@ class _SecondaryAction extends StatelessWidget {
 
     final style = OutlinedButton.styleFrom(
       foregroundColor: primaryOrange,
-      side: BorderSide(color: primaryOrange.withValues(alpha: 0.5)),
+      backgroundColor: primaryOrange.withValues(alpha: 0.07),
+      side: BorderSide(color: primaryOrange.withValues(alpha: 0.35)),
       minimumSize: Size(48.h, 48.h),
       padding: EdgeInsets.symmetric(horizontal: compact ? 0 : 12.w),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14.r)),
